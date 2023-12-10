@@ -8,9 +8,12 @@
 #include <stdlib.h> // for NULL
 #include <R_ext/Rdynload.h>
 
+
+SEXP _monolix2rx_trans_longEq(SEXP in);
+
 void R_init_nonmem2rx(DllInfo *info) {
   R_CallMethodDef callMethods[]  = {
-    {"_nonmem2rx_trans_", (DL_FUNC) &_monolix2rx_trans_longEq, 1},
+    {"_monolix2rx_trans_longEq", (DL_FUNC) &_monolix2rx_trans_longEq, 1},
     {NULL, NULL, 0}
   };
   // log likelihoods used in calculations
@@ -19,7 +22,7 @@ void R_init_nonmem2rx(DllInfo *info) {
   };
   R_registerRoutines(info, cMethods, callMethods, NULL, NULL);
   R_useDynamicSymbols(info, FALSE);
-  nonmem2rx_full_ini();
+  /* nonmem2rx_full_ini(); */
 }
 
 void R_unload_nonmem2rx(DllInfo *info) {
