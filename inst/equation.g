@@ -90,7 +90,6 @@ primary_expression
     ;
 
 decimalint: "0|([1-9][0-9]*)" $term -1;
-
 float1: "([0-9]+.[0-9]*|[0-9]*.[0-9]+)([eE][\-\+]?[0-9]+)?" $term -2;
 float2: "[0-9]+[eE][\-\+]?[0-9]+" $term -3;
 identifier: "[a-zA-Z][a-zA-Z0-9_]*" $term -4;
