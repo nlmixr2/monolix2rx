@@ -8,11 +8,11 @@
 #include <stdlib.h> // for NULL
 #include <R_ext/Rdynload.h>
 
+#include "util.h"
 
-SEXP _monolix2rx_trans_longEq(SEXP in);
-
-void R_init_nonmem2rx(DllInfo *info) {
+void R_init_monolixr2rx(DllInfo *info) {
   R_CallMethodDef callMethods[]  = {
+    {"_monolix2rx_trans_indDef", (DL_FUNC) &_monolix2rx_trans_indDef, 1},
     {"_monolix2rx_trans_longEq", (DL_FUNC) &_monolix2rx_trans_longEq, 1},
     {NULL, NULL, 0}
   };
@@ -22,9 +22,9 @@ void R_init_nonmem2rx(DllInfo *info) {
   };
   R_registerRoutines(info, cMethods, callMethods, NULL, NULL);
   R_useDynamicSymbols(info, FALSE);
-  /* nonmem2rx_full_ini(); */
+  /* monolixr2rx_full_ini(); */
 }
 
-void R_unload_nonmem2rx(DllInfo *info) {
-  /* nonmem2rx_full_parseFree(1); */
+void R_unload_monolixr2rx(DllInfo *info) {
+  /* monolixr2rx_full_parseFree(1); */
 }
