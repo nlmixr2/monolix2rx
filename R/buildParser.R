@@ -22,11 +22,18 @@
   file.rename(devtools::package_file("src/longOutput.g.d_parser.c"),
               devtools::package_file("src/longOutput.g.d_parser.h"))
   message("mlxtran grammer")
+  message("Update Parser c for <MODEL> [INDIVIDUAL]")
+  dparser::mkdparse(devtools::package_file("inst/mlxtranInd.g"),
+                    devtools::package_file("src/"),
+                    grammar_ident="mlxtranInd")
+  file.rename(devtools::package_file("src/mlxtranInd.g.d_parser.c"),
+              devtools::package_file("src/mlxtranInd.g.d_parser.h"))
+
   message("Update Parser c for <MODEL> [INDIVIDUAL] DEFINITION:")
   dparser::mkdparse(devtools::package_file("inst/mlxtranIndDefinition.g"),
                     devtools::package_file("src/"),
                     grammar_ident="mlxtranIndDefinition")
   file.rename(devtools::package_file("src/mlxtranIndDefinition.g.d_parser.c"),
-              devtools::package_file("src/.g.d_parser.h"))
+              devtools::package_file("src/mlxtranIndDefinition.g.d_parser.h"))
   invisible("")
 }

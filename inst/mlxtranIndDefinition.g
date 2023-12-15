@@ -23,14 +23,23 @@ coeffList: '{' (identifier | constant) (',' (identifier | constant)) '}';
 coeffComplex: 'coefficient' '=' '{' (identifier | constant | coeffList) (',' (identifier | constant | coeffList))* '}';
 coeffOp: coeffSingle | coeffComplex;
 
+sdList: '{' (identifier | constant) (',' (identifier | constant)) '}';
 sdFixed: 'sd' '=' constant;
 sdVar: 'sd' '=' identifier;
+sdLstItem: 'sd' '=' sdList;
 
 varFixed: 'var' '=' constant;
 varVar: 'var' '=' identifier;
+varList: '{' (identifier | constant) (',' (identifier | constant)) '}';
+varLstItem: 'var' '=' varList;
+
 noVar: 'no-variability';
 
-varOption: (sdVar | sdFixed | varFixed | varVar | noVar);
+varOption: (sdVar | sdFixed | sdLstItem | varFixed | varVar | varLstItem | noVar);
+
+iovItem: identifier ('*' identifier)* ;
+
+iovLine: 'varlevel' '=' '{' iovItem (',' iovItem)* '}';
 
 minVal: 'min' '=' constant;
 maxVal: 'max' '=' constant;
@@ -46,12 +55,11 @@ distLine: logitNormalLine | otherLine ;
 
 corrOp: 'r' '(' identifier ',' identifier ')' '=' identifier;
 
-corLine: 'correlation' '=' '{' corrOp (',' corrOp)* '}';
+corLine: 'correlation' '=' '{' ('level' '=' iovItem ',')? corrOp (',' corrOp)* '}';
 
 statement: distLine singleLineComment?
     | corLine singleLineComment?
     ;
-
 
 constant : decimalint | float1 | float2;
 decimalint: "0|([1-9][0-9]*)" $term -1;
