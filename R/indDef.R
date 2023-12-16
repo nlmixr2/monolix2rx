@@ -54,7 +54,7 @@
 #' Set the standard deviation
 #'
 #' @param var variable name or constant
-#' @return
+#' @return nothing, called for side effects
 #' @noRd
 #' @author Matthew L. Fidler
 .setSd <- function(var) {
@@ -126,5 +126,14 @@
 #' @author Matthew L. Fidler
 .setIov <- function(var) {
   .v <- gsub(" +[*] +", "*", var)
-  .monolix2rx$iov <- sort(unique(.monolix2rx$iov, .v))
+  .monolix2rx$iov <- c(.monolix2rx$iov, .v)
+}
+#' Add mu-referenced covariate to parameter definition
+#'
+#' @param var variable name
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.addCov <- function(var) {
+  .monolix2rx$cov <- c(.monolix2rx$cov, var)
 }

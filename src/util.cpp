@@ -93,3 +93,13 @@ extern "C" SEXP monolix2rxSetIov(const char *var) {
   return R_NilValue;
   END_RCPP
 }
+
+
+extern "C" SEXP monolix2rxAddCov(const char *var) {
+  BEGIN_RCPP
+  Environment monolix2rxNs = loadNamespace("monolix2rx");
+  Function addCov(".addCov", monolix2rxNs);
+  addCov(var);
+  return R_NilValue;
+  END_RCPP
+}

@@ -84,6 +84,16 @@ int indDef_process_varName(const char* name, D_ParseNode *pn) {
   return 0;
 }
 
+int indDef_process_covItem(const char *name, D_ParseNode *pn) {
+  if (!strcmp("covId", name)) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxAddCov(v);
+    return 1;
+  }
+  return 0;
+}
+
 int indDef_process_distribution(const char* name, D_ParseNode *pn) {
   if (!strcmp("logitNormalDist", name) ||
       !strcmp("distribution", name)) {
@@ -157,7 +167,7 @@ int intDef_handle_typical_def(const char* name,  D_ParseNode *pn) {
 }
 
 int indDef_process_iov(const char* name, D_ParseNode *pn) {
-  if (!strcmp("iovItem", name)) {
+  if (!strcmp("iovItemVL", name)) {
     D_ParseNode *xpn = d_get_child(pn, 0);
     char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
     monolix2rxSetIov(v);

@@ -19,6 +19,7 @@
   .monolix2rx$min      <- -Inf
   .monolix2rx$max      <- Inf
   .monolix2rx$iov      <- character(0)
+  .monolix2rx$cov      <- character(0)
 }
 
 #' Translate a monolix file to rxode2

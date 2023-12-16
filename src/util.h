@@ -9,3 +9,4 @@ SEXP monolix2rxSetVar(const char *var);
 SEXP monolix2rxSetMax(const char *var);
 SEXP monolix2rxSetMin(const char *var);
 SEXP monolix2rxSetIov(const char *var);
+SEXP monolix2rxAddCov(const char *var);

@@ -14,8 +14,9 @@ meanFixed: 'mean' '=' constant;
 
 typicalOption: (typicalVar | typicalFixed | meanVar | meanFixed);
 
-covariateSingleOp: 'covariate' '=' identifier;
-covariateMultOp: 'covariate' '=' '{' identifier (',' identifier)* '}';
+covId: identifier;
+covariateSingleOp: 'covariate' '=' covId;
+covariateMultOp: 'covariate' '=' '{' covId (',' covId)* '}';
 covariateOp: covariateSingleOp | covariateMultOp;
 
 coefItem: identifier | constant;
@@ -42,8 +43,9 @@ noVar: 'no-variability';
 varOption: (sdOp | sdLstItem | varOp | varLstItem | noVar);
 
 iovItem: identifier ('*' identifier)* ;
+iovItemVL: iovItem;
 
-iovLine: 'varlevel' '=' '{' iovItem (',' iovItem)* '}';
+iovLine: 'varlevel' '=' '{' iovItemVL (',' iovItemVL)* '}';
 
 minVal: 'min' '=' constant;
 maxVal: 'max' '=' constant;
