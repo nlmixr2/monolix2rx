@@ -18,24 +18,28 @@ covariateSingleOp: 'covariate' '=' identifier;
 covariateMultOp: 'covariate' '=' '{' identifier (',' identifier)* '}';
 covariateOp: covariateSingleOp | covariateMultOp;
 
-coeffSingle: 'coefficient' '=' (identifier | constant);
-coeffList: '{' (identifier | constant) (',' (identifier | constant)) '}';
-coeffComplex: 'coefficient' '=' '{' (identifier | constant | coeffList) (',' (identifier | constant | coeffList))* '}';
+coefItem: identifier | constant;
+coefItemL: identifier | constant;
+
+coeffSingle: 'coefficient' '=' coefItem;
+coeffList: '{' coefItemL (',' coefItemL)* '}';
+coeffComplex: 'coefficient' '=' '{' (coefItem | coeffList) (',' (coefItem | coeffList))* '}';
 coeffOp: coeffSingle | coeffComplex;
 
-sdList: '{' (identifier | constant) (',' (identifier | constant)) '}';
-sdFixed: 'sd' '=' constant;
-sdVar: 'sd' '=' identifier;
+sdItem: identifier | constant;
+
+sdList: '{' sdItem (',' sdItem)* '}';
+sdOp: 'sd' '=' sdItem;
 sdLstItem: 'sd' '=' sdList;
 
-varFixed: 'var' '=' constant;
-varVar: 'var' '=' identifier;
-varList: '{' (identifier | constant) (',' (identifier | constant)) '}';
+varItem: identifier | constant;
+varOp: 'var' '=' varItem;
+varList: '{' varOp (',' varOp)* '}';
 varLstItem: 'var' '=' varList;
 
 noVar: 'no-variability';
 
-varOption: (sdVar | sdFixed | sdLstItem | varFixed | varVar | varLstItem | noVar);
+varOption: (sdOp | sdLstItem | varOp | varLstItem | noVar);
 
 iovItem: identifier ('*' identifier)* ;
 

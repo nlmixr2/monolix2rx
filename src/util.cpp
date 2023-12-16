@@ -48,3 +48,21 @@ extern "C" SEXP monolix2rxSetDistTypicalFixed(const char *var, int isMean) {
   return R_NilValue;
   END_RCPP
 }
+
+extern "C" SEXP monolix2rxSetVar(const char *var) {
+  BEGIN_RCPP
+  Environment monolix2rxNs = loadNamespace("monolix2rx");
+  Function setVar(".setVar", monolix2rxNs);
+  setVar(var);
+  return R_NilValue;
+  END_RCPP
+}
+
+extern "C" SEXP monolix2rxSetSd(const char *var) {
+  BEGIN_RCPP
+  Environment monolix2rxNs = loadNamespace("monolix2rx");
+  Function setSd(".setSd", monolix2rxNs);
+  setSd(var);
+  return R_NilValue;
+  END_RCPP
+}

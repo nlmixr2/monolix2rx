@@ -4,3 +4,5 @@ SEXP _monolix2rx_trans_longEq(SEXP in);
 SEXP _monolix2rx_trans_indDef(SEXP in);
 SEXP monolix2rxSetDistTypicalEst(const char *var, int isMean);
 SEXP monolix2rxSetDistTypicalFixed(const char *var, int isMean);
+SEXP monolix2rxSetSd(const char *var);
+SEXP monolix2rxSetVar(const char *var);
