@@ -24,9 +24,27 @@ extern "C" SEXP monolix2rxAddVar(const char *var) {
 
 extern "C" SEXP monolix2rxSetDist(const char *var) {
   BEGIN_RCPP
-    Environment monolix2rxNs = loadNamespace("monolix2rx");
+  Environment monolix2rxNs = loadNamespace("monolix2rx");
   Function setDist(".setDist", monolix2rxNs);
   setDist(var);
+  return R_NilValue;
+  END_RCPP
+}
+
+extern "C" SEXP monolix2rxSetDistTypicalEst(const char *var, int isMean) {
+  BEGIN_RCPP
+  Environment monolix2rxNs = loadNamespace("monolix2rx");
+  Function setTypicalEst(".setTypicalEst", monolix2rxNs);
+  setTypicalEst(var, isMean);
+  return R_NilValue;
+  END_RCPP
+}
+
+extern "C" SEXP monolix2rxSetDistTypicalFixed(const char *var, int isMean) {
+  BEGIN_RCPP
+  Environment monolix2rxNs = loadNamespace("monolix2rx");
+  Function setTypicalFixed(".setTypicalFixed", monolix2rxNs);
+  setTypicalFixed(var, isMean);
   return R_NilValue;
   END_RCPP
 }
