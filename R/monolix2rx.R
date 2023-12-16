@@ -20,6 +20,10 @@
   .monolix2rx$max      <- Inf
   .monolix2rx$iov      <- character(0)
   .monolix2rx$cov      <- character(0)
+  .monolix2rx$coef     <- NULL
+  .monolix2rx$coefVal  <- NULL
+  .monolix2rx$coefLst  <- character(0)
+  .monolix2rx$coefLstVal <- numeric(0)
 }
 
 #' Translate a monolix file to rxode2

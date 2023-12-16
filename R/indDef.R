@@ -137,3 +137,51 @@
 .addCov <- function(var) {
   .monolix2rx$cov <- c(.monolix2rx$cov, var)
 }
+#' Pushes a coefficient list onto $coef (if any)
+#'
+#' @return nothing called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.pushCoefList <- function() {
+  if (length(.monolix2rx$coefLst) != 0) {
+    .monolix2rx$coef <- c(.monolix2rx$coef, .monolix2rx$coefLst)
+    .monolix2rx$coefVal <- c(.monolix2rx$coefVal, .monolix2rx$coefLstVal)
+    .monolix2rx$coefLst <- character(0)
+    .monolix2rx$coefLstVal <- numeric(0)
+  }
+}
+#' Add a single coefficient
+#'
+#' @param var variable name
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.addCoefSingle <- function(var) {
+  .pushCoefList()
+  .var <- suppressWarnings(as.numeric(var))
+  if (is.na(.var)) {
+    .monolix2rx$coef <- c(.monolix2rx$coef, list(NA_character_))
+    .monolix2rx$coefVal <- c(.monolix2rx$coefVal, list(.var))
+
+  } else {
+    .monolix2rx$coef <- c(.monolix2rx$coef, list(var))
+    .monolix2rx$coefVal <- c(.monolix2rx$coefVal, list(NA_real_))
+  }
+}
+#'  Add a multiple item coefficient to the coefficent list
+#'
+#' @param var
+#' @return
+#' @export
+#' @author Matthew L. Fidler
+#' @examples
+.addCoefMult <- function(var) {
+  .var <- suppressWarnings(as.numeric(var))
+  if (is.na(.var)) {
+    .monolix2rx$coefLst <- c(.monolix2rx$coefLst, var)
+    .monolix2rx$coefLstVal <- c(.monolix2rx$coefLstVal, NA_real_)
+  } else {
+    .monolix2rx$coefLst <- c(.monolix2rx$coefLst, NA_character_)
+    .monolix2rx$coefLstVal <- c(.monolix2rx$coefLstVal, .var)
+  }
+}

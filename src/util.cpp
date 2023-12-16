@@ -103,3 +103,30 @@ extern "C" SEXP monolix2rxAddCov(const char *var) {
   return R_NilValue;
   END_RCPP
 }
+
+extern "C" SEXP monolix2rxPushCoefList(void) {
+  BEGIN_RCPP
+  Environment monolix2rxNs = loadNamespace("monolix2rx");
+  Function pushCoefList(".pushCoefList", monolix2rxNs);
+  pushCoefList();
+  return R_NilValue;
+  END_RCPP
+}
+
+extern "C" SEXP monolix2rxAddCoefSingle(const char *var) {
+  BEGIN_RCPP
+  Environment monolix2rxNs = loadNamespace("monolix2rx");
+  Function addCoefSingle(".addCoefSingle", monolix2rxNs);
+  addCoefSingle(var);
+  return R_NilValue;
+  END_RCPP
+}
+
+extern "C" SEXP monolix2rxAddCoefMult(const char *var) {
+  BEGIN_RCPP
+  Environment monolix2rxNs = loadNamespace("monolix2rx");
+  Function addCoefMult(".addCoefMult", monolix2rxNs);
+  addCoefMult(var);
+  return R_NilValue;
+  END_RCPP
+}
