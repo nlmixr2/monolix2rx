@@ -193,6 +193,7 @@ int indDef_process_coefSingle(const char* name, D_ParseNode *pn) {
   }
   return 0;
 }
+
 int indDef_process_coefItemList(const char* name, D_ParseNode *pn) {
   if (!strcmp("coefItemL", name)) {
     D_ParseNode *xpn = d_get_child(pn, 0);
@@ -201,6 +202,18 @@ int indDef_process_coefItemList(const char* name, D_ParseNode *pn) {
     return 1;
   }
   return 0;
+}
+
+int indDef_process_corr(const char* name, D_ParseNode *pn) {
+  if (!strcmp("corrOp", name)) {
+    D_ParseNode *xpn = d_get_child(pn, 2);
+    char *v1 = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    xpn = d_get_child(pn, 4);
+    char *v2 = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    xpn = d_get_child(pn, 7);
+    char *v3 = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxAddCor(v1, v2, v3);
+  }
 }
 
 void wprint_parsetree_indDef(D_ParserTables pt, D_ParseNode *pn, int depth, print_node_fn_t fn, void *client_data) {

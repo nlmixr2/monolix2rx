@@ -130,3 +130,12 @@ extern "C" SEXP monolix2rxAddCoefMult(const char *var) {
   return R_NilValue;
   END_RCPP
 }
+
+extern "C" SEXP monolix2rxAddCor(const char *v1, const char *v2, const char *v3) {
+  BEGIN_RCPP
+  Environment monolix2rxNs = loadNamespace("monolix2rx");
+  Function addCor(".addCor", monolix2rxNs);
+  addCor(v1, v2, v3);
+  return R_NilValue;
+  END_RCPP
+}

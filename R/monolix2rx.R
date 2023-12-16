@@ -24,6 +24,8 @@
   .monolix2rx$coefVal  <- NULL
   .monolix2rx$coefLst  <- character(0)
   .monolix2rx$coefLstVal <- numeric(0)
+  .monolix2rx$corLevel <- "id"
+  .monolix2rx$corDf     <- data.frame(level=character(0), v1=character(0), v2=character(0), est=character(0))
 }
 
 #' Translate a monolix file to rxode2

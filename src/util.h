@@ -13,3 +13,4 @@ SEXP monolix2rxAddCov(const char *var);
 SEXP monolix2rxPushCoefList(void);
 SEXP monolix2rxAddCoefSingle(const char *var);
 SEXP monolix2rxAddCoefMult(const char *var);
+SEXP monolix2rxAddCor(const char *v1, const char *v2, const char *v3);

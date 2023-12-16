@@ -185,3 +185,16 @@
     .monolix2rx$coefLstVal <- c(.monolix2rx$coefLstVal, .var)
   }
 }
+#' Add correlation estimate
+#'
+#' @param var1 correlated variable 1
+#' @param var2 correlated variable 2
+#' @param estVal estimation variable
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.addCor <- function(var1, var2, estVal) {
+  .monolix2rx$corDf <- rbind(.monolix2rx$corDf,
+                             data.frame(level=.monolix2rx$corLevel,
+                                        v1=var1, v2=var2, est=estVal))
+}
