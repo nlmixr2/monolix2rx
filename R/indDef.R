@@ -92,3 +92,39 @@
     .monolix2rx$varVal <- c(.monolix2rx$varVal, .var)
   }
 }
+#' Set the maximum value of the transformation
+#'
+#' @param var sting to change to a numeric for min/max
+#' @return nothing called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.setMax <- function(var) {
+  .var <- suppressWarnings(as.numeric(var))
+  if (is.na(.var)) {
+    stop("'max' must be a numeric value")
+  }
+  .monolix2rx$max <- .var
+}
+#' Set the maximum value of the transformation
+#'
+#' @param var sting to change to a numeric for min/max
+#' @return nothing called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.setMin <- function(var) {
+  .var <- suppressWarnings(as.numeric(var))
+  if (is.na(.var)) {
+    stop("'min' must be a numeric value")
+  }
+  .monolix2rx$min <- .var
+}
+#' This sets the IOV item from a monolix variable definition
+#'
+#' @param var iov definition to add
+#' @return nothing called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.setIov <- function(var) {
+  .v <- gsub(" +[*] +", "*", var)
+  .monolix2rx$iov <- sort(unique(.monolix2rx$iov, .v))
+}

@@ -59,7 +59,9 @@ distLine: logitNormalLine | otherLine ;
 
 corrOp: 'r' '(' identifier ',' identifier ')' '=' identifier;
 
-corLine: 'correlation' '=' '{' ('level' '=' iovItem ',')? corrOp (',' corrOp)* '}';
+corIovItem: iovItem;
+
+corLine: 'correlation' '=' '{' ('level' '=' corIovItem ',')? corrOp (',' corrOp)* '}';
 
 statement: distLine singleLineComment?
     | corLine singleLineComment?

@@ -6,3 +6,6 @@ SEXP monolix2rxSetDistTypicalEst(const char *var, int isMean);
 SEXP monolix2rxSetDistTypicalFixed(const char *var, int isMean);
 SEXP monolix2rxSetSd(const char *var);
 SEXP monolix2rxSetVar(const char *var);
+SEXP monolix2rxSetMax(const char *var);
+SEXP monolix2rxSetMin(const char *var);
+SEXP monolix2rxSetIov(const char *var);

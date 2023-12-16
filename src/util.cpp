@@ -66,3 +66,30 @@ extern "C" SEXP monolix2rxSetSd(const char *var) {
   return R_NilValue;
   END_RCPP
 }
+
+extern "C" SEXP monolix2rxSetMax(const char *var) {
+  BEGIN_RCPP
+  Environment monolix2rxNs = loadNamespace("monolix2rx");
+  Function setMax(".setMax", monolix2rxNs);
+  setMax(var);
+  return R_NilValue;
+  END_RCPP
+}
+
+extern "C" SEXP monolix2rxSetMin(const char *var) {
+  BEGIN_RCPP
+  Environment monolix2rxNs = loadNamespace("monolix2rx");
+  Function setMin(".setMin", monolix2rxNs);
+  setMin(var);
+  return R_NilValue;
+  END_RCPP
+}
+
+extern "C" SEXP monolix2rxSetIov(const char *var) {
+  BEGIN_RCPP
+  Environment monolix2rxNs = loadNamespace("monolix2rx");
+  Function setIov(".setIov", monolix2rxNs);
+  setIov(var);
+  return R_NilValue;
+  END_RCPP
+}
