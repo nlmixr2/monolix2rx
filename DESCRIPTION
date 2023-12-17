@@ -19,4 +19,6 @@ Imports:
     rxode2 (> 2.0.13),
     magrittr
 Suggests:
-    devtools
+    devtools,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

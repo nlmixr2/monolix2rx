@@ -21,12 +21,12 @@
 #include "mlxtranIndDefinition.g.d_parser.h"
 #define max2( a , b )  ( (a) > (b) ? (a) : (b) )
 
-extern D_ParserTables mlxtranIndDefinition;
+extern D_ParserTables parser_tables_mlxtranIndDefinition;
+#define curP monolixr2rx_indDef_curP
 
 #define gBuf monolixr2rx_indDef_gBuf
 #define gBufFree monolixr2rx_indDef_gBufFree
 #define gBufLast monolixr2rx_indDef_gBufLast
-#define curP monolixr2rx_indDef_curP
 #define _pn monolixr2rx_indDef__pn
 #define freeP monolixr2rx_indDef_freeP
 #define parseFreeLast monolixr2rx_indDef_parseFreeLast
@@ -272,7 +272,7 @@ void wprint_parsetree_indDef(D_ParserTables pt, D_ParseNode *pn, int depth, prin
 
 void trans_indDef(const char* parse){
   freeP();
-  curP = new_D_Parser(&mlxtranIndDefinition, sizeof(D_ParseNode_User));
+  curP = new_D_Parser(&parser_tables_mlxtranIndDefinition, sizeof(D_ParseNode_User));
   curP->save_parse_tree = 1;
   curP->error_recovery = 1;
   curP->initial_scope = NULL;

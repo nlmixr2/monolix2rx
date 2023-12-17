@@ -34,6 +34,7 @@
 #' @return rxode2 model
 #' @export
 #' @author Matthew L. Fidler
+#' @useDynLib monolix2rx, .registration=TRUE
 #' @eval .monolix2rxBuildGram()
 #' @examples
 monolixr2rx <- function(mlxtran) {
