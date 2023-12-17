@@ -14,6 +14,27 @@ test_that("cannot use both var and sd", {
   expect_error(.indDef("F = {distribution=normal, mean=F_pop_2, var=omega_F2, sd=omega_F}"))
 })
 
+test_that("error on covariate/coefficient mismatch", {
+  expect_error(.indDef("V = {distribution=lognormal, covariate=Race, coefficient={0, {beta_V_Race_Black, beta_V_Race_Red}, beta_V_Race_Latin},typical=V_pop, sd=omega_V }"))
+
+  expect_error(.indDef("ka = {distribution=lognormal,typical=ka_pop, covariate={Race, Wt,sexf}, coefficient={{0, beta_ka_Race_Black, beta_ka_Race_Latin},beta_ka_Wt}, no-variability}"))
+})
+
+test_that("min/max numeric", {
+  expect_error(.indDef("f = {distribution=logitnormal, typical=F_pop,sd=omega_F, min=min0, max=1}"))
+  expect_error(.indDef("f = {distribution=logitnormal, typical=F_pop,sd=omega_F, min=0, max=max1}"))
+})
+
+test_that("duplicate correlations error", {
+  expect_error(.indDef("correlation = {level=id, r(V, Cl)=corr1_V_Cl, r(Cl, V)=corr1_Cl_V}"))
+})
+
+test_that("error with varlevel mismatch", {
+  expect_error(.indDef("ka = {distribution=logNormal, typical=ka_pop, varlevel={id, id*occ, id*occ*occ}, sd={omega_ka, gamma_ka}}"))
+})
+
+
+
 .indDef("F = {distribution=logitnormal, typical=F_pop,sd=omega_F, min=0, max=1}
 ka = {distribution=lognormal,typical=ka_pop, no-variability}
 V = {distribution=lognormal,typical=V_pop, sd=omega_V }

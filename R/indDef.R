@@ -414,28 +414,22 @@ print.monolix2rxIndDef <- function(x, ...) {
 }
 #' Set the maximum value of the transformation
 #'
-#' @param var sting to change to a numeric for min/max
+#' @param var sting to change to a numeric for max
 #' @return nothing called for side effects
 #' @noRd
 #' @author Matthew L. Fidler
 .setMax <- function(var) {
-  .var <- suppressWarnings(as.numeric(var))
-  if (is.na(.var)) {
-    stop("'max' must be a numeric value")
-  }
+  .var <- as.numeric(var)
   .monolix2rx$max <- .var
 }
 #' Set the maximum value of the transformation
 #'
-#' @param var sting to change to a numeric for min/max
+#' @param var sting to change to a numeric for min
 #' @return nothing called for side effects
 #' @noRd
 #' @author Matthew L. Fidler
 .setMin <- function(var) {
-  .var <- suppressWarnings(as.numeric(var))
-  if (is.na(.var)) {
-    stop("'min' must be a numeric value")
-  }
+  .var <- as.numeric(var)
   .monolix2rx$min <- .var
 }
 #' This sets the IOV item from a monolix variable definition
@@ -515,7 +509,7 @@ print.monolix2rxIndDef <- function(x, ...) {
   .v <- sort(c(var1, var2))
   .w <- which(.monolix2rx$corDf$level == .monolix2rx$corLevel &
                 .monolix2rx$corDf$v1 == .v[1] &
-                .monolix2rx$corDf$v1 == .v[2])
+                .monolix2rx$corDf$v2 == .v[2])
   if (length(.w) != 0) {
     stop("cannot define r(", .v[1], ", ", .v[2], ") for level=", .monolix2rx$corLevel,
          " more than once",
