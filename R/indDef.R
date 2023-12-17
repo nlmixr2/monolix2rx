@@ -1,3 +1,74 @@
+.indDefIni <- function(full=TRUE) {
+  .monolix2rx$varName  <- NA_character_
+  .monolix2rx$dist     <- NA_character_
+  .monolix2rx$isMean   <- NA
+  .monolix2rx$varEst   <- NA_character_
+  .monolix2rx$varVal   <- NA_real_
+  .monolix2rx$varFixed <- NA
+  .monolix2rx$sd       <- character(0)
+  .monolix2rx$sdVal    <- numeric(0)
+  .monolix2rx$var      <- character(0)
+  .monolix2rx$varVal   <- numeric(0)
+  .monolix2rx$min      <- -Inf
+  .monolix2rx$max      <- Inf
+  .monolix2rx$iov      <- character(0)
+  .monolix2rx$cov      <- character(0)
+  .monolix2rx$coef     <- NULL
+  .monolix2rx$coefVal  <- NULL
+  .monolix2rx$coefLst  <- character(0)
+  .monolix2rx$coefLstVal <- numeric(0)
+  .monolix2rx$corLevel <- "id"
+  if (full) {
+    .monolix2rx$defItems <- NULL
+    .monolix2rx$corDf     <- data.frame(level=character(0), v1=character(0), v2=character(0), est=character(0))
+  }
+}
+
+.addIndDefItem <- function() {
+  if (!is.na(.monolix2rx$varName)) {
+    if (length(.monolix2rx$varVal) == 0L) {
+       stop("'", .monolix2rx$varName, "' needs a 'typical=' or 'mean=' declaration",
+           call.=FALSE)
+    }
+
+    .ret <- list(distribution=.monolix2rx$dist)
+    .typical <- list(est=.monolix2rx$varEst,
+                     val=.monolix2rx$varVal,
+                     fixed=.monolix2rx$varFixed)
+    if (.monolix2rx$isMean) {
+      .ret$mean <- .typical
+    } else {
+      .ret$typical <- .typical
+    }
+    if (length(.monolix2rx$sd) > 0L) {
+      .ret$sd <- list(est=.monolix2rx$sd,
+                      val=.monolix2rx$sdVal)
+    } else if (length(.monolix2rx$var) > 0L) {
+      .ret$var <- list(est=.monolix2rx$var,
+                       val=.monolix2rx$varVal)
+    }
+    .ret <- list(.ret)
+    names(.ret) <- .monolix2rx$varName
+    .monolix2rx$defItems <- c(.monolix2rx$defItems, .ret)
+    .indDefIni(FALSE)
+  }
+}
+
+#' @export
+print.monolix2rxIndDef <- function(x, ...) {
+  lapply(names(x), function(n) {
+    .cur <- x[[n]]
+    cat(n, " = {distribution=", .cur$distribution, sep="")
+    if (!is.null(.cur$typical)) {
+      cat(", typical=", ifelse(is.na(.cur$typical$est), .cur$typical$val, .cur$typical$est), sep="")
+    } else {
+      cat(", mean=", ifelse(is.na(.cur$mean$est), .cur$mean$val, .cur$mean$est), sep="")
+    }
+    cat("}\n")
+  })
+  invisible(x)
+}
+
 #' Add a variable for monolix parsing
 #'
 #' @param var Variable to add
@@ -5,6 +76,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .addVar <- function(var) {
+  .addIndDefItem()
   .monolix2rx$varName <- var
 }
 
@@ -15,8 +87,8 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .setDist <- function(dist) {
-  .monoix2rx$dist <- tolower(dist)
-  if (.monoix2rx$dist == "logitnormal") {
+  .monolix2rx$dist <- tolower(dist)
+  if (.monolix2rx$dist == "logitnormal") {
     # Set the defaults for min/max with logitNormal
     if (is.infinite(.monolix2rx$min) &&
           is.infinite(.monolix2rx$max)) {

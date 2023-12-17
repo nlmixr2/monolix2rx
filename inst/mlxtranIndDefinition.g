@@ -45,12 +45,14 @@ varOption: (sdOp | sdLstItem | varOp | varLstItem | noVar);
 iovItem: identifier ('*' identifier)* ;
 iovItemVL: iovItem;
 
-iovLine: 'varlevel' '=' '{' iovItemVL (',' iovItemVL)* '}';
+iovOp1: 'varlevel' '=' '{' iovItemVL (',' iovItemVL)* '}';
+iovOp2: 'varlevel' '='  iovItemVL;
+iovOp: iovOp1 | iovOp2;
 
 minVal: 'min' '=' constant;
 maxVal: 'max' '=' constant;
 
-otherOptions: typicalOption | varOption | covariateOp | coeffOp;
+otherOptions: typicalOption | varOption | covariateOp | coeffOp | iovOp;
 logitOptions: otherOptions | minVal | maxVal ;
 
 logitNormalLine: identifier '=' '{' logitNormalDist (',' logitOptions)* '}';

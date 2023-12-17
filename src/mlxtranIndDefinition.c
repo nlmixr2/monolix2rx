@@ -22,15 +22,15 @@
 #define max2( a , b )  ( (a) > (b) ? (a) : (b) )
 
 extern D_ParserTables parser_tables_mlxtranIndDefinition;
-#define curP monolixr2rx_indDef_curP
+#define curP monolix2rx_indDef_curP
 
-#define gBuf monolixr2rx_indDef_gBuf
-#define gBufFree monolixr2rx_indDef_gBufFree
-#define gBufLast monolixr2rx_indDef_gBufLast
-#define _pn monolixr2rx_indDef__pn
-#define freeP monolixr2rx_indDef_freeP
-#define parseFreeLast monolixr2rx_indDef_parseFreeLast
-#define parseFree monolixr2rx_indDef_parseFree
+#define gBuf monolix2rx_indDef_gBuf
+#define gBufFree monolix2rx_indDef_gBufFree
+#define gBufLast monolix2rx_indDef_gBufLast
+#define _pn monolix2rx_indDef__pn
+#define freeP monolix2rx_indDef_freeP
+#define parseFreeLast monolix2rx_indDef_parseFreeLast
+#define parseFree monolix2rx_indDef_parseFree
 #define errP monolix2rx_indDef_errP
 #include "parseSyntaxErrors.h"
 #include "util.h"

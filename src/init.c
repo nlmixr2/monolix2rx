@@ -10,7 +10,7 @@
 
 #include "util.h"
 
-void R_init_monolixr2rx(DllInfo *info) {
+void R_init_monolix2rx(DllInfo *info) {
   R_CallMethodDef callMethods[]  = {
     {"_monolix2rx_trans_indDef", (DL_FUNC) &_monolix2rx_trans_indDef, 1},
     {"_monolix2rx_trans_longEq", (DL_FUNC) &_monolix2rx_trans_longEq, 1},
@@ -22,9 +22,10 @@ void R_init_monolixr2rx(DllInfo *info) {
   };
   R_registerRoutines(info, cMethods, callMethods, NULL, NULL);
   R_useDynamicSymbols(info, FALSE);
+  nonmem2rx_full_ini();
   /* monolixr2rx_full_ini(); */
 }
 
-void R_unload_monolixr2rx(DllInfo *info) {
+void R_unload_monolix2rx(DllInfo *info) {
   /* monolixr2rx_full_parseFree(1); */
 }

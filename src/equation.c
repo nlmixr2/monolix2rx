@@ -91,5 +91,5 @@ SEXP _monolix2rx_trans_longEq(SEXP in) {
   /* sClear(&firstErr); */
   /* trans_longEq(R_CHAR(STRING_ELT(in, 0))); */
   /* parseFree(0); */
-  /* return R_NilValue; */
+  return R_NilValue;
 }
