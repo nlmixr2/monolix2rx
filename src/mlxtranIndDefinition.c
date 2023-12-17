@@ -218,6 +218,25 @@ int indDef_process_corr(const char* name, D_ParseNode *pn) {
   return 0;
 }
 
+int indDef_process_corReset(const char *name, D_ParseNode *pn, int i) {
+  if (i == 0 && !strcmp("corLine", name)) {
+    const char *v = "id";
+    monolix2rxSetCorLevel(v);
+    return 1;
+  }
+  return 0;
+}
+
+int indDef_process_corrLevel(const char *name, D_ParseNode *pn) {
+  if (!strcmp("corIovItem", name)) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxSetCorLevel(v);
+    return 1;
+  }
+  return 0;
+}
+
 void wprint_parsetree_indDef(D_ParserTables pt, D_ParseNode *pn, int depth, print_node_fn_t fn, void *client_data) {
   char *name = (char*)pt.symbols[pn->symbol].name;
   int nch = d_get_number_of_children(pn);
@@ -232,13 +251,15 @@ void wprint_parsetree_indDef(D_ParserTables pt, D_ParseNode *pn, int depth, prin
       indDef_process_iov(name, pn) ||
       indDef_process_coefSingle(name, pn) ||
       indDef_process_coefItemList(name, pn) ||
-      indDef_process_corr(name, pn)) {
+      indDef_process_corr(name, pn) ||
+      indDef_process_corrLevel(name, pn)) {
     // return early; no need to process more
     return;
   }
   if (nch != 0) {
     for (int i = 0; i < nch; i++) {
-      if (indDef_process_coefListStart(name, pn, i)) {
+      if (indDef_process_coefListStart(name, pn, i) ||
+          indDef_process_corReset(name, pn, i)) {
         // don't process this argument more
         continue;
       }

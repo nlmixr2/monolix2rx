@@ -170,11 +170,10 @@
 }
 #'  Add a multiple item coefficient to the coefficent list
 #'
-#' @param var
-#' @return
-#' @export
+#' @param var coeff variable name
+#' @return nothing, called for side effects
+#' @noRd
 #' @author Matthew L. Fidler
-#' @examples
 .addCoefMult <- function(var) {
   .var <- suppressWarnings(as.numeric(var))
   if (is.na(.var)) {
@@ -197,4 +196,13 @@
   .monolix2rx$corDf <- rbind(.monolix2rx$corDf,
                              data.frame(level=.monolix2rx$corLevel,
                                         v1=var1, v2=var2, est=estVal))
+}
+#' Add correlation estimate
+#'
+#' @param var level of correlation
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.setCorLevel <- function(var) {
+  .monolix2rx$corLevel <- var
 }
