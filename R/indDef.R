@@ -4,7 +4,6 @@
   .monolix2rx$isMean   <- NA
   .monolix2rx$varEst   <- NA_character_
   .monolix2rx$varVal   <- NA_real_
-  .monolix2rx$varFixed <- NA
   .monolix2rx$sd       <- character(0)
   .monolix2rx$sdVal    <- numeric(0)
   .monolix2rx$var      <- character(0)
@@ -21,31 +20,97 @@
   if (full) {
     .monolix2rx$defItems <- NULL
     .monolix2rx$corDf     <- data.frame(level=character(0), v1=character(0), v2=character(0), est=character(0))
+    .monolix2rx$defFixed <- numeric(0)
+    .monolix2rx$indDef <- NULL
   }
 }
+#' Parses the mlxtran [individual] definition: text
+#'
+#'
+#' @param text text from the individual defition
+#' @return monolix2rxIndDef class
+#' @noRd
+#' @author Matthew L. Fidler
+.indDef <- function(text) {
+  .indDefIni()
+  .Call(`_monolix2rx_trans_indDef`, text)
+  .indDefFinalize()
+  .monolix2rx$indDef
+}
 
+#' Finalized the mlxtran [individual] definition:
+#'
+#' @return nothing called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.indDefFinalize <- function() {
+  .addIndDefItem()
+  .indDef <- list(vars=.monolix2rx$defItems,
+                  fixed=.monolix2rx$defFixed,
+                  cor=.monolix2rx$corDf)
+  class(.indDef) <- "monolix2rxIndDef"
+  .indDefIni(TRUE)
+  .monolix2rx$indDef <- .indDef
+}
+#' Add parsed item to the .monolix2rx$defItems
+#'
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .addIndDefItem <- function() {
   if (!is.na(.monolix2rx$varName)) {
     if (length(.monolix2rx$varVal) == 0L) {
        stop("'", .monolix2rx$varName, "' needs a 'typical=' or 'mean=' declaration",
            call.=FALSE)
     }
-
     .ret <- list(distribution=.monolix2rx$dist)
-    .typical <- list(est=.monolix2rx$varEst,
-                     val=.monolix2rx$varVal,
-                     fixed=.monolix2rx$varFixed)
+    .est <- .monolix2rx$varEst
+    if (!is.na(.monolix2rx$varVal)) {
+      .est <- paste0("rxTv_", .monolix2rx$varName)
+      names(.monolix2rx$varVal) <- .est
+      .monolix2rx$defFixed <- c(.monolix2rx$defFixed, .monolix2rx$varVal)
+    }
+    .typical <- .est
     if (.monolix2rx$isMean) {
       .ret$mean <- .typical
     } else {
       .ret$typical <- .typical
     }
+    if (length(.monolix2rx$iov) > 0) {
+      .ret$varlevel <- .monolix2rx$iov
+    }
     if (length(.monolix2rx$sd) > 0L) {
-      .ret$sd <- list(est=.monolix2rx$sd,
-                      val=.monolix2rx$sdVal)
+      if (!is.null(.ret$varlevel) &&
+            length(.ret$varlevel) != length(.monolix2rx$sd)) {
+        stop("length of 'varlevel=' needs to match length 'sd='",
+             call.=FALSE)
+      }
+      .w <- which(is.na(.monolix2rx$sd))
+      .sd <- .monolix2rx$sd
+      if (length(.w) > 0L) {
+        .estw <- paste0("rxVar_",.monolix2rx$varName, "_", .w)
+        .fix <- .monolix2rx$sdVal[.w]
+        names(.fix) <- .estw
+        .sd[.w] <- .estw
+        .monolix2rx$defFixed <- c(.monolix2rx$defFixed, .fix)
+      }
+      .ret$sd <- .sd
     } else if (length(.monolix2rx$var) > 0L) {
-      .ret$var <- list(est=.monolix2rx$var,
-                       val=.monolix2rx$varVal)
+      if (!is.null(.ret$varlevel) &&
+            length(.ret$varlevel) != length(.monolix2rx$var)) {
+        stop("length of 'varlevel=' needs to match length 'var='",
+             call.=FALSE)
+      }
+      .w <- which(is.na(.monolix2rx$var))
+      .var <- .monolix2rx$var
+      if (length(.w) > 0L) {
+        .estw <- paste0("rxVar_",.monolix2rx$varName, "_", .w)
+        .fix <- .monolix2rx$varVal[.w]
+        names(.fix) <- .estw
+        .var[.w] <- .estw
+        .monolix2rx$defFixed <- c(.monolix2rx$defFixed, .fix)
+      }
+      .ret$var <- .var
     }
     .ret <- list(.ret)
     names(.ret) <- .monolix2rx$varName
@@ -54,18 +119,70 @@
   }
 }
 
+.varOrFixed <- function(varName, fixed) {
+  vapply(seq_along(varName),
+         function(i) {
+           .n <- varName[i]
+           .f <- fixed[.n]
+           if (is.na(.f)) return(.n)
+           paste(.f)
+         },
+         character(1), USE.NAMES=FALSE)
+}
+
 #' @export
 print.monolix2rxIndDef <- function(x, ...) {
-  lapply(names(x), function(n) {
-    .cur <- x[[n]]
+  ## .indDef <- list(vars=.monolix2rx$defItems,
+  ##                 fixed=.monolix2rx$defFixed,
+  ##                 cor=.monolix2rx$corDf)
+  lapply(names(x$vars), function(n) {
+    .cur <- x$vars[[n]]
     cat(n, " = {distribution=", .cur$distribution, sep="")
     if (!is.null(.cur$typical)) {
-      cat(", typical=", ifelse(is.na(.cur$typical$est), .cur$typical$val, .cur$typical$est), sep="")
+      cat(", typical=", .varOrFixed(.cur$typical, x$fixed), sep="")
     } else {
-      cat(", mean=", ifelse(is.na(.cur$mean$est), .cur$mean$val, .cur$mean$est), sep="")
+      cat(", mean=", .cur$mean, sep="")
+    }
+    if (!is.null(.cur$varlevel)) {
+      if (length(.cur$varlevel) == 1L) {
+        cat(", varlevel=", .cur$varlevel, sep="")
+      } else {
+        cat(", varlevel={", paste(.cur$varlevel, collapse=", "), "}", sep="")
+      }
+    }
+    if (!is.null(.cur$sd)) {
+      if (length(.cur$sd) == 1L) {
+        cat(", sd=", .varOrFixed(.cur$sd, x$fixed), sep="")
+      } else {
+        cat(", sd={", paste(.varOrFixed(.cur$sd, x$fixed), collapse=", "),"}", sep="")
+      }
+    } else if (!is.null(.cur$var)) {
+      if (length(.cur$sd) == 1L) {
+        cat(", var=", .varOrFixed(.cur$var, x$fixed), sep="")
+      } else {
+        cat(", var={", paste(.varOrFixed(.cur$var, x$fixed), collapse=", "),"}", sep="")
+      }
+    } else {
+      cat(", no-variability")
     }
     cat("}\n")
   })
+  .cor <- x$cor
+  if (length(x$cor$level) > 0L) {
+    .levels <- sort(unique(x$cor$level))
+    lapply(.levels,
+           function(lvl) {
+             cat("correlation = {")
+             if (length(.levels) == 1L &&
+                   .levels == "id") {
+             } else {
+               cat("level=", lvl, ", ", sep="")
+             }
+             .c <- .cor[.cor$level == lvl, ]
+             cat(paste(paste0("r(", .c$v1, ", ", .c$v2, ")=", .c$est), collapse=", "))
+             cat("}\n")
+           })
+  }
   invisible(x)
 }
 
@@ -108,7 +225,6 @@ print.monolix2rxIndDef <- function(x, ...) {
   .monolix2rx$isMean <- (isMean == 1L)
   .monolix2rx$varEst <- var
   .monolix2rx$varVal <- NA_real_
-  .monolix2rx$varFixed <- FALSE
 }
 #' Set typical fixed variable
 #'
@@ -121,7 +237,6 @@ print.monolix2rxIndDef <- function(x, ...) {
   .monolix2rx$isMean <- (isMean == 1L)
   .monolix2rx$varEst <- NA_character_
   .monolix2rx$varVal <- as.numeric(num)
-  .monolix2rx$varFixed <- TRUE
 }
 #' Set the standard deviation
 #'
@@ -265,9 +380,18 @@ print.monolix2rxIndDef <- function(x, ...) {
 #' @noRd
 #' @author Matthew L. Fidler
 .addCor <- function(var1, var2, estVal) {
+  .v <- sort(c(var1, var2))
+  .w <- which(.monolix2rx$corDf$level == .monolix2rx$corLevel &
+                .monolix2rx$corDf$v1 == .v[1] &
+                .monolix2rx$corDf$v1 == .v[2])
+  if (length(.w) != 0) {
+    stop("cannot define r(", .v[1], ", ", .v[2], ") for level=", .monolix2rx$corLevel,
+         " more than once",
+         call.=FALSE)
+  }
   .monolix2rx$corDf <- rbind(.monolix2rx$corDf,
                              data.frame(level=.monolix2rx$corLevel,
-                                        v1=var1, v2=var2, est=estVal))
+                                        v1=.v[1], v2=.v[2], est=estVal))
 }
 #' Add correlation estimate
 #'
