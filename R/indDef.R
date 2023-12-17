@@ -96,8 +96,23 @@
     }
     if (!is.null(.monolix2rx$coef)) {
       if (length(.monolix2rx$cov) != length(.monolix2rx$coef)) {
-        stop("number of covariates and coefficients need to match for '", .monolix2rx$varName, "'",
-             call.=FALSE)
+        if (length(.monolix2rx$cov) == 1L) {
+          .monolix2rx$coef <- list(vapply(seq_along(.monolix2rx$coef), function(i) {
+            .cf <- .monolix2rx$coef[[i]]
+            if (length(.cf) != 1) {
+              stop("number of covariates and coefficients need to match for '", .monolix2rx$varName, "'",
+                   call.=FALSE)
+            }
+            .cf
+          }, character(1), USE.NAMES=FALSE))
+          .monolix2rx$coefVal <- list(vapply(seq_along(.monolix2rx$coefVal), function(i) {
+            .cv <- .monolix2rx$coefVal[[i]]
+            .cv
+          }, numeric(1), USE.NAMES=FALSE))
+        } else {
+          stop("number of covariates and coefficients need to match for '", .monolix2rx$varName, "'",
+               call.=FALSE)
+        }
       }
       .coef <- lapply(seq_along(.monolix2rx$coef),
                       function(i) {
@@ -227,6 +242,25 @@ print.monolix2rxIndDef <- function(x, ...) {
       cat(", typical=", .varOrFixed(.cur$typical, x$fixed), sep="")
     } else {
       cat(", mean=", .cur$mean, sep="")
+    }
+    if (!is.null(.cur$cov)) {
+      cat(', covariate=')
+      if (length(.cur$cov) == 1L) {
+        cat(.cur$cov)
+      } else {
+        cat("{", paste(.cur$cov, collapse=", "), "}", sep="")
+      }
+    }
+    if (!is.null(.cur$coef)) {
+      cat(', coefficient=')
+      if (length(.cur$coef) > 1L) cat("{")
+      cat(paste(vapply(seq_along(.cur$coef),
+             function(i) {
+               .cv <- .varOrFixed(.cur$coef[[i]], x$fixed)
+               if (length(.cv) == 1) return(.cv)
+               paste0("{", paste(.cv, collapse=", "), "}")
+             }, character(1), USE.NAMES=TRUE), collapse=", "))
+      if (length(.cur$coef) > 1L) cat("}")
     }
     if (!is.null(.cur$varlevel)) {
       if (length(.cur$varlevel) == 1L) {

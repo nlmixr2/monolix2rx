@@ -30,7 +30,7 @@ correlation = {level=id*occ, r(ka, Tlag)=corr2_ka_Tlag}")
 
 .indDef("F = {distribution=logitnormal, typical=F_pop,sd=omega_F, min=0, max=1}
 ka = {distribution=lognormal,typical=ka_pop, covariate={Race, Wt}, coefficient={{0, beta_ka_Race_Black, beta_ka_Race_Latin},beta_ka_Wt}, no-variability}
-V = {distribution=lognormal,typical=V_pop, sd=omega_V }
+V = {distribution=lognormal, covariate=Race, coefficient={0, beta_V_Race_Black, beta_V_Race_Latin},typical=V_pop, sd=omega_V }
 Cl = {distribution=lognormal,typical=Cl_pop, sd=omega_Cl}
 correlation = {level=id, r(V, Cl)=corr1_V_Cl}
 ")
