@@ -4,7 +4,7 @@ statement_list :
 
 logitNormalDist: 'distribution' '=' ('logitNormal' | 'logitnormal');
 
-distribution: 'distribution' '=' ('normal' | 'logNormal' | 'lognormal' | 'logitNormal' | 'logitnormal' | 'probitnormal' | 'probitNormal');
+distribution: 'distribution' '=' ('normal' | 'logNormal' | 'lognormal' | 'probitnormal' | 'probitNormal');
 
 typicalVar: 'typical' '=' identifier;
 meanVar: 'mean' '=' identifier;

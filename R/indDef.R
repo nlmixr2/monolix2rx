@@ -18,8 +18,10 @@
   .monolix2rx$coefLstVal <- numeric(0)
   .monolix2rx$corLevel <- "id"
   if (full) {
+    .monolix2rx$rx <- character(0)
     .monolix2rx$defItems <- NULL
     .monolix2rx$corDf     <- data.frame(level=character(0), v1=character(0), v2=character(0), est=character(0))
+    .monolix2rx$estDf <- data.frame(type=character(0), name=character(0), fixed=logical(0), level=character(0))
     .monolix2rx$defFixed <- numeric(0)
     .monolix2rx$indDef <- NULL
   }
@@ -47,7 +49,9 @@
   .addIndDefItem()
   .indDef <- list(vars=.monolix2rx$defItems,
                   fixed=.monolix2rx$defFixed,
-                  cor=.monolix2rx$corDf)
+                  cor=.monolix2rx$corDf,
+                  est=.monolix2rx$estDf,
+                  rx=.monolix2rx$rx)
   class(.indDef) <- "monolix2rxIndDef"
   .indDefIni(TRUE)
   .monolix2rx$indDef <- .indDef
@@ -64,20 +68,77 @@
            call.=FALSE)
     }
     .ret <- list(distribution=.monolix2rx$dist)
+    .rx <- paste0(.monolix2rx$varName, " <- ")
     .est <- .monolix2rx$varEst
+    .fix <- FALSE
+    if (.ret$distribution == "lognormal") {
+      .rx <- paste0(.rx, "exp(")
+    } else if (.ret$distribution == "normal") {
+    } else if (.ret$distribution == "logitnormal") {
+      .rx <- paste0(.rx, "expit(")
+    } else if (.ret$distribution == "probitnormal") {
+      .rx <- paste0(.rx, "probitInv(")
+    }
     if (!is.na(.monolix2rx$varVal)) {
       .est <- paste0("rxTv_", .monolix2rx$varName)
       names(.monolix2rx$varVal) <- .est
       .monolix2rx$defFixed <- c(.monolix2rx$defFixed, .monolix2rx$varVal)
+      .fix <- TRUE
     }
     .typical <- .est
+    .monolix2rx$estDf <- rbind(.monolix2rx$estDf,
+                               data.frame(type="typical", name=.est, fixed=.fix, level="pop"))
+    .rx <- paste0(.rx, .est)
     if (.monolix2rx$isMean) {
       .ret$mean <- .typical
     } else {
       .ret$typical <- .typical
     }
+    if (!is.null(.monolix2rx$coef)) {
+      if (length(.monolix2rx$cov) != length(.monolix2rx$coef)) {
+        stop("number of covariates and coefficients need to match for '", .monolix2rx$varName, "'",
+             call.=FALSE)
+      }
+      .coef <- lapply(seq_along(.monolix2rx$coef),
+                      function(i) {
+                        .c <- .monolix2rx$coef[[i]]
+                        .cv <- .monolix2rx$coefVal[[i]]
+                        .cov <- .monolix2rx$cov[i]
+                        .w <- which(is.na(.c))
+                        if (length(.w) == 0L) {
+                          .monolix2rx$estDf <- rbind(.monolix2rx$estDf,
+                                                     data.frame(type="cov", name=.c, fixed=FALSE, level="cov"))
+                          return(.c)
+                        }
+                        .n <- paste0("rxCov_", .monolix2rx$varName, "_",
+                                     .cov, "_", .w)
+                        .fix <- .cv[.w]
+                        names(.fix) <- .n
+                        .monolix2rx$defFixed <- c(.monolix2rx$defFixed, .fix)
+                        .c[.w] <- .n
+                        .monolix2rx$estDf <- rbind(.monolix2rx$estDf,
+                                                   data.frame(type="cov", name=.c,
+                                                              fixed=vapply(.c,
+                                                                           function(v) {
+                                                                             any(names(.monolix2rx$defFixed) == v)
+                                                                           },
+                                                                           logical(1), USE.NAMES = FALSE),
+                                                              level="cov"))
+                        return(.c)
+                      })
+      .ret$cov <- .monolix2rx$cov
+      .ret$coef <- .coef
+      .rx <- paste0(.rx, " + ",
+                    paste(vapply(seq_along(.ret$coef),
+                                 function(i) {
+                                   paste(paste0(.ret$coef[[i]], "*", .ret$cov[i]), collapse=" + ")
+                                 }, character(1), USE.NAMES=FALSE),
+                          collapse=" + "))
+    }
+    .vl <- "id"
     if (length(.monolix2rx$iov) > 0) {
       .ret$varlevel <- .monolix2rx$iov
+      .vl <- .monolix2rx$iov
     }
     if (length(.monolix2rx$sd) > 0L) {
       if (!is.null(.ret$varlevel) &&
@@ -95,6 +156,14 @@
         .monolix2rx$defFixed <- c(.monolix2rx$defFixed, .fix)
       }
       .ret$sd <- .sd
+      .rx <- paste0(.rx, " + ", paste(.ret$sd, collapse=" +" ))
+      .monolix2rx$estDf <- rbind(.monolix2rx$estDf,
+                                 data.frame(type="sd", name=.sd,
+                                            fixed=vapply(.sd,
+                                                         function(v) {
+                                                           any(names(.monolix2rx$defFixed) == v)
+                                                         }, logical(1), USE.NAMES = FALSE),
+                                            level=.vl))
     } else if (length(.monolix2rx$var) > 0L) {
       if (!is.null(.ret$varlevel) &&
             length(.ret$varlevel) != length(.monolix2rx$var)) {
@@ -111,7 +180,23 @@
         .monolix2rx$defFixed <- c(.monolix2rx$defFixed, .fix)
       }
       .ret$var <- .var
+      .rx <- paste0(.rx, " + ", paste(.ret$var, collapse=" +" ))
+      .monolix2rx$estDf <- rbind(.monolix2rx$estDf,
+                                 data.frame(type="var", name=.var,
+                                            fixed=vapply(.var,
+                                                         function(v) {
+                                                           any(names(.monolix2rx$defFixed) == v)
+                                                         }, logical(1), USE.NAMES = FALSE),
+                                            level=.vl))
     }
+    if (any(.ret$distribution == c("lognormal", "probitnormal"))) {
+      .rx <- paste0(.rx, ")")
+    } else if (.ret$distribution == "logitnormal") {
+      .ret$max <- .monolix2rx$max
+      .ret$min <- .monolix2rx$min
+      .rx <- paste0(.rx, ", ", .ret$min, ", ", .ret$max, ")")
+    }
+    .monolix2rx$rx <- c(.monolix2rx$rx, .rx)
     .ret <- list(.ret)
     names(.ret) <- .monolix2rx$varName
     .monolix2rx$defItems <- c(.monolix2rx$defItems, .ret)
@@ -164,6 +249,12 @@ print.monolix2rxIndDef <- function(x, ...) {
       }
     } else {
       cat(", no-variability")
+    }
+    if (!is.null(.cur$min)) {
+      cat(", min=", .cur$min, sep="")
+    }
+    if (!is.null(.cur$max)) {
+      cat(", max=", .cur$max, sep="")
     }
     cat("}\n")
   })
@@ -222,6 +313,10 @@ print.monolix2rxIndDef <- function(x, ...) {
 #' @author Matthew L. Fidler
 #' @noRd
 .setTypicalEst <- function(var, isMean) {
+  if (!is.na(.monolix2rx$isMean)) {
+    stop("can only use 'typical=' or 'mean=' in '",.monolix2rx$varName,"' not both",
+         call.=FALSE)
+  }
   .monolix2rx$isMean <- (isMean == 1L)
   .monolix2rx$varEst <- var
   .monolix2rx$varVal <- NA_real_
@@ -234,6 +329,10 @@ print.monolix2rxIndDef <- function(x, ...) {
 #' @noRd
 #' @author Matthew L. Fidler
 .setTypicalFixed <- function(num, isMean) {
+  if (!is.na(.monolix2rx$isMean)) {
+    stop("can only use 'typical=' or 'mean=' in '",.monolix2rx$varName,"' not both",
+         call.=FALSE)
+  }
   .monolix2rx$isMean <- (isMean == 1L)
   .monolix2rx$varEst <- NA_character_
   .monolix2rx$varVal <- as.numeric(num)
@@ -331,8 +430,8 @@ print.monolix2rxIndDef <- function(x, ...) {
 #' @author Matthew L. Fidler
 .pushCoefList <- function() {
   if (length(.monolix2rx$coefLst) != 0) {
-    .monolix2rx$coef <- c(.monolix2rx$coef, .monolix2rx$coefLst)
-    .monolix2rx$coefVal <- c(.monolix2rx$coefVal, .monolix2rx$coefLstVal)
+    .monolix2rx$coef <- c(.monolix2rx$coef, list(.monolix2rx$coefLst))
+    .monolix2rx$coefVal <- c(.monolix2rx$coefVal, list(.monolix2rx$coefLstVal))
     .monolix2rx$coefLst <- character(0)
     .monolix2rx$coefLstVal <- numeric(0)
   }
@@ -346,10 +445,9 @@ print.monolix2rxIndDef <- function(x, ...) {
 .addCoefSingle <- function(var) {
   .pushCoefList()
   .var <- suppressWarnings(as.numeric(var))
-  if (is.na(.var)) {
+  if (!is.na(.var)) {
     .monolix2rx$coef <- c(.monolix2rx$coef, list(NA_character_))
     .monolix2rx$coefVal <- c(.monolix2rx$coefVal, list(.var))
-
   } else {
     .monolix2rx$coef <- c(.monolix2rx$coef, list(var))
     .monolix2rx$coefVal <- c(.monolix2rx$coefVal, list(NA_real_))

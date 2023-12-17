@@ -249,6 +249,7 @@ void wprint_parsetree_indDef(D_ParserTables pt, D_ParseNode *pn, int depth, prin
       indDef_process_minDef(name, pn) ||
       indDef_process_maxDef(name, pn) ||
       indDef_process_iov(name, pn) ||
+      indDef_process_covItem(name, pn) ||
       indDef_process_coefSingle(name, pn) ||
       indDef_process_coefItemList(name, pn) ||
       indDef_process_corr(name, pn) ||
