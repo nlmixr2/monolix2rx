@@ -57,11 +57,11 @@ static inline void trans_syntax_error_report_fn0(char *err){
   if (!rx_suppress_syntax_info){
     if (lastSyntaxErrorLine == 0){
       if (isEsc) {
-        Rprintf(_("\033[1m%s record syntax error error:\n================================================================================\033[0m"),
+        Rprintf(_("\033[1m%s syntax error error:\n================================================================================\033[0m"),
                    record);
       }
       else {
-        Rprintf(_("%s record syntax error error:\n================================================================================"), record);
+        Rprintf(_("%s syntax error error:\n================================================================================"), record);
       }
       lastSyntaxErrorLine=1;
     }
@@ -80,10 +80,10 @@ static inline void trans_syntax_error_report_fn0(char *err){
 static inline void printSyntaxErrorHeader(void) {
   if (lastSyntaxErrorLine == 0){
     if (isEsc) {
-      Rprintf(_("\033[1m%s record syntax error error:\n================================================================================\033[0m"), record);
+      Rprintf(_("\033[1m%s syntax error error:\n================================================================================\033[0m"), record);
     }
     else {
-      Rprintf(_("%s record syntax error:\n================================================================================"), record);
+      Rprintf(_("%s syntax error:\n================================================================================"), record);
     }
     lastSyntaxErrorLine=1;
   }

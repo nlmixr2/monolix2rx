@@ -178,7 +178,7 @@
         .monolix2rx$defFixed <- c(.monolix2rx$defFixed, .fix)
       }
       .ret$sd <- .sd
-      .rx <- paste0(.rx, " + ", paste(.ret$sd, collapse=" +" ))
+      .rx <- paste0(.rx, " + ", paste(.ret$sd, collapse=" + "))
       .monolix2rx$estDf <- rbind(.monolix2rx$estDf,
                                  data.frame(type="sd", name=.sd,
                                             fixed=vapply(.sd,
@@ -202,7 +202,7 @@
         .monolix2rx$defFixed <- c(.monolix2rx$defFixed, .fix)
       }
       .ret$var <- .var
-      .rx <- paste0(.rx, " + ", paste(.ret$var, collapse=" +" ))
+      .rx <- paste0(.rx, " + ", paste(.ret$var, collapse=" + "))
       .monolix2rx$estDf <- rbind(.monolix2rx$estDf,
                                  data.frame(type="var", name=.var,
                                             fixed=vapply(.var,
