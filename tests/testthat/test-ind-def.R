@@ -33,7 +33,14 @@ test_that("error with varlevel mismatch", {
   expect_error(.indDef("ka = {distribution=logNormal, typical=ka_pop, varlevel={id, id*occ, id*occ*occ}, sd={omega_ka, gamma_ka}}"))
 })
 
+test_that("duplicated parameters error", {
+  expect_error(.indDef("ka = {distribution=logNormal, typical=ka_pop, varlevel={id, id*occ}, sd={omega_ka, omega_ka}}"),
+               'omega_ka')
+  expect_error(.indDef("ka = {distribution=logNormal, typical=ka_pop, varlevel={id, id*occ}, sd={omega_ka, gamma_ka}}
+correlation = {r(V, Cl)=gamma_ka}"),
+               'gamma_ka')
 
+})
 
 .indDef("F = {distribution=logitnormal, typical=F_pop,sd=omega_F, min=0, max=1}
 ka = {distribution=lognormal,typical=ka_pop, no-variability}

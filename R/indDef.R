@@ -52,6 +52,13 @@
                   cor=.monolix2rx$corDf,
                   est=.monolix2rx$estDf,
                   rx=.monolix2rx$rx)
+  .n <- c(.indDef$est$name,.indDef$cor$est)
+  .n <- unique(.n[duplicated(.n)])
+  if (length(.n) > 0) {
+    stop("duplicated parameter estimates in [INDIVIDUAL] DEFINITION: '",
+         paste(.n, collapse="', '"), "'",
+         call.=FALSE)
+  }
   class(.indDef) <- "monolix2rxIndDef"
   .indDefIni(TRUE)
   .monolix2rx$indDef <- .indDef
