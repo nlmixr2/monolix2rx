@@ -20,3 +20,7 @@ SEXP _monolix2rx_trans_parameter(SEXP in);
 SEXP monolix2rxParameterMethod(const char *v);
 SEXP monolix2rxParameterValue(const char *v);
 SEXP monolix2rxParameterName(const char *v);
+SEXP monolix2rxInputAdd(const char *v);
+SEXP monolix2rxInputCatItem(const char *v);
+SEXP monolix2rxInputCat(const char *v);
+SEXP _monolix2rx_trans_individual(SEXP in);

@@ -2,8 +2,10 @@
 statement_list :
         (statement)+ ;
 
-inputLine: 'input' '=' '{' identifier (',' identifier)* '}';
-catCov: identifier '=' '{' 'type' '=' 'categorical' ',' 'categories' '=' '{' identifier (',' identifier)*   '}' '}';
+inpId: identifier;
+inputLine: 'input' '=' '{' inpId (',' inpId)* '}';
+catId: identifier;
+catCov: identifier '=' '{' 'type' '=' 'categorical' ',' 'categories' '=' '{' catId (',' catId)*   '}' '}';
 
 statement: inputLine singleLineComment?
     | catCov singleLineComment?
