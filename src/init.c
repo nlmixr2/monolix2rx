@@ -13,6 +13,7 @@
 void R_init_monolix2rx(DllInfo *info) {
   R_CallMethodDef callMethods[]  = {
     {"_monolix2rx_trans_indDef", (DL_FUNC) &_monolix2rx_trans_indDef, 1},
+    {"_monolix2rx_trans_parameter", (DL_FUNC) &_monolix2rx_trans_parameter, 1},
     {"_monolix2rx_trans_longEq", (DL_FUNC) &_monolix2rx_trans_longEq, 1},
     {NULL, NULL, 0}
   };

@@ -297,7 +297,7 @@ void trans_indDef(const char* parse){
 SEXP _monolix2rx_trans_indDef(SEXP in) {
   sClear(&curLine);
   sClear(&firstErr);
-  record = "mlxtran [INDIVIDUAL] DEFINITION:";
+  record = "mlxtran <MODEL> [INDIVIDUAL] DEFINITION";
   trans_indDef(R_CHAR(STRING_ELT(in, 0)));
   parseFree(0);
   return R_NilValue;

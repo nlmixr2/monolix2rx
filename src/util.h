@@ -16,3 +16,7 @@ SEXP monolix2rxAddCoefMult(const char *var);
 SEXP monolix2rxAddCor(const char *v1, const char *v2, const char *v3);
 SEXP monolix2rxSetCorLevel(const char *v);
 void nonmem2rx_full_ini(void);
+SEXP _monolix2rx_trans_parameter(SEXP in);
+SEXP monolix2rxParameterMethod(const char *v);
+SEXP monolix2rxParameterValue(const char *v);
+SEXP monolix2rxParameterName(const char *v);

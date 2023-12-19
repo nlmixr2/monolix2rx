@@ -147,5 +147,31 @@ extern "C" SEXP monolix2rxSetCorLevel(const char *v) {
   setCorLevel(v);
   return R_NilValue;
   END_RCPP
+}
 
+extern "C" SEXP monolix2rxParameterMethod(const char *v) {
+  BEGIN_RCPP
+  Environment monolix2rxNs = loadNamespace("monolix2rx");
+  Function parameterMethod(".parameterMethod", monolix2rxNs);
+  parameterMethod(v);
+  return R_NilValue;
+  END_RCPP
+}
+
+extern "C" SEXP monolix2rxParameterValue(const char *v) {
+  BEGIN_RCPP
+  Environment monolix2rxNs = loadNamespace("monolix2rx");
+  Function parameterValue(".parameterValue", monolix2rxNs);
+  parameterValue(v);
+  return R_NilValue;
+  END_RCPP
+}
+
+extern "C" SEXP monolix2rxParameterName(const char *v) {
+  BEGIN_RCPP
+  Environment monolix2rxNs = loadNamespace("monolix2rx");
+  Function parameterName(".parameterName", monolix2rxNs);
+  parameterName(v);
+  return R_NilValue;
+  END_RCPP
 }
