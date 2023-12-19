@@ -1,13 +1,5 @@
 .monolix2rxBuildGram <- function() {
   message("monolix user txt model parsing")
-  message("Update Parser c for [LONGITUDINAL] INPUT: block")
-
-  dparser::mkdparse(devtools::package_file("inst/longInput.g"),
-                    devtools::package_file("src/"),
-                    grammar_ident="monolixLongInput")
-  file.rename(devtools::package_file("src/longInput.g.d_parser.c"),
-              devtools::package_file("src/longInput.g.d_parser.h"))
-
   message("Update Parser c for [LONGITUDINAL] EQUATION: block")
   dparser::mkdparse(devtools::package_file("inst/equation.g"),
                     devtools::package_file("src/"),
@@ -22,7 +14,7 @@
   file.rename(devtools::package_file("src/longOutput.g.d_parser.c"),
               devtools::package_file("src/longOutput.g.d_parser.h"))
   message("mlxtran grammer")
-  message("Update Parser c for <MODEL> [INDIVIDUAL]")
+  message("Update Parser c for input specification")
   dparser::mkdparse(devtools::package_file("inst/mlxtranInd.g"),
                     devtools::package_file("src/"),
                     grammar_ident="mlxtranInd")

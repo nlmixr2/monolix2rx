@@ -102,12 +102,22 @@ int individual_process_catCov(const char *name, D_ParseNode *pn, int i) {
   }
   return 0;
 }
+int individual_process_regressor(const char *name, D_ParseNode *pn) {
+  if (!strcmp("regressorLine", name)) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxIndReg(v);
+    return 1;
+  }
+  return 0;
+}
 
 void wprint_parsetree_individual(D_ParserTables pt, D_ParseNode *pn, int depth, print_node_fn_t fn, void *client_data) {
   char *name = (char*)pt.symbols[pn->symbol].name;
   int nch = d_get_number_of_children(pn);
   if (individual_process_catId(name, pn) ||
-      individual_process_inpId(name, pn)) {
+      individual_process_inpId(name, pn) ||
+      individual_process_regressor(name, pn)) {
     // return early; no need to process more
     return;
   }
@@ -147,10 +157,10 @@ void trans_individual(const char* parse){
   finalizeSyntaxError();
 }
 
-SEXP _monolix2rx_trans_individual(SEXP in) {
+SEXP _monolix2rx_trans_individual(SEXP in, SEXP where) {
   sClear(&curLine);
   sClear(&firstErr);
-  record = "[INDIVIDUAL]";
+  record = R_CHAR(STRING_ELT(where, 0));
   trans_individual(R_CHAR(STRING_ELT(in, 0)));
   parseFree(0);
   return R_NilValue;

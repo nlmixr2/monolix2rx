@@ -4,11 +4,16 @@ statement_list :
 
 inpId: identifier;
 inputLine: 'input' '=' '{' inpId (',' inpId)* '}';
-catId: identifier;
+catId: identifier | char_t1 | char_t2;
 catCov: identifier '=' '{' 'type' '=' 'categorical' ',' 'categories' '=' '{' catId (',' catId)*   '}' '}';
+regressorLine: identifier '=' '{' 'use' '=' 'regressor' '}';
+
+char_t1: "\'([^\'\\]|\\[^])*\'";
+char_t2: "\"([^\"\\]|\\[^])*\"";
 
 statement: inputLine singleLineComment?
     | catCov singleLineComment?
+    | regressorLine singleLineComment?
     ;
 
 constant : decimalint | float1 | float2;

@@ -179,7 +179,7 @@ extern "C" SEXP monolix2rxParameterName(const char *v) {
 extern "C" SEXP monolix2rxInputAdd(const char *v) {
   BEGIN_RCPP
   Environment monolix2rxNs = loadNamespace("monolix2rx");
-  Function inputAdd(".inputAdd", monolix2rxNs);
+  Function inputAdd(".indAdd", monolix2rxNs);
   inputAdd(v);
   return R_NilValue;
   END_RCPP
@@ -189,7 +189,7 @@ extern "C" SEXP monolix2rxInputAdd(const char *v) {
 extern "C" SEXP monolix2rxInputCatItem(const char *v) {
   BEGIN_RCPP
   Environment monolix2rxNs = loadNamespace("monolix2rx");
-  Function inputCatItem(".inputCatItem", monolix2rxNs);
+  Function inputCatItem(".indCatItem", monolix2rxNs);
   inputCatItem(v);
   return R_NilValue;
   END_RCPP
@@ -198,8 +198,17 @@ extern "C" SEXP monolix2rxInputCatItem(const char *v) {
 extern "C" SEXP monolix2rxInputCat(const char *v) {
   BEGIN_RCPP
   Environment monolix2rxNs = loadNamespace("monolix2rx");
-  Function inputCat(".inputCat", monolix2rxNs);
+  Function inputCat(".indCat", monolix2rxNs);
   inputCat(v);
+  return R_NilValue;
+  END_RCPP
+}
+
+extern "C" SEXP monolix2rxIndReg(const char *v) {
+  BEGIN_RCPP
+    Environment monolix2rxNs = loadNamespace("monolix2rx");
+  Function indReg(".indReg", monolix2rxNs);
+  indReg(v);
   return R_NilValue;
   END_RCPP
 }
