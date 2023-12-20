@@ -36,3 +36,5 @@ SEXP monolix2rxDouble(const char *var, const char *v2, const char *fn);
 #define monolix2rxContentSetUse1(v1, v2) monolix2rxDouble(v1, v2,".contSetUse1")
 #define monolix2rxContentSetNbdoses(v) monolix2rxSingle(v, ".contentNbdoses")
 #define monolix2rxContentContentContCov(v) monolix2rxSingle(v, ".contentContCov")
+#define monolix2rxContentContentYname(v) monolix2rxSingle(v, ".contentYname")
+#define monolix2rxContentContentName(v) monolix2rxSingle(v, ".contentName")

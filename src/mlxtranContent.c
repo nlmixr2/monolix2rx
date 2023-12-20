@@ -194,6 +194,37 @@ int content_process_cont(const char *name, D_ParseNode *pn) {
   return 0;
 }
 
+int content_process_obsVar(const char *name, D_ParseNode *pn, int i) {
+  if (i == 0 && !strcmp(name, "obsLine")) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxContentSetUse1("observation", v);
+    return 1;
+  }
+  return 0;
+}
+
+int content_process_yname(const char *name, D_ParseNode *pn) {
+  if (!strcmp(name, "ynameType")) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxContentContentYname(v);
+    return 1;
+  }
+  return 0;
+}
+
+int content_process_name(const char *name, D_ParseNode *pn) {
+  if (!strcmp(name, "nameType")) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxContentContentName(v);
+    return 1;
+  }
+  return 0;
+
+}
+
 void wprint_parsetree_content(D_ParserTables pt, D_ParseNode *pn, int depth, print_node_fn_t fn, void *client_data) {
   char *name = (char*)pt.symbols[pn->symbol].name;
   int nch = d_get_number_of_children(pn);
@@ -209,7 +240,8 @@ void wprint_parsetree_content(D_ParserTables pt, D_ParseNode *pn, int depth, pri
       content_process_ytype(name, pn) ||
       content_process_adm(name, pn) ||
       content_process_nbdoses(name, pn) ||
-      content_process_cont(name, pn)
+      content_process_cont(name, pn) ||
+      content_process_yname(name, pn)
       ) {
     // return early; no need to process more
     return;
@@ -217,7 +249,8 @@ void wprint_parsetree_content(D_ParserTables pt, D_ParseNode *pn, int depth, pri
   if (nch != 0) {
     for (int i = 0; i < nch; i++) {
       if (individual_process_catCov(name, pn, i) ||
-          content_process_ss(name, pn, i)) {
+          content_process_ss(name, pn, i) ||
+          content_process_obsVar(name, pn, i)) {
         // don't process this argument more
         continue;
       }

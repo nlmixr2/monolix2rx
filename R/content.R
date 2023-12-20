@@ -21,22 +21,79 @@
         observation=NA_character_)
     .monolix2rx$contLst <- character(0)
     .monolix2rx$ssNbdoses <- 7L
+    .monolix2rx$yname <- character(0)
+    .monolix2rx$name <- character(0)
   }
 }
-
+#' Parse [CONTENT] from mlxtran
+#'
+#' @param text the parsing string
+#' @return monolix2rxContent list
+#' @noRd
+#' @author Matthew L. Fidler
 .content <- function(text) {
   .contentIni(TRUE)
   .Call(`_monolix2rx_trans_content`, text)
+  .lst <- list(use1=.monolix2rx$use1,
+               cont=.monolix2rx$contLst,
+               cat=.monolix2rx$catLst2,
+               reg=.monolix2rx$regLst,
+               nbdoses=.monolix2rx$ssNbdoses,
+               yname=.monolix2rx$yname,
+               name=.monolix2rx$name)
+  class(.lst) <- "monolix2rxContent"
+  return(.lst)
 }
-
+#' Set the single use variables
+#'
+#' @param use1 use1 is the name of the single use variable
+#' @param name name of the variable in the dataset
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .contSetUse1 <- function(use1, name) {
   .monolix2rx$use1[use1] <- name
 }
-
+#' Set the steady state number of doses
+#'
+#' @param val This represents the integer
+#' @return nothing called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .contentNbdoses <- function(val) {
   .monolix2rx$ssNbdoses <- as.integer(val)
 }
-
+#' Add continuous covariates to the list
+#'
+#' @param val This represents the integer
+#' @return nothing, called for side effets
+#' @noRd
+#' @author Matthew L. Fidler
 .contentContCov <- function(val) {
   .monolix2rx$contLst <- c(.monolix2rx$contLst, val)
+}
+#' Content Yname
+#'
+#' @param val value of yname
+#' @return nothing, called for side effecs
+#' @noRd
+#' @author Matthew L. Fidler
+.contentYname <- function(var) {
+  .v1 <- substr(var, 1, 1)
+  if (.v1 == "'" || .v1 == '"') {
+    .v2 <- substr(var, nchar(var), nchar(var))
+    if (.v1 == .v2) {
+      var <- substr(var, 2, nchar(var)-1)
+    }
+  }
+  .monolix2rx$yname <- c(.monolix2rx$yname, var)
+}
+#' Content name
+#'
+#' @param val value of name
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.contentName <- function(val) {
+  .monolix2rx$name <- c(.monolix2rx$name, val)
 }
