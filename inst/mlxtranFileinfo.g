@@ -12,6 +12,8 @@ fileLine: 'file' '=' filename;
 delimiterLine: 'delimiter' '=' 'comma';
 headerLine: 'header' '=' '{' identifier (',' identifier)* '}';
 
+
+
 statement: fileLine singleLineComment?
     | delimiterLine singleLineComment?
     | headerLine singleLineComment?

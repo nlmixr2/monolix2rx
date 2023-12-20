@@ -23,6 +23,13 @@
   file.rename(devtools::package_file("src/mlxtranFileinfo.g.d_parser.c"),
               devtools::package_file("src/mlxtranFileinfo.g.d_parser.h"))
 
+  message("Update Parser c for [CONTENT]")
+  dparser::mkdparse(devtools::package_file("inst/mlxtranContent.g"),
+                    devtools::package_file("src/"),
+                    grammar_ident="mlxtranContent")
+  file.rename(devtools::package_file("src/mlxtranContent.g.d_parser.c"),
+              devtools::package_file("src/mlxtranContent.g.d_parser.h"))
+
   message("Update Parser c for input specification")
   dparser::mkdparse(devtools::package_file("inst/mlxtranInd.g"),
                     devtools::package_file("src/"),

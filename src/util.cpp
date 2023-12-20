@@ -22,6 +22,17 @@ extern "C" SEXP monolix2rxSingle(const char *var, const char *fn) {
   END_RCPP
 }
 
+extern "C" SEXP monolix2rxDouble(const char *var, const char *var2, const char *fn) {
+  BEGIN_RCPP
+  Environment monolix2rxNs = loadNamespace("monolix2rx");
+  Function f(fn, monolix2rxNs);
+  f(var, var2);
+  return R_NilValue;
+  END_RCPP
+}
+
+
+
 extern "C" SEXP monolix2rxSetDistTypicalEst(const char *var, int isMean) {
   BEGIN_RCPP
   Environment monolix2rxNs = loadNamespace("monolix2rx");
