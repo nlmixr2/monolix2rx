@@ -109,3 +109,43 @@
   # What does that mean?
   .monolix2rx$regLst <- c(.monolix2rx$regLst, reg)
 }
+
+#' @export
+print.monolix2rxInd <- function(x, ...) {
+  .inp <- x$input
+  if (length(.inp) > 0L) {
+    cat("input = {", paste(.inp, collapse=", "), "}\n", sep="")
+  }
+  .cat <- x$cat
+  if (length(x$reg) > 0L) {
+    lapply(x$reg,
+           function(n) {
+             cat(paste0(n, " = {use = regressor}\n"))
+           })
+  }
+  if (length(.cat) > 0L) {
+    lapply(names(.cat),
+           function(n) {
+             .c <- .cat[[n]]
+             cat(n, " = {type=categorical, categories=", sep="")
+             .q <- .c$quote
+             .c <- .c$cat
+             if (length(.q) > 1) {
+               cat("{")
+             }
+             cat(paste(vapply(seq_along(.c),
+                    function(i) {
+                      if (.q[i]) {
+                        return(paste0("'", .c[i], "'"))
+                      }
+                      .c[i]
+                    }, character(1), USE.NAMES = FALSE),
+                    collapse=", "))
+             if (length(.q) > 1) {
+               cat("}")
+             }
+             cat("}\n")
+           })
+  }
+  return(invisible(x))
+}
