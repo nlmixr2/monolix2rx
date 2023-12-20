@@ -241,7 +241,8 @@ void wprint_parsetree_content(D_ParserTables pt, D_ParseNode *pn, int depth, pri
       content_process_adm(name, pn) ||
       content_process_nbdoses(name, pn) ||
       content_process_cont(name, pn) ||
-      content_process_yname(name, pn)
+      content_process_yname(name, pn) ||
+      content_process_name(name, pn)
       ) {
     // return early; no need to process more
     return;
