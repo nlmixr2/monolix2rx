@@ -342,7 +342,7 @@ print.monolix2rxIndDef <- function(x, ...) {
     if (is.infinite(.monolix2rx$min) &&
           is.infinite(.monolix2rx$max)) {
       .monolix2rx$min <- 0
-      .monolix2rx$max <- 0
+      .monolix2rx$max <- 1
     }
   }
 }

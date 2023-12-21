@@ -4,14 +4,15 @@ SEXP _monolix2rx_trans_parameter(SEXP in);
 SEXP _monolix2rx_trans_individual(SEXP in, SEXP what);
 SEXP _monolix2rx_trans_fileinfo(SEXP in);
 SEXP _monolix2rx_trans_content(SEXP in);
+SEXP _monolix2rx_trans_longdef(SEXP in);
 void nonmem2rx_full_ini(void);
 
 SEXP monolix2rxSetDistTypicalEst(const char *var, int isMean);
 SEXP monolix2rxSetDistTypicalFixed(const char *var, int isMean);
 SEXP monolix2rxPushCoefList(void);
-SEXP monolix2rxAddCor(const char *v1, const char *v2, const char *v3);
 SEXP monolix2rxSingle(const char *var, const char *fn);
 SEXP monolix2rxDouble(const char *var, const char *v2, const char *fn);
+SEXP monolix2rxTriple(const char *var, const char *v2, const char *v3, const char *fn);
 
 #define monolix2rxAddVar(v) monolix2rxSingle(v, ".addVar")
 #define monolix2rxSetDist(v) monolix2rxSingle(v, ".setDist")
@@ -38,3 +39,12 @@ SEXP monolix2rxDouble(const char *var, const char *v2, const char *fn);
 #define monolix2rxContentContentContCov(v) monolix2rxSingle(v, ".contentContCov")
 #define monolix2rxContentContentYname(v) monolix2rxSingle(v, ".contentYname")
 #define monolix2rxContentContentName(v) monolix2rxSingle(v, ".contentName")
+#define monolix2rxLongDefAddEndpoint(v) monolix2rxSingle(v, ".addEndpoint")
+#define monolix2rxLongDefAddPrediction(v) monolix2rxSingle(v,".addPrediction")
+#define monolix2rxLongDefSetCombined1(v1, v2) monolix2rxDouble(v1, v2,".setCombined1")
+#define monolix2rxLongDefSetCombined2(v1, v2) monolix2rxDouble(v1, v2,".setCombined2")
+#define monolix2rxLongDefSetCombined1c(v1, v2, v3) monolix2rxTriple(v1, v2, v3,".setCombined1c")
+#define monolix2rxLongDefSetCombined2c(v1, v2, v3) monolix2rxTriple(v1, v2, v3, ".setCombined2c")
+#define monolix2rxAddCor(v1, v2, v3) monolix2rxTriple(v1, v2, v3, ".addCor")
+#define monolix2rxLongDefSetConstant(v1) monolix2rxSingle(v1, ".setConstant")
+#define monolix2rxLongDefSetProportional(v1) monolix2rxSingle(v1, ".setProp")

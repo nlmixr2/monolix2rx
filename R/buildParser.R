@@ -14,6 +14,7 @@
                     grammar_ident="longOutput")
   file.rename(devtools::package_file("src/longOutput.g.d_parser.c"),
               devtools::package_file("src/longOutput.g.d_parser.h"))
+
   message("mlxtran grammar")
 
   message("Update Parser c for [FILEINFO]")
@@ -43,6 +44,13 @@
                     grammar_ident="mlxtranIndDefinition")
   file.rename(devtools::package_file("src/mlxtranIndDefinition.g.d_parser.c"),
               devtools::package_file("src/mlxtranIndDefinition.g.d_parser.h"))
+
+  message("Update Parser c for [LONGITUDINAL] DEFINITION: block")
+  dparser::mkdparse(devtools::package_file("inst/longDef.g"),
+                    devtools::package_file("src/"),
+                    grammar_ident="longDef")
+  file.rename(devtools::package_file("src/longDef.g.d_parser.c"),
+              devtools::package_file("src/longDef.g.d_parser.h"))
 
   message("Update Parser c for <PARAMETER>")
   dparser::mkdparse(devtools::package_file("inst/mlxtranParameter.g"),
