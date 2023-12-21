@@ -15,7 +15,8 @@ Sex = {type=categorical, categories={M, F}}")
                                        quote = c(FALSE, FALSE, FALSE)),
                            Sex = list(cat = c("M", "F"),
                                       quote = c(FALSE, FALSE))),
-                reg = "E0")
+                reg = "E0",
+                file=character(0))
   class(.tmp2) <- "monolix2rxInd"
 
   expect_equal(.tmp, .tmp2)
@@ -28,7 +29,8 @@ SEX = {type=categorical, categories={Female, Male}}")
                                        quote = c(TRUE, TRUE)),
                            SEX = list(cat = c("Female", "Male"),
                                       quote = c(FALSE, FALSE))),
-                reg = character(0))
+                reg = character(0),
+                file=character(0))
   class(.tmp2) <- "monolix2rxInd"
   expect_equal(.tmp, .tmp2)
 
