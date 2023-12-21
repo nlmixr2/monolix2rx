@@ -30,8 +30,20 @@ errOp: 'errorModel' '=' errModels;
 endpointOp: distOp | errOp | predOp;
 endpoint: identifier '=' '{' endpointOp (',' endpointOp)*'}';
 
+
+eventTypes: 'exact' | 'intervalCensored';
+eventTypeOp: 'eventType' '=' eventTypes;
+maxEventNumberOp: 'maxEventNumber' '=' decimalint;
+rightCensoringTimeOp: 'rightCensoringTime' '=' constant;
+intervalLengthOp: 'intervalLength' '=' constant;
+hazardOp: 'hazard' '=' identifier;
+
+tteOps: eventTypeOp | maxEventNumberOp | rightCensoringTimeOp | intervalLengthOp | hazardOp;
+
+tte: identifier '=' '{' 'type' '=' 'event' (',' tteOps)* '}';
+
 statement: endpoint singleLineComment?
-    ;
+    | tte singleLineComment?;
 
 constant : decimalint | float1 | float2;
 decimalint: "0|([1-9][0-9]*)" $term -1;

@@ -85,7 +85,7 @@ int longdef_process_distOp(const char *name, D_ParseNode *pn) {
 
 int longdef_process_endpoint(const char *name, D_ParseNode *pn, int i) {
   if (i == 0 && !strcmp("endpoint", name)) {
-    D_ParseNode *xpn = d_get_child(pn, 2);
+    D_ParseNode *xpn = d_get_child(pn, 0);
     char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
     monolix2rxLongDefAddEndpoint(v);
     return 1;
@@ -175,6 +175,68 @@ int longdef_process_proportional(const char *name, D_ParseNode *pn) {
   return 0;
 }
 
+int longdef_process_tte(const char *name, D_ParseNode *pn, int i) {
+  if (i == 0 && !strcmp("tte", name)) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxLongDefAddEndpoint(v);
+    monolix2rxSetDist("event");
+    return 1;
+  }
+  return 0;
+}
+
+int longdef_process_hazard(const char *name, D_ParseNode *pn) {
+  if (!strcmp("hazardOp", name)) {
+    D_ParseNode *xpn = d_get_child(pn, 2);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxLongDefAddPrediction(v);
+    return 1;
+  }
+  return 0;
+}
+
+int longdef_process_eventType(const char *name, D_ParseNode *pn) {
+  if (!strcmp("eventTypes", name)) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxLongDefSetEventType(v);
+    return 1;
+  }
+  return 0;
+}
+
+int longdef_process_maxEventNumber(const char *name, D_ParseNode *pn) {
+  if (!strcmp("maxEventNumberOp", name)) {
+    D_ParseNode *xpn = d_get_child(pn, 2);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxLongDefSetMaxEventNumber(v);
+    return 1;
+  }
+  return 0;
+}
+
+int longdef_process_rightCensoringTime(const char *name, D_ParseNode *pn) {
+  if (!strcmp("rightCensoringTimeOp", name)) {
+    D_ParseNode *xpn = d_get_child(pn, 2);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxLongDefSetRightCensoringTime(v);
+    return 1;
+  }
+  return 0;
+}
+
+//
+int longdef_process_intervalLength(const char *name, D_ParseNode *pn) {
+  if (!strcmp("intervalLengthOp", name)) {
+    D_ParseNode *xpn = d_get_child(pn, 2);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxLongDefSetIntervalLength(v);
+    return 1;
+  }
+  return 0;
+}
+
 void wprint_parsetree_longdef(D_ParserTables pt, D_ParseNode *pn, int depth, print_node_fn_t fn, void *client_data) {
   char *name = (char*)pt.symbols[pn->symbol].name;
   if (longdef_process_distOp(name, pn) ||
@@ -184,14 +246,20 @@ void wprint_parsetree_longdef(D_ParserTables pt, D_ParseNode *pn, int depth, pri
       longdef_process_combined1c(name, pn) ||
       longdef_process_combined2c(name, pn) ||
       longdef_process_constant(name, pn) ||
-      longdef_process_proportional(name, pn)
+      longdef_process_proportional(name, pn) ||
+      longdef_process_hazard(name, pn) ||
+      longdef_process_eventType(name, pn) ||
+      longdef_process_maxEventNumber(name, pn) ||
+      longdef_process_rightCensoringTime(name, pn) ||
+      longdef_process_intervalLength(name, pn)
       ) {
     return;
   }
   int nch = d_get_number_of_children(pn);
   if (nch != 0) {
     for (int i = 0; i < nch; i++) {
-      if (longdef_process_endpoint(name, pn, i)) {
+      if (longdef_process_endpoint(name, pn, i) ||
+          longdef_process_tte(name, pn, i)) {
         continue; // process next args
       }
       D_ParseNode *xpn = d_get_child(pn, i);

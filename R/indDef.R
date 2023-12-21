@@ -225,7 +225,13 @@
     .indDefIni(FALSE)
   }
 }
-
+#' For a variable name and fixed constant
+#'
+#' @param varName variable name
+#' @param fixed fixed number
+#' @return this variable as defined in monolix
+#' @noRd
+#' @author Matthew L. Fidler
 .varOrFixed <- function(varName, fixed) {
   vapply(seq_along(varName),
          function(i) {
