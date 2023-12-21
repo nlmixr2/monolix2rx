@@ -11,8 +11,8 @@ censLine: identifier '=' '{' 'use' '=' 'censored' '}';
 limitLine: identifier '=' '{' 'use' '=' 'limit' '}';
 ytypeLine: identifier '=' '{' 'use' '=' 'observationtype' '}';
 admLine: identifier '=' '{' 'use' '=' 'administration' '}';
-nbdoses: decimalint;
-ssLine: identifier '=' '{' 'use' '=' 'steadystate' (',' 'nbdoses' '=' nbdoses)? '}';
+nbd: decimalint;
+ssLine: identifier '=' '{' 'use' '=' 'steadystate' (',' 'nbdoses' '=' nbd)? '}';
 regressorLine: identifier '=' '{' 'use' '=' 'regressor' '}';
 contLine: identifier '=' '{' 'use' '=' 'covariate' ',' 'type' '=' 'continuous' '}';
 

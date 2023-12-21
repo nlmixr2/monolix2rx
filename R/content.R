@@ -41,6 +41,10 @@
                nbdoses=.monolix2rx$ssNbdoses,
                yname=.monolix2rx$yname,
                name=.monolix2rx$name)
+  if (length(.lst$yname) != length(.lst$name)) {
+    stop("for 'observation' type the length of 'name' and 'yname' should match",
+         call.=FALSE)
+  }
   class(.lst) <- "monolix2rxContent"
   return(.lst)
 }
@@ -79,7 +83,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .contentYname <- function(var) {
-  .v1 <- substr(var, 1, 1)
+   .v1 <- substr(var, 1, 1)
   if (.v1 == "'" || .v1 == '"') {
     .v2 <- substr(var, nchar(var), nchar(var))
     if (.v1 == .v2) {
@@ -115,6 +119,8 @@ print.monolix2rxContent <- function(x, ...) {
         cat(", yname={'", paste(.yname, collapse="', '"), "'}", sep="")
         cat(", type={", paste(rep("continuous", length(.name)), collapse=", "), "}", sep="")
       }
+    } else if (n == "steadystate") {
+      cat(", nbdoses=", x$nbdoses, sep="")
     }
     cat("}\n", sep="")
   })

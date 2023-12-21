@@ -175,9 +175,8 @@ int content_process_ss(const char *name, D_ParseNode *pn, int i) {
 }
 
 int content_process_nbdoses(const char *name, D_ParseNode *pn) {
-  if (!strcmp(name, "nbdoses")) {
-    D_ParseNode *xpn = d_get_child(pn, 0);
-    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+  if (!strcmp(name, "nbd")) {
+    char *v = (char*)rc_dup_str(pn->start_loc.s, pn->end);
     monolix2rxContentSetNbdoses(v);
     return 1;
   }

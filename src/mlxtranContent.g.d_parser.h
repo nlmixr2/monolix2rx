@@ -3557,7 +3557,7 @@ D_Symbol d_symbols_mlxtranContent[] = {
 {D_SYMBOL_NTERM, "limitLine", 9, -1},
 {D_SYMBOL_NTERM, "ytypeLine", 9, -1},
 {D_SYMBOL_NTERM, "admLine", 7, -1},
-{D_SYMBOL_NTERM, "nbdoses", 7, -1},
+{D_SYMBOL_NTERM, "nbd", 3, -1},
 {D_SYMBOL_NTERM, "ssLine", 6, -1},
 {D_SYMBOL_INTERNAL, "ssLine__16", 10, -1},
 {D_SYMBOL_EBNF, "ssLine__15", 10, -1},
