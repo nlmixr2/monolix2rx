@@ -23,6 +23,7 @@
     .monolix2rx$ssNbdoses <- 7L
     .monolix2rx$yname <- character(0)
     .monolix2rx$name <- character(0)
+    .monolix2rx$type <- character(0)
   }
 }
 #' Parse [CONTENT] from mlxtran
@@ -40,7 +41,8 @@
                reg=.monolix2rx$regLst,
                nbdoses=.monolix2rx$ssNbdoses,
                yname=.monolix2rx$yname,
-               name=.monolix2rx$name)
+               name=.monolix2rx$name,
+               type=.monolix2rx$type)
   if (length(.lst$yname) != length(.lst$name)) {
     stop("for 'observation' type the length of 'name' and 'yname' should match",
          call.=FALSE)
@@ -101,6 +103,16 @@
 .contentName <- function(val) {
   .monolix2rx$name <- c(.monolix2rx$name, val)
 }
+#' Content type
+#'
+#' @param val type string
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.contentType <- function(val) {
+  .monolix2rx$type <- c(.monolix2rx$type, val)
+}
+
 #' @export
 print.monolix2rxContent <- function(x, ...) {
   lapply(names(x$use1), function(n) {
@@ -109,15 +121,16 @@ print.monolix2rxContent <- function(x, ...) {
     if (n == "observation") {
       .name <- x$name
       .yname <- x$yname
+      .type <- x$type
       if (length(.name) == 1L) {
         cat(", name=", .name, sep="")
         cat(", yname='", .yname, "'", sep="")
-        cat(", type=continuous")
+        cat(", type=", .type, sep="")
 
       } else {
         cat(", name={", paste(.name, collapse=", "), "}", sep="")
         cat(", yname={'", paste(.yname, collapse="', '"), "'}", sep="")
-        cat(", type={", paste(rep("continuous", length(.name)), collapse=", "), "}", sep="")
+        cat(", type={", paste(.type, collapse=", "), "}", sep="")
       }
     } else if (n == "steadystate") {
       cat(", nbdoses=", x$nbdoses, sep="")

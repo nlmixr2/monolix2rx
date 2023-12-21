@@ -39,6 +39,7 @@ SEXP monolix2rxTriple(const char *var, const char *v2, const char *v3, const cha
 #define monolix2rxContentContentContCov(v) monolix2rxSingle(v, ".contentContCov")
 #define monolix2rxContentContentYname(v) monolix2rxSingle(v, ".contentYname")
 #define monolix2rxContentContentName(v) monolix2rxSingle(v, ".contentName")
+#define monolix2rxContentContentType(v) monolix2rxSingle(v, ".contentType")
 #define monolix2rxLongDefAddEndpoint(v) monolix2rxSingle(v, ".addEndpoint")
 #define monolix2rxLongDefAddPrediction(v) monolix2rxSingle(v,".addPrediction")
 #define monolix2rxLongDefSetCombined1(v1, v2) monolix2rxDouble(v1, v2,".setCombined1")
