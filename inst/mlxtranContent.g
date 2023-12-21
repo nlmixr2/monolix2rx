@@ -13,7 +13,7 @@ ytypeLine: identifier '=' '{' 'use' '=' 'observationtype' '}';
 admLine: identifier '=' '{' 'use' '=' 'administration' '}';
 nbdoses: decimalint;
 ssLine: identifier '=' '{' 'use' '=' 'steadystate' (',' 'nbdoses' '=' nbdoses)? '}';
-regLine: identifier '=' '{' 'use' '=' 'regressor' '}';
+regressorLine: identifier '=' '{' 'use' '=' 'regressor' '}';
 contLine: identifier '=' '{' 'use' '=' 'covariate' ',' 'type' '=' 'continuous' '}';
 
 ynameType: char_t1 | char_t2 | identifier;
@@ -51,7 +51,7 @@ statement: idLine singleLineComment?
     | ytypeLine singleLineComment?
     | admLine singleLineComment?
     | ssLine singleLineComment?
-    | regLine singleLineComment?
+    | regressorLine singleLineComment?
     | contLine singleLineComment?
     | catCov singleLineComment?
     | obsLine singleLineComment?

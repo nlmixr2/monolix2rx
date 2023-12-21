@@ -109,20 +109,14 @@
   # What does that mean?
   .monolix2rx$regLst <- c(.monolix2rx$regLst, reg)
 }
-
-#' @export
-print.monolix2rxInd <- function(x, ...) {
-  .inp <- x$input
-  if (length(.inp) > 0L) {
-    cat("input = {", paste(.inp, collapse=", "), "}\n", sep="")
-  }
+#' Print the categorical variables in `$cat`
+#'
+#' @param x that contains $cat, a categorical covariate list
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.printCat <- function(x) {
   .cat <- x$cat
-  if (length(x$reg) > 0L) {
-    lapply(x$reg,
-           function(n) {
-             cat(paste0(n, " = {use = regressor}\n"))
-           })
-  }
   if (length(.cat) > 0L) {
     lapply(names(.cat),
            function(n) {
@@ -134,18 +128,42 @@ print.monolix2rxInd <- function(x, ...) {
                cat("{")
              }
              cat(paste(vapply(seq_along(.c),
-                    function(i) {
-                      if (.q[i]) {
-                        return(paste0("'", .c[i], "'"))
-                      }
-                      .c[i]
-                    }, character(1), USE.NAMES = FALSE),
-                    collapse=", "))
+                              function(i) {
+                                if (.q[i]) {
+                                  return(paste0("'", .c[i], "'"))
+                                }
+                                .c[i]
+                              }, character(1), USE.NAMES = FALSE),
+                       collapse=", "))
              if (length(.q) > 1) {
                cat("}")
              }
              cat("}\n")
            })
   }
-  return(invisible(x))
+}
+#' Print regressor items
+#'
+#' @param x contains x$reg
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.printReg <- function(x) {
+  if (length(x$reg) > 0L) {
+    lapply(x$reg,
+           function(n) {
+             cat(paste0(n, " = {use = regressor}\n"))
+           })
+  }
+}
+
+#' @export
+print.monolix2rxInd <- function(x, ...) {
+  .inp <- x$input
+  if (length(.inp) > 0L) {
+    cat("input = {", paste(.inp, collapse=", "), "}\n", sep="")
+  }
+  .printReg(x)
+  .printCat(x)
+  invisible(x)
 }

@@ -97,3 +97,31 @@
 .contentName <- function(val) {
   .monolix2rx$name <- c(.monolix2rx$name, val)
 }
+#' @export
+print.monolix2rxContent <- function(x, ...) {
+  lapply(names(x$use1), function(n) {
+    if (is.na(x$use1[n])) return(NULL)
+    cat(x$use1[n], " = {use=", n, sep="")
+    if (n == "observation") {
+      .name <- x$name
+      .yname <- x$yname
+      if (length(.name) == 1L) {
+        cat(", name=", .name, sep="")
+        cat(", yname='", .yname, "'", sep="")
+        cat(", type=continuous")
+
+      } else {
+        cat(", name={", paste(.name, collapse=", "), "}", sep="")
+        cat(", yname={'", paste(.yname, collapse="', '"), "'}", sep="")
+        cat(", type={", paste(rep("continuous", length(.name)), collapse=", "), "}", sep="")
+      }
+    }
+    cat("}\n", sep="")
+  })
+  .printReg(x)
+  lapply(x$cont, function(n) {
+    cat(n, " = {use=covariate, type=continuous}\n", sep="")
+  })
+  .printCat(x)
+  invisible(x)
+}

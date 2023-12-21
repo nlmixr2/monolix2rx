@@ -1,4 +1,4 @@
-.content("ID = {use=identifier}
+tmp <- .content("ID = {use=identifier}
 TIME = {use=time}
 EVID = {use=eventidentifier}
 AMT = {use=amount}

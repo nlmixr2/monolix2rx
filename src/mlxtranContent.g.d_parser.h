@@ -3561,7 +3561,7 @@ D_Symbol d_symbols_mlxtranContent[] = {
 {D_SYMBOL_NTERM, "ssLine", 6, -1},
 {D_SYMBOL_INTERNAL, "ssLine__16", 10, -1},
 {D_SYMBOL_EBNF, "ssLine__15", 10, -1},
-{D_SYMBOL_NTERM, "regLine", 7, -1},
+{D_SYMBOL_NTERM, "regressorLine", 13, -1},
 {D_SYMBOL_NTERM, "contLine", 8, -1},
 {D_SYMBOL_NTERM, "ynameType", 9, -1},
 {D_SYMBOL_NTERM, "ynameOp1", 8, -1},
