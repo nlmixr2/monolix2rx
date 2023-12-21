@@ -42,8 +42,25 @@ tteOps: eventTypeOp | maxEventNumberOp | rightCensoringTimeOp | intervalLengthOp
 
 tte: identifier '=' '{' 'type' '=' 'event' (',' tteOps)* '}';
 
+pIn: identifier ('=' | '<=' | '==' | '>=' | '~=' | '!=')  identifier;
+pOut: 'P' '(' pIn ('|' pIn)? ')';
+pTrans0: 'log' | 'logit' | 'probit';
+pTrans: pTrans0 '(' pOut ')';
+pFull: pTrans | pOut;
+
+eqLine: (identifier | pFull) '=' "[^\n,}]*";
+logicLine: ('if' | 'else' | 'end' | 'elseif') "[^\n,}]*";
+codeLine: eqLine | logicLine;
+
+categoriesInt: decimalint;
+categoriesOp: 'categories' '=' '{' categoriesInt (',' categoriesInt)* '}';
+catOps: categoriesOp | codeLine;
+
+categorical: identifier '=' '{' 'type' '=' 'categorical' (',' catOps)* '}';
+
 statement: endpoint singleLineComment?
-    | tte singleLineComment?;
+    | tte singleLineComment?
+    ;
 
 constant : decimalint | float1 | float2;
 decimalint: "0|([1-9][0-9]*)" $term -1;
