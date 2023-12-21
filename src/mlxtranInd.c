@@ -115,9 +115,22 @@ int individual_process_regressor(const char *name, D_ParseNode *pn) {
 void wprint_parsetree_individual(D_ParserTables pt, D_ParseNode *pn, int depth, print_node_fn_t fn, void *client_data) {
   char *name = (char*)pt.symbols[pn->symbol].name;
   int nch = d_get_number_of_children(pn);
-  if (individual_process_catId(name, pn) ||
-      individual_process_inpId(name, pn) ||
-      individual_process_regressor(name, pn)) {
+  if (!strcmp("filename_t3", name) ||
+      !strcmp("filename_t4", name)) {
+    char *v = (char*)rc_dup_str(pn->start_loc.s, pn->end);
+    monolix2rxFileinfoFile(v);
+    return;
+  } else if (!strcmp("filename_t1", name) ||
+             !strcmp("filename_t2", name)) {
+    char *v = (char*)rc_dup_str(pn->start_loc.s, pn->end);
+    v++;
+    int len = strlen(v);
+    v[len-1] = 0;
+    monolix2rxFileinfoFile(v);
+    return;
+  } else if (individual_process_catId(name, pn) ||
+             individual_process_inpId(name, pn) ||
+             individual_process_regressor(name, pn)) {
     // return early; no need to process more
     return;
   }

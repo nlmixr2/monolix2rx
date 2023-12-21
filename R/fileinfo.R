@@ -41,12 +41,21 @@
 .fileinfoHeader <- function(head) {
   .monolix2rx$header <- c(.monolix2rx$header, head)
 }
-
-#' @export
-print.monolix2rxFileinfo <- function(x, ...) {
+#' Print file
+#'
+#' @param x print file info
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.printFile <- function(x) {
   if (length(x$file) == 1L) {
     cat("file = '", x$file, "'\n", sep="")
   }
+}
+
+#' @export
+print.monolix2rxFileinfo <- function(x, ...) {
+  .printFile(x)
   cat("delimiter = comma\n")
   cat("header = {", paste(x$header, collapse=", "), "}\n", sep="")
 }

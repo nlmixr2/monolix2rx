@@ -9,6 +9,7 @@
   .monolix2rx$catLstQ <- logical(0)
   .monolix2rx$catName <- NA_character_
   if (full) {
+    .fileinfoIni()
     .monolix2rx$inpLst <- character(0)
     .monolix2rx$regLst <- character(0)
     .monolix2rx$catLst2 <- NULL
@@ -89,7 +90,8 @@
   .indPushCat()
   .ind <- list(input=.monolix2rx$inpLst,
                cat=.monolix2rx$catLst2,
-               reg=.monolix2rx$regLst)
+               reg=.monolix2rx$regLst,
+               file=.monolix2rx$file)
   class(.ind) <- "monolix2rxInd"
   .indIni(full=TRUE)
   .monolix2rx$ind <- .ind
@@ -165,5 +167,6 @@ print.monolix2rxInd <- function(x, ...) {
   }
   .printReg(x)
   .printCat(x)
+  .printFile(x)
   invisible(x)
 }

@@ -11,9 +11,18 @@ regressorLine: identifier '=' '{' 'use' '=' 'regressor' '}';
 char_t1: "\'([^\'\\]|\\[^])*\'";
 char_t2: "\"([^\"\\]|\\[^])*\"";
 
+filename: filename_t1 | filename_t2 | filename_t3 | filename_t4;
+filename_t1: "\'([^\'\\]|\\[^])*\'";
+filename_t2: "\"([^\"\\]|\\[^])*\"";
+filename_t3: "[^ '\"\n]+";
+filename_t4: ("[^ .\n]+")+ '.'  "[A-Za-z0-9_]+";
+
+fileLine: 'file' '=' filename;
+
 statement: inputLine singleLineComment?
     | catCov singleLineComment?
     | regressorLine singleLineComment?
+    | fileLine singleLineComment?
     ;
 
 constant : decimalint | float1 | float2;
