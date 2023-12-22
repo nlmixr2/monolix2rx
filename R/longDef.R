@@ -18,6 +18,7 @@
   .monolix2rx$intervalLength <- NA_real_
   .monolix2rx$categoriesInt <- integer(0)
   .monolix2rx$codeLine <- character(0)
+  .monolix2rx$dependence <- NA_character_
   if (full) {
     .monolix2rx$defFixed <- numeric(0)
     .monolix2rx$longDef <- NULL
@@ -42,6 +43,15 @@
   .monolix2rx$categoriesInt <- c(.monolix2rx$categoriesInt, .i)
 }
 
+.setDependence <- function(var) {
+  .monolix2rx$dependence <- var
+}
+#' Push a code line for error models that support them
+#'
+#' @param var code line
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .setCodeLine <- function(var) {
   .monolix2rx$codeLine <- c(.monolix2rx$codeLine, var)
 }
@@ -120,7 +130,8 @@
     .end <- list(var=.monolix2rx$varName,
                  dist=.monolix2rx$dist, # type in non cont.
                  pred=.monolix2rx$pred, # hazard in tte
-                 err=.err)
+                 err=.err,
+                 dependence=.monolix2rx$dependence)
     .monolix2rx$longDef <- c(.monolix2rx$longDef, list(.end))
     .longDefIni(FALSE)
   }
@@ -260,8 +271,11 @@ print.monolix2rxLongDef <- function(x, ...) {
            } else if (.lst$dist == "categorical") {
              .err <- .lst$err
              cat(.lst$var, " = {type=categorical", sep="")
-             cat(", categories= {", paste(.err$categories, collapse=", "), "},\n", sep="")
-             cat(paste(.err$code, collapse="\n"), "}\n", sep="")
+             cat(", categories= {", paste(.err$categories, collapse=", "), "}", sep="")
+             if (!is.na(.lst$dependence)) {
+               cat(", dependence=", .lst$dependence, sep="")
+             }
+             cat(",\n", paste(.err$code, collapse="\n"), "}\n", sep="")
            } else  {
              .err <- .lst$err
              .v <- .varOrFixed(.err$typical, x$fixed)

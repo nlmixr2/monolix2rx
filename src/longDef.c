@@ -259,7 +259,8 @@ int longdef_process_categoriesInt(const char *name, D_ParseNode *pn) {
 
 int longdef_process_codeLine(const char *name, D_ParseNode *pn) {
   if (!strcmp("pLine", name) ||
-      !strcmp("logicLine", name)) {
+      !strcmp("logicLine", name) ||
+      !strcmp("dependenceLine", name)) {
     char *v = (char*)rc_dup_str(pn->start_loc.s, pn->end);
     monolix2rxLongDefSetCodeLine(v);
     return 1;

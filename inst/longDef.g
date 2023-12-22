@@ -49,12 +49,18 @@ pTrans0: 'log(P(' | 'logit(P(' | 'probit(P(';
 pTrans: pTrans0 pIn ('|' pIn)? '))';
 pFull: pTrans | pOut;
 
-pLine: (pFull | identifier ) '=' "[^\n},;]*";
+tLine: 'transitionRate(' decimalint ',' decimalint ')';
+
+pLine: (pFull | identifier | tLine ) '=' "[^\n},;]*";
 logicLine: ('if' | 'else' | 'end' | 'elseif') "^[\n},;]*";
-codeLine: (pLine | logicLine )+;
+dependenceLine: 'dependence' '=' 'Markov';
+codeLine: (dependenceLine | pLine | logicLine )+;
+
 
 categoriesInt: decimalint;
 categoriesOp: 'categories' '=' '{' categoriesInt (',' categoriesInt)* '}';
+
+
 catOps: categoriesOp | codeLine;
 
 categorical: identifier '=' '{' 'type' '=' 'categorical' (',' catOps)* '}';
