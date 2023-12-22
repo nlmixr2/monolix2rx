@@ -15,11 +15,11 @@ combined2: 'combined2' '(' errPar ',' errPar ')';
 combined1c: 'combined1c' '(' errPar ',' errPar ',' errPar ')';
 combined2c: 'combined2c' '(' errPar ',' errPar ',' errPar ')';
 
-constant: 'constant' '(' errPar ')';
+constantErr: 'constant' '(' errPar ')';
 proportional: 'proportional' '(' errPar ')';
 
 errModels: proportional
-         | constant
+         | constantErr
          | combined1
          | combined2
          | combined1c
@@ -42,15 +42,16 @@ tteOps: eventTypeOp | maxEventNumberOp | rightCensoringTimeOp | intervalLengthOp
 
 tte: identifier '=' '{' 'type' '=' 'event' (',' tteOps)* '}';
 
-pIn: identifier ('=' | '<=' | '==' | '>=' | '~=' | '!=')  identifier;
-pOut: 'P' '(' pIn ('|' pIn)? ')';
-pTrans0: 'log' | 'logit' | 'probit';
-pTrans: pTrans0 '(' pOut ')';
+
+pIn: identifier ('=' | '<=' | '==' | '>=' | '~=' | '!=') ( identifier | constant);
+pOut: 'P(' pIn ('|' pIn)? ')';
+pTrans0: 'log(P(' | 'logit(P(' | 'probit(P(';
+pTrans: pTrans0 pIn ('|' pIn)? '))';
 pFull: pTrans | pOut;
 
-eqLine: (identifier | pFull) '=' "[^\n,}]*";
-logicLine: ('if' | 'else' | 'end' | 'elseif') "[^\n,}]*";
-codeLine: eqLine | logicLine;
+pLine: (pFull | identifier ) '=' "[^\n},;]*";
+logicLine: ('if' | 'else' | 'end' | 'elseif') "^[\n},;]*";
+codeLine: (pLine | logicLine )+;
 
 categoriesInt: decimalint;
 categoriesOp: 'categories' '=' '{' categoriesInt (',' categoriesInt)* '}';
@@ -60,6 +61,7 @@ categorical: identifier '=' '{' 'type' '=' 'categorical' (',' catOps)* '}';
 
 statement: endpoint singleLineComment?
     | tte singleLineComment?
+    | categorical singleLineComment?
     ;
 
 constant : decimalint | float1 | float2;

@@ -16,11 +16,36 @@
   .monolix2rx$maxEventNumber <- NA_integer_
   .monolix2rx$rightCensoringTime <- NA_real_
   .monolix2rx$intervalLength <- NA_real_
+  .monolix2rx$categoriesInt <- integer(0)
+  .monolix2rx$codeLine <- character(0)
   if (full) {
     .monolix2rx$defFixed <- numeric(0)
     .monolix2rx$longDef <- NULL
   }
 }
+#' Set the categories integer vector
+#'
+#' @param var string of the integer
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.setCategoriesInt <- function(var) {
+  .i <- as.integer(var)
+  if (length(.monolix2rx$categoriesInt) == 0) {
+    .monolix2rx$categoriesInt <- .i
+    return(invisible())
+  }
+  .old <- .monolix2rx$categoriesInt[length(.monolix2rx$categoriesInt)]
+  if (.i <= .old) {
+    stop("categories need to be in ascending order")
+  }
+  .monolix2rx$categoriesInt <- c(.monolix2rx$categoriesInt, .i)
+}
+
+.setCodeLine <- function(var) {
+  .monolix2rx$codeLine <- c(.monolix2rx$codeLine, var)
+}
+
 #' Set the interval length
 #'
 #' @param var string of interval length
@@ -86,8 +111,11 @@
                    maxEventNumber=.monolix2rx$maxEventNumber,
                    rightCensoringTime=.monolix2rx$rightCensoringTime,
                    intervalLength=.monolix2rx$intervalLength)
+    } else if (.monolix2rx$dist == "categorical") {
+      .err <- list(categories=.monolix2rx$categoriesInt,
+                   code=.monolix2rx$codeLine)
     } else {
-      .err <- monolix2rx$err
+      .err <- .monolix2rx$err
     }
     .end <- list(var=.monolix2rx$varName,
                  dist=.monolix2rx$dist, # type in non cont.
@@ -214,17 +242,7 @@ print.monolix2rxLongDef <- function(x, ...) {
   lapply(seq_along(x$endpoint),
          function(i) {
            .lst <- x$endpoint[[i]]
-           if (.lst$dist %in% c("combined1", "combined2",
-                                "combined1c", "combined2c",
-                                "proportional", "constant")) {
-             .err <- .lst$err
-             .v <- .varOrFixed(.err$typical, x$fixed)
-             cat(.lst$var, " = {distribution = ", .lst$dist,
-                 ", prediction = ", .lst$pred,
-                 ", errorModel = ",
-                 .err$errName, "(", paste(.v, collapse=", "), ")",
-                 "}\n", sep="")
-           } else if (.lst$dist == "event") {
+           if (.lst$dist == "event") {
              .err <- .lst$err
              cat(.lst$var, " = {type=event", sep="")
              cat(", eventType=", .err$eventType, sep="")
@@ -239,8 +257,20 @@ print.monolix2rxLongDef <- function(x, ...) {
              }
              cat(", hazard=", .lst$pred, sep="")
              cat("}\n")
+           } else if (.lst$dist == "categorical") {
+             .err <- .lst$err
+             cat(.lst$var, " = {type=categorical", sep="")
+             cat(", categories= {", paste(.err$categories, collapse=", "), "},\n", sep="")
+             cat(paste(.err$code, collapse="\n"), "}\n", sep="")
+           } else  {
+             .err <- .lst$err
+             .v <- .varOrFixed(.err$typical, x$fixed)
+             cat(.lst$var, " = {distribution = ", .lst$dist,
+                 ", prediction = ", .lst$pred,
+                 ", errorModel = ",
+                 .err$errName, "(", paste(.v, collapse=", "), ")",
+                 "}\n", sep="")
            }
-
          })
   invisible(x)
 }

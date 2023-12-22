@@ -53,3 +53,5 @@ SEXP monolix2rxTriple(const char *var, const char *v2, const char *v3, const cha
 #define monolix2rxLongDefSetMaxEventNumber(v1) monolix2rxSingle(v1, ".setMaxEventNumber")
 #define monolix2rxLongDefSetRightCensoringTime(v1) monolix2rxSingle(v1, ".setRightCensoringTime")
 #define monolix2rxLongDefSetIntervalLength(v1) monolix2rxSingle(v1, ".setIntervalLength")
+#define monolix2rxLongDefSetCategoriesInt(v1) monolix2rxSingle(v1,".setCategoriesInt")
+#define monolix2rxLongDefSetCodeLine(v1) monolix2rxSingle(v1, ".setCodeLine")
