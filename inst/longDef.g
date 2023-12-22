@@ -65,6 +65,8 @@ catOps: categoriesOp | codeLine;
 
 categorical: identifier '=' '{' 'type' '=' 'categorical' (',' catOps)* '}';
 
+count: identifier '=' '{' 'type' '=' 'count' (',' codeLine)* '}';
+
 statement: endpoint singleLineComment?
     | tte singleLineComment?
     | categorical singleLineComment?
