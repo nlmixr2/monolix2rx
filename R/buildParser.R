@@ -58,5 +58,13 @@
                     grammar_ident="mlxtranParameter")
   file.rename(devtools::package_file("src/mlxtranParameter.g.d_parser.c"),
               devtools::package_file("src/mlxtranParameter.g.d_parser.h"))
+
+  message("Update Parser c for <FIT>")
+  dparser::mkdparse(devtools::package_file("inst/mlxtranFit.g"),
+                    devtools::package_file("src/"),
+                    grammar_ident="mlxtranFit")
+  file.rename(devtools::package_file("src/mlxtranFit.g.d_parser.c"),
+              devtools::package_file("src/mlxtranFit.g.d_parser.h"))
+
   invisible("")
 }

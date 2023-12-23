@@ -5,6 +5,8 @@ SEXP _monolix2rx_trans_individual(SEXP in, SEXP what);
 SEXP _monolix2rx_trans_fileinfo(SEXP in);
 SEXP _monolix2rx_trans_content(SEXP in);
 SEXP _monolix2rx_trans_longdef(SEXP in);
+SEXP _monolix2rx_trans_fit(SEXP in);
+
 void nonmem2rx_full_ini(void);
 
 SEXP monolix2rxSetDistTypicalEst(const char *var, int isMean);
