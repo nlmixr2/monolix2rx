@@ -1,5 +1,9 @@
 .mlxEnv <- new.env(parent=emptyenv())
-
+#' Initialize the parsing environment
+#'
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .mlxtranIni <- function() {
   .mlxEnv$section <- NA_character_
   .mlxEnv$subsection <- NA_character_
@@ -7,7 +11,12 @@
   .mlxEnv$lst <- list(mlxtran="")
 }
 
-
+#' This parses a single line from something like readLines
+#'
+#' @param l line to pars
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .mlxtranParseItem <- function(l) {
   .begin <- 1
   .end <- .nc <- nchar(l)
@@ -45,7 +54,12 @@
   .mlxtranLine(l)
   return(invisible())
 }
-
+#' This applies mlxtran to a set of lines
+#'
+#' @param lines a character vector representing a set of lines to parse
+#' @return a mlxtran object
+#' @noRd
+#' @author Matthew L. Fidler
 .mlxtran <- function(lines) {
   .mlxtranIni()
   lapply(lines, .mlxtranParseItem)
@@ -78,13 +92,24 @@
   class(.ret) <- "monolix2rxMlxtran"
   .ret
 }
-
+#' Paste together lines, ignoring empty ones and adding \n between substantial lines
+#'
+#' @param prior prior line
+#' @param new new line
+#' @return prior \n new (or prior / new depending on the simplicity of the lines)
+#' @noRd
+#' @author Matthew L. Fidler
 .mlxtranPasteLine <- function(prior, new) {
   if (prior == "") return(new)
   if (new == "") return(prior)
   paste0(prior, "\n", new)
 }
-
+#' This handles a non-section line for a mlxtran file
+#'
+#' @param line line to put in the right place in the lst
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .mlxtranLine <- function(line) {
   .s <- .mlxEnv$section
   .ss <- .mlxEnv$subsection
@@ -115,18 +140,33 @@
   .mlxEnv$lst[[.s]][[.ss]][[.sss]] <- .mlxtranPasteLine(.mlxEnv$lst[[.s]][[.ss]][[.sss]], line)
   return(invisible())
 }
-
+#' This handles the section text when it encounters it
+#'
+#' @param sec section text
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .mlxtranSection <- function(sec) {
   .mlxEnv$section <- sec
   .mlxEnv$subsection <- NA_character_
   .mlxEnv$subsubsection <- NA_character_
 }
-
+#' This handles the subsection text when it encounters it
+#'
+#' @param sec subsection text
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .mlxtranSubsection <- function(sec) {
   .mlxEnv$subsection <- sec
   .mlxEnv$subsubsection <- NA_character_
 }
-
+#' This handles the sub-subsection text
+#'
+#' @param sec sub-subsection text
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .mlxtranSubsubsection <- function(sec) {
   .mlxEnv$subsubsection <- sec
 }
