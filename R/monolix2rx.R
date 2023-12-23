@@ -16,6 +16,9 @@
 #' @export
 #' @author Matthew L. Fidler
 #' @useDynLib monolix2rx, .registration=TRUE
+#' @importFrom Rcpp cppFunction
+#' @importFrom dparser dparse
+#' @importFrom stats setNames
 #' @eval .monolix2rxBuildGram()
 #' @examples
 monolixr2rx <- function(mlxtran) {
