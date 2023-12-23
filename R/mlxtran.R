@@ -67,6 +67,9 @@
   if (!is.null(.ret$PARAMETER)) {
     .ret$PARAMETER$PARAMETER <- .parameter(.ret$PARAMETER$PARAMETER)
   }
+  if (!is.null(.ret$FIT)) {
+    .ret$FIT$FIT <- .fit(.ret$FIT$FIT)
+  }
   if (!is.null(.ret$DATAFILE)) {
     if (!is.null(.ret$DATAFILE$FILEINFO)) {
       .ret$DATAFILE$FILEINFO$FILEINFO <- .fileinfo(.ret$DATAFILE$FILEINFO$FILEINFO)

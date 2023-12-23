@@ -95,6 +95,7 @@ test_that("mlxtran initial list", {
   expect_true(inherits(v$MODEL$LONGITUDINAL$LONGITUDINAL, "monolix2rxLongitudinal"))
   expect_true(inherits(v$MODEL$LONGITUDINAL$DEFINITION, "monolix2rxLongDef"))
   expect_true(inherits(v$PARAMETER$PARAMETER, "monolix2rxParameter"))
+  expect_true(inherit(v$FIT$FIT, "monolix2rxFit"))
 
 
 })

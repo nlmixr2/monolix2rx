@@ -2,6 +2,7 @@
 
 S3method(print,monolix2rxContent)
 S3method(print,monolix2rxFileinfo)
+S3method(print,monolix2rxFit)
 S3method(print,monolix2rxInd)
 S3method(print,monolix2rxIndDef)
 S3method(print,monolix2rxLongDef)

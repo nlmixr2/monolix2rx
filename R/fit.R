@@ -23,3 +23,9 @@
   .monolix2rx$modelDat <- c(.monolix2rx$modelDat, modelId)
 
 }
+
+#' @export
+print.monolix2rxFit <- function(x, ...) {
+  cat("data = {", paste(x$data, collapse=", "), "}\n", sep="")
+  cat("model = {", paste(x$model, collapse=", "), "}\n", sep="")
+}
