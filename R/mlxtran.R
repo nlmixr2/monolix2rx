@@ -75,8 +75,7 @@
       }
     }
   }
-  .indDef
-  #class(.ret) <- "monolix2rxMlxtran"
+  class(.ret) <- "monolix2rxMlxtran"
   .ret
 }
 
