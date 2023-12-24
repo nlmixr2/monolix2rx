@@ -9,6 +9,8 @@
   .mlxEnv$subsection <- NA_character_
   .mlxEnv$subsubsection <- NA_character_
   .mlxEnv$lst <- list(mlxtran="")
+  .mlxEnv$isDesc <- FALSE
+  .mlxEnv$desc <- ""
 }
 
 #' This parses a single line from something like readLines
@@ -63,6 +65,16 @@
 .mlxtran <- function(lines) {
   .mlxtranIni()
   lapply(lines, .mlxtranParseItem)
+  # Add file entries
+  if (!is.null(.mlxEnv$lst$MODEL$LONGITUDINAL)) {
+    .long <- .longitudinal(.mlxEnv$lst$MODEL$LONGITUDINAL$LONGITUDINAL)
+    .file <- .long$file
+    if (file.exists(.file)) {
+      .m2 <- c("<MODEL>",
+               suppressWarnings(readLines(.file)))
+      lapply(.m2, .mlxtranParseItem)
+    }
+  }
   .ret <- .mlxEnv$lst
   if (!is.null(.ret$PARAMETER)) {
     .ret$PARAMETER$PARAMETER <- .parameter(.ret$PARAMETER$PARAMETER)
@@ -102,6 +114,7 @@
       }
     }
   }
+  attr(.ret, "desc") <- .mlxEnv$desc
   class(.ret) <- "monolix2rxMlxtran"
   .ret
 }
@@ -124,6 +137,9 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .mlxtranLine <- function(line) {
+  if (.mlxEnv$isDesc) {
+    .mlxEnv$desc <- .mlxtranPasteLine(.mlxEnv$desc, line)
+  }
   .s <- .mlxEnv$section
   .ss <- .mlxEnv$subsection
   .sss <- .mlxEnv$subsubsection
@@ -163,6 +179,7 @@
   .mlxEnv$section <- sec
   .mlxEnv$subsection <- NA_character_
   .mlxEnv$subsubsection <- NA_character_
+  .mlxEnv$isDesc <- FALSE
 }
 #' This handles the subsection text when it encounters it
 #'
@@ -173,6 +190,7 @@
 .mlxtranSubsection <- function(sec) {
   .mlxEnv$subsection <- sec
   .mlxEnv$subsubsection <- NA_character_
+  .mlxEnv$isDesc <- FALSE
 }
 #' This handles the sub-subsection text
 #'
@@ -181,13 +199,24 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .mlxtranSubsubsection <- function(sec) {
+  if (sec == "DESCRIPTION") {
+    .mlxEnv$isDesc <- TRUE
+    return(invisible())
+  }
   .mlxEnv$subsubsection <- sec
+  .mlxEnv$isDesc <- FALSE
 }
 
 #' @export
 print.monolix2rxMlxtran <- function(x, ...) {
   .env <- new.env(parent=emptyenv())
   .env$catText <- FALSE
+  .desc <- attr(x, "desc")
+  if (.desc != "") {
+    cat("DESCRIPTION:\n")
+    cat(.desc, "\n", sep="")
+    cat("\n")
+  }
   lapply(names(x), function(ns) {
     if (ns != "mlxtran") {
       cat(ifelse(.env$catText, "\n", ""), "<", ns, ">\n", sep="")

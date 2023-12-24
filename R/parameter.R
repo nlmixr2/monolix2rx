@@ -73,16 +73,16 @@
 }
 #' @export
 print.monolix2rxParameter <- function(x, ...) {
-  cat(paste(vapply(seq_along(.monolix2rx$parameter$name),
+  cat(paste(vapply(seq_along(x$name),
          function(i) {
-           if (.monolix2rx$parameter$method[i] == "unknown") {
-             paste0(.monolix2rx$parameter$name[i], " = ",
-                    .monolix2rx$parameter$value[i])
+           if (x$method[i] == "unknown") {
+             paste0(x$name[i], " = ",
+                    x$value[i])
            } else {
-             paste0(.monolix2rx$parameter$name[i], " = {value=",
-                    .monolix2rx$parameter$value[i], ", method=",
-                    toupper(.monolix2rx$parameter$method[i]), "}")
+             paste0(x$name[i], " = {value=",
+                    x$value[i], ", method=",
+                    toupper(x$method[i]), "}")
            }
-         }, character(1), USE.NAMES=TRUE),
+         }, character(1), USE.NAMES=FALSE),
         collapse="\n"), "\n", sep="")
 }
