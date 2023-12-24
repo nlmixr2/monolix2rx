@@ -92,6 +92,16 @@
       }
     }
   }
+  if (!is.null(.ret$MONOLIX)) {
+    if (!is.null(.ret$MONOLIX$SETTINGS)) {
+      if (!is.null(.ret$MONOLIX$SETTINGS$GLOBAL)) {
+        .ret$MONOLIX$SETTINGS$GLOBAL <- .mlxtranOp(.ret$MONOLIX$SETTINGS$GLOBAL, "<MONOLIX> [SETTINGS] GLOBAL:")
+      }
+      if (!is.null(.ret$MONOLIX$SETTINGS$POPULATION)) {
+        .ret$MONOLIX$SETTINGS$POPULATION <- .mlxtranOp(.ret$MONOLIX$SETTINGS$POPULATION, "<MONOLIX> [SETTINGS] POPULATION:")
+      }
+    }
+  }
   class(.ret) <- "monolix2rxMlxtran"
   .ret
 }
