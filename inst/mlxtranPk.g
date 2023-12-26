@@ -31,7 +31,8 @@ kP: kNN eqExpr? | kN_N eqExpr?;
 
 peripOp: kP | amtOp | vOp | cpOp;
 peripLine: 'peripheral'  '(' peripOp (',' peripOp)* ')';
-effOp: cmtOp | cpOp | 'ke0' eqExpr?;
+ke0Op: 'ke0' eqExpr?;
+effOp: cmtOp | cpOp | ke0Op;
 effectLine: 'effect'  '(' effOp (',' effOp)* ')';
 
 fromOp: 'from' '=' decimalint;
@@ -41,8 +42,26 @@ transferOps: fromOp | toOp | ktrOp;
 transferLine: 'transfer' '(' transferOps (',' transferOps)* ')';
 
 admOp: ('adm' | 'type') '=' decimalint;
+targetOp: 'target'  '=' identifier;
+
 TlagOp: 'Tlag' eqExpr?;
 pOp: 'p' eqExpr?;
+Tk0Op: 'Tk0' eqExpr?;
+kaOp: 'ka' eqExpr?;
+KtrOp: 'Ktr' eqExpr?;
+MttOp: 'Mtt' eqExpr?;
+
+depotOps: admOp | targetOp | TlagOp | pOp | Tk0Op | kaOp | KtrOp |  MttOp;
+depotLine: 'depot' '(' depotOps (',' depotOps) ')';
+
+
+absOrOral: ('absorption' | 'oral');
+
+absOps: admOp | TlagOp | pOp | cmtOp | Tk0Op | kaOp | KtrOp | MttOp;
+
+absorptionLine: absOrOral '(' absOps (',' absOps) ')';
+
+
 ivOps: cmtOp | admOp | TlagOp | pOp;
 ivLine: 'iv' '(' ivOps (',' ivOps)* ')';
 
@@ -64,6 +83,8 @@ statement: pkmodel1 singleLineComment?
     | cmtLine singleLineComment?
     | peripLine singleLineComment?
     | transferLine singleLineComment?
+    | depotLine  singleLineComment?
+    | absorptionLine  singleLineComment?
     | ivLine singleLineComment?
     | emptyLine singleLineComment?
     | resetLine singleLineComment?
