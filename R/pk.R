@@ -295,7 +295,6 @@
   }
   if (.monolix2rx$pkStatement == "empty") {
     .monolix2rx$curEmpty[par] <- val
-    print(.monolix2rx$curEmpty)
     return(invisible(TRUE))
   }
   if (.monolix2rx$pkStatement == "reset") {
@@ -349,4 +348,170 @@
   .pkPushStatement()
   if (type == "absorption") type <- "oral"
   .monolix2rx$pkStatement <- type
+}
+
+.printPkDf <- function(what, df) {
+  if (length(df[, 1]) > 1L) {
+    lapply(seq_len(length(df[, 1])),
+           function(w) {
+             .printPkDf(what, df[w, ])
+           })
+    return(invisible())
+  }
+  .na <- vapply(seq_len(ncol(df)), function(i){
+    !is.na(df[[i]])
+  }, logical(1), USE.NAMES = FALSE)
+  .df <- df[, .na, drop = FALSE]
+  cat(what,"(",
+      paste(vapply(names(.df),
+         function(n) {
+           .v <- .df[[n]]
+           if (.v == "") return(n)
+           paste0(n, " = ", .v)
+         }, character(1), USE.NAMES = FALSE), collapse=", "),
+      ")\n", sep="")
+}
+
+#' @export
+print.monolix2rxPk <- function(x, ...) {
+  if (!is.na(x$Cc)) {
+    if (!is.na(x$Ce)) {
+      cat("{", x$Cc, ", ", x$Ce, "} = ", sep="")
+    } else {
+      cat(x$Cc, " = ", sep="")
+    }
+    .pars <- x$pkmodel
+    .pars <- .pars[!is.na(.pars)]
+    cat("pkmodel(")
+    cat(paste(vapply(names(.pars), function(n) {
+      .p <- .pars[n]
+      if (.p == "") return(n)
+      return(paste0(n, " = ", .p))
+    }, character(1), USE.NAMES = FALSE), collapse=", "))
+    cat(")\n")
+  }
+  # get max/min cmts
+  .r <- suppressWarnings(range(c(x$compartment$cmt,
+                                 x$peripheral$in.i, x$peripheral$in.j,
+                                 x$peripheral$out.i, x$peripheral$out.j,
+                                 x$effect$cmt, x$transfer$from, x$transfer$to, x$oral$cmt,
+                                 x$iv$cmt, x$elimination$cmt)))
+  .prn <- FALSE
+  if (is.finite(.r[1])) {
+    for (.i in seq(.r[1], .r[2])) {
+      .prn <- FALSE
+      .w <- which(x$compartment$cmt == .i)
+      if (length(.w) > 0) {
+        .cmt <- x$compartment[.w, ]
+        .printPkDf("compartment", .cmt)
+        .prn <- TRUE
+      }
+      .w <- which(x$peripheral$in.j == .i)
+      if (length(.w) > 0) {
+        .perip <- x$peripheral[.w, ]
+        if (.perip$in.i < 10 && .perip$in.j < 10) {
+          .k <- paste0("k", .perip$in.i, .perip$in.j)
+        } else {
+          .k <- paste0("k", .perip$in.i, "_", .perip$in.j)
+        }
+        .df1 <- data.frame(k=.perip$in.eq)
+        names(.df1) <- .k
+        .perip <- .perip[, -(1:3)]
+        if (.perip$out.i < 10 && .perip$out.j < 10) {
+          .k <- paste0("k", .perip$out.i, .perip$out.j)
+        } else {
+          .k <- paste0("k", .perip$out.i, "_", .perip$out.j)
+        }
+        .df2 <- data.frame(k=.perip$out.eq)
+        names(.df2) <- .k
+        .perip <- .perip[, -(1:3)]
+        .perip <- cbind(.df1, .df2, .perip)
+        .printPkDf("peripheral", .perip)
+        .prn <- TRUE
+      }
+      .w <- which(x$transfer$to == .i)
+      if (length(.w) > 0) {
+        .trans <- x$transfer[.w, ]
+        .printPkDf("transfer", .trans)
+        .prn <- TRUE
+      }
+      .w <- which(x$oral$cmt == .i)
+      if (length(.w) > 0) {
+        .oral <- x$oral[.w, ]
+        .printPkDf("oral", .oral)
+        .prn <- TRUE
+      }
+      .w <- which(x$iv$cmt == .i)
+      if (length(.w) > 0) {
+        .iv <- x$iv[.w, ]
+        .printPkDf("iv", .iv)
+        .prn <- TRUE
+      }
+      .w <- which(x$elimination$cmt == .i)
+      if (length(.w) > 0) {
+        .elimination <- x$elimination[.w, ]
+        .printPkDf("elimination", .elimination)
+        .prn <- TRUE
+      }
+      .w <- which(x$effect$cmt == .i)
+      if (length(.w) > 0) {
+        .effect <- x$effect[.w, ]
+        .printPkDf("effect", .effect)
+        .prn <- TRUE
+      }
+      if (.prn && .i < .r[2]) cat("\n")
+    }
+    .prn <- TRUE
+  }
+  # Now adm only
+  .r <- suppressWarnings(range(c(x$depot$adm, x$empty$adm, x$reset$adm), na.rm=TRUE))
+  .prnAdm <- FALSE
+  if (is.finite(.r[1])) {
+    if (.prn) cat("\n")
+    for (.i in seq(.r[1], .r[2])) {
+      .prn <- FALSE
+      .w <- which(x$depot$adm == .i)
+      if (length(.w) > 0) {
+        .depot <- x$depot[.w, ]
+        .printPkDf("depot", .depot)
+        .prn <- TRUE
+      }
+      .w <- which(x$empty$adm == .i)
+      if (length(.w) > 0) {
+        .empty <- x$empty[.w, ]
+        .printPkDf("empty", .empty)
+        .prn <- TRUE
+      }
+      .w <- which(x$reset$adm == .i)
+      if (length(.w) > 0) {
+        .reset <- x$reset[.w, ]
+        .printPkDf("reset", .reset)
+        .prn <- TRUE
+      }
+      if (.prn && .i < .r[2]) cat("\n")
+    }
+    .prnAdm <- TRUE
+  }
+  .w <- which(is.na(x$depot$adm))
+  if (length(.w) > 0) {
+    .depot <- x$depot[.w, ]
+    if (.prnAdm) cat("\n")
+    .prnAdn <- FALSE
+    .printPkDf("depot", .depot)
+  }
+  .w <- which(is.na(x$empty$adm))
+  if (length(.w) > 0) {
+    if (.prnAdm) cat("\n")
+    .prnAdn <- FALSE
+    .empty <- x$empty[.w, ]
+    .printPkDf("empty", .empty)
+  }
+  .w <- which(is.na(x$reset$adm))
+  if (length(.w) > 0) {
+    if (.prnAdm) cat("\n")
+    .prnAdn <- FALSE
+    .reset <- x$reset[.w, ]
+    .printPkDf("reset", .reset)
+  }
+
 }
