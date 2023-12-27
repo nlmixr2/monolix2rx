@@ -69,6 +69,12 @@
                                       target=character(0))
     .monolix2rx$pkReset <- data.frame(adm=integer(0),
                                       target=character(0))
+    .monolix2rx$pkElimination <- data.frame(cmt=integer(0),
+                                            V=character(0),
+                                            k=character(0),
+                                            Cl=character(0),
+                                            Vm=character(0),
+                                            Km=character(0))
   }
   .monolix2rx$pkStatement <- NA_character_
   .monolix2rx$curPkPar <- NA_character_
@@ -122,6 +128,12 @@
                                      target=NA_character_)
   .monolix2rx$curReset <- data.frame(adm=NA_integer_,
                                      target=NA_character_)
+  .monolix2rx$curElimination <- data.frame(cmt=NA_integer_,
+                                           V=NA_character_,
+                                           k=NA_character_,
+                                           Cl=NA_character_,
+                                           Vm=NA_character_,
+                                           Km=NA_character_)
 }
 
 .pkPushStatement <- function() {
@@ -141,9 +153,9 @@
     .pkIni(FALSE)
     return(invisible())
   }
-  if (.monlix2rx$pkStatement == "effect") {
-    .monolix2rx$pkPerip <- rbind(.monolix2rx$pkEffect,
-                                 .monolix2rx$curEffect)
+  if (.monolix2rx$pkStatement == "effect") {
+    .monolix2rx$pkEffect <- rbind(.monolix2rx$pkEffect,
+                                  .monolix2rx$curEffect)
     .pkIni(FALSE)
     return(invisible())
   }
@@ -183,10 +195,57 @@
     .pkIni(FALSE)
     return(invisible())
   }
+  if (.monolix2rx$pkStatement == "elimination") {
+    .monolix2rx$pkElimination <- rbind(.monolix2rx$pkElimination,
+                                       .monolix2rx$curElimination)
+    .pkIni(FALSE)
+    return(invisible())
+  }
 }
 
 .pk <- function(text) {
   .pkIni(TRUE)
+  .Call(`_monolix2rx_trans_mlxtran_pk`, text)
+  .pkPushStatement()
+  .ret <- list(Cc=.monolix2rx$pkCc,
+               Ce=.monolix2rx$pkCe,
+               pkmodel=.monolix2rx$pkPars,
+               compartment=.monolix2rx$pkCmt,
+               peripheral=.monolix2rx$pkPerip,
+               effect=.monolix2rx$pkEffect,
+               transfer=.monolix2rx$pkTransfer,
+               depot=.monolix2rx$pkDepot,
+               oral=.monolix2rx$pkOral,
+               iv=.monolix2rx$pkIv,
+               empty=.monolix2rx$pkEmpty,
+               reset=.monolix2rx$pkReset,
+               elimination=.monolix2rx$pkElimination)
+  class(.ret) <- "monolix2rxPk"
+  .ret
+}
+
+.pkSetK <- function(knum) {
+  .nc <- nchar(knum)
+  if (.nc == 2L) {
+    .i <- as.integer(substr(knum, 1, 1))
+    .j <- as.integer(substr(knum, 2, 2))
+  } else {
+    .v <- strsplit(knum,"_")[[1]]
+    .i <- as.integer(.v[1])
+    .j <- as.integer(.v[2])
+  }
+  if (is.na(.monolix2rx$curPerip$in.i)) {
+    .monolix2rx$curPerip$in.i <- .i
+    .monolix2rx$curPerip$in.j <- .j
+    .pkParDeclare("in.eq")
+  } else if (is.na(.monolix2rx$curPerip$out.i)) {
+    .monolix2rx$curPerip$out.i <- .i
+    .monolix2rx$curPerip$out.j <- .j
+    .pkParDeclare("out.eq")
+  } else {
+    stop("more than 2 k## expressions in peripheral() macro",
+         call.=FALSE)
+  }
 }
 
 .pkSetCc <- function(cc) {
@@ -214,8 +273,9 @@
     .monolix2rx$curPerip[par] <- val
     return(invisible(TRUE))
   }
-  if (.monlix2rx$pkStatement == "effect") {
-    .monolix2rx$curPerip[par] <- val
+  if (.monolix2rx$pkStatement == "effect") {
+    .monolix2rx$curEffect[par] <- val
+    return(invisible(TRUE))
   }
   if (.monolix2rx$pkStatement == "transfer") {
     .monolix2rx$curTransfer[par] <- val
@@ -241,10 +301,15 @@
     .monolix2rx$curReset[par] <- val
     return(invisible(TRUE))
   }
+  if (.monolix2rx$pkStatement == "elimination") {
+    .monolix2rx$curElimination[par] <- val
+    return(invisible(TRUE))
+  }
   return(invisible(FALSE))
 }
 
 .pkParDeclare <- function(par) {
+  if (par == "ktr") par <- "Ktr"
   .monolix2rx$curPkPar <- par
   .isInt <- FALSE
   if (par %in% c("cmt", "adm", "from", "to")) {
@@ -253,7 +318,7 @@
     .val <- ""
   }
   if (!.pkAssignBasedOnValue(par, .val)) {
-    stop("unexpected pk declaration for '", par, '"', call. = FALSE)
+    stop("unexpected pk declaration for '", par, "' in '", .monolix2rx$pkStatement, "'", call. = FALSE)
   } else {
     return(invisible())
   }

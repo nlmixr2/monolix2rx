@@ -37,8 +37,8 @@ effectLine: 'effect'  '(' effOp (',' effOp)* ')';
 
 fromOp: 'from' '=' decimalint;
 toOp: 'to' '=' decimalint;
-ktrOp: 'ktr' eqExpr?;
-transferOps: fromOp | toOp | ktrOp;
+ktOp: 'kt' eqExpr?;
+transferOps: fromOp | toOp | ktOp;
 transferLine: 'transfer' '(' transferOps (',' transferOps)* ')';
 
 admOp: ('adm' | 'type') '=' decimalint;
@@ -48,24 +48,22 @@ TlagOp: 'Tlag' eqExpr?;
 pOp: 'p' eqExpr?;
 Tk0Op: 'Tk0' eqExpr?;
 kaOp: 'ka' eqExpr?;
-KtrOp: 'Ktr' eqExpr?;
 MttOp: 'Mtt' eqExpr?;
-
+KtrOp: 'Ktr' eqExpr?;
 depotOps: admOp | targetOp | TlagOp | pOp | Tk0Op | kaOp | KtrOp |  MttOp;
-depotLine: 'depot' '(' depotOps (',' depotOps) ')';
+depotLine: 'depot' '(' depotOps (',' depotOps)* ')';
 
 
 absOrOral: ('absorption' | 'oral');
 
 absOps: admOp | TlagOp | pOp | cmtOp | Tk0Op | kaOp | KtrOp | MttOp;
 
-absorptionLine: absOrOral '(' absOps (',' absOps) ')';
+absorptionLine: absOrOral '(' absOps (',' absOps)* ')';
 
 
 ivOps: cmtOp | admOp | TlagOp | pOp;
 ivLine: 'iv' '(' ivOps (',' ivOps)* ')';
 
-targetOp: 'target' '=' identifier;
 emptyOp: admOp | targetOp;
 emptyLine: 'empty' '(' emptyOp (',' emptyOp)* ')';
 resetLine: 'reset' '(' emptyOp (',' emptyOp)* ')';
@@ -83,6 +81,7 @@ statement: pkmodel1 singleLineComment?
     | cmtLine singleLineComment?
     | peripLine singleLineComment?
     | transferLine singleLineComment?
+    | effectLine singleLineComment?
     | depotLine  singleLineComment?
     | absorptionLine  singleLineComment?
     | ivLine singleLineComment?

@@ -7,6 +7,7 @@ SEXP _monolix2rx_trans_content(SEXP in);
 SEXP _monolix2rx_trans_longdef(SEXP in);
 SEXP _monolix2rx_trans_fit(SEXP in);
 SEXP _monolix2rx_trans_mlxtran_op(SEXP in, SEXP what);
+SEXP _monolix2rx_trans_mlxtran_pk(SEXP in);
 
 void nonmem2rx_full_ini(void);
 
