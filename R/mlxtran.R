@@ -102,6 +102,9 @@
       if (!is.null(.ret$MODEL$LONGITUDINAL$DEFINITION)) {
         .ret$MODEL$LONGITUDINAL$DEFINITION <- .longDef(.ret$MODEL$LONGITUDINAL$DEFINITION)
       }
+      if (!is.null(.ret$MODEL$LONGITUDINAL$PK)) {
+        .ret$MODEL$LONGITUDINAL$PK <- .pk(.ret$MODEL$LONGITUDINAL$PK)
+      }
     }
   }
   if (!is.null(.ret$MONOLIX)) {
