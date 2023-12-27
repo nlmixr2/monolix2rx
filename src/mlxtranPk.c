@@ -78,6 +78,7 @@ int mlxtran_pk_process_pkmodel1(const char* name, D_ParseNode *pn, int i) {
       D_ParseNode *xpn = d_get_child(pn, 0);
       char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
       monolix2rxSingle(v, ".pkSetCc");
+      monolix2rxSingle("pkmodel", ".pkSetStatement");
       return 1;
     } else if (i == 1 && i == 2) {
       return 1;
@@ -104,25 +105,25 @@ int mlxtran_pk_process_pkmodel2(const char* name, D_ParseNode *pn, int i) {
   return 0;
 }
 
-int mlxtran_pk_process_declarePars(const char* name, D_ParseNode *pn) {
-  if (!strcmp("pkpars0", name) ||
-      !strcmp("pkparsE0", name) ||
-      !strcmp("ke0Op", name) ||
-      !strcmp("TlagOp", name) ||
-      !strcmp("pOp", name) ||
-      !strcmp("Tk0Op", name) ||
-      !strcmp("kaOp", name) ||
-      !strcmp("KtrOp", name) ||
-      !strcmp("ktOp", name) ||
-      !strcmp("MttOp", name) ||
-      !strcmp("kOp", name) ||
-      !strcmp("clOp", name) ||
-      !strcmp("vmOp", name) ||
-      !strcmp("kmOp", name)) {
+int mlxtran_pk_process_declarePars(const char* name, D_ParseNode *pn, int i) {
+  if (i == 0 &&
+      (!strcmp("pkpars0", name) ||
+       !strcmp("pkparsE0", name) ||
+       !strcmp("ke0Op", name) ||
+       !strcmp("TlagOp", name) ||
+       !strcmp("pOp", name) ||
+       !strcmp("Tk0Op", name) ||
+       !strcmp("kaOp", name) ||
+       !strcmp("KtrOp", name) ||
+       !strcmp("ktOp", name) ||
+       !strcmp("MttOp", name) ||
+       !strcmp("kOp", name) ||
+       !strcmp("clOp", name) ||
+       !strcmp("vmOp", name) ||
+       !strcmp("kmOp", name))) {
     D_ParseNode *xpn = d_get_child(pn, 0);
     char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
     monolix2rxSingle(v, ".pkParDeclare");
-    monolix2rxSingle("pkmodel", ".pkSetStatement");
     return 1;
   }
   return 0;
@@ -201,8 +202,7 @@ int mlxtran_pk_process_setStatement(const char* name, D_ParseNode *pn, int i) {
 void wprint_parsetree_mlxtran_pk(D_ParserTables pt, D_ParseNode *pn, int depth, print_node_fn_t fn, void *client_data) {
   char *name = (char*)pt.symbols[pn->symbol].name;
   int nch = d_get_number_of_children(pn);
-  if (mlxtran_pk_process_declarePars(name, pn) ||
-      mlxtran_pk_process_strict_ops(name, pn) ||
+  if (mlxtran_pk_process_strict_ops(name, pn) ||
       mlxtran_pk_process_eqExpr(name, pn) ||
       mlxtran_pk_process_knum(name, pn)) {
     // return early; no need to process more
@@ -212,7 +212,8 @@ void wprint_parsetree_mlxtran_pk(D_ParserTables pt, D_ParseNode *pn, int depth, 
     for (int i = 0; i < nch; i++) {
       if (mlxtran_pk_process_pkmodel2(name, pn, i) ||
           mlxtran_pk_process_pkmodel1(name, pn, i) ||
-          mlxtran_pk_process_setStatement(name, pn, i)) {
+          mlxtran_pk_process_setStatement(name, pn, i) ||
+          mlxtran_pk_process_declarePars(name, pn, i)) {
         continue;
       }
       D_ParseNode *xpn = d_get_child(pn, i);

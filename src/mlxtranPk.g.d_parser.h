@@ -2321,7 +2321,7 @@ unsigned char d_scanner_173_0_0_mlxtranPk[SCANNER_BLOCK_SIZE] = {
 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
 };
 
-D_Shift * d_shift_173_0_mlxtranPk[] = {&d_shift_17_mlxtranPk,NULL};
+D_Shift * d_shift_173_1_mlxtranPk[] = {&d_shift_17_mlxtranPk,NULL};
 
 D_Shift * d_accepts_diff_215_0_mlxtranPk[] = {0};
 D_Shift * d_accepts_diff_215_1_mlxtranPk[] = {&d_shift_0_mlxtranPk,0};
@@ -3974,9 +3974,9 @@ SB_trans_uint8 d_transition_172_mlxtranPk[3] = {
 };
 
 SB_uint8 d_scanner_173_mlxtranPk[2] = {
-{d_shift_173_0_mlxtranPk, {d_scanner_173_0_0_mlxtranPk, d_scanner_50_0_1_mlxtranPk
+{NULL, {d_scanner_173_0_0_mlxtranPk, d_scanner_50_0_1_mlxtranPk
  , d_scanner_50_0_1_mlxtranPk, d_scanner_50_0_1_mlxtranPk}},
-{d_shift_173_0_mlxtranPk, {d_scanner_173_0_0_mlxtranPk, d_scanner_50_0_1_mlxtranPk
+{d_shift_173_1_mlxtranPk, {d_scanner_173_0_0_mlxtranPk, d_scanner_50_0_1_mlxtranPk
  , d_scanner_50_0_1_mlxtranPk, d_scanner_50_0_1_mlxtranPk}}
 };
 
@@ -5354,7 +5354,7 @@ D_Symbol d_symbols_mlxtranPk[] = {
 {D_SYMBOL_STRING, "k31", 3, -1},
 {D_SYMBOL_STRING, "ke0", 3, -1},
 {D_SYMBOL_STRING, "=", 1, -1},
-{D_SYMBOL_REGEX, "[^\\n,)]*", 9, -1},
+{D_SYMBOL_REGEX, "[^\\n,\\\\)]+", 13, -1},
 {D_SYMBOL_STRING, "=", 1, -1},
 {D_SYMBOL_STRING, "pkmodel", 7, -1},
 {D_SYMBOL_STRING, "(", 1, -1},

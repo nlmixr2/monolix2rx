@@ -185,7 +185,7 @@
   }
   if (.monolix2rx$pkStatement == "empty") {
     .monolix2rx$pkEmpty <- rbind(.monolix2rx$pkEmpty,
-                                 .monolix2rx$curEmpy)
+                                 .monolix2rx$curEmpty)
     .pkIni(FALSE)
     return(invisible())
   }
@@ -295,6 +295,7 @@
   }
   if (.monolix2rx$pkStatement == "empty") {
     .monolix2rx$curEmpty[par] <- val
+    print(.monolix2rx$curEmpty)
     return(invisible(TRUE))
   }
   if (.monolix2rx$pkStatement == "reset") {
@@ -309,7 +310,6 @@
 }
 
 .pkParDeclare <- function(par) {
-  if (par == "ktr") par <- "Ktr"
   .monolix2rx$curPkPar <- par
   .isInt <- FALSE
   if (par %in% c("cmt", "adm", "from", "to")) {
