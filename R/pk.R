@@ -513,5 +513,11 @@ print.monolix2rxPk <- function(x, ...) {
     .reset <- x$reset[.w, ]
     .printPkDf("reset", .reset)
   }
+}
 
+#' @export
+as.list.monolix2rxPk <- function(x, ...) {
+  .x <- x
+  class(.x) <- NULL
+  .x
 }

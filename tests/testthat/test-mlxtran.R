@@ -126,6 +126,7 @@ test_that("mlxtran initial list", {
     expect_true(inherits(v$MODEL$INDIVIDUAL$DEFINITION, "monolix2rxIndDef"))
     expect_true(inherits(v$MODEL$LONGITUDINAL$LONGITUDINAL, "monolix2rxLongitudinal"))
     expect_true(inherits(v$MODEL$LONGITUDINAL$DEFINITION, "monolix2rxLongDef"))
+    expect_true(inherits(v$MODEL$LONGITUDINAL$PK, "monolix2rxPk"))
     expect_true(inherits(v$PARAMETER$PARAMETER, "monolix2rxParameter"))
     expect_true(inherits(v$MONOLIX$SETTINGS$GLOBAL, "monolix2rxOp"))
     expect_true(inherits(v$MONOLIX$SETTINGS$POPULATION, "monolix2rxOp"))
