@@ -59,7 +59,6 @@
   file.rename(devtools::package_file("src/mlxtranPk.g.d_parser.c"),
               devtools::package_file("src/mlxtranPk.g.d_parser.h"))
 
-
   message("Update Parser c for <PARAMETER>")
   dparser::mkdparse(devtools::package_file("inst/mlxtranParameter.g"),
                     devtools::package_file("src/"),
@@ -74,12 +73,20 @@
   file.rename(devtools::package_file("src/mlxtranFit.g.d_parser.c"),
               devtools::package_file("src/mlxtranFit.g.d_parser.h"))
 
-  message("Update Parser c for mlxtran operators")
+  message("Update Parser c for mlxtran options")
   dparser::mkdparse(devtools::package_file("inst/mlxtranOp.g"),
                     devtools::package_file("src/"),
                     grammar_ident="mlxtranOp")
   file.rename(devtools::package_file("src/mlxtranOp.g.d_parser.c"),
               devtools::package_file("src/mlxtranOp.g.d_parser.h"))
+
+  message("Update Parser c for mlxtran tasks")
+  dparser::mkdparse(devtools::package_file("inst/mlxtranTask.g"),
+                    devtools::package_file("src/"),
+                    grammar_ident="mlxtranTask")
+  file.rename(devtools::package_file("src/mlxtranTask.g.d_parser.c"),
+              devtools::package_file("src/mlxtranTask.g.d_parser.h"))
+
 
   invisible("")
 }

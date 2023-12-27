@@ -2,7 +2,7 @@ test_that("mlxtran initial list", {
 
   withr::with_dir(tempdir(), {
 
-    modelLines <- c("DESCRIPTION:",
+   modelLines <- c("DESCRIPTION:",
                     "model translated from `babelmixr2` and `nlmixr2` function pk.turnover.emax3 to pk.turnover.emax3-monolix.txt",
                     "",
                     "[LONGITUDINAL]",
