@@ -14,3 +14,10 @@
 print.monolix2rxLongitudinal <- function(x, ...) {
   print.monolix2rxInd(x, ...)
 }
+
+#' @export
+as.list.monolix2rxLongitudinal <- function(x, ...) {
+  .x <- x
+  class(.x) <- NULL
+  .x
+}

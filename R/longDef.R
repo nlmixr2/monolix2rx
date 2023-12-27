@@ -287,3 +287,10 @@ print.monolix2rxLongDef <- function(x, ...) {
          })
   invisible(x)
 }
+
+#' @export
+as.list.monolix2rxLongDef <- function(x, ...) {
+  .x <- x
+  class(.x) <- NULL
+  .x
+}

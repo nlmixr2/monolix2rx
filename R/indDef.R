@@ -324,6 +324,13 @@ print.monolix2rxIndDef <- function(x, ...) {
   invisible(x)
 }
 
+#' @export
+as.list.monolix2rxIndDef <- function(x, ...) {
+  .x <- x
+  class(.x) <- NULL
+  .x
+}
+
 #' Add a variable for monolix parsing
 #'
 #' @param var Variable to add

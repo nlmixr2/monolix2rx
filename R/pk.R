@@ -1,4 +1,10 @@
-
+#' Initialize PK parsing
+#'
+#'
+#' @param full this is a boolean to do a full reset
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .pkIni <- function(full=TRUE) {
   if (full) {
     .monolix2rx$pkCc <- NA_character_
@@ -135,7 +141,11 @@
                                            Vm=NA_character_,
                                            Km=NA_character_)
 }
-
+#' Pushes the Pk information based on current statement
+#'
+#' @return nothing, called for side effect
+#' @noRd
+#' @author Matthew L. Fidler
 .pkPushStatement <- function() {
   if (is.na(.monolix2rx$pkStatement)) {
     .pkIni(FALSE)
@@ -202,7 +212,12 @@
     return(invisible())
   }
 }
-
+#' Parse PK
+#'
+#' @param text pk macro parse text
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .pk <- function(text) {
   .pkIni(TRUE)
   .Call(`_monolix2rx_trans_mlxtran_pk`, text)
@@ -223,7 +238,12 @@
   class(.ret) <- "monolix2rxPk"
   .ret
 }
-
+#' This sets the k## or k#_# for periphal macro
+#'
+#' @param knum knum text (text without k prefix)
+#' @return nothing called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .pkSetK <- function(knum) {
   .nc <- nchar(knum)
   if (.nc == 2L) {
@@ -247,19 +267,35 @@
          call.=FALSE)
   }
 }
-
+#' Set the Cc for the pkmacro
+#'
+#' @param cc string for the central concentration
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .pkSetCc <- function(cc) {
   .pkPushStatement()
   .monolix2rx$pkCc <- cc
   .monolix2rx$pkStatement <- "pkmodel"
 }
-
+#' Set Ce for effect compartment
+#'
+#' @param ce effect compartment
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .pkSetCe <- function(ce) {
   .pkPushStatement()
   .monolix2rx$pkCe <- ce
   .monolix2rx$pkStatement <- "pkmodel"
 }
-
+#' Assign PK statement based on the statement being processed
+#'
+#' @param par parameter name
+#' @param val parameter value
+#' @return boolean saying if the value was assigned (`TRUE`) or not (`FALSE`).
+#' @noRd
+#' @author Matthew L. Fidler
 .pkAssignBasedOnValue <- function(par, val) {
   if (.monolix2rx$pkStatement == "pkmodel") {
     .monolix2rx$pkPars[par] <- val
@@ -307,7 +343,12 @@
   }
   return(invisible(FALSE))
 }
-
+#' Declare a parameter was defined
+#'
+#' @param par parameter that was defined
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .pkParDeclare <- function(par) {
   .monolix2rx$curPkPar <- par
   .isInt <- FALSE
@@ -322,7 +363,12 @@
     return(invisible())
   }
 }
-
+#' Assign pk value based on current Pk Parameter declared
+#'
+#' @param par parameter value
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .pkParAssign <- function(par) {
   if (.monolix2rx$curPkPar %in% c("cmt", "adm", "from", "to")) {
     .val <- as.integer(par)
@@ -335,7 +381,12 @@
     return(invisible())
   }
 }
-
+#' PK parameter equation expression
+#'
+#' @param eq equation rhs
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .pkParEqExpr <- function(eq) {
   if (!is.na(.monolix2rx$curPkPar)) {
     .monolix2rx$pkPars[.monolix2rx$curPkPar] <- eq
@@ -343,13 +394,24 @@
     return(invisible())
   }
 }
-
+#' PK set statement
+#'
+#' @param type the statement that is being processed
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .pkSetStatement <- function(type) {
   .pkPushStatement()
   if (type == "absorption") type <- "oral"
   .monolix2rx$pkStatement <- type
 }
-
+#' Print a PK structure data frame
+#'
+#' @param what what is the pk item that is being printed
+#' @param df The data frame that will be printed
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .printPkDf <- function(what, df) {
   if (length(df[, 1]) > 1L) {
     lapply(seq_len(length(df[, 1])),

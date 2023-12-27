@@ -12,6 +12,7 @@
 
 void R_init_monolix2rx(DllInfo *info) {
   R_CallMethodDef callMethods[]  = {
+    {"_monolix2rx_trans_longoutput", (DL_FUNC) &_monolix2rx_trans_longoutput, 1},
     {"_monolix2rx_trans_mlxtran_pk", (DL_FUNC) &_monolix2rx_trans_mlxtran_pk, 1},
     {"_monolix2rx_trans_mlxtran_op", (DL_FUNC) &_monolix2rx_trans_mlxtran_op, 2},
     {"_monolix2rx_trans_fit", (DL_FUNC) &_monolix2rx_trans_fit, 1},
@@ -30,8 +31,7 @@ void R_init_monolix2rx(DllInfo *info) {
   };
   R_registerRoutines(info, cMethods, callMethods, NULL, NULL);
   R_useDynamicSymbols(info, FALSE);
-  nonmem2rx_full_ini();
-  /* monolixr2rx_full_ini(); */
+  monolix2rx_full_ini();
 }
 
 void R_unload_monolix2rx(DllInfo *info) {

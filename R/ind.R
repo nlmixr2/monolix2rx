@@ -170,3 +170,10 @@ print.monolix2rxInd <- function(x, ...) {
   .printFile(x)
   invisible(x)
 }
+
+#' @export
+as.list.monolix2rxInd <- function(x, ...) {
+  .x <- x
+  class(.x) <- NULL
+  .x
+}

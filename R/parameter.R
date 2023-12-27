@@ -86,3 +86,10 @@ print.monolix2rxParameter <- function(x, ...) {
          }, character(1), USE.NAMES=FALSE),
         collapse="\n"), "\n", sep="")
 }
+
+#' @export
+as.data.frame.monolix2rxParameter <- function(x, row.names = NULL, optional = FALSE, ...) {
+  .x <- x
+  class(.x) <- "data.frame"
+  .x
+}

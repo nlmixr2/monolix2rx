@@ -13,7 +13,7 @@
 #include <Rmath.h>
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#define _(String) dgettext ("nonmem2rx", String)
+#define _(String) dgettext ("monolix2rx", String)
 /* replace pkg as appropriate */
 #else
 #define _(String) (String)
@@ -28,7 +28,7 @@ extern sbuf sbTransErr;
 extern sbuf curLine;
 extern vLines _dupStrs;
 
-void nonmem2rx_full_parseFree(int last) {
+void monolix2rx_full_parseFree(int last) {
   lineFree(&_dupStrs);
   if (last) {
     sFree(&firstErr);
@@ -48,25 +48,25 @@ void nonmem2rx_full_parseFree(int last) {
 }
 
 
-int nonmem2rx_full_ini_done = 0;
-void nonmem2rx_full_ini(void) {
-  if (nonmem2rx_full_ini_done == 0) {
+int monolix2rx_full_ini_done = 0;
+void monolix2rx_full_ini(void) {
+  if (monolix2rx_full_ini_done == 0) {
     sIni(&firstErr);
     sIni(&sbTransErr);
     sIni(&sbErr1);
     sIni(&sbErr2);
     sIni(&curLine);
     lineIni(&_dupStrs);
-    nonmem2rx_full_ini_done = 1;
+    monolix2rx_full_ini_done = 1;
   }
 }
 
-SEXP _nonmem2rx_r_parseFree(void) {
-  nonmem2rx_full_parseFree(0);
+SEXP _monolix2rx_r_parseFree(void) {
+  monolix2rx_full_parseFree(0);
   return R_NilValue;
 }
 
-SEXP _nonmem2rx_r_parseIni(void) {
-  nonmem2rx_full_ini();
+SEXP _monolix2rx_r_parseIni(void) {
+  monolix2rx_full_ini();
   return R_NilValue;
 }

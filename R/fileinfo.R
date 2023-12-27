@@ -59,3 +59,10 @@ print.monolix2rxFileinfo <- function(x, ...) {
   cat("delimiter = comma\n")
   cat("header = {", paste(x$header, collapse=", "), "}\n", sep="")
 }
+
+#' @export
+as.list.monolix2rxFileinfo <- function(x, ...) {
+  .x <- x
+  class(.x) <- NULL
+  .x
+}

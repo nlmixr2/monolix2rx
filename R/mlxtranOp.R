@@ -63,3 +63,10 @@ print.monolix2rxOp <- function(x, ...) {
   })
   invisible(x)
 }
+
+#' @export
+as.list.monolix2rxOp <- function(x, ...) {
+  .x <- x
+  class(.x) <- NULL
+  return(.x)
+}

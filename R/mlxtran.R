@@ -105,6 +105,9 @@
       if (!is.null(.ret$MODEL$LONGITUDINAL$PK)) {
         .ret$MODEL$LONGITUDINAL$PK <- .pk(.ret$MODEL$LONGITUDINAL$PK)
       }
+      if (!is.null(.ret$MODEL$LONGITUDINAL$OUTPUT)) {
+        .ret$MODEL$LONGITUDINAL$OUTPUT <- .longOut(.ret$MODEL$LONGITUDINAL$OUTPUT)
+      }
     }
   }
   if (!is.null(.ret$MONOLIX)) {
@@ -269,4 +272,42 @@ print.monolix2rxMlxtran <- function(x, ...) {
   })
   cat("\n")
   invisible(x)
+}
+
+#' @export
+as.list.monolix2rxMlxtran <- function(x, ...) {
+  .n <- names(x)
+  .x <- setNames(lapply(.n,
+               function(n) {
+                 .y <- x[[n]]
+                 if (is.list(.y)) {
+                   .n2 <- names(.y)
+                   .y <- setNames(
+                     lapply(.n2,
+                            function(n2) {
+                              .z <- .y[[n2]]
+                              if (inherits(.z, "data.frame")) {
+                                return(as.data.frame(.z))
+                              } else {
+                                .z <- as.list(.z)
+                                .n3 <- names(.z)
+                                .z <- setNames(
+                                  lapply(.n3,
+                                         function(n3) {
+                                           .w <- .z[[n3]]
+                                           if (inherits(.w, "data.frame")) {
+                                             return(as.data.frame(.w))
+                                           }
+                                           return(as.list(.w))
+                                         }),
+                                  .n3
+                                )
+                                return(.z)
+                              }
+                            }), .n2)
+                 }
+                 .y
+               }), .n)
+  class(.x) <- NULL
+  .x
 }

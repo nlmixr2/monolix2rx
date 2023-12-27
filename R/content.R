@@ -144,3 +144,10 @@ print.monolix2rxContent <- function(x, ...) {
   .printCat(x)
   invisible(x)
 }
+
+#' @export
+as.list.monolix2rxContent <- function(x, ...) {
+  .x <- x
+  class(.x) <- NULL
+  return(.x)
+}

@@ -8,8 +8,9 @@ SEXP _monolix2rx_trans_longdef(SEXP in);
 SEXP _monolix2rx_trans_fit(SEXP in);
 SEXP _monolix2rx_trans_mlxtran_op(SEXP in, SEXP what);
 SEXP _monolix2rx_trans_mlxtran_pk(SEXP in);
+SEXP _monolix2rx_trans_longoutput(SEXP in);
 
-void nonmem2rx_full_ini(void);
+void monolix2rx_full_ini(void);
 
 SEXP monolix2rxSetDistTypicalEst(const char *var, int isMean);
 SEXP monolix2rxSetDistTypicalFixed(const char *var, int isMean);
