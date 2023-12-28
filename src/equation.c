@@ -243,7 +243,7 @@ int equation_if(char *name,  D_ParseNode *pn, int i) {
     if (!strcmp("if", name)) {
       sAppendN(&curLine, "if (", 4);
       return 2;
-    } else if (!strcmp("ifelse", name)) {
+    } else if (!strcmp("elseif", name)) {
       sAppendN(&curLine, "} else if (", 11);
       return 2;
     } else if (!strcmp("else", name)) {
@@ -257,12 +257,23 @@ int equation_if(char *name,  D_ParseNode *pn, int i) {
   return 0;
 }
 
+int equation_handle_odeType(char *name,  D_ParseNode *pn) {
+  if (!strcmp(name, "odeType")) {
+    D_ParseNode *xpn = d_get_child(pn, 2);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxSingle(v, ".equationOdeType");
+    return 1;
+  }
+  return 0;
+}
+
 void wprint_parsetree_equation(D_ParserTables pt, D_ParseNode *pn, int depth, print_node_fn_t fn, void *client_data) {
   char *name = (char*)pt.symbols[pn->symbol].name;
   if (equation_operators(name, pn) ||
       equation_logic_operators(name, pn) ||
       equation_identifier_or_constant(name, pn) ||
-      equation_function_name(name,  pn)) {
+      equation_function_name(name,  pn) ||
+      equation_handle_odeType(name, pn)) {
     return;
   }
   int nch = d_get_number_of_children(pn);
@@ -285,6 +296,8 @@ void wprint_parsetree_equation(D_ParserTables pt, D_ParseNode *pn, int depth, pr
       pushModel();
     } else if (!strcmp("assignment", name)) {
       pushModel();
+    } else if (!strcmp("odeType", name)) {
+      sClear(&curLine);
     }
   }
 }

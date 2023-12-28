@@ -8,6 +8,7 @@ statement: odeType singleLineComment?
     | assignment singleLineComment?
     | if singleLineComment?
     | else singleLineComment?
+    | elseif singleLineComment?
     | endit singleLineComment?
     ;
 
