@@ -1,14 +1,5 @@
 .monolix2rx <- new.env(parent=emptyenv())
 
-#' Clear the monolix2rx environment
-#'
-#' @return nothing, called for side effects
-#' @noRd
-#' @author Matthew L. Fidler
-.clearMonolix2rx <- function() {
-  .indDefIni()
-}
-
 #' Translate a monolix file to rxode2
 #'
 #' @param mlxtran file name for mlxtran to translate to rxode2
@@ -21,6 +12,12 @@
 #' @importFrom stats setNames
 #' @eval .monolix2rxBuildGram()
 #' @examples
-monolixr2rx <- function(mlxtran) {
-
+monolix2rx <- function(mlxtran) {
+  .ret <- mlxtran(mlxtran, equation=TRUE)
+  .model <- c("model({",
+              .ret$MODEL$INDIVIDUAL$DEFINITION$rx,
+              .ret$MODEL$LONGITUDINAL$EQUATION$rx,
+              "})")
+  .model <- str2lang(paste0(.model, collapse="\n"))
+  .model
 }

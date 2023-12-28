@@ -17,7 +17,8 @@ Imports:
     checkmate,
     dparser,
     rxode2 (> 2.0.13),
-    magrittr
+    magrittr,
+    withr
 Suggests:
     devtools,
     testthat (>= 3.0.0)

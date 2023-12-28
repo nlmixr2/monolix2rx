@@ -59,10 +59,11 @@
 #' This applies mlxtran to a set of lines
 #'
 #' @param lines a character vector representing a set of lines to parse
+#' @param equation when TRUE, try to parse equation too
 #' @return a mlxtran object
 #' @noRd
 #' @author Matthew L. Fidler
-.mlxtran <- function(lines) {
+.mlxtran <- function(lines, equation=FALSE) {
   .mlxtranIni()
   lapply(lines, .mlxtranParseItem)
   # Add file entries
@@ -104,6 +105,9 @@
       }
       if (!is.null(.ret$MODEL$LONGITUDINAL$PK)) {
         .ret$MODEL$LONGITUDINAL$PK <- .pk(.ret$MODEL$LONGITUDINAL$PK)
+      }
+      if (equation && !is.null(.ret$MODEL$LONGITUDINAL$EQUATION)) {
+        .ret$MODEL$LONGITUDINAL$EQUATION <- .equation(.ret$MODEL$LONGITUDINAL$EQUATION)
       }
       if (!is.null(.ret$MODEL$LONGITUDINAL$OUTPUT)) {
         .ret$MODEL$LONGITUDINAL$OUTPUT <- .longOut(.ret$MODEL$LONGITUDINAL$OUTPUT)
@@ -214,6 +218,34 @@
   }
   .mlxEnv$subsubsection <- sec
   .mlxEnv$isDesc <- FALSE
+}
+#' Read and parse mlxtran lines
+#'
+#' @param file mlxtran file to process
+#' @param equation parse the equation block to rxode2 (some models cannot be translated)
+#' @return mlxtran object
+#' @export
+#' @author Matthew L. Fidler
+#' @examples
+#'
+mlxtran <- function(file, equation=FALSE) {
+  checkmate::assertLogical(equation, any.missing=FALSE, len=1)
+  if (inherits(file, "monolix2rxMlxtran")) {
+    if (equation && !is.null(file$MODEL$LONGITUDINAL$EQUATION)) {
+      file$MODEL$LONGITUDINAL$EQUATION <- .equation(file$MODEL$LONGITUDINAL$EQUATION)
+    }
+    return(file)
+  }
+  if (length(file) > 1L) {
+    .lines <- file
+    .dirn <- getwd()
+  } else {
+    checkmate::checkFileExists(file)
+    .lines <- suppressWarnings(readLines(file))
+    .dirn <- dirname(file)
+  }
+  withr::with_dir(.dirn,
+                  .mlxtran(.lines, equation=equation))
 }
 
 #' @export

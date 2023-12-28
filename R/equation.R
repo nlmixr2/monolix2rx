@@ -8,8 +8,10 @@
   .monolix2rx$equationLine <- character(0)
   .monolix2rx$odeType <- "nonStiff"
   .Call(`_monolix2rx_trans_equation`, text)
-  .ret <- list(rx=.monolix2rx$equationLine,
+  .ret <- list(monolix=text,
+               rx=.monolix2rx$equationLine,
                odeType=.monolix2rx$odeType)
+  class(.ret) <- "monolix2rxEquation"
   .ret
 }
 #' Add an equation line
@@ -29,4 +31,16 @@
 #' @author Matthew L. Fidler
 .equationOdeType <- function(odeType) {
   .monolix2rx$odeType <- odeType
+}
+
+#' @export
+print.monolix2rxEquation <- function(x, ...) {
+  cat(x$monolix, "\n", sep="")
+}
+
+#' @export
+as.list.monolix2rxEquation <- function(x, ...) {
+  .x <- x
+  class(.x) <- NULL
+  .x
 }
