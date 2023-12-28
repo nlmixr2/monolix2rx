@@ -88,17 +88,17 @@ D_Reduction d_reduction_93_equation = {3, 58, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL
 D_Reduction d_reduction_94_equation = {1, 59, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
 D_Reduction d_reduction_95_equation = {1, 60, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
 D_Reduction d_reduction_97_equation = {1, 61, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
-D_Reduction d_reduction_100_equation = {5, 62, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
-D_Reduction d_reduction_101_equation = {2, 63, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_102_equation = {0, 63, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_103_equation = {2, 64, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_104_equation = {0, 64, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_105_equation = {1, 65, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_106_equation = {3, 66, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
-D_Reduction d_reduction_107_equation = {2, 67, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_108_equation = {0, 67, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_109_equation = {1, 68, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_110_equation = {1, 69, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
+D_Reduction d_reduction_101_equation = {5, 62, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
+D_Reduction d_reduction_102_equation = {2, 63, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_103_equation = {0, 63, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_104_equation = {2, 64, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_105_equation = {0, 64, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_106_equation = {1, 65, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_107_equation = {3, 66, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
+D_Reduction d_reduction_108_equation = {2, 67, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_109_equation = {0, 67, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_110_equation = {1, 68, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_111_equation = {1, 69, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
 D_Reduction d_reduction_138_equation = {1, 70, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
 D_Reduction d_reduction_141_equation = {1, 71, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
 D_Reduction d_reduction_144_equation = {3, 71, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
@@ -1184,7 +1184,7 @@ unsigned char d_scanner_33_77_0_equation[SCANNER_BLOCK_SIZE] = {
 79, 79, 79, 79, 79, 79, 79, 79, 79, 79, 0, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_33_79_equation[] = {&d_shift_37_equation,NULL};
+D_Shift * d_shift_33_79_equation[] = {&d_shift_38_equation,NULL};
 
 unsigned char d_scanner_33_80_0_equation[SCANNER_BLOCK_SIZE] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -1214,7 +1214,7 @@ unsigned char d_scanner_33_83_0_equation[SCANNER_BLOCK_SIZE] = {
 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_33_84_equation[] = {&d_shift_50_equation,NULL};
+D_Shift * d_shift_33_84_equation[] = {&d_shift_51_equation,NULL};
 
 unsigned char d_scanner_33_85_0_equation[SCANNER_BLOCK_SIZE] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -1230,7 +1230,7 @@ unsigned char d_scanner_33_86_1_equation[SCANNER_BLOCK_SIZE] = {
 6, 6, 6, 6, 6, 6, 6, 6, 6, 114, 6, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_33_87_equation[] = {&d_shift_39_equation,NULL};
+D_Shift * d_shift_33_87_equation[] = {&d_shift_40_equation,NULL};
 
 unsigned char d_scanner_33_88_1_equation[SCANNER_BLOCK_SIZE] = {
 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 
@@ -1267,7 +1267,7 @@ unsigned char d_scanner_33_92_1_equation[SCANNER_BLOCK_SIZE] = {
 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_33_93_equation[] = {&d_shift_40_equation,NULL};
+D_Shift * d_shift_33_93_equation[] = {&d_shift_41_equation,NULL};
 
 unsigned char d_scanner_33_94_0_equation[SCANNER_BLOCK_SIZE] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -1315,9 +1315,9 @@ unsigned char d_scanner_33_101_1_equation[SCANNER_BLOCK_SIZE] = {
 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_33_102_equation[] = {&d_shift_63_equation,NULL};
+D_Shift * d_shift_33_102_equation[] = {&d_shift_64_equation,NULL};
 
-D_Shift * d_shift_33_103_equation[] = {&d_shift_49_equation,NULL};
+D_Shift * d_shift_33_103_equation[] = {&d_shift_50_equation,NULL};
 
 unsigned char d_scanner_33_104_0_equation[SCANNER_BLOCK_SIZE] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -1326,7 +1326,7 @@ unsigned char d_scanner_33_104_0_equation[SCANNER_BLOCK_SIZE] = {
 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_33_105_equation[] = {&d_shift_51_equation,NULL};
+D_Shift * d_shift_33_105_equation[] = {&d_shift_52_equation,NULL};
 
 unsigned char d_scanner_33_106_0_equation[SCANNER_BLOCK_SIZE] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -1335,11 +1335,11 @@ unsigned char d_scanner_33_106_0_equation[SCANNER_BLOCK_SIZE] = {
 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_33_107_equation[] = {&d_shift_53_equation,NULL};
+D_Shift * d_shift_33_107_equation[] = {&d_shift_54_equation,NULL};
 
-D_Shift * d_shift_33_108_equation[] = {&d_shift_52_equation,NULL};
+D_Shift * d_shift_33_108_equation[] = {&d_shift_53_equation,NULL};
 
-D_Shift * d_shift_33_109_equation[] = {&d_shift_54_equation,NULL};
+D_Shift * d_shift_33_109_equation[] = {&d_shift_55_equation,NULL};
 
 unsigned char d_scanner_33_110_0_equation[SCANNER_BLOCK_SIZE] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -1348,9 +1348,9 @@ unsigned char d_scanner_33_110_0_equation[SCANNER_BLOCK_SIZE] = {
 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_33_111_equation[] = {&d_shift_60_equation,NULL};
+D_Shift * d_shift_33_111_equation[] = {&d_shift_61_equation,NULL};
 
-D_Shift * d_shift_33_112_equation[] = {&d_shift_55_equation,NULL};
+D_Shift * d_shift_33_112_equation[] = {&d_shift_56_equation,NULL};
 
 unsigned char d_scanner_33_113_0_equation[SCANNER_BLOCK_SIZE] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -1450,13 +1450,13 @@ unsigned char d_scanner_33_126_0_equation[SCANNER_BLOCK_SIZE] = {
 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_33_127_equation[] = {&d_shift_38_equation,NULL};
+D_Shift * d_shift_33_127_equation[] = {&d_shift_39_equation,NULL};
 
-D_Shift * d_shift_33_128_equation[] = {&d_shift_56_equation,NULL};
+D_Shift * d_shift_33_128_equation[] = {&d_shift_57_equation,NULL};
 
 D_Shift * d_shift_33_129_equation[] = {&d_shift_31_equation,NULL};
 
-D_Shift * d_shift_33_130_equation[] = {&d_shift_64_equation,NULL};
+D_Shift * d_shift_33_130_equation[] = {&d_shift_34_equation,NULL};
 
 unsigned char d_scanner_33_131_0_equation[SCANNER_BLOCK_SIZE] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -1472,7 +1472,7 @@ unsigned char d_scanner_33_132_1_equation[SCANNER_BLOCK_SIZE] = {
 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_33_133_equation[] = {&d_shift_59_equation,NULL};
+D_Shift * d_shift_33_133_equation[] = {&d_shift_60_equation,NULL};
 
 unsigned char d_scanner_33_134_1_equation[SCANNER_BLOCK_SIZE] = {
 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 
@@ -1495,9 +1495,9 @@ unsigned char d_scanner_33_136_0_equation[SCANNER_BLOCK_SIZE] = {
 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_33_137_equation[] = {&d_shift_41_equation,NULL};
+D_Shift * d_shift_33_137_equation[] = {&d_shift_42_equation,NULL};
 
-D_Shift * d_shift_33_138_equation[] = {&d_shift_42_equation,NULL};
+D_Shift * d_shift_33_138_equation[] = {&d_shift_43_equation,NULL};
 
 unsigned char d_scanner_33_139_1_equation[SCANNER_BLOCK_SIZE] = {
 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 
@@ -1513,7 +1513,7 @@ unsigned char d_scanner_33_140_1_equation[SCANNER_BLOCK_SIZE] = {
 6, 6, 6, 6, 6, 6, 151, 6, 6, 6, 6, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_33_141_equation[] = {&d_shift_48_equation,NULL};
+D_Shift * d_shift_33_141_equation[] = {&d_shift_49_equation,NULL};
 
 unsigned char d_scanner_33_142_0_equation[SCANNER_BLOCK_SIZE] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -1522,9 +1522,9 @@ unsigned char d_scanner_33_142_0_equation[SCANNER_BLOCK_SIZE] = {
 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_33_143_equation[] = {&d_shift_46_equation,NULL};
+D_Shift * d_shift_33_143_equation[] = {&d_shift_47_equation,NULL};
 
-D_Shift * d_shift_33_144_equation[] = {&d_shift_62_equation,NULL};
+D_Shift * d_shift_33_144_equation[] = {&d_shift_63_equation,NULL};
 
 unsigned char d_scanner_33_145_1_equation[SCANNER_BLOCK_SIZE] = {
 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 
@@ -1547,7 +1547,7 @@ unsigned char d_scanner_33_147_1_equation[SCANNER_BLOCK_SIZE] = {
 6, 6, 6, 6, 155, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_33_148_equation[] = {&d_shift_58_equation,NULL};
+D_Shift * d_shift_33_148_equation[] = {&d_shift_59_equation,NULL};
 
 unsigned char d_scanner_33_149_0_equation[SCANNER_BLOCK_SIZE] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -1563,7 +1563,7 @@ unsigned char d_scanner_33_150_0_equation[SCANNER_BLOCK_SIZE] = {
 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_33_151_equation[] = {&d_shift_44_equation,NULL};
+D_Shift * d_shift_33_151_equation[] = {&d_shift_45_equation,NULL};
 
 unsigned char d_scanner_33_152_1_equation[SCANNER_BLOCK_SIZE] = {
 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 
@@ -1572,7 +1572,7 @@ unsigned char d_scanner_33_152_1_equation[SCANNER_BLOCK_SIZE] = {
 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_33_153_equation[] = {&d_shift_57_equation,NULL};
+D_Shift * d_shift_33_153_equation[] = {&d_shift_58_equation,NULL};
 
 unsigned char d_scanner_33_154_0_equation[SCANNER_BLOCK_SIZE] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -1581,9 +1581,9 @@ unsigned char d_scanner_33_154_0_equation[SCANNER_BLOCK_SIZE] = {
 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_33_155_equation[] = {&d_shift_47_equation,NULL};
+D_Shift * d_shift_33_155_equation[] = {&d_shift_48_equation,NULL};
 
-D_Shift * d_shift_33_156_equation[] = {&d_shift_45_equation,NULL};
+D_Shift * d_shift_33_156_equation[] = {&d_shift_46_equation,NULL};
 
 unsigned char d_scanner_33_157_0_equation[SCANNER_BLOCK_SIZE] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -1592,9 +1592,9 @@ unsigned char d_scanner_33_157_0_equation[SCANNER_BLOCK_SIZE] = {
 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_33_158_equation[] = {&d_shift_43_equation,NULL};
+D_Shift * d_shift_33_158_equation[] = {&d_shift_44_equation,NULL};
 
-D_Shift * d_shift_33_159_equation[] = {&d_shift_61_equation,NULL};
+D_Shift * d_shift_33_159_equation[] = {&d_shift_62_equation,NULL};
 
 D_Shift * d_accepts_diff_37_0_equation[] = {0};
 D_Shift ** d_accepts_diff_37_equation[] = {
@@ -1828,7 +1828,7 @@ unsigned char d_scanner_150_0_0_equation[SCANNER_BLOCK_SIZE] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_150_3_equation[] = {&d_shift_34_equation,NULL};
+D_Shift * d_shift_150_3_equation[] = {&d_shift_35_equation,NULL};
 
 D_Shift * d_accepts_diff_151_0_equation[] = {0};
 D_Shift ** d_accepts_diff_151_equation[] = {
@@ -3011,7 +3011,7 @@ unsigned char d_goto_valid_32_equation[] = {
 D_Reduction * d_reductions_32_equation[] = {&d_reduction_74_equation};
 D_RightEpsilonHint d_right_epsilon_hints_32_equation[] = {{0, 63, &d_reduction_72_equation}};
 unsigned char d_goto_valid_33_equation[] = {
-0x0,0x0,0x0,0x0,0x0,0x0,0x8,0x74,0xe4,0xf,0x0,0x20,0x0,0x80,0xe3,0xff,0xff,0xff,0x79,0x0};
+0x0,0x0,0x0,0x0,0x0,0x0,0x8,0x74,0xe4,0xf,0x0,0x20,0x0,0x80,0xc7,0xff,0xff,0xff,0x79,0x0};
 D_Reduction * d_reductions_34_equation[] = {&d_reduction_82_equation};
 D_Reduction * d_reductions_35_equation[] = {&d_reduction_28_equation};
 D_Reduction * d_reductions_36_equation[] = {&d_reduction_2_equation};
@@ -3064,34 +3064,34 @@ D_Reduction * d_reductions_64_equation[] = {&d_reduction_83_equation};
 D_Reduction * d_reductions_65_equation[] = {&d_reduction_97_equation};
 D_Reduction * d_reductions_66_equation[] = {&d_reduction_97_equation};
 D_Reduction * d_reductions_67_equation[] = {&d_reduction_97_equation};
-D_Reduction * d_reductions_68_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_69_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_70_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_71_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_72_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_73_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_74_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_75_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_76_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_77_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_78_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_79_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_80_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_81_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_82_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_83_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_84_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_85_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_86_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_87_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_88_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_89_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_90_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_91_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_92_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_93_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_94_equation[] = {&d_reduction_110_equation};
-D_Reduction * d_reductions_95_equation[] = {&d_reduction_110_equation};
+D_Reduction * d_reductions_68_equation[] = {&d_reduction_97_equation};
+D_Reduction * d_reductions_69_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_70_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_71_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_72_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_73_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_74_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_75_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_76_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_77_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_78_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_79_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_80_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_81_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_82_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_83_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_84_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_85_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_86_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_87_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_88_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_89_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_90_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_91_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_92_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_93_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_94_equation[] = {&d_reduction_111_equation};
+D_Reduction * d_reductions_95_equation[] = {&d_reduction_111_equation};
 D_Reduction * d_reductions_96_equation[] = {&d_reduction_145_equation};
 D_Reduction * d_reductions_97_equation[] = {&d_reduction_146_equation};
 D_Reduction * d_reductions_98_equation[] = {&d_reduction_147_equation};
@@ -3100,12 +3100,12 @@ D_Reduction * d_reductions_100_equation[] = {&d_reduction_80_equation};
 D_Reduction * d_reductions_101_equation[] = {&d_reduction_141_equation};
 unsigned char d_goto_valid_102_equation[] = {
 0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
-D_Reduction * d_reductions_102_equation[] = {&d_reduction_104_equation};
+D_Reduction * d_reductions_102_equation[] = {&d_reduction_105_equation};
 D_Reduction * d_reductions_103_equation[] = {&d_reduction_95_equation};
 D_Reduction * d_reductions_104_equation[] = {&d_reduction_95_equation};
 unsigned char d_goto_valid_105_equation[] = {
 0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
-D_Reduction * d_reductions_105_equation[] = {&d_reduction_108_equation};
+D_Reduction * d_reductions_105_equation[] = {&d_reduction_109_equation};
 D_Reduction * d_reductions_106_equation[] = {&d_reduction_141_equation};
 unsigned char d_goto_valid_107_equation[] = {
 0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8,0x0,0x0,0x0,0x0,0x0,0x40,0x0,0x0,0x0,0x0,0x0,0x0};
@@ -3166,7 +3166,7 @@ D_Reduction * d_reductions_148_equation[] = {&d_reduction_83_equation};
 unsigned char d_goto_valid_149_equation[] = {
 0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x40,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
 unsigned char d_goto_valid_150_equation[] = {
-0x0,0x0,0x90,0x80,0x48,0x22,0x34,0x0,0x2,0x0,0x0,0x20,0xc0,0x0,0x4,0x0,0x0,0x0,0x0,0x0};
+0x0,0x0,0x90,0x80,0x48,0x22,0x34,0x0,0x2,0x0,0x0,0x20,0xc0,0x0,0x8,0x0,0x0,0x0,0x0,0x0};
 D_Reduction * d_reductions_150_equation[] = {&d_reduction_83_equation};
 unsigned char d_goto_valid_151_equation[] = {
 0x0,0x0,0x90,0x80,0x48,0x22,0x34,0x0,0x10,0x0,0x0,0x60,0xc0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
@@ -3184,17 +3184,17 @@ D_Reduction * d_reductions_159_equation[] = {&d_reduction_76_equation};
 D_Reduction * d_reductions_160_equation[] = {&d_reduction_144_equation};
 unsigned char d_goto_valid_161_equation[] = {
 0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x80,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
-D_Reduction * d_reductions_161_equation[] = {&d_reduction_102_equation};
-D_Reduction * d_reductions_162_equation[] = {&d_reduction_105_equation};
-D_Reduction * d_reductions_163_equation[] = {&d_reduction_103_equation};
-D_Reduction * d_reductions_164_equation[] = {&d_reduction_106_equation};
-D_Reduction * d_reductions_165_equation[] = {&d_reduction_109_equation};
-D_Reduction * d_reductions_166_equation[] = {&d_reduction_107_equation};
+D_Reduction * d_reductions_161_equation[] = {&d_reduction_103_equation};
+D_Reduction * d_reductions_162_equation[] = {&d_reduction_106_equation};
+D_Reduction * d_reductions_163_equation[] = {&d_reduction_104_equation};
+D_Reduction * d_reductions_164_equation[] = {&d_reduction_107_equation};
+D_Reduction * d_reductions_165_equation[] = {&d_reduction_110_equation};
+D_Reduction * d_reductions_166_equation[] = {&d_reduction_108_equation};
 D_Reduction * d_reductions_167_equation[] = {&d_reduction_91_equation};
 D_Reduction * d_reductions_168_equation[] = {&d_reduction_91_equation};
 D_Reduction * d_reductions_169_equation[] = {&d_reduction_93_equation};
 unsigned char d_goto_valid_170_equation[] = {
-0x0,0x0,0x0,0x0,0x0,0x0,0x80,0x74,0xe4,0xf,0x0,0x20,0x0,0x80,0xe3,0xff,0xff,0xff,0x79,0x0};
+0x0,0x0,0x0,0x0,0x0,0x0,0x80,0x74,0xe4,0xf,0x0,0x20,0x0,0x80,0xc7,0xff,0xff,0xff,0x79,0x0};
 D_Reduction * d_reductions_171_equation[] = {&d_reduction_89_equation};
 unsigned char d_goto_valid_172_equation[] = {
 0x0,0x0,0x90,0x80,0x48,0x22,0x34,0x0,0x0,0x0,0x0,0x60,0xc0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
@@ -3204,8 +3204,8 @@ D_Reduction * d_reductions_174_equation[] = {&d_reduction_87_equation};
 unsigned char d_goto_valid_175_equation[] = {
 0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8,0x0,0x0,0x0,0x0,0x0,0x40,0x0,0x0,0x0,0x0,0x0,0x0};
 D_Reduction * d_reductions_175_equation[] = {&d_reduction_87_equation};
-D_Reduction * d_reductions_176_equation[] = {&d_reduction_100_equation};
-D_Reduction * d_reductions_177_equation[] = {&d_reduction_101_equation};
+D_Reduction * d_reductions_176_equation[] = {&d_reduction_101_equation};
+D_Reduction * d_reductions_177_equation[] = {&d_reduction_102_equation};
 unsigned short d_gotos_equation[571] = {
 9,10,11,12,22,13,20,21,26,43,39,27,14,15,16,17,
 18,51,45,28,41,26,47,29,27,49,30,53,54,31,57,59,
@@ -3221,7 +3221,7 @@ unsigned short d_gotos_equation[571] = {
 0,24,25,105,0,0,106,107,108,109,110,111,112,0,0,0,
 0,156,8,135,136,137,138,139,140,168,169,0,0,0,65,0,
 0,24,25,31,0,0,0,32,0,0,24,25,33,0,34,35,
-66,67,68,0,0,0,69,70,71,72,73,74,75,76,77,78,
+66,67,68,69,0,0,0,70,71,72,73,74,75,76,77,78,
 79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,
 95,96,0,0,97,98,99,8,26,0,0,27,131,132,133,134,
 24,25,0,28,0,26,0,29,27,0,114,0,0,31,0,0,
@@ -3236,11 +3236,11 @@ unsigned short d_gotos_equation[571] = {
 0,27,0,32,0,0,0,164,33,28,34,35,0,29,0,0,
 178,0,0,31,0,0,0,32,0,0,167,0,33,0,34,35,
 0,0,0,23,0,0,0,0,0,0,0,0,24,25,0,0,
-0,0,0,23,165,0,0,0,162,0,0,174,24,25,175,0,
+0,0,0,23,165,0,0,0,0,162,0,174,24,25,175,0,
 102,103,104,0,0,0,105,23,177,106,107,176,109,110,111,112,
 24,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,65,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,66,67,68,0,0,0,69,70,71,72,73,74,75,
+0,0,0,66,67,68,69,0,0,0,70,71,72,73,74,75,
 76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,
 92,93,94,95,96,0,0,97,98,99,8};
 
@@ -3553,6 +3553,7 @@ D_Symbol d_symbols_equation[] = {
 {D_SYMBOL_STRING, "atan2(", 6, -1},
 {D_SYMBOL_STRING, "min(", 4, -1},
 {D_SYMBOL_STRING, "max(", 4, -1},
+{D_SYMBOL_STRING, "delay(", 6, -1},
 {D_SYMBOL_STRING, ",", 1, -1},
 {D_SYMBOL_STRING, ")", 1, -1},
 {D_SYMBOL_STRING, ")", 1, -1},
@@ -3583,7 +3584,6 @@ D_Symbol d_symbols_equation[] = {
 {D_SYMBOL_STRING, "factorial(", 10, -1},
 {D_SYMBOL_STRING, "factln(", 7, -1},
 {D_SYMBOL_STRING, "rem(", 4, -1},
-{D_SYMBOL_STRING, "delay(", 6, -1},
 {D_SYMBOL_STRING, "(", 1, -1},
 {D_SYMBOL_STRING, ")", 1, -1},
 {D_SYMBOL_REGEX, "0|([1-9][0-9]*)", 15, -1},

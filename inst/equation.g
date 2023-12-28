@@ -67,7 +67,7 @@ power_operator   : '^';
 
 function: function1 | function2;
 
-function2_name: 'atan2(' | 'min(' | 'max(';
+function2_name: 'atan2(' | 'min(' | 'max(' | 'delay(';
 
 function2 : function2_name (logical_or_expression)*  ',' logical_or_expression* ')' ;
 
@@ -76,8 +76,7 @@ function1_name: 'abs(' | 'sqrt(' | 'exp(' | 'log(' | 'log10(' | 'logit(' |
         'invlogit(' | 'probit(' | 'norminv(' | 'qnorm(' | 'normcdf(' |
         'pnorm(' | 'sin(' | 'cos(' | 'tan(' |  'asin(' |  'acos(' |
         'atan(' |  'cosh(' | 'tanh(' | 'gammaln(' | 'lgamma(' |
-        'floor(' | 'ceil(' | 'factorial(' | 'factln(' | 'rem(' |
-        'delay(';
+        'floor(' | 'ceil(' | 'factorial(' | 'factln(' | 'rem(';
 
 
 constant : decimalint | float1 | float2;

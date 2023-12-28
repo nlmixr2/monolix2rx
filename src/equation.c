@@ -41,6 +41,7 @@ int gBufFree = 0;
 D_Parser *curP=NULL;
 D_Parser *errP=NULL;
 D_ParseNode *_pn = 0;
+extern sbuf sbTransErr;
 
 void freeP(void){
   if (_pn){
@@ -143,11 +144,11 @@ int equation_identifier_or_constant(char *name,  D_ParseNode *pn) {
       sAppendN(&curLine, "dose", 4);
       return 1;
     } else if (!strcmp("inftDose", v)) {
-      /* sClear(&sbTransErr); */
-      /* sAppend(&sbTransErr, "'inftDose' Monolix declaration not supported in translation"); */
-      /* updateSyntaxCol(); */
-      /* trans_syntax_error_report_fn0(sbTransErr.s); */
-      /* finalizeSyntaxError(); */
+      sClear(&sbTransErr);
+      sAppend(&sbTransErr, "'inftDose' Monolix declaration not supported in translation");
+      updateSyntaxCol();
+      trans_syntax_error_report_fn0(sbTransErr.s);
+      finalizeSyntaxError();
       return 1;
     } else if (!strcmp("tDose", v)) {
       sAppendN(&curLine, "tlast", 5);
@@ -156,11 +157,11 @@ int equation_identifier_or_constant(char *name,  D_ParseNode *pn) {
       sAppendN(&curLine, "time", 4);
       return 1;
     } else if (!strcmp("t_0", v) || !strcmp("t0", v)) {
-      /* sClear(&sbTransErr); */
-      /* sAppend(&sbTransErr, "'t_0' or 't0' Monolix declaration not supported in translation"); */
-      /* updateSyntaxCol(); */
-      /* trans_syntax_error_report_fn0(sbTransErr.s); */
-      /* finalizeSyntaxError(); */
+      sClear(&sbTransErr);
+      sAppend(&sbTransErr, "'t_0' or 't0' Monolix declaration not supported in translation");
+      updateSyntaxCol();
+      trans_syntax_error_report_fn0(sbTransErr.s);
+      finalizeSyntaxError();
       return 1;
     }
     // ddt_x becomes d/dt(x)
@@ -212,19 +213,12 @@ int equation_function_name(char *name,  D_ParseNode *pn) {
     } else if (!strcmp("factln(", v)) {
       sAppendN(&curLine, "lfactorial(", 11);
       return 1;
-    } else if (!strcmp("delay(", v)) {
-      /* sClear(&sbTransErr); */
-      /* sAppend(&sbTransErr, "delay() not supported in translation"); */
-      /* updateSyntaxCol(); */
-      /* trans_syntax_error_report_fn0(sbTransErr.s); */
-      /* finalizeSyntaxError(); */
-      return 1;
     } else if (!strcmp("rem(", v)) {
-      /* sClear(&sbTransErr); */
-      /* sAppend(&sbTransErr, "rem() not supported in translation"); */
-      /* updateSyntaxCol(); */
-      /* trans_syntax_error_report_fn0(sbTransErr.s); */
-      /* finalizeSyntaxError(); */
+      sClear(&sbTransErr);
+      sAppend(&sbTransErr, "rem() not supported in translation");
+      updateSyntaxCol();
+      trans_syntax_error_report_fn0(sbTransErr.s);
+      finalizeSyntaxError();
       return 1;
     }
     sAppend(&curLine, "%s", v);
@@ -232,6 +226,14 @@ int equation_function_name(char *name,  D_ParseNode *pn) {
   } else if (!strcmp("function2_name", name)) {
     D_ParseNode *xpn = d_get_child(pn, 0);
     char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    if (!strcmp("delay(", v)) {
+      sClear(&sbTransErr);
+      sAppend(&sbTransErr, "delay() not supported in translation");
+      updateSyntaxCol();
+      trans_syntax_error_report_fn0(sbTransErr.s);
+      finalizeSyntaxError();
+      return 1;
+    }
     sAppend(&curLine, "%s", v);
     return 1;
   }
