@@ -12,6 +12,7 @@
 
 void R_init_monolix2rx(DllInfo *info) {
   R_CallMethodDef callMethods[]  = {
+    {"_monolix2rx_trans_equation", (DL_FUNC) &_monolix2rx_trans_equation, 1},
     {"_monolix2rx_trans_mlxtrantask", (DL_FUNC) &_monolix2rx_trans_mlxtrantask, 1},
     {"_monolix2rx_trans_longoutput", (DL_FUNC) &_monolix2rx_trans_longoutput, 1},
     {"_monolix2rx_trans_mlxtran_pk", (DL_FUNC) &_monolix2rx_trans_mlxtran_pk, 1},
@@ -23,7 +24,6 @@ void R_init_monolix2rx(DllInfo *info) {
     {"_monolix2rx_trans_individual", (DL_FUNC) &_monolix2rx_trans_individual, 2},
     {"_monolix2rx_trans_indDef", (DL_FUNC) &_monolix2rx_trans_indDef, 1},
     {"_monolix2rx_trans_parameter", (DL_FUNC) &_monolix2rx_trans_parameter, 1},
-    {"_monolix2rx_trans_longEq", (DL_FUNC) &_monolix2rx_trans_longEq, 1},
     {NULL, NULL, 0}
   };
   // log likelihoods used in calculations

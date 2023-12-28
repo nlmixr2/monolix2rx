@@ -1,4 +1,3 @@
-SEXP _monolix2rx_trans_longEq(SEXP in);
 SEXP _monolix2rx_trans_indDef(SEXP in);
 SEXP _monolix2rx_trans_parameter(SEXP in);
 SEXP _monolix2rx_trans_individual(SEXP in, SEXP what);
@@ -10,6 +9,7 @@ SEXP _monolix2rx_trans_mlxtran_op(SEXP in, SEXP what);
 SEXP _monolix2rx_trans_mlxtran_pk(SEXP in);
 SEXP _monolix2rx_trans_longoutput(SEXP in);
 SEXP _monolix2rx_trans_mlxtrantask(SEXP in);
+SEXP _monolix2rx_trans_equation(SEXP in);
 
 void monolix2rx_full_ini(void);
 
