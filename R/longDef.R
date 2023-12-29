@@ -274,7 +274,6 @@ print.monolix2rxLongDef <- function(x, ...) {
              .err <- .lst$err
              cat(.lst$var, " = {type=count", sep="")
              cat(",\n", paste(.err$code, collapse="\n"), "}\n", sep="")
-
            } else  {
              .err <- .lst$err
              .v <- .varOrFixed(.err$typical, x$fixed)
