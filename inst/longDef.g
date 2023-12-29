@@ -70,6 +70,7 @@ count: identifier '=' '{' 'type' '=' 'count' (',' codeLine)* '}';
 statement: endpoint singleLineComment?
     | tte singleLineComment?
     | categorical singleLineComment?
+    | count singleLineComment?
     ;
 
 constant : decimalint | float1 | float2;

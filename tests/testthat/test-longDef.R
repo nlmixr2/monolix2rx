@@ -126,4 +126,15 @@ transitionRate(2,1) = q21}")
   class(tmp2) <- "monolix2rxLongDef"
   expect_equal(tmp, tmp2)
 
+
+  tmp <- .longDef("y = {type=count, P(y=k) = exp(-lambda)*(lambda^k)/factorial(k)}")
+
+  tmp2 <- list(endpoint = list(list(var = "y",
+                                    dist = "count",
+                                    pred = NA_character_,
+                                    err = list(code = "P(y=k) = exp(-lambda)*(lambda^k)/factorial(k)"))),
+               fixed = numeric(0))
+  class(tmp2) <- "monolix2rxLongDef"
+  expect_equal(tmp, tmp2)
+
 })

@@ -73,4 +73,30 @@ test_that("test single endpoint handling", {
   expect_equal(.handleSingleEndpoint(.ret),
                "rx_pred_cp ~ add(pkadd__err) + pow(prop__err, tc) + combined2() | rx_prd_cp")
 
+  tmp <- .longDef("Seizure = {type = event, eventType = intervalCensored, maxEventNumber = 1,
+rightCensoringTime = 120, intervalLength = 10, hazard = haz}")
+
+  expect_error(.handleSingleEndpoint(tmp$endpoint[[1]]))
+
+  tmp <- .longDef("State = {type = categorical, categories = {1,2,3}, dependence = Markov
+P(State_1=1) = a1
+P(State_1=2) = a2
+logit(P(State <=1|State_p=1)) = a11
+logit(P(State <=2|State_p=1)) = a11+a12
+logit(P(State <=1|State_p=2)) = a21
+logit(P(State <=2|State_p=2)) = a21+a22
+logit(P(State <=1|State_p=3)) = a31
+logit(P(State <=2|State_p=3)) = a31+a32}")
+
+  expect_error(.handleSingleEndpoint(tmp$endpoint[[1]]))
+
+  tmp <- .longDef("y = {type=count, P(y=k) = exp(-lambda)*(lambda^k)/factorial(k)}")
+
+  expect_error(.handleSingleEndpoint(tmp$endpoint[[1]]))
+
+  tmp <- .longDef("rx_prd_cp={distribution = normal, prediction = rx_pred_cp, errorModel=combined2c(pkadd__err,prop__err, tc)}")
+
+  expect_equal(.handleSingleEndpoint(tmp$endpoint[[1]]),
+               "rx_pred_cp ~ add(pkadd__err) + pow(prop__err, tc) + combined2() | rx_prd_cp")
+
 })
