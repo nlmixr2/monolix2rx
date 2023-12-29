@@ -464,4 +464,14 @@ empty(adm=3, target=Ap)")
   .ret2$reset <- data.frame(adm = 3L, target = "all")
   expect_equal(.ret, .ret2)
 
+  expect_error(.pk("Cc = pkmodel(Tlag, ka, k, k12, k21)"))
+
+  expect_error(.pk("{Cc, Ce} = pkmodel(Tlag, ka, p, V, Vm, Km, k12, k21, k13, k31, ke0, Tk0)"))
+
+  expect_error(.pk("Cc = pkmodel(ka, Cl, V, Vm, Km)"))
+
+  expect_error(.pk("{Cc, Ce} = pkmodel(Tlag, ka, p, V, Vm, Km, k12, k21, k13, k31)"))
+
+  expect_error(.pk("Cc = pkmodel(Tlag, ka, p, V, Vm, Km, k12, k21, k13, k31, ke0)"))
+
 })

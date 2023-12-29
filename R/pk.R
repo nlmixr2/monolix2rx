@@ -212,6 +212,48 @@
     return(invisible())
   }
 }
+#' Validate the pkmodel
+#'
+#' @param pkmodel PK model character vector
+#' @param Ce effect concentration (if it exists)
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.validatePkModel <- function(pkmodel, Ce) {
+  if (is.na(pkmodel["V"])) {
+    stop("pkmodel() requires a volume 'V'",
+         call.=FALSE)
+  }
+  if (!is.na(pkmodel["Tk0"])) {
+    # Excludes ka, Ktr and Mtt.
+    if (!is.na(pkmodel["ka"]) ||
+          !is.na(pkmodel["Ktr"]) ||
+           !is.na(pkmodel["Mtt"])) {
+      stop("pkmodel defines a zero order absorption duration ('Tk0') and cannot also define 'ka', 'Ktr', and/or 'Mtt'",
+           call.=FALSE)
+    }
+  }
+  if (!is.na(pkmodel["k"])) {
+    if (!is.na(pkmodel["Cl"]) ||
+          !is.na(pkmodel["Vm"]) ||
+           !is.na(pkmodel["Km"])) {
+      stop("pkmodel defines an elimination constant ('k') and cannot also define 'Cl', 'Vm', and/or 'Km'",
+           call.=FALSE)
+    }
+  }
+  if (!is.na(pkmodel["Cl"])) {
+    if (!is.na(pkmodel["Vm"]) ||
+          !is.na(pkmodel["Km"])) {
+      stop("pkmodel defines an elimination constant ('Cl') and cannot also define 'Vm', and/or 'Km'",
+           call.=FALSE)
+    }
+  }
+  if (!is.na(Ce) && is.na(pkmodel["ke0"])) {
+    stop("pkmodel ke0 not defined but Ce is defined",
+         call.=FALSE)
+  }
+}
+
 #' Parse PK
 #'
 #' @param text pk macro parse text
@@ -222,6 +264,7 @@
   .pkIni(TRUE)
   .Call(`_monolix2rx_trans_mlxtran_pk`, text)
   .pkPushStatement()
+  .validatePkModel(.monolix2rx$pkPars, .monolix2rx$pkCe)
   .ret <- list(Cc=.monolix2rx$pkCc,
                Ce=.monolix2rx$pkCe,
                pkmodel=.monolix2rx$pkPars,
