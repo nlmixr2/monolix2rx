@@ -17,6 +17,10 @@ monolix2rx <- function(mlxtran) {
   .model <- c("model({",
               .ret$MODEL$INDIVIDUAL$DEFINITION$rx,
               .ret$MODEL$LONGITUDINAL$EQUATION$rx,
+              vapply(seq_along(.ret$MODEL$LONGITUDINAL$DEFINITION$endpoint),
+                     function(i) {
+                       .handleSingleEndpoint(.ret$MODEL$LONGITUDINAL$DEFINITION$endpoint[[i]])
+                     }, character(1), USE.NAMES = FALSE),
               "})")
   .model <- str2lang(paste0(.model, collapse="\n"))
   .model
