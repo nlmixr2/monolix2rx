@@ -152,6 +152,7 @@
 .mlxtranLine <- function(line) {
   if (.mlxEnv$isDesc) {
     .mlxEnv$desc <- .mlxtranPasteLine(.mlxEnv$desc, line)
+    return(invisible())
   }
   .s <- .mlxEnv$section
   .ss <- .mlxEnv$subsection

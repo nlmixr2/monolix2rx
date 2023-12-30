@@ -136,4 +136,6 @@ test_that("mlxtran initial list", {
 
   expect_snapshot(print(v))
 
+  expect_error(as.list(v), NA)
+
 })
