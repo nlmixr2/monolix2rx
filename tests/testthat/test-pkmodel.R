@@ -96,4 +96,15 @@ compartment(cmt=1, amount=Ac, volume=V, concentration=Cc)")
   expect_equal(.pkmodel(.ret$pkmodel, .ret$Cc, .ret$Ce),
                character(0))
 
+
+  .ret <- .pk("Cp = pkmodel(V, k=kel, p=f, Tlag, k12, k21, k13, k31, Tk0)")
+
+  expect_equal(.pkmodel(.ret$pkmodel, .ret$Cc, .ret$Ce),
+               c("d/dt(central) <-  - k12*central + k21*periph - k13*central + k31*periph2 - kel*central",
+                 "alag(central) <- Tlag", "dur(central) <- Tk0",
+                 "f(central) <- f",
+                 "d/dt(periph) <- k12*central - k21*periph",
+                 "d/dt(periph2) <- k13*central - k31*periph2",
+                 "Cp <- central/V"))
+
 })
