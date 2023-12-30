@@ -1,3 +1,15 @@
+.pkadm <- new.env(parent=emptyenv())
+
+.pkadmReset <- function() {
+  .pkadm$adm <- data.frame(adm=integer(0), compartment=character(0), cmt=integer(0))
+}
+.pkadmPush <- function(adm, compartment, cmt) {
+  if (!exists("adm", envir=.pkadm)) {
+    .pkadmReset()
+  }
+  .pkadm$adm <- rbind(.pkadm$adm,
+                      data.frame(adm=adm, compartment=compartment, cmt=cmt))
+}
 #' Process the pk model portion of the PK: block to translate to rxode2
 #'
 #' @param pkmodel PK parameters defined in Monolix
@@ -25,6 +37,10 @@
   .centralExtra <- character(0)
   if (!is.na(.pkmodel["ka"])) {
     .ret <- paste0("d/dt(", .depot, ") <- -", .pkmodel["ka"], "*", .depot)
+    # Monolix defines compartment differently; oral absorption is
+    # associated with the central compartment
+    .pkadmPush(1L, .depot, 1L)
+    .pkadmPush(NA_integer_, .central, 1L)
     if (!is.na(.pkmodel["Mtt"]) && !is.na(.pkmodel["Ktr"])) {
       .ret <- paste0(.ret, " + transit(",
                      .pkmodel["Mtt"], "*", .pkmodel["Ktr"], "-1, ",
@@ -43,6 +59,7 @@
                 paste0("alag(", .depot, ") <- ", .pkmodel["Tlag"]))
     }
   } else {
+    .pkadmPush(1L, .central, 1L)
     .centralOde <- paste0("d/dt(", .central, ") <- ")
     if (!is.na(.pkmodel["Tlag"])) {
       .centralExtra <- c(.centralExtra,
@@ -58,6 +75,7 @@
     }
   }
   if (!is.na(.pkmodel["k12"]) && !is.na(.pkmodel["k21"])) {
+    .pkadmPush(NA_integer_, .periph, 2L)
     .centralOde <- paste0(.centralOde, " - ", .pkmodel["k12"], "*", .central,
                           " + ", .pkmodel["k21"], "*", .periph)
     .centralExtra <- c(.centralExtra,
@@ -65,6 +83,7 @@
                               " - ", .pkmodel["k21"], "*", .periph))
   }
   if (!is.na(.pkmodel["k13"]) && !is.na(.pkmodel["k31"])) {
+    .pkadmPush(NA_integer_, .periph2, 3L)
     .centralOde <- paste0(.centralOde, " - ", .pkmodel["k13"], "*", .central,
                           " + ", .pkmodel["k31"], "*", .periph2)
     .centralExtra <- c(.centralExtra,
@@ -86,6 +105,9 @@
   .ret <- c(.ret,
             paste0(Cc, " <- ", .central, "/", .pkmodel["V"]))
   if (!is.na(.pkmodel["ke0"]) && !is.na(Ce)) {
+    # it isn't clear if the effect compartment is defined in the cmt def of pkmacro.
+    # for now just use NA
+    .pkadmPush(NA_integer_, Ce, NA_integer_)
     .ret <- c(.ret,
               paste0("d/dt(", Ce, ") <- ", .pkmodel["ke0"], "*(", Cc, " - ", Ce, ")"))
   }
