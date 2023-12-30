@@ -134,4 +134,6 @@ test_that("mlxtran initial list", {
     expect_true(inherits(v$FIT$FIT, "monolix2rxFit"))
   })
 
+  expect_snapshot(print(v))
+
 })
