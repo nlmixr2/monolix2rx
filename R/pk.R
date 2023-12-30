@@ -220,6 +220,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .validatePkModel <- function(pkmodel, Ce) {
+  if (all(is.na(pkmodel))) return(invisible())
   if (is.na(pkmodel["V"])) {
     stop("pkmodel() requires a volume 'V'",
          call.=FALSE)

@@ -107,8 +107,8 @@ int mlxtran_pk_process_pkmodel2(const char* name, D_ParseNode *pn, int i) {
 
 int mlxtran_pk_process_declarePars(const char* name, D_ParseNode *pn, int i) {
   if (i == 0 &&
-      (!strcmp("pkpars0", name) ||
-       !strcmp("pkparsE0", name) ||
+      (!strcmp("pkpars", name) ||
+       !strcmp("pkparsE", name) ||
        !strcmp("ke0Op", name) ||
        !strcmp("TlagOp", name) ||
        !strcmp("pOp", name) ||
@@ -122,8 +122,34 @@ int mlxtran_pk_process_declarePars(const char* name, D_ParseNode *pn, int i) {
        !strcmp("vmOp", name) ||
        !strcmp("kmOp", name))) {
     D_ParseNode *xpn = d_get_child(pn, 0);
+    // check for '=' and call par declare followed by assign if found.
     char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
-    monolix2rxSingle(v, ".pkParDeclare");
+    char *v2 = v;
+    while (v2[0] != 0 && v2[0] != '=') {
+      v2++;
+    }
+    if (v2[0] == '=') {
+      // This argument was somehow missed by the parser
+      v2[0] = 0;
+      monolix2rxSingle(v, ".pkParDeclare");
+      // take off white space for second argument
+      v2++;
+      while (v2[0] == ' ' || v2[0] == '\t') {
+        v2++;
+      }
+      v = v2;
+      while (v[0] != 0) {
+        v++;
+      }
+      v--;
+      while (v[0] == ' ' || v[0] == '\t') {
+        v[0] = 0;
+        v--;
+      }
+      monolix2rxSingle(v2, ".pkParAssign");
+    } else {
+      monolix2rxSingle(v, ".pkParDeclare");
+    }
     return 1;
   }
   return 0;
