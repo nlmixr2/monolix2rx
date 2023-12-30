@@ -56,6 +56,7 @@
       depot(adm = 1, target = depot, Tlag = 0, p = 1)
       
       EQUATION:
+      ; parsed: $MODEL$LONGITUDINAL$EQUATION
       DCP = center/v
       PD = 1-emax*DCP/(ec50+DCP)
       effect_0 = e0

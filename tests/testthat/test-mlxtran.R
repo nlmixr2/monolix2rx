@@ -132,10 +132,16 @@ test_that("mlxtran initial list", {
     expect_true(inherits(v$MONOLIX$SETTINGS$GLOBAL, "monolix2rxOp"))
     expect_true(inherits(v$MONOLIX$SETTINGS$POPULATION, "monolix2rxOp"))
     expect_true(inherits(v$FIT$FIT, "monolix2rxFit"))
+
+    v <- .mlxtran(lines, equation=TRUE)
+
+    expect_snapshot(print(v))
+
+    expect_error(as.list(v), NA)
+
   })
 
-  expect_snapshot(print(v))
 
-  expect_error(as.list(v), NA)
+
 
 })

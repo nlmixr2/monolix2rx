@@ -38,6 +38,8 @@ test_that("[LONGITUDINAL] DEFINITION:", {
   tmp <- .longDef("Seizure = {type = event, eventType = intervalCensored, maxEventNumber = 1,
 rightCensoringTime = 120, intervalLength = 10, hazard = haz}")
 
+  expect_snapshot(print(tmp))
+
   tmp2 <- list(endpoint = list(list(var = "Seizure",
                                     dist = "event",
                                     pred = "haz",
@@ -69,6 +71,8 @@ rightCensoringTime = 120, intervalLength = 10, hazard = haz}")
 logit(P(level <=0)) = th1
 logit(P(level <=1)) = th1 + th2
 logit(P(level <=2)) = th1 + th2 + th3}")
+
+  expect_snapshot(print(tmp))
 
   tmp2 <- list(endpoint = list(list(var = "level",
                                     dist = "categorical",
@@ -128,6 +132,8 @@ transitionRate(2,1) = q21}")
 
 
   tmp <- .longDef("y = {type=count, P(y=k) = exp(-lambda)*(lambda^k)/factorial(k)}")
+
+  expect_snapshot(print(tmp))
 
   tmp2 <- list(endpoint = list(list(var = "y",
                                     dist = "count",
