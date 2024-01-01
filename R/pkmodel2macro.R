@@ -18,10 +18,11 @@
 #' This allows DRY generation of rxode2 type models with macros
 #'
 #' @param pk pk parameters
-#' @return
+#' @param txt boolean to return text instead of parsed pk macro
+#' @return text or parsed pk object
 #' @noRd
 #' @author Matthew L. Fidler
-.pkmodel2macro <- function(pk) {
+.pkmodel2macro <- function(pk, txt=FALSE) {
   .pkmodel <- pk$pkmodel
   .macro <- paste0("compartment(cmt=1, volume=", ifelse(.pkmodel["V"] == "", "V",
                                                         paste0("V=",.pkmodel["V"])),
@@ -54,7 +55,7 @@
                        .getPkmodelStr(.pkmodel, "k21"),
                        ")"))
   }
-  if (!is.na(.pkmodel["k13"]) && !is.na(.pkmodel["31"])) {
+  if (!is.na(.pkmodel["k13"]) && !is.na(.pkmodel["k31"])) {
     .macro <- c(.macro,
                 paste0("peripheral(",
                        .getPkmodelStr(.pkmodel, "k13", ""),
@@ -76,6 +77,7 @@
                        ", concentration=", pk$Ce,
                        ")"))
   }
+  if (txt) return(.macro)
   .macro <- paste(.macro, collapse="\n")
   .pk2 <- .pk(.macro)
   .pk2$compartment <- rbind(.pk2$compartment, pk$compartment)

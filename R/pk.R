@@ -26,6 +26,8 @@
                             k31=NA_character_,
                             ke0=NA_character_)
 
+    .monolix2rx$admd <- data.frame(adm=integer(0), admd=integer(0))
+
     .monolix2rx$pkCmt <- data.frame(cmt=integer(0),
                                     amount=character(0),
                                     volume=character(0),
@@ -50,6 +52,7 @@
                                          kt=character(0))
 
     .monolix2rx$pkDepot <- data.frame(adm=integer(0),
+                                      admd=integer(0),
                                       target=character(0),
                                       Tlag=character(0),
                                       p=character(0),
@@ -59,6 +62,7 @@
                                       Mtt=character(0))
 
     .monolix2rx$pkOral <- data.frame(adm=integer(0),
+                                     admd=integer(0),
                                      cmt=integer(0),
                                      Tlag=character(0),
                                      p=character(0),
@@ -68,12 +72,15 @@
                                      Mtt=character(0))
 
     .monolix2rx$pkIv <- data.frame(adm=integer(0),
+                                   admd=integer(0),
                                    cmt=integer(0),
                                    Tlag=character(0),
                                    p=character(0))
     .monolix2rx$pkEmpty <- data.frame(adm=integer(0),
+                                      admd=integer(0),
                                       target=character(0))
     .monolix2rx$pkReset <- data.frame(adm=integer(0),
+                                      admd=integer(0),
                                       target=character(0))
     .monolix2rx$pkElimination <- data.frame(cmt=integer(0),
                                             V=character(0),
@@ -108,6 +115,7 @@
                                         kt=NA_character_)
 
   .monolix2rx$curDepot <- data.frame(adm=NA_integer_,
+                                     admd=NA_integer_,
                                      target=NA_character_,
                                      Tlag=NA_character_,
                                      p=NA_character_,
@@ -117,6 +125,7 @@
                                      Mtt=NA_character_)
 
   .monolix2rx$curOral <- data.frame(adm=NA_integer_,
+                                    admd=NA_integer_,
                                     cmt=NA_integer_,
                                     Tlag=NA_character_,
                                     p=NA_character_,
@@ -126,13 +135,16 @@
                                     Mtt=NA_character_)
 
   .monolix2rx$curIv <- data.frame(adm=NA_integer_,
+                                  admd=NA_integer_,
                                   cmt=NA_integer_,
                                   Tlag=NA_character_,
                                   p=NA_character_)
 
   .monolix2rx$curEmpty <- data.frame(adm=NA_integer_,
+                                     admd=NA_integer_,
                                      target=NA_character_)
   .monolix2rx$curReset <- data.frame(adm=NA_integer_,
+                                     admd=NA_integer_,
                                      target=NA_character_)
   .monolix2rx$curElimination <- data.frame(cmt=NA_integer_,
                                            V=NA_character_,
@@ -141,6 +153,28 @@
                                            Vm=NA_character_,
                                            Km=NA_character_)
 }
+#' Integrate the dose number into the adm dataset
+#'
+#' @param df data frame to integate
+#' @return data frame with admd (adm dose number) integrated
+#' @noRd
+#' @author Matthew L. Fidler
+.pkGetAdmd <- function(df) {
+  .adm <- df$adm
+  .admd <- .monolix2rx$admd[.monolix2rx$admd$adm == .adm, "admd"]
+  if (length(.admd) == 0L) {
+    df$admd <- 1L
+    .monolix2rx$admd <- rbind(.monolix2rx$admd,
+                              data.frame(adm=df$adm, admd=1L))
+  } else {
+    .admd <- max(.admd) + 1L
+    df$admd <- .admd
+    .monolix2rx$admd <- rbind(.monolix2rx$admd,
+                              data.frame(adm=df$adm, admd=.admd))
+  }
+  df
+}
+
 #' Pushes the Pk information based on current statement
 #'
 #' @return nothing, called for side effect
@@ -177,31 +211,31 @@
   }
   if (.monolix2rx$pkStatement == "depot") {
     .monolix2rx$pkDepot <- rbind(.monolix2rx$pkDepot,
-                                 .monolix2rx$curDepot)
+                                 .pkGetAdmd(.monolix2rx$curDepot))
     .pkIni(FALSE)
     return(invisible())
   }
   if (.monolix2rx$pkStatement == "oral") {
     .monolix2rx$pkOral <- rbind(.monolix2rx$pkOral,
-                                .monolix2rx$curOral)
+                                .pkGetAdmd(.monolix2rx$curOral))
     .pkIni(FALSE)
     return(invisible())
   }
   if (.monolix2rx$pkStatement == "iv") {
     .monolix2rx$pkIv <- rbind(.monolix2rx$pkIv,
-                                .monolix2rx$curIv)
+                              .pkGetAdmd(.monolix2rx$curIv))
     .pkIni(FALSE)
     return(invisible())
   }
   if (.monolix2rx$pkStatement == "empty") {
     .monolix2rx$pkEmpty <- rbind(.monolix2rx$pkEmpty,
-                                 .monolix2rx$curEmpty)
+                                 .pkGetAdmd(.monolix2rx$curEmpty))
     .pkIni(FALSE)
     return(invisible())
   }
   if (.monolix2rx$pkStatement == "reset") {
     .monolix2rx$pkReset <- rbind(.monolix2rx$pkReset,
-                                 .monolix2rx$curReset)
+                                 .pkGetAdmd(.monolix2rx$curReset))
     .pkIni(FALSE)
     return(invisible())
   }
@@ -278,7 +312,8 @@
                iv=.monolix2rx$pkIv,
                empty=.monolix2rx$pkEmpty,
                reset=.monolix2rx$pkReset,
-               elimination=.monolix2rx$pkElimination)
+               elimination=.monolix2rx$pkElimination,
+               admd=.monolix2rx$admd)
   class(.ret) <- "monolix2rxPk"
   .ret
 }
@@ -468,6 +503,7 @@
     !is.na(df[[i]])
   }, logical(1), USE.NAMES = FALSE)
   .df <- df[, .na, drop = FALSE]
+  .df <- .df[, names(.df) != "admd", drop = FALSE]
   cat(what,"(",
       paste(vapply(names(.df),
          function(n) {
@@ -608,7 +644,7 @@ print.monolix2rxPk <- function(x, ...) {
   .w <- which(is.na(x$empty$adm))
   if (length(.w) > 0) {
     if (.prnAdm) cat("\n")
-    .prnAdn <- FALSE
+     .prnAdn <- FALSE
     .empty <- x$empty[.w, ]
     .printPkDf("empty", .empty)
   }
