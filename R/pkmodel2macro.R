@@ -23,6 +23,10 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .pkmodel2macro <- function(pk, txt=FALSE) {
+  if (is.na(pk$Cc)) {
+    if (txt) return(as.character(pk))
+    return(pk)
+  }
   .pkmodel <- pk$pkmodel
   .macro <- paste0("compartment(cmt=1, volume=", ifelse(.pkmodel["V"] == "", "V",
                                                         paste0("V=",.pkmodel["V"])),

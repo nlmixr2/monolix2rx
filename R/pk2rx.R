@@ -219,13 +219,13 @@
     } else {
       .k21 <- paste0("k", .perip$out.i, "_", .perip$out.j)
     }
-    .pk2rxConc(env, pk, .i, amount=.periph$amount, volume=.periph$volume, concentration=.periph$concentration)
+    .pk2rxConc(env, pk, i, amount=.perip$amount, volume=.perip$volume, concentration=.perip$concentration)
     # perip like
-    .c2 <- .pk2rxAmt(env, pk, .i, amount=.periph$amount)
-    .i2 <- .i
+    .c2 <- .pk2rxAmt(env, pk, i, amount=.perip$amount)
+    .i2 <- i
     # central like
-    .c1 <- .pk2rxAmt(env, pk, .perph$in.i, amount=NA_character_)
-    .i1 <- .perph$in.i
+    .c1 <- .pk2rxAmt(env, pk, .perip$in.i, amount=NA_character_)
+    .i1 <- .perip$in.i
     # Central
     env$rhs[[.i1]] <- paste0(env$rhs[[.i1]],
                              " - ", .k12, "*", .c1,
@@ -336,7 +336,7 @@
       env$dur[[i]] <- paste0(env$dur[[i]],
                              .pk2rxAdmVal(pk, .oral, "dur", .tk0))
       if (!is.na(.oral$p)) {
-        .p <- oral$p
+        .p <- .oral$p
         if (.p == "") .p <- "p"
         if (is.null(env$f[[i]])) {
           env$f[[i]] <-  paste0("f(", .cmtName, ") <- ")
@@ -383,7 +383,7 @@
                                     ifelse(is.na(.p), "1.0", .p),
                                     ")")
       } else if (!is.na(.oral$p)) {
-        .p <- oral$p
+        .p <- .oral$p
         if (.p == "") .p <- "p"
         if (is.null(env$fDepot[[i]])) {
           env$fDepot[[i]] <- paste0("f(", .cmtName, ") <- ")
