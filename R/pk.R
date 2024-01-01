@@ -26,7 +26,7 @@
                             k31=NA_character_,
                             ke0=NA_character_)
 
-    .monolix2rx$admd <- data.frame(adm=integer(0), admd=integer(0))
+    .monolix2rx$admd <- data.frame(adm=integer(0), admd=integer(0), cmt=integer(0), target=character(0))
 
     .monolix2rx$pkCmt <- data.frame(cmt=integer(0),
                                     amount=character(0),
@@ -161,16 +161,23 @@
 #' @author Matthew L. Fidler
 .pkGetAdmd <- function(df) {
   .adm <- df$adm
+  .cmt <- NA_integer_
+  .target <- NA_character_
+  if (any(names(df) == "cmt")) {
+    .cmt <- df$cmt
+  } else {
+    .target <- df$target
+  }
   .admd <- .monolix2rx$admd[.monolix2rx$admd$adm == .adm, "admd"]
   if (length(.admd) == 0L) {
     df$admd <- 1L
     .monolix2rx$admd <- rbind(.monolix2rx$admd,
-                              data.frame(adm=df$adm, admd=1L))
+                              data.frame(adm=df$adm, admd=1L, cmt=.cmt, target=.target))
   } else {
     .admd <- max(.admd) + 1L
     df$admd <- .admd
     .monolix2rx$admd <- rbind(.monolix2rx$admd,
-                              data.frame(adm=df$adm, admd=.admd))
+                              data.frame(adm=df$adm, admd=.admd, cmt=.cmt, target=.target))
   }
   df
 }

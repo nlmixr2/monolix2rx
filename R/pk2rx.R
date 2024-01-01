@@ -263,6 +263,9 @@
                              " + ", .kt, "*", .c1)
   }
 }
+.pk2rxAdmVal <- function(pk, adm, value) {
+  .admd <- pk$admd[pk$admd == adm, ]
+}
 #' Handle the administration/oral macros
 #'
 #' @param env environment for rxode2 translation
@@ -339,7 +342,7 @@
           env$fDepot[[i]] <- paste0("f(", .cmtName, ") <- ")
         }
         env$fDepot[[i]] <- paste0(env$fDepot[[i]],
-                                  " + (ADM==", .oral$adm, " && ADMD==", .oral$admd, , ")*(", .p, ")")
+                                  " + (ADM==", .oral$adm, " && ADMD==", .oral$admd,")*(", .p, ")")
       }
       if (!is.na(.oral$Tlag)) {
         .Tlag <- .oral$Tlag
@@ -348,7 +351,7 @@
           env$tlagDepot[[i]] <- paste0("alag(", .cmtName, ") <- ")
         }
         env$tlagDepot[[i]] <- paste0(env$tlagDepot[[i]],
-                                     " + (ADM==", .oral$adm, " && ADMD==", .oral$admd, , ")*(", .Tlag, ")")
+                                     " + (ADM==", .oral$adm, " && ADMD==", .oral$admd, ")*(", .Tlag, ")")
       }
     }
   }
