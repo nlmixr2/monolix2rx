@@ -263,8 +263,55 @@
                              " + ", .kt, "*", .c1)
   }
 }
-.pk2rxAdmVal <- function(pk, adm, value) {
-  .admd <- pk$admd[pk$admd == adm, ]
+#' Convert to a appropriate property addition for the dur/f/alag rxode2 properties
+#'
+#' If there are multiple doses that affect the same property, add logical operators
+#'
+#' @param pk parsed pk value
+#' @param df current data frame being considered
+#' @param type the type of property being considered, can be "dur", "f", "tlag"
+#' @param value the value of the property to be returned in the right circumstances
+#' @return rxode2 text of the property to be added
+#' @noRd
+#' @author Matthew L. Fidler
+.pk2rxAdmVal <- function(pk, df, type, value) {
+  .adm <- df$adm
+  .admd <- pk$admd
+  .cmt <- NA_integer_
+  .target <- NA_character_
+  if (any(names(df) == "cmt")) {
+    .cmt <- df$cmt
+  } else {
+    .target <- df$target
+  }
+  .depot <- FALSE
+  if (any(names(df) == "ka")) {
+    if (!is.na(df$ka)) {
+      .depot <- TRUE
+    }
+  }
+  if (!is.na(.cmt)) {
+    .admd <- .admd[.admd$cmt == .cmt, ]
+  } else if (!is.na(.target)) {
+    .admd <- .admd[.admd$target == .target, ]
+  } else {
+    stop("target/cmt not defined, cannot figure out dose", call.=FALSE)
+  }
+  .cur <- .admd[.admd$depot == .depot && .admd[[type]] == TRUE , ]
+  if (length(.cur$adm) == 1L) return(value)
+  .cur <- .cur[.cur$adm == df$adm, ]
+  if (length(.cur$adm) == 1L) {
+    return(paste0("+(ADM==", df$adm, ")*(", value, ")"))
+  }
+  .cur2 <- .cur[.cur$admd == df$admd, ]
+  if (length(.cur2$adm) == 1L) {
+    return(paste0("+(ADMD==", df$admd, ")*(", value, ")"))
+  }
+  .cur <- .cur[.cur$admd == df$admd, ]
+  if (length(.cur$adm) == 1L) {
+    return(paste0("+(ADM==", df$adm, " && ADMD==", df$admd, ")*(", value, ")"))
+  }
+  stop("cannot figure out how to isolate dose in translation to rxode2", call.=FALSE)
 }
 #' Handle the administration/oral macros
 #'
@@ -287,7 +334,7 @@
         env$dur[[i]] <- paste0("dur(", .cmtName, ") <- ")
       }
       env$dur[[i]] <- paste0(env$dur[[i]],
-                             " + (ADM==", .oral$adm, " && ADMD==", .oral$admd, ")*(", .tk0, ")")
+                             .pk2rxAdmVal(pk, .oral, "dur", .tk0))
       if (!is.na(.oral$p)) {
         .p <- oral$p
         if (.p == "") .p <- "p"
@@ -295,7 +342,7 @@
           env$f[[i]] <-  paste0("f(", .cmtName, ") <- ")
         }
         env$f[[i]] <- paste0(env$f[[i]],
-                             " + (ADM==", .oral$adm, " && ADMD==", .oral$admd, ")*(", .p, ")")
+                             .pk2rxAdmVal(pk, .oral, "f", .p))
       }
       if (!is.na(.oral$Tlag)) {
         .Tlag <- .oral$Tlag
@@ -304,7 +351,7 @@
           env$tlag[[i]] <- paste0("alag(", .cmtName, ") <- ")
         }
         env$tlag[[i]] <- paste0(env$tlag[[i]],
-                                " + (ADM==", .oral$adm, " && ADMD==", .oral$admd,  ")*(", .Tlag, ")")
+                                .pk2rxAdmVal(pk, .oral, "tlag", .Tlag))
       }
     } else {
       # ka
@@ -342,7 +389,7 @@
           env$fDepot[[i]] <- paste0("f(", .cmtName, ") <- ")
         }
         env$fDepot[[i]] <- paste0(env$fDepot[[i]],
-                                  " + (ADM==", .oral$adm, " && ADMD==", .oral$admd,")*(", .p, ")")
+                                  .pk2rxAdmVal(pk, .oral, "f", .p))
       }
       if (!is.na(.oral$Tlag)) {
         .Tlag <- .oral$Tlag
@@ -351,7 +398,7 @@
           env$tlagDepot[[i]] <- paste0("alag(", .cmtName, ") <- ")
         }
         env$tlagDepot[[i]] <- paste0(env$tlagDepot[[i]],
-                                     " + (ADM==", .oral$adm, " && ADMD==", .oral$admd, ")*(", .Tlag, ")")
+                                     .pk2rxAdmVal(pk, .oral, "tlag", .Tlag))
       }
     }
   }
@@ -403,7 +450,7 @@
         .env$tlag[[i]] <- paste0("alag(", .ca, ") <- ")
       }
       .env$tlag[[i]] <- paste0(.env$tlag[[i]],
-                               " + (ADM==", .iv$adm, " && ADMD==", .oral$admd, ")*(", .tlag, ")")
+                               .pk2rxAdmVal(pk, .iv, "tlag", .tlag))
     }
     if (!is.na(.iv$p)) {
       .p <- .iv$p
@@ -412,7 +459,7 @@
         .env$f[[i]] <- paste0("f(", .ca, ") <- ")
       }
       .env$f[[i]] <- paste0(.env$f[[i]],
-                            " + (ADM==", .iv$adm, " && ADMD==", .oral$admd, ")*(", .p, ")")
+                            .pk2rxAdmVal(pk, .iv, "f", .p))
     }
   }
 }
@@ -507,7 +554,7 @@
                  env$fDepot[[.target]] <- paste0("f(", .target, env$depotPostfix, ") <- ")
                }
                env$fDepot[[.target]] <- paste0(env$fDepot[[.target]],
-                                               " + (ADM==", .depot$adm, " && ADMD==", .oral$admd, ")*(", .p, ")")
+                                               .pk2rxAdmVal(pk, .depot, "f", .p))
              }
              if (!is.na(.depot$Tlag)) {
                .Tlag <- .depot$Tlag
@@ -518,7 +565,7 @@
                                                     ") <- ")
                }
                env$tlagDepot[[.target]] <- paste0(env$tlagDepot[[.target]],
-                                                  " + (ADM==", .depot$adm, " && ADMD==", .oral$admd, ")*(", .Tlag, ")")
+                                                  .pk2rxAdmVal(pk, .depot, "tlag", .Tlag))
              }
            } else {
              if (!is.na(.depot$p)) {
@@ -528,7 +575,7 @@
                  env$f[[.target]] <- paste0("f(", .target, ") <- ")
                }
                env$f[[.target]] <- paste0(env$f[[.target]],
-                                          " + (ADM==", .depot$adm, " && ADMD==", .oral$admd, ")*(", .p, ")")
+                                          .pk2rxAdmVal(pk, .depot, "f", .p))
              }
              if (!is.na(.depot$Tlag)) {
                .Tlag <- .depot$Tlag
@@ -539,7 +586,7 @@
                                                     ") <- ")
                }
                env$tlag[[.target]] <- paste0(env$tlag[[.target]],
-                                             " + (ADM==", .depot$adm, " && ADMD==", .oral$admd, ")*(", .Tlag, ")")
+                                             .pk2rxAdmVal(pk, .depot, "tlag", .Tlag))
              }
              if (!is.na(.depot$Tk0)) {
                .Tk0 <- .depot$Tk0
@@ -550,7 +597,7 @@
                                                ") <- ")
                }
                env$dur[[.target]] <- paste0(env$dur[[.target]],
-                                            " + (ADM==", .depot$adm, " && ADMD==", .oral$admd, ")*(", .Tk0, ")")
+                                            .pk2rxAdmVal(pk, .depot, "dur", .Tk0))
              }
            }
          })
