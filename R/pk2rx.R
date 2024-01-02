@@ -198,6 +198,22 @@
   }
   stop("cannot figure out how to isolate dose in translation to rxode2", call.=FALSE)
 }
+#' Get the variable from a dataset or list
+#'
+#'
+#' @param input input dataset or varaible
+#' @param var variable name
+#' @return will return NA_character_ for NULL and NA values.  If the
+#'   inp=="" then return the inp value
+#' @noRd
+#' @author Matthew L. Fidler
+.pk2rxGetVar <- function(input, var) {
+  .inp <- input[[var]]
+  if (is.null(.inp)) return(NA_character_)
+  if (is.na(.inp)) return(NA_character_)
+  if (.inp == "") return(var)
+  .inp
+}
 #' Handle the administration/oral macros
 #'
 #' @param env environment for rxode2 translation
@@ -213,16 +229,14 @@
   for (.w in .w0) {
     .oral <- pk$oral[.w, ]
     if (!is.na(.oral$Tk0)) {
-      .tk0 <- .oral$Tk0
-      if (.tk0 == "") .tk0 <- "Tk0"
+      .tk0 <- .pk2rxGetVar(.oral, "Tk0")
       if (is.null(env$dur[[i]])) {
         env$dur[[i]] <- paste0("dur(", .cmtName, ") <- ")
       }
       env$dur[[i]] <- paste0(env$dur[[i]],
                              .pk2rxAdmVal(pk, .oral, "dur", .tk0))
       if (!is.na(.oral$p)) {
-        .p <- .oral$p
-        if (.p == "") .p <- "p"
+        .p <- .pk2rxGetVar(.oral, "p")
         if (is.null(env$f[[i]])) {
           env$f[[i]] <-  paste0("f(", .cmtName, ") <- ")
         }
@@ -230,8 +244,7 @@
                              .pk2rxAdmVal(pk, .oral, "f", .p))
       }
       if (!is.na(.oral$Tlag)) {
-        .Tlag <- .oral$Tlag
-        if (.Tlag == "") .Tlag <- "Tlag"
+        .Tlag <- .pk2rxGetVar(.oral, "Tlag")
         if (is.null(env$tlag[[i]])) {
           env$tlag[[i]] <- paste0("alag(", .cmtName, ") <- ")
         }
@@ -248,19 +261,15 @@
       if (is.null(env$rhsDepot[[i]])) {
         env$rhsDepot[[i]] <- ""
       }
-      .ka <- .oral$ka
-      if (.ka == "") .ka <- "ka"
+      .ka <- .pk2rxGetVar(.oral, "ka")
       env$rhsDepot[[i]] <- paste0(env$rhsDepot[[i]],
                                   " - ", .ka, "*", .cmtName)
       env$rhs[[i]] <- paste0(env$rhs[[i]],
                              " + ", .ka, "*", .cmtName)
       if (!is.na(.oral$Mtt) && !is.na(.oral$Ktr)) {
-        .Mtt <- .oral$Mtt
-        if (.Mtt == "") .Mtt <- "Mtt"
-        .Ktr <- .oral$Ktr
-        if (.Ktr == "") .Ktr <- "Ktr"
-        .p <- .oral$p
-        if (!is.na(.p) && .p == "") .p <- "p"
+        .Mtt <- .pk2rxGetVar(.oral, "Mtt")
+        .Ktr <- .pk2rxGetVar(.oral, "Ktr")
+        .p <- .pk2rxGetVar(.oral, "p")
         env$rhsDepot[[i]] <- paste0(env$rhsDepot[[i]],
                                     " + transit(",
                                     .Mtt, "*", .Ktr, "-1, ",
@@ -268,8 +277,7 @@
                                     ifelse(is.na(.p), "1.0", .p),
                                     ")")
       } else if (!is.na(.oral$p)) {
-        .p <- .oral$p
-        if (.p == "") .p <- "p"
+        .p <- .pk2rxGetVar(.oral, "p")
         if (is.null(env$fDepot[[i]])) {
           env$fDepot[[i]] <- paste0("f(", .cmtName, ") <- ")
         }
@@ -277,8 +285,7 @@
                                   .pk2rxAdmVal(pk, .oral, "f", .p))
       }
       if (!is.na(.oral$Tlag)) {
-        .Tlag <- .oral$Tlag
-        if (.Tlag == "") .Tlag <- "Tlag"
+        .Tlag <- .pk2rxGetVar(.oral, "Tlag")
         if (is.null(env$tlagDepot[[i]])) {
           env$tlagDepot[[i]] <- paste0("alag(", .cmtName, ") <- ")
         }
@@ -308,8 +315,7 @@
       stop("concentration of compartment ", i, " is not defined")
     }
     .cc <- attr(env$conc[[i]], "conc")
-    .ke0 <- .effect$ke0
-    if (.ke0 == "") .ke0 <- "ke0"
+    .ke0 <- .pk2rxGetVar(.effect, "ke0")
     env$lhsEffect[[i]] <- paste0("d/dt(", .ce, ")")
     env$rhsEffect[[i]] <- paste0(.ke0, "*(", .cc, " - ", .ce, ")")
   }
@@ -329,8 +335,7 @@
     .iv <- pk$iv[.w, ]
     .ca <- .pk2rxAmt(env, pk, i)
     if (!is.na(.iv$Tlag)) {
-      .tlag <- .iv$Tlag
-      if (.tlag == "") .tlag = "Tlag"
+      .tlag <- .pk2rxGetVar(.iv, "Tlag")
       if (is.null(.env$tlag[[i]])) {
         .env$tlag[[i]] <- paste0("alag(", .ca, ") <- ")
       }
@@ -338,8 +343,7 @@
                                .pk2rxAdmVal(pk, .iv, "tlag", .tlag))
     }
     if (!is.na(.iv$p)) {
-      .p <- .iv$p
-      if (.p == "") .p = "p"
+      .p <- .pk2rxGetVar(.iv, "p")
       if (is.null(.env$f[[i]])) {
         .env$f[[i]] <- paste0("f(", .ca, ") <- ")
       }
@@ -363,8 +367,7 @@
     .elimination <- pk$elimination[.w, ]
     .cmtName <- .pk2rxAmt(env, pk, i)
     if (!is.na(.elimination$V)) {
-      .V <- .elimination$V
-      if (.V == "") .V <- "V"
+      .V <- .pk2rxGetVar(.elimination, "V")
     } else {
       .V <- pk$compartment[pk$compartment$cmt == i, "volume"]
       if (!is.na(.V)) {
@@ -372,13 +375,11 @@
       }
     }
     if (!is.na(.elimination$k)) {
-      .k <- .elimination$k
-      if (.k == "") .k <- "k"
+      .k <- .pk2rxGetVar(.elimination, "k")
       env$rhs[[i]] <- paste0(env$rhs[[i]],
                              " - ", .k, "*", .cmtName)
     } else if (!is.na(.elimination$Cl)) {
-      .Cl <- .elimination$Cl
-      if (.Cl == "") .Cl <- "Cl"
+      .Cl <- .pk2rxGetVar(.elimination, "Cl")
       if (is.na(.V)) {
         stop("cannot determine volume for this elimination type",
              .call=FALSE)
@@ -386,10 +387,8 @@
       env$rhs[[i]] <- paste0(env$rhs[[i]],
                              " - ", .Cl, "/", .V, "*", .cmtName)
     } else if (!is.na(.elimination$Vm) && !is.na(.elimination$Km)) {
-      .Vm <- .elimination$Vm
-      if (.Vm == "") .Vm <- "Vm"
-      .Km <- .elimination$Km
-      if (.Km == "") .Km <- "Km"
+      .Vm <- .pk2rxGetVar(.elimination, "Vm")
+      .Km <- .pk2rxGetVar(.elimination, "Km")
       env$rhs[[i]] <- paste0(env$rhs[[i]],
                              " - (",
                              .Vm, "*", .cmtName, "/", .V, ")/(",
@@ -420,12 +419,9 @@
                                                " - ", .ka, "*", .target, env$depotPostfix)
              env$extraDepot[[.target]] <- paste0(" + ", .ka, "*", .target, env$depotPostfix)
              if (!is.na(.depot$Mtt) && !is.na(.depot$Ktr)) {
-               .Mtt <- .depot$Mtt
-               if (.Mtt == "") .Mtt <- "Mtt"
-               .Ktr <- .depot$Ktr
-               if (.Ktr == "") .Ktr <- "Ktr"
-               .p <- .oral$p
-               if (!is.na(.p) && .p == "") .p <- "p"
+               .Mtt <- .pk2rxGetVar(.depot, "Mtt")
+               .Ktr <- .pk2rxGetVar(.depot, "Ktr")
+               .p <- .pk2rxGetVar(.depot, "p")
                env$rhsDepot[[.target]] <- paste0(env$rhsDepot[[.target]],
                                                  " + transit(",
                                                  .Mtt, "*", .Ktr, "-1, ",
@@ -433,8 +429,7 @@
                                                  ifelse(is.na(.p), "1.0", .p),
                                                  ")")
              } else if (!is.na(.depot$p)) {
-               .p <- .depot$p
-               if (.p == "") .p <- "p"
+               .p <- .pk2rxGetVar(.depot, "p")
                if (is.null(env$fDepot[[.target]])) {
                  env$fDepot[[.target]] <- paste0("f(", .target, env$depotPostfix, ") <- ")
                }
@@ -442,8 +437,7 @@
                                                .pk2rxAdmVal(pk, .depot, "f", .p))
              }
              if (!is.na(.depot$Tlag)) {
-               .Tlag <- .depot$Tlag
-               if (.Tlag == "") .Tlag <- "Tlag"
+               .Tlag <- .pk2rxGetVar(.depot, "Tlag")
                if (is.null(env$tlagDepot[[.target]])) {
                  env$tlagDepot[[.target]] <- paste0("alag(",
                                                     .target, env$depotPostfix,
@@ -454,8 +448,7 @@
              }
            } else {
              if (!is.na(.depot$p)) {
-               .p <- .depot$p
-               if (.p == "") .p <- "p"
+               .p <- .pk2rxGetVar(.depot, "p")
                if (is.null(env$f[[.target]])) {
                  env$f[[.target]] <- paste0("f(", .target, ") <- ")
                }
@@ -463,8 +456,7 @@
                                           .pk2rxAdmVal(pk, .depot, "f", .p))
              }
              if (!is.na(.depot$Tlag)) {
-               .Tlag <- .depot$Tlag
-               if (.Tlag == "") .Tlag <- "Tlag"
+               .Tlag <- .pk2rxGetVar(.depot, "Tlag")
                if (is.null(env$tlag[[.target]])) {
                  env$tlag[[.target]] <- paste0("alag(",
                                                .target,
@@ -474,8 +466,7 @@
                                              .pk2rxAdmVal(pk, .depot, "tlag", .Tlag))
              }
              if (!is.na(.depot$Tk0)) {
-               .Tk0 <- .depot$Tk0
-               if (.Tk0 == "") .Tk0 <- "Tk0"
+               .Tk0 <- .pk2rxGetVar(.depot, "Tk0")
                if (is.null(env$tlag[[.target]])) {
                  env$dur[[.target]] <- paste0("dur(",
                                               .target,
