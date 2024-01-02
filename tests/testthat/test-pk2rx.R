@@ -133,3 +133,23 @@ effect(cmt=1, ke0=ke02, concentration=Ce2)
 
   expect_error(.pk2rxEffect(env, pk, 1))
 })
+
+
+test_that(".pk2rxIv()",{
+
+  pk <- .pk("compartment(cmt=1, amount=Ac, concentration=Cc, volume=V)
+elimination(cmt=1, k)
+iv(cmt=1, Tlag=alag, p=f2)
+effect(cmt=1, ke0, concentration=Ce)")
+
+  env <- new.env(parent=emptyenv())
+  env$name <- vector("list", 1)
+  env$tlag <- vector("list", 1)
+  env$f <- vector("list", 1)
+
+  .pk2rxIv(env, pk, 1)
+
+  expect_equal(env$tlag[[1]], "alag(Ac) <- alag")
+  expect_equal(env$f[[1]], "f(Ac) <- f2")
+
+})

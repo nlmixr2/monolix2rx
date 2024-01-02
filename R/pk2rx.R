@@ -336,19 +336,19 @@
     .ca <- .pk2rxAmt(env, pk, i)
     if (!is.na(.iv$Tlag)) {
       .tlag <- .pk2rxGetVar(.iv, "Tlag")
-      if (is.null(.env$tlag[[i]])) {
-        .env$tlag[[i]] <- paste0("alag(", .ca, ") <- ")
+      if (is.null(env$tlag[[i]])) {
+        env$tlag[[i]] <- paste0("alag(", .ca, ") <- ")
       }
-      .env$tlag[[i]] <- paste0(.env$tlag[[i]],
+      env$tlag[[i]] <- paste0(env$tlag[[i]],
                                .pk2rxAdmVal(pk, .iv, "tlag", .tlag))
     }
     if (!is.na(.iv$p)) {
       .p <- .pk2rxGetVar(.iv, "p")
-      if (is.null(.env$f[[i]])) {
-        .env$f[[i]] <- paste0("f(", .ca, ") <- ")
+      if (is.null(env$f[[i]])) {
+        env$f[[i]] <- paste0("f(", .ca, ") <- ")
       }
-      .env$f[[i]] <- paste0(.env$f[[i]],
-                            .pk2rxAdmVal(pk, .iv, "f", .p))
+      env$f[[i]] <- paste0(env$f[[i]],
+                           .pk2rxAdmVal(pk, .iv, "f", .p))
     }
   }
 }
