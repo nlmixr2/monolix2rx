@@ -531,10 +531,10 @@
 #' @author Matthew L. Fidler
 .as.character.PkDf <- function(what, df) {
   if (length(df[, 1]) > 1L) {
-    return(vapply(seq_len(length(df[, 1])),
+    return(vapply(seq_along(df[, 1]),
                   function(w) {
                     .as.character.PkDf(what, df[w, ])
-                  }, character(0), USE.NAMES = FALSE))
+                  }, character(1), USE.NAMES = FALSE))
   }
   .na <- vapply(seq_len(ncol(df)), function(i){
     !is.na(df[[i]])
