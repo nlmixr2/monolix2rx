@@ -594,7 +594,7 @@
   }
   if (.ret == "" && identical(.env$endLines, character(0)) &&
         length(.pk$depot$adm) == 0L) {
-    return(NULL)
+    .ret <- character(0)
   } else {
     .ret <- strsplit(.ret, "\n")[[1]]
   }

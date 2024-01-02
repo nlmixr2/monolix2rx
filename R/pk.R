@@ -335,7 +335,7 @@
 #' @author Matthew L. Fidler
 .pk <- function(text) {
   .pkIni(TRUE)
-  .Call(`_monolix2rx_trans_mlxtran_pk`, text)
+  if (text != "") .Call(`_monolix2rx_trans_mlxtran_pk`, text)
   .pkPushStatement()
   .validatePkModel(.monolix2rx$pkPars, .monolix2rx$pkCe)
   .ret <- list(Cc=.monolix2rx$pkCc,

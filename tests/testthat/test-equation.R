@@ -1,7 +1,9 @@
 test_that("equation tests", {
 
+  pk <- .pk("")
+
   .ret <- .equation("x_0 = V
-ddt_x = -k*x")
+ddt_x = -k*x", pk)
 
   expect_equal(.ret$rx,
                c("x(0) <- V", "d/dt(x) <-  - k * x"))
@@ -13,7 +15,7 @@ elseif t<20
 else
    c = 3
 end
-")
+", pk)
 
   expect_equal(.ret$rx,
                c("if (time <= 10) {",
@@ -29,7 +31,7 @@ end
 else
    dx = 2
 end
-ddt_x = dx")
+ddt_x = dx", pk)
 
   expect_equal(.ret$rx,
                c("if (time <= 10) {",
@@ -42,27 +44,27 @@ ddt_x = dx")
   .ret <- .equation("; ode is considered as stiff
 odeType = stiff
 x_0 = V
-ddt_x = -k*x")
+ddt_x = -k*x", pk)
 
   expect_equal(.ret$odeType, "stiff")
 
   .ret <- .equation("; ode is considered as stiff
 odeType =  nonStiff
 x_0 = V
-ddt_x = -k*x")
+ddt_x = -k*x", pk)
 
   expect_equal(.ret$odeType, "nonStiff")
 
   .ret <- .equation("; ode is considered as stiff
 x_0 = V
-ddt_x = -k*x")
+ddt_x = -k*x", pk)
 
   expect_equal(.ret$odeType, "nonStiff")
 
   .ret <- .equation("x_0 = a
 dx_0 = b
 ddt_x = dx
-ddt_dx = -x-dx")
+ddt_dx = -x-dx", pk)
 
   expect_equal(.ret$rx,
                c("x(0) <- a",
@@ -70,40 +72,40 @@ ddt_dx = -x-dx")
                  "d/dt(x) <- dx",
                  "d/dt(dx) <-  - x - dx"))
 
-  .ret <- .equation("a=amtDose")
+  .ret <- .equation("a=amtDose", pk)
 
   expect_equal(.ret$rx, "a <- dose")
 
-  .ret <- .equation("a=tDose")
+  .ret <- .equation("a=tDose", pk)
 
   expect_equal(.ret$rx, "a <- tlast")
 
-  .ret <- .equation("a=t+3")
+  .ret <- .equation("a=t+3", pk)
   expect_equal(.ret$rx, "a <- time + 3")
 
-  expect_error(.equation("a=inftDose"), "inftDose")
+  expect_error(.equation("a=inftDose", pk), "inftDose")
 
-  expect_error(.equation("t0=0"), "t0")
+  expect_error(.equation("t0=0", pk), "t0")
 
-  expect_error(.equation("t_0=0"), "t0")
+  expect_error(.equation("t_0=0", pk), "t0")
 
-  .ret <- .equation("a=invlogit(b)")
+  .ret <- .equation("a=invlogit(b)", pk)
   expect_equal(.ret$rx, "a <- expit(b)")
 
-  .ret <- .equation("a=norminv(b)")
+  .ret <- .equation("a=norminv(b)", pk)
   expect_equal(.ret$rx, "a <- qnorm(b)")
 
-  .ret <- .equation("a=normcdf(b)")
+  .ret <- .equation("a=normcdf(b)", pk)
   expect_equal(.ret$rx, "a <- pnorm(b)")
 
-  .ret <- .equation("a=gammaln(b)")
+  .ret <- .equation("a=gammaln(b)", pk)
   expect_equal(.ret$rx, "a <- lgamma(b)")
 
-  .ret <- .equation("a=factln(b)")
+  .ret <- .equation("a=factln(b)", pk)
   expect_equal(.ret$rx, "a <- lfactorial(b)")
 
-  expect_error(.equation("ddt_x = ka*x-k*delay(x,tau)"), "delay")
+  expect_error(.equation("ddt_x = ka*x-k*delay(x,tau)", pk), "delay")
 
-  expect_error(.equation("ddt_x = ka*x-k*rem(tau)"), "rem")
+  expect_error(.equation("ddt_x = ka*x-k*rem(tau)", pk), "rem")
 
 })

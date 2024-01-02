@@ -14,11 +14,9 @@
 #' @examples
 monolix2rx <- function(mlxtran) {
   .ret <- mlxtran(mlxtran, equation=TRUE)
-  .equation <- .ret$MODEL$LONGITUDINAL$EQUATION$rx
-  .pk <- .pk2rx(.ret$MODEL$LONGITUDINAL$PK)
+  .equation <- .ret$MODEL$LONGITUDINAL$EQUATION$rx # includes PK: macro
   .model <- c("model({",
               .ret$MODEL$INDIVIDUAL$DEFINITION$rx,
-              .pk$pk,
               .equation,
               vapply(seq_along(.ret$MODEL$LONGITUDINAL$DEFINITION$endpoint),
                      function(i) {

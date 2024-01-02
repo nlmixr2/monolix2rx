@@ -107,7 +107,8 @@
         .ret$MODEL$LONGITUDINAL$PK <- .pk(.ret$MODEL$LONGITUDINAL$PK)
       }
       if (equation && !is.null(.ret$MODEL$LONGITUDINAL$EQUATION)) {
-        .ret$MODEL$LONGITUDINAL$EQUATION <- .equation(.ret$MODEL$LONGITUDINAL$EQUATION)
+        .ret$MODEL$LONGITUDINAL$EQUATION <- .equation(.ret$MODEL$LONGITUDINAL$EQUATION,
+                                                      .ret$MODEL$LONGITUDINAL$PK)
       }
       if (!is.null(.ret$MODEL$LONGITUDINAL$OUTPUT)) {
         .ret$MODEL$LONGITUDINAL$OUTPUT <- .longOut(.ret$MODEL$LONGITUDINAL$OUTPUT)
@@ -233,7 +234,8 @@ mlxtran <- function(file, equation=FALSE) {
   checkmate::assertLogical(equation, any.missing=FALSE, len=1)
   if (inherits(file, "monolix2rxMlxtran")) {
     if (equation && !is.null(file$MODEL$LONGITUDINAL$EQUATION)) {
-      file$MODEL$LONGITUDINAL$EQUATION <- .equation(file$MODEL$LONGITUDINAL$EQUATION)
+      file$MODEL$LONGITUDINAL$EQUATION <- .equation(file$MODEL$LONGITUDINAL$EQUATION,
+                                                    file$MODEL$LONGITUDINAL$PK)
     }
     return(file)
   }

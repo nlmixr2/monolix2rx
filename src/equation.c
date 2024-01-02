@@ -38,6 +38,8 @@ extern D_ParserTables parser_tables_equation;
 char* gBuf;
 int gBufLast = 0;
 int gBufFree = 0;
+int gIsAssignmentStart = 0;
+char *curDdt;
 D_Parser *curP=NULL;
 D_Parser *errP=NULL;
 D_ParseNode *_pn = 0;
@@ -77,7 +79,7 @@ extern sbuf curLine;
 void pushModel(void) {
   if (curLine.s == NULL) return;
   if (curLine.s[0] == 0) return;
-  monolix2rxSingle(curLine.s, ".equationLine");
+  monolix2rxDouble(curLine.s, curDdt, ".equationLine");
   sClear(&curLine);
 }
 
@@ -171,6 +173,9 @@ int equation_identifier_or_constant(char *name,  D_ParseNode *pn) {
         v2[0] == 't' && v2++ &&
         v2[0] == '_') {
       sAppend(&curLine, "d/dt(%s)", v2+1);
+      if (gIsAssignmentStart) {
+        curDdt = (char*)rc_dup_str(v2+1, v2+1+strlen(v2+1));
+      }
       return 1;
     }
     v2 = v;
@@ -282,6 +287,13 @@ void wprint_parsetree_equation(D_ParserTables pt, D_ParseNode *pn, int depth, pr
   if (nch != 0) {
     int needEnd=0, needEnd2=0;
     for (int i = 0; i < nch; i++) {
+      if (i == 0 && !strcmp("assignment", name)) {
+        const char *none="";
+        curDdt=rc_dup_str(none, none);
+        gIsAssignmentStart=1;
+      } else if (!strcmp("assignment", name)) {
+        gIsAssignmentStart=0;
+      }
       needEnd2 =equation_if(name,  pn, i);
       if (needEnd2) {
         needEnd = needEnd2;
