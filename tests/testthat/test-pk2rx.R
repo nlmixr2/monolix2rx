@@ -76,3 +76,34 @@ peripheral(k10_20, k20_10)
                " + k10_20*cmt10 - k20_10*cmt20")
 
 })
+
+
+test_that(".pk2rxAdmVal()", {
+
+  pk <- .pk("compartment(cmt=1, amount=depot)\ndepot(type=1, target=depot, Tlag=tl, p=f)")
+
+  pk$depot$target <- NA_character_
+
+  expect_error(.pk2rxAdmVal(pk, pk$depot, "f", "f"))
+
+  pk <- .pk("compartment(cmt=1, amount=depot)\ndepot(type=1, target=depot, Tlag=tl, p=f)\ndepot(type=1, target=depot,Tlag=tl1, p=1-f)")
+
+  expect_equal(.pk2rxAdmVal(pk, pk$depot[1, ], "f", "f"),
+               "+(ADMD==1)*(f)")
+
+  pk <- .pk("compartment(cmt=1, amount=depot)\ndepot(type=1, target=depot, Tlag=tl, p=f)\ndepot(type=2, target=depot,Tlag=tl1, p=1-f)")
+
+  expect_equal(.pk2rxAdmVal(pk, pk$depot[1, ], "f", "f"),
+               "+(ADM==1)*(f)")
+
+
+  pk <- .pk("compartment(cmt=1, amount=depot)\ndepot(type=1, target=depot, Tlag=tl, p=f1)\ndepot(type=1, target=depot,Tlag=tl1, p=f2)\ndepot(type=2, target=depot,Tlag=tl1, p=1-f1-f2)\ndepot(type=2, target=depot,Tlag=tl1, p=w)")
+
+  expect_equal(.pk2rxAdmVal(pk, pk$depot[1, ], "f", "f"),
+               "+(ADM==1 && ADMD==1)*(f)")
+
+  pk$admd <- rbind(pk$admd, pk$admd[1, ])
+
+  expect_error(.pk2rxAdmVal(pk, pk$depot[1, ], "f", "f"))
+
+})

@@ -182,18 +182,18 @@
   } else {
     stop("target/cmt not defined, cannot figure out dose", call.=FALSE)
   }
-  .cur <- .admd[.admd$depot == .depot && .admd[[type]] == TRUE , ]
+  .cur <- .admd[.admd$depot == .depot & .admd[[type]] == TRUE , ]
   if (length(.cur$adm) == 1L) return(value)
-  .cur <- .cur[.cur$adm == df$adm, ]
-  if (length(.cur$adm) == 1L) {
+  .cur1 <- .cur[.cur$adm == df$adm, ]
+  if (length(.cur1$adm) == 1L) {
     return(paste0("+(ADM==", df$adm, ")*(", value, ")"))
   }
   .cur2 <- .cur[.cur$admd == df$admd, ]
   if (length(.cur2$adm) == 1L) {
     return(paste0("+(ADMD==", df$admd, ")*(", value, ")"))
   }
-  .cur <- .cur[.cur$admd == df$admd, ]
-  if (length(.cur$adm) == 1L) {
+  .cur3 <- .cur[.cur$admd == df$admd & .cur$adm == df$adm, ]
+  if (length(.cur3$adm) == 1L) {
     return(paste0("+(ADM==", df$adm, " && ADMD==", df$admd, ")*(", value, ")"))
   }
   stop("cannot figure out how to isolate dose in translation to rxode2", call.=FALSE)
