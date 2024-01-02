@@ -140,8 +140,8 @@
   .w <- which(pk$compartment$cmt == i)
   if (length(.w) == 1L) {
     .amount <- pk$compartment[.w, "amount"]
-    if (!is.na(amount)) {
-      env$name[[i]] <- amount
+    if (!is.na(.amount)) {
+      env$name[[i]] <- .amount
       env$lhs[[i]] <- paste0("d/dt(", env$name[[i]], ")")
       env$rhs[[i]] <- ""
       env$extra[[i]] <- character(0)
@@ -532,7 +532,7 @@
                env$lhsDepot[[.target]] <- ""
              }
              env$rhsDepot[[.target]] <- paste0(env$rhsDepot[[.target]],
-                                                " - ", .ka, "*", .target, env$depotPostfix)
+                                               " - ", .ka, "*", .target, env$depotPostfix)
              env$extraDepot[[.target]] <- paste0(" + ", .ka, "*", .target, env$depotPostfix)
              if (!is.na(.depot$Mtt) && !is.na(.depot$Ktr)) {
                .Mtt <- .depot$Mtt
@@ -582,8 +582,8 @@
                if (.Tlag == "") .Tlag <- "Tlag"
                if (is.null(env$tlag[[.target]])) {
                  env$tlag[[.target]] <- paste0("alag(",
-                                                    .target,
-                                                    ") <- ")
+                                               .target,
+                                               ") <- ")
                }
                env$tlag[[.target]] <- paste0(env$tlag[[.target]],
                                              .pk2rxAdmVal(pk, .depot, "tlag", .Tlag))
@@ -593,8 +593,8 @@
                if (.Tk0 == "") .Tk0 <- "Tk0"
                if (is.null(env$tlag[[.target]])) {
                  env$dur[[.target]] <- paste0("dur(",
-                                               .target,
-                                               ") <- ")
+                                              .target,
+                                              ") <- ")
                }
                env$dur[[.target]] <- paste0(env$dur[[.target]],
                                             .pk2rxAdmVal(pk, .depot, "dur", .Tk0))
@@ -620,6 +620,7 @@
   .prn <- FALSE
   .ret <- ""
   .env <- new.env(parent=emptyenv())
+  .env$endLines <- character(0)
   .env$depotPostfix <- depotPostfix
   if (is.finite(.r[1])) {
     .env$name      <- vector("list", .r[2])
@@ -653,9 +654,12 @@
     .ret <- vapply(seq_along(.env$name),
                    function(i) {
                      .ret <- character(0)
+                     .endLine <- FALSE
                      if (!is.null(.env$lhsDepot[[i]])) {
-                       .ret <- c(.ret,
-                                 paste0(.env$lhsDepot[[i]], " <- ", .env$rhsDepot[[i]]))
+                       if (.env$rhsDepot[[i]] != "") {
+                         .ret <- c(.ret,
+                                   paste0(.env$lhsDepot[[i]], " <- ", .env$rhsDepot[[i]]))
+                       }
                      }
                      if (!is.null(.env$fDepot[[i]])) {
                        .ret <- c(.ret,
@@ -666,8 +670,12 @@
                                  .env$tlagDepot[[i]])
                      }
                      if (!is.null(.env$lhs[[i]])) {
-                       .ret <- c(.ret,
-                                 paste0(.env$lhs[[i]], " <- ", .env$rhs[[i]]))
+                       if (.env$rhs[[i]] != "") {
+                         .ret <- c(.ret,
+                                   paste0(.env$lhs[[i]], " <- ", .env$rhs[[i]]))
+                       } else {
+                         .endLine <- TRUE
+                       }
                      }
                      if (!is.null(.env$dur[[i]])) {
                        .ret <- c(.ret,
@@ -690,10 +698,20 @@
                                  paste0(.env$lhsEffect[[i]], " <- ", .env$rhsEffect[[i]]))
                      }
                      if (identical(.ret, character(0))) return(NA_character_)
+                     if (.endLine) {
+                       .env$endLines <- c(.env$endLines, paste(.ret, collapse="\n"))
+                       return(NA_character_)
+                     }
                      return(paste(.ret, collapse="\n"))
                    }, character(1), USE.NAMES = FALSE)
     .ret <- .ret[!is.na(.ret)]
     .ret <- paste(.ret, collapse="\n")
+  }
+  if (.ret == "" && identical(.env$endLines, character(0)) &&
+        length(.pk$depot$adm) == 0L) {
+    return(NULL)
+  } else {
+    .ret <- strsplit(.ret, "\n")[[1]]
   }
   .env$lhsDepot  <- list()
   .env$rhsDepot  <- list()
@@ -704,11 +722,6 @@
   .env$fDepot    <- list()
   .env$tlagDepot <- list()
   .pk2rxDepot(.env, .pk)
-  if (.ret == "") {
-    .ret <- NULL
-  } else {
-    .ret <- strsplit(.ret, "\n")[[1]]
-  }
   list(pk=.ret,
        equation=list(lhsDepot=.env$lhsDepot,
                      rhsDepot=.env$rhsDepot,
@@ -717,5 +730,6 @@
                      f=.env$f,
                      tlag=.env$tlag,
                      fDepot=.env$fDepot,
-                     tlagDepot=.env$fDepot))
+                     tlagDepot=.env$fDepot,
+                     endLines=.env$endLines))
 }

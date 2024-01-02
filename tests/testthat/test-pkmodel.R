@@ -2,12 +2,12 @@ test_that("pkmodel()", {
 
   .ret <- .pk("Cc = pkmodel(V, Cl)")
 
-  expect_true(.pkmodel2macro(.ret, TRUE),
+  expect_equal(.pkmodel2macro(.ret, TRUE),
               c("compartment(cmt=1, volume=V, concentration=Cc)",
                 "iv(adm=1, cmt=1)",
                 "elimination(cmt=1, Cl)"))
 
-  expect_equal(.pk2rx(.ret)$pk
+  expect_equal(.pk2rx(.ret)$pk,
                c("d/dt(cmt1) <-  - Cl/V*cmt1",
                  "Cc <- cmt1/V"))
 
@@ -157,24 +157,27 @@ test_that("pkmodel()", {
 compartment(cmt=1, amount=Ac, volume=V, concentration=Cc)")
 
   expect_equal(.pkmodel2macro(.ret, TRUE),
+               c("compartment(cmt = 1, amount = Ac, volume = V, concentration = Cc)"))
+
+  expect_equal(.pk2rx(.ret)$equation$endLines,
+               "Cc <- Ac/V")
+
+  .ret <- .pk("Cp = pkmodel(V, k=kel, p=f, Tlag, k12, k21, k13, k31, Tk0)")
+
+  expect_equal(.pkmodel2macro(.ret, TRUE),
                c("compartment(cmt=1, volume=V, concentration=Cp)",
                  "absorption(adm=1, Tlag, Tk0, p = f, Tk0, cmt=1)",
                  "peripheral(k12, k21)",
                  "peripheral(k13, k31)",
-                 "elimination(cmt=1, Vm, Km)"))
+                 "elimination(cmt=1, k = kel)"))
 
-  expect_equal(.pkmodel(.ret$pkmodel, .ret$Cc, .ret$Ce),
-               character(0))
-
-
-  .ret <- .pk("Cp = pkmodel(V, k=kel, p=f, Tlag, k12, k21, k13, k31, Tk0)")
-
-  expect_equal(.pkmodel(.ret$pkmodel, .ret$Cc, .ret$Ce),
-               c("d/dt(central) <-  - k12*central + k21*periph - k13*central + k31*periph2 - kel*central",
-                 "alag(central) <- Tlag", "dur(central) <- Tk0",
-                 "f(central) <- f",
-                 "d/dt(periph) <- k12*central - k21*periph",
-                 "d/dt(periph2) <- k13*central - k31*periph2",
-                 "Cp <- central/V"))
+  expect_equal(.pk2rx(.ret)$pk,
+               c("d/dt(cmt1) <-  - k12*cmt1 + k21*cmt2 - k13*cmt1 + k31*cmt3 - kel*cmt1",
+                 "dur(cmt1) <- Tk0",
+                 "f(cmt1) <- f",
+                 "alag(cmt1) <- Tlag",
+                 "Cp <- cmt1/V",
+                 "d/dt(cmt2) <-  + k12*cmt1 - k21*cmt2",
+                 "d/dt(cmt3) <-  + k13*cmt1 - k31*cmt3"))
 
 })

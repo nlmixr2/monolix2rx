@@ -162,6 +162,10 @@
 #' @author Matthew L. Fidler
 .pkGetAdmd <- function(df) {
   .adm <- df$adm
+  if (is.na(.adm)) {
+    .adm <- 1L
+    df$adm <- 1L
+  }
   .cmt <- NA_integer_
   .target <- NA_character_
   if (any(names(df) == "cmt")) {
@@ -525,46 +529,48 @@
 #' @return nothing, called for side effects
 #' @noRd
 #' @author Matthew L. Fidler
-.printPkDf <- function(what, df) {
+.as.character.PkDf <- function(what, df) {
   if (length(df[, 1]) > 1L) {
-    lapply(seq_len(length(df[, 1])),
-           function(w) {
-             .printPkDf(what, df[w, ])
-           })
-    return(invisible())
+    return(vapply(seq_len(length(df[, 1])),
+                  function(w) {
+                    .as.character.PkDf(what, df[w, ])
+                  }, character(0), USE.NAMES = FALSE))
   }
   .na <- vapply(seq_len(ncol(df)), function(i){
     !is.na(df[[i]])
   }, logical(1), USE.NAMES = FALSE)
   .df <- df[, .na, drop = FALSE]
   .df <- .df[, names(.df) != "admd", drop = FALSE]
-  cat(what,"(",
-      paste(vapply(names(.df),
-         function(n) {
-           .v <- .df[[n]]
-           if (.v == "") return(n)
-           paste0(n, " = ", .v)
-         }, character(1), USE.NAMES = FALSE), collapse=", "),
-      ")\n", sep="")
+  paste0(what,"(",
+         paste(vapply(names(.df),
+                      function(n) {
+                        .v <- .df[[n]]
+                        if (.v == "") return(n)
+                        paste0(n, " = ", .v)
+                      }, character(1), USE.NAMES = FALSE), collapse=", "),
+         ")")
 }
-
 #' @export
-print.monolix2rxPk <- function(x, ...) {
+as.character.monolix2rxPk <- function(x, ...) {
+  .retf <- character(0)
+  .ret <- ""
   if (!is.na(x$Cc)) {
     if (!is.na(x$Ce)) {
-      cat("{", x$Cc, ", ", x$Ce, "} = ", sep="")
+      .ret <- paste0("{", x$Cc, ", ", x$Ce, "} = ")
     } else {
-      cat(x$Cc, " = ", sep="")
+      .ret <- paste0(x$Cc, " = ")
     }
     .pars <- x$pkmodel
     .pars <- .pars[!is.na(.pars)]
-    cat("pkmodel(")
-    cat(paste(vapply(names(.pars), function(n) {
+    .ret <- paste0(.ret, "pkmodel(")
+    .ret <- paste0(.ret, paste(vapply(names(.pars), function(n) {
       .p <- .pars[n]
       if (.p == "") return(n)
       return(paste0(n, " = ", .p))
-    }, character(1), USE.NAMES = FALSE), collapse=", "))
-    cat(")\n")
+    }, character(1), USE.NAMES = FALSE), collapse=", "),
+    ")")
+    .retf <- c(.retf, .ret)
+    .ret <- ""
   }
   # get max/min cmts
   .r <- suppressWarnings(range(c(x$compartment$cmt,
@@ -579,7 +585,8 @@ print.monolix2rxPk <- function(x, ...) {
       .w <- which(x$compartment$cmt == .i)
       if (length(.w) > 0) {
         .cmt <- x$compartment[.w, ]
-        .printPkDf("compartment", .cmt)
+        .retf <- c(.retf,
+                   .as.character.PkDf("compartment", .cmt))
         .prn <- TRUE
       }
       .w <- which(x$peripheral$in.j == .i)
@@ -602,40 +609,46 @@ print.monolix2rxPk <- function(x, ...) {
         names(.df2) <- .k
         .perip <- .perip[, -(1:3)]
         .perip <- cbind(.df1, .df2, .perip)
-        .printPkDf("peripheral", .perip)
+        .retf <- c(.retf,
+                   .as.character.PkDf("peripheral", .perip))
         .prn <- TRUE
       }
       .w <- which(x$transfer$to == .i)
       if (length(.w) > 0) {
         .trans <- x$transfer[.w, ]
-        .printPkDf("transfer", .trans)
+        .retf <- c(.retf,
+                   .as.character.PkDf("transfer", .trans))
         .prn <- TRUE
       }
       .w <- which(x$oral$cmt == .i)
       if (length(.w) > 0) {
         .oral <- x$oral[.w, ]
-        .printPkDf("oral", .oral)
+        .retf <- c(.retf,
+                   .as.character.PkDf("oral", .oral))
         .prn <- TRUE
       }
       .w <- which(x$iv$cmt == .i)
       if (length(.w) > 0) {
         .iv <- x$iv[.w, ]
-        .printPkDf("iv", .iv)
+        .retf <- c(.retf,
+                   .as.character.PkDf("iv", .iv))
         .prn <- TRUE
       }
       .w <- which(x$elimination$cmt == .i)
       if (length(.w) > 0) {
         .elimination <- x$elimination[.w, ]
-        .printPkDf("elimination", .elimination)
+        .retf <- c(.retf,
+                   .as.character.PkDf("elimination", .elimination))
         .prn <- TRUE
       }
       .w <- which(x$effect$cmt == .i)
       if (length(.w) > 0) {
         .effect <- x$effect[.w, ]
-        .printPkDf("effect", .effect)
+        .retf <- c(.retf,
+                   .as.character.PkDf("effect", .effect))
         .prn <- TRUE
       }
-      if (.prn && .i < .r[2]) cat("\n")
+      if (.prn && .i < .r[2]) .retf <- c(.retf, "")
     }
     .prn <- TRUE
   }
@@ -643,54 +656,64 @@ print.monolix2rxPk <- function(x, ...) {
   .r <- suppressWarnings(range(c(x$depot$adm, x$empty$adm, x$reset$adm), na.rm=TRUE))
   .prnAdm <- FALSE
   if (is.finite(.r[1])) {
-    if (.prn) cat("\n")
+    if (.prn) .retf <- c(.retf, "")
     for (.i in seq(.r[1], .r[2])) {
       .prn <- FALSE
       .w <- which(x$depot$adm == .i)
       if (length(.w) > 0) {
         .depot <- x$depot[.w, ]
-        .printPkDf("depot", .depot)
+        .retf <- c(.retf,
+                   .as.character.PkDf("depot", .depot))
         .prn <- TRUE
       }
       .w <- which(x$empty$adm == .i)
       if (length(.w) > 0) {
         .empty <- x$empty[.w, ]
-        .printPkDf("empty", .empty)
+        .retf <- c(.retf,
+                   .as.character.PkDf("empty", .empty))
         .prn <- TRUE
       }
       .w <- which(x$reset$adm == .i)
       if (length(.w) > 0) {
         .reset <- x$reset[.w, ]
-        .printPkDf("reset", .reset)
+        .retf <- c(.retf,
+                   .as.character.PkDf("reset", .reset))
         .prn <- TRUE
       }
-      if (.prn && .i < .r[2]) cat("\n")
+      if (.prn && .i < .r[2]) .retf <- c(.retf, "")
     }
     .prnAdm <- TRUE
   }
   .w <- which(is.na(x$depot$adm))
   if (length(.w) > 0) {
     .depot <- x$depot[.w, ]
-    if (.prnAdm) cat("\n")
+    if (.prnAdm) .retf <- c(.retf, "")
     .prnAdn <- FALSE
-    .printPkDf("depot", .depot)
+    .retf <- c(.retf,
+               .as.character.PkDf("depot", .depot))
   }
   .w <- which(is.na(x$empty$adm))
   if (length(.w) > 0) {
-    if (.prnAdm) cat("\n")
-     .prnAdn <- FALSE
+    if (.prnAdm) .retf <- c(.retf, "")
+    .prnAdn <- FALSE
     .empty <- x$empty[.w, ]
-    .printPkDf("empty", .empty)
+    .retf <- c(.retf,
+               .as.character.PkDf("empty", .empty))
   }
   .w <- which(is.na(x$reset$adm))
   if (length(.w) > 0) {
-    if (.prnAdm) cat("\n")
+    if (.prnAdm) .retf <- c(.retf, "")
     .prnAdn <- FALSE
     .reset <- x$reset[.w, ]
-    .printPkDf("reset", .reset)
+    .retf <- c(.retf,
+               .as.character.PkDf("reset", .reset))
   }
+  .retf
 }
-
+#' @export
+print.monolix2rxPk <- function(x, ...) {
+  cat(paste(as.character.monolix2rxPk(x, ...), collapse="\n"), "\n", sep="")
+}
 #' @export
 as.list.monolix2rxPk <- function(x, ...) {
   .x <- x
