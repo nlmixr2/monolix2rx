@@ -107,3 +107,29 @@ test_that(".pk2rxAdmVal()", {
   expect_error(.pk2rxAdmVal(pk, pk$depot[1, ], "f", "f"))
 
 })
+
+
+test_that(".pk2rxGetVar() null case", {
+  expect_equal(.pk2rxGetVar(list(test=NULL), "test"), NA_character_)
+})
+
+
+test_that(".pk2rxEffect() duplicate effects and missing concentrations", {
+
+  pk <- .pk("; Define an effect compartment linked to the base compartment 1,
+; with a transfer rate ke0 to the effect compartment,
+; with Ce as concentration's name
+effect(cmt=1, ke0, concentration=Ce)
+effect(cmt=1, ke0=ke02, concentration=Ce2)
+")
+
+  env <- new.env(parent=emptyenv())
+  env$name <- vector("list", 1)
+  env$lhs <- vector("list", 1)
+  env$rhs <- vector("list", 1)
+  env$extra <- vector("list", 1)
+  env$lhsEffect <- vector("list", 1)
+  env$rhsEffect <- vector("list", 1)
+
+  expect_error(.pk2rxEffect(env, pk, 1))
+})
