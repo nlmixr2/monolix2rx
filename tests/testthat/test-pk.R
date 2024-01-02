@@ -664,6 +664,8 @@ empty(adm=3, target=Ap)")
   expect_equal(as.character(.ret),
                "reset(adm = 3, target = all)")
 
+  expect_true(is.list(as.list(.ret)))
+
   expect_error(.pk("Cc = pkmodel(Tlag, ka, k, k12, k21)"))
 
   expect_error(.pk("{Cc, Ce} = pkmodel(Tlag, ka, p, V, Vm, Km, k12, k21, k13, k31, ke0, Tk0)"))
@@ -673,5 +675,8 @@ empty(adm=3, target=Ap)")
   expect_error(.pk("{Cc, Ce} = pkmodel(Tlag, ka, p, V, Vm, Km, k12, k21, k13, k31)"))
 
   expect_error(.pk("Cc = pkmodel(Tlag, ka, p, V, Vm, Km, k12, k21, k13, k31, ke0)"))
+
+  expect_error(.pk("peripheral(k2_13, k13_2, k14_4)"))
+
 
 })

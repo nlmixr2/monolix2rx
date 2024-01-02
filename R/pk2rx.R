@@ -1,15 +1,3 @@
-.pkadm <- new.env(parent=emptyenv())
-
-.pkadmReset <- function() {
-  .pkadm$adm <- data.frame(adm=integer(0), compartment=character(0), cmt=integer(0))
-}
-.pkadmPush <- function(adm, compartment, cmt) {
-  if (!exists("adm", envir=.pkadm)) {
-    .pkadmReset()
-  }
-  .pkadm$adm <- rbind(.pkadm$adm,
-                      data.frame(adm=adm, compartment=compartment, cmt=cmt))
-}
 #' Get the amount name for compartment i
 #'
 #' @param env environment for pk macro to rxode2 translation has name, lhs, rhs
@@ -83,7 +71,7 @@
 #' @author Matthew L. Fidler
 .pk2rxCompartment <- function(env, pk, i) {
   .w <- which(pk$compartment$cmt == i)
-  if (length(.w) > 1L) stop("multiple compartment definitions for ", i)
+  if (length(.w) > 1L) stop("multiple compartment definitions for compartment ", i)
   if (length(.w) == 1L) {
     .cmt <- pk$compartment[.w, ]
     .pk2rxConc(env, pk, i, volume=.cmt$volume, concentration=.cmt$concentration)

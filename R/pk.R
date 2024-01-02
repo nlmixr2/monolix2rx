@@ -684,30 +684,6 @@ as.character.monolix2rxPk <- function(x, ...) {
     }
     .prnAdm <- TRUE
   }
-  .w <- which(is.na(x$depot$adm))
-  if (length(.w) > 0) {
-    .depot <- x$depot[.w, ]
-    if (.prnAdm) .retf <- c(.retf, "")
-    .prnAdn <- FALSE
-    .retf <- c(.retf,
-               .as.character.PkDf("depot", .depot))
-  }
-  .w <- which(is.na(x$empty$adm))
-  if (length(.w) > 0) {
-    if (.prnAdm) .retf <- c(.retf, "")
-    .prnAdn <- FALSE
-    .empty <- x$empty[.w, ]
-    .retf <- c(.retf,
-               .as.character.PkDf("empty", .empty))
-  }
-  .w <- which(is.na(x$reset$adm))
-  if (length(.w) > 0) {
-    if (.prnAdm) .retf <- c(.retf, "")
-    .prnAdn <- FALSE
-    .reset <- x$reset[.w, ]
-    .retf <- c(.retf,
-               .as.character.PkDf("reset", .reset))
-  }
   .retf
 }
 #' @export
