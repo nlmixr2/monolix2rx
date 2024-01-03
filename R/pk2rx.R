@@ -412,7 +412,7 @@
            .target <- .depot$target
            .adm <- .depot$adm
            if (!is.na(.depot$ka)) {
-             .ka <- .depot$ka
+             .ka <- .pk2rxGetVar(.depot, "ka")
              if (is.null(env$lhsDepot[[.target]])) {
                env$lhsDepot[[.target]] <- paste0("d/dt(", .target, env$depotPostfix, ")")
                env$lhsDepot[[.target]] <- ""
@@ -479,6 +479,7 @@
              }
            }
          })
+  invisible()
 }
 #' Convert Pk macro to ODEs for rxode2
 #'

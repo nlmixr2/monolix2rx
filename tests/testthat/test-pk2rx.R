@@ -254,3 +254,68 @@ test_that("pk2rxTransfer()", {
   expect_equal(.env$rhs[[2]], " + kt*cmt1")
 
 })
+
+test_that("pk2rxDepot() tests", {
+
+  .env <- new.env(parent=emptyenv())
+  .env$endLines <- character(0)
+  .env$depotPostfix <- "d"
+  .env$lhsDepot  <- list()
+  .env$rhsDepot  <- list()
+  .env$extraDepot<- list()
+  .env$dur       <- list()
+  .env$f         <- list()
+  .env$tlag      <- list()
+  .env$fDepot    <- list()
+  .env$tlagDepot <- list()
+
+  pk <- .pk("depot(target=Ac, ka, Mtt, Ktr, p, Tlag)
+depot(target=Ac2, ka=ka2, p=p2, Tlag=tlag2)
+depot(target=Ac3, p=p3, Tlag=tlag3)")
+
+  .pk2rxDepot(.env, pk)
+
+  expect_equal(as.list(.env),
+               list(dur = list(), endLines = character(0),
+                    extraDepot = list(Ac = " + ka*Acd",
+                                      Ac2 = " + ka2*Ac2d"),
+                    lhsDepot = list(Ac = "", Ac2 = ""),
+                    tlag = list(Ac3 = "alag(Ac3) <- tlag3"),
+                    f = list(Ac3 = "f(Ac3) <- p3"),
+                    tlagDepot = list(Ac = "alag(Acd) <- Tlag",
+                                     Ac2 = "alag(Ac2d) <- tlag2"),
+                    fDepot = list(Ac2 = "f(Ac2d) <- p2"),
+                    depotPostfix = "d",
+                    rhsDepot = list(Ac = " - ka*Acd + transit(Mtt*Ktr-1, Mtt, p)",
+                                    Ac2 = " - ka2*Ac2d")))
+
+  .env <- new.env(parent=emptyenv())
+  .env$endLines <- character(0)
+  .env$depotPostfix <- "d"
+  .env$lhsDepot  <- list()
+  .env$rhsDepot  <- list()
+  .env$extraDepot<- list()
+  .env$dur       <- list()
+  .env$f         <- list()
+  .env$tlag      <- list()
+  .env$fDepot    <- list()
+  .env$tlagDepot <- list()
+
+
+  pk <- .pk("depot(target=Ac, Tk0=dur1)")
+
+  .pk2rxDepot(.env, pk)
+
+  expect_equal(as.list(.env),
+               list(dur = list(Ac = "dur(Ac) <- dur1"),
+                    endLines = character(0),
+                    extraDepot = list(),
+                    lhsDepot = list(),
+                    tlag = list(),
+                    f = list(),
+                    tlagDepot = list(),
+                    fDepot = list(),
+                    depotPostfix = "d",
+                    rhsDepot = list()))
+
+})
