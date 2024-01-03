@@ -37,6 +37,20 @@
   }
   NA_real_
 }
+#' Determine if the parameter is fixed or not
+#'
+#' @param pars parsed <PARAMETERS> section
+#' @param name character of the parameter name
+#' @return boolean stating if this parameter value is fixed
+#' @noRd
+#' @author Matthew L. Fidler
+.parsGetFixed <- function(pars, name) {
+  .w <- which(pars$name == "name")
+  if (length(.w) == 1L) {
+    return(tolower(pars[.w, "method"]) == "fixed")
+  }
+  FALSE
+}
 #' This sets up the diagonals in the omega list to match the defined variability
 #'
 #' @param cur The current variable definition
@@ -153,11 +167,19 @@
                 .val <- .parsGetValue(pars, .var)
               }
               .def2iniSetupDiagSd(.cur, .env, pars, n)
-              bquote(.(str2lang(.var)) <- .(.val))
+              if (.parsGetFixed(pars, .var)) {
+                bquote(.(str2lang(.var)) <- fixed(.(.val)))
+              } else {
+                bquote(.(str2lang(.var)) <- .(.val))
+              }
             }),
             lapply(.env$err,
                    function(e) {
-                     bquote(.(str2lang(e)) <- .(.parsGetValue(pars, e)))
+                     if (.parsGetFixed(pars, e)) {
+                       bquote(.(str2lang(e)) <- fixed(.(.parsGetValue(pars, e))))
+                     } else {
+                       bquote(.(str2lang(e)) <- .(.parsGetValue(pars, e)))
+                     }
                    }))
   .omega <- setNames(lapply(.env$vl,
                             function(level) {
