@@ -138,8 +138,7 @@
     .c1 <- .pk2rxAmt(env, pk, .trans$from)
     .i1 <- .trans$from
     .i2 <- .trans$to
-    .kt <- .trans$kt
-    if (.kt == "") .kt <- "kt"
+    .kt <- .pk2rxGetVar(.trans, "kt")
     # from
     env$rhs[[.i1]] <- paste0(env$rhs[[.i1]],
                              " - ", .kt, "*", .c1)

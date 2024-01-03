@@ -219,3 +219,38 @@ test_that(".pk2rxElimination()", {
   expect_error(.pk("elimination(cmt=1, k, volume=v2)"), 'volume')
 
 })
+
+
+test_that("pk2rxTransfer()", {
+
+  .env <- new.env(parent=emptyenv())
+  .env$endLines <- character(0)
+  .env$depotPostfix <- "d"
+
+  .env$name      <- vector("list", 2)
+  .env$lhs       <- vector("list", 2)
+  .env$rhs       <- vector("list", 2)
+  .env$lhsDepot  <- vector("list", 2)
+  .env$rhsDepot  <- vector("list", 2)
+  .env$lhsEffect <- vector("list", 2)
+  .env$rhsEffect <- vector("list", 2)
+  .env$dur       <- vector("list", 2)
+  .env$f         <- vector("list", 2)
+  .env$tlag      <- vector("list", 2)
+  .env$fDepot    <- vector("list", 2)
+  .env$tlagDepot <- vector("list", 2)
+  .env$extra     <- vector("list", 2)
+  .env$conc      <- vector("list", 2)
+  .env$cmtDefault <- "cmt"
+
+  .env$rhs[[1]] <- ""
+  .env$rhs[[2]] <- ""
+
+  pk <- .pk("transfer(from=1, to=2, kt)")
+
+  .pk2rxTransfer(.env, pk, 2)
+
+  expect_equal(.env$rhs[[1]], " - kt*cmt1")
+  expect_equal(.env$rhs[[2]], " + kt*cmt1")
+
+})
