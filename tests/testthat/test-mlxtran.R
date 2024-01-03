@@ -141,7 +141,4 @@ test_that("mlxtran initial list", {
 
   })
 
-
-
-
 })
