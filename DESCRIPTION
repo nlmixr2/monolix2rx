@@ -16,10 +16,10 @@ Imports:
     Rcpp,
     checkmate,
     dparser,
-    rxode2 (> 2.0.13),
     magrittr,
     withr
 Suggests:
     devtools,
+    rxode2 (> 2.0.13),
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

@@ -1,3 +1,14 @@
+#' Get the parameter value based on the transformation
+#'
+#' This is for the typical values in monolix
+#'
+#' @param value The typical value from monolix (ie back-transformed)
+#' @param distribution the distribution of the parameter
+#' @param min the minimum value (numeric) for logit/expit transformations
+#' @param max the maximum value (numeirc) for the logit/expit transformations
+#' @return the mean value of the distribution (ie non-tranformed) or NA if unknown
+#' @noRd
+#' @author Matthew L. Fidler
 .parsTransformValue <- function(value, distribution, min, max) {
   if (distribution == "lognormal") {
     return(log(value))
@@ -12,7 +23,13 @@
   }
   NA_real_
 }
-
+#' Get the parameter value from the parsed pars object
+#'
+#' @param pars parsed pars object
+#' @param name name of the parameter being queried
+#' @return value of the parameter or NA if not found
+#' @noRd
+#' @author Matthew L. Fidler
 .parsGetValue <- function(pars, name) {
   .w <- which(pars$name == name)
   if (length(.w) == 1L) {
@@ -20,8 +37,100 @@
   }
   NA_real_
 }
-
+#' This sets up the diagonals in the omega list to match the defined variability
+#'
+#' @param cur The current variable definition
+#' @param env environment where `omega` and `vl` are defined as a list
+#'   and a empty character vector, respectively. `omegaDf` is also a
+#'   data.frame for tracking estimates (which will be used later for reading
+#'   correlations)
+#' @param pars the parsed estimate block
+#' @param name is the parameter name
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.def2iniSetupDiagSd <- function(cur, env, pars, name) {
+  if (!is.null(cur$varlevel)) {
+    .vl <- cur$varlevel
+  } else {
+    .vl <- "id"
+  }
+  env$vl <- unique(c(env$vl, .vl))
+  if (!is.null(cur$sd)) {
+    # don't need to check for the same length; checked in parsing
+    lapply(seq_along(.vl),
+           function(i) {
+             .level <- .vl[i]
+             .var <- cur$sd[i]
+             env$omegaDf <- rbind(env$omegaDf,
+                                  data.frame(level=.level, name=name,
+                                             var=.var))
+             env$omega[[.level]] <-
+               c(env$omega[[.level]],
+                 setNames(.parsGetValue(pars, .var), .var))
+           })
+  } else if (!is.null(cur$var)) {
+    # same as above but setup sqrt to give sqrt matrix
+    lapply(seq_along(.vl),
+           function(i) {
+             .level <- .vl[i]
+             .var <- cur$sd[i]
+             env$omegaDf <- rbind(env$omegaDf,
+                                  data.frame(level=.level, name=name,
+                                             var=.var))
+             env$omega[[.level]] <-
+               c(env$omega[[.level]],
+                 setNames(sqrt(.parsGetValue(pars, .var)), .var))
+           })
+  }
+}
+#' Get the covariance matrix based on the parameter definitions
+#'
+#' @param env env environment where `omega` and `vl` are defined as a list
+#'   and a empty character vector, respectively. `omegaDf` is also a
+#'   data.frame for tracking estimates (which will be used later for reading
+#'   correlations)
+#' @param def parsed individual definition
+#' @param pars parsed <PARAMETER> block
+#' @param level the level of varaibility being processed
+#' @return covariance for level
+#' @noRd
+#' @author Matthew L. Fidler
+.def2iniGetCov <- function(env, def, pars, level) {
+  .sd <- diag(env$omega[[level]])
+  .r <- diag(length(env$omega[[level]]))
+  .n <- names(env$omega[[level]])
+  dimnames(.r) <- list(.n, .n)
+  env$r <- .r
+  .cor <- def$cor
+  .cor <- .cor[.cor$level == level, ]
+  lapply(seq_along(.cor$v1), function(i) {
+    .cur <- .cor[i, ]
+    .v1 <- .cur$v1
+    .v2 <- .cur$v2
+    .v1 <- env$omegaDf[env$omegaDf$level == level & env$omegaDf$name == .v1, "var"]
+    .v2 <- env$omegaDf[env$omegaDf$level == level & env$omegaDf$name == .v2, "var"]
+    .val <- .parsGetValue(pars, .cur$est)
+    env$r[.v1, .v2] <- .val
+    env$r[.v2, .v1] <- .val
+  })
+  dimnames(.sd) <- list(.n, .n)
+  .omega <- .sd %*% .r %*% .sd
+  dimnames(.omega) <- list(.n, .n)
+  .omega
+}
+#' Get the ini block based on a mlxtran parsed sections
+#'
+#' @param def `[INDIVIDUAL] DEFINITION:` section (parsed)
+#' @param pars `<PARAMETER>` section (parsed)
+#' @param longDef `[LONGITUDIAL] DEFINITION:` section (parsed)
+#' @return ini block
+#' @noRd
+#' @author Matthew L. Fidler
 .def2ini <- function(def, pars, longDef) {
+  if (!requireNamespace("lotri", quietly = TRUE)) {
+    stop("reqires 'lotri'")
+  }
   .env <- new.env(parent=emptyenv())
   .var <- def$var
   .n <- names(.var)
@@ -29,6 +138,9 @@
   lapply(seq_along(longDef$endpoint), function(i) {
     .env$err <- c(.env$err, longDef$endpoint[[1]]$err$typical)
   })
+  .env$omega <- list()
+  .env$vl <- character(0)
+  .env$omegaDf <- data.frame(level=character(0), name=character(0), var=character(0))
   .pop <- c(list(quote(`{`)),
             lapply(.n, function(n) {
               .cur <- .var[[n]]
@@ -40,12 +152,21 @@
                 .var <- .cur$mean
                 .val <- .parsGetValue(pars, .var)
               }
+              .def2iniSetupDiagSd(.cur, .env, pars, n)
               bquote(.(str2lang(.var)) <- .(.val))
             }),
             lapply(.env$err,
                    function(e) {
                      bquote(.(str2lang(e)) <- .(.parsGetValue(pars, e)))
                    }))
-  .pop <- as.call(c(list(str2lang("lotri::lotri")), as.call(.pop)))
-  .pop
+  .omega <- setNames(lapply(.env$vl,
+                            function(level) {
+                              .def2iniGetCov(.env, def, pars, level)
+                            }), .env$vl)
+  class(.omega) <- "lotriFix"
+  .omega <- as.expression(.omega)
+  .omega <- .omega[[2]]
+  .ini <- c(.pop,
+            lapply(seq_along(.omega)[-1], function(x) {.omega[[x]]}))
+  as.call(c(list(quote(`ini`)), as.call(.ini)))
 }

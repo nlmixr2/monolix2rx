@@ -13,6 +13,11 @@
 #' @eval .monolix2rxBuildGram()
 #' @examples
 monolix2rx <- function(mlxtran) {
+  if (!requireNamespace("rxode2", quietly=FALSE) ||
+        !requireNamespace("lotri", quietly=FALSE)) {
+    stop("'monolix2rx' requires 'rxode2' and 'lotri'",
+         call.=FALSE)
+  }
   .ret <- mlxtran(mlxtran, equation=TRUE)
   .equation <- .ret$MODEL$LONGITUDINAL$EQUATION$rx # includes PK: macro
   .model <- c("model({",
@@ -24,7 +29,10 @@ monolix2rx <- function(mlxtran) {
                      }, character(1), USE.NAMES = FALSE),
               "})")
   .model <- str2lang(paste0(.model, collapse="\n"))
-  .model
+  .ini <- .def2ini(v$MODEL$INDIVIDUAL$DEFINITION,
+                   v$PARAMETER$PARAMETER,
+                   v$MODEL$LONGITUDINAL$DEFINITION)
+  as.call(c(list(quote(`{`)), .ini, .model))
 }
 #' Handle a single endpoint and convert to rxode2
 #'
