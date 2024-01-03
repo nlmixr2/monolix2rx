@@ -45,9 +45,9 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .parsGetFixed <- function(pars, name) {
-  .w <- which(pars$name == "name")
+  .w <- which(pars$name == name)
   if (length(.w) == 1L) {
-    return(tolower(pars[.w, "method"]) == "fixed")
+    return(pars[.w, "method"] == "FIXED")
   }
   FALSE
 }
@@ -79,6 +79,9 @@
              env$omegaDf <- rbind(env$omegaDf,
                                   data.frame(level=.level, name=name,
                                              var=.var))
+             if (.parsGetFixed(pars, .var)) {
+               env$extraFixed <- c(env$extraFixed, .var)
+             }
              env$omega[[.level]] <-
                c(env$omega[[.level]],
                  setNames(.parsGetValue(pars, .var), .var))
@@ -88,7 +91,7 @@
     lapply(seq_along(.vl),
            function(i) {
              .level <- .vl[i]
-             .var <- cur$sd[i]
+             .var <- cur$var[i]
              env$omegaDf <- rbind(env$omegaDf,
                                   data.frame(level=.level, name=name,
                                              var=.var))
@@ -129,16 +132,42 @@
     .v2 <- env$omegaDf[env$omegaDf$level == level & env$omegaDf$name == .v2, "var"]
     .val <- .parsGetValue(pars, .cur$est)
     if (.parsGetFixed(pars, .cur$est)) {
-      env$extraFixed <- c(env$extraFixed, .cur$est)
+      env$extraFixed <- c(env$extraFixed, .v1, .v2)
     }
     env$r[.v1, .v2] <- .val
     env$r[.v2, .v1] <- .val
   })
   dimnames(.sd) <- list(.n, .n)
-  .omega <- .sd %*% .r %*% .sd
+  .omega <- .sd %*% env$r %*% .sd
   dimnames(.omega) <- list(.n, .n)
   .omega
 }
+
+#' Based on a correctly setup environment with env$df = ini df fix an
+#' omega or omega block
+#'
+#'
+#' @param env environment with env$df == ini block
+#' @param v variable name to fix
+#' @return nothing, called for side effects on env
+#' @export
+#' @author Matthew L. Fidler
+.def2iniFixOmegaVar <- function(env, v) {
+  .w <- which(env$df$name == v)
+  env$df$fix[.w] <- TRUE
+  .neta <- env$df$neta1[.w]
+  .etas <- .neta
+  .fixedEtas <- NULL
+  while (length(.etas) > 0) {
+    .neta <- .etas[1]
+    .w <- which(env$df$neta1 == .neta | env$df$neta2 == .neta)
+    env$df$fix[.w] <- TRUE
+    .etas <- unique(c(.etas, env$df$neta1[.w], env$df$neta2[.w]))
+    .fixedEtas <- c(.neta, .fixedEtas)
+    .etas <- .etas[!(.etas %in% .fixedEtas)]
+  }
+}
+
 #' Fix the omega blocks associated with fixed parameters in monolix model
 #'
 #' @param omega initial omega list
@@ -152,19 +181,7 @@
   .env$df <- as.data.frame(omega)
   lapply(fixVars,
          function(v) {
-           .w <- which(.env$df$name == v)
-           .env$df$fix[.w] <- TRUE
-           .neta <- .env$df$neta1[.w]
-           .etas <- .neta
-           .fixedEtas <- NULL
-           while (length(.etas) > 0) {
-             .neta <- .etas[1]
-             .w <- which(.env$df$neta1 == .neta | .env$df$neta2 == .neta)
-             .ini$fix[.w] <- TRUE
-             .etas <- unique(c(.etas, .env$df$neta1[.w], .env$df$neta2[.w]))
-             .fixedEtas <- c(.neta, .fixedEtas)
-             .etas <- .etas[!(.etas %in% .fixedEtas)]
-           }
+           .def2iniFixOmegaVar(.env, v)
          })
   lotri::as.lotri(.env$df)
 }
@@ -224,7 +241,7 @@
                               .def2iniGetCov(.env, def, pars, level)
                             }), .env$vl)
   class(.omega) <- "lotriFix"
-  .omega <- .def2iniFixOmega(.omega)
+  .omega <- .def2iniFixOmega(.omega, .env$extraFixed)
   .omega <- as.expression(.omega)
   .omega <- .omega[[2]]
   .ini <- c(.pop,

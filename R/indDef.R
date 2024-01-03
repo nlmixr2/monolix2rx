@@ -7,7 +7,7 @@
   .monolix2rx$sd       <- character(0)
   .monolix2rx$sdVal    <- numeric(0)
   .monolix2rx$var      <- character(0)
-  .monolix2rx$varVal   <- numeric(0)
+  .monolix2rx$variVal  <- numeric(0)
   .monolix2rx$min      <- -Inf
   .monolix2rx$max      <- Inf
   .monolix2rx$iov      <- character(0)
@@ -196,7 +196,7 @@
       .var <- .monolix2rx$var
       if (length(.w) > 0L) {
         .estw <- paste0("rxVar_",.monolix2rx$varName, "_", .w)
-        .fix <- .monolix2rx$varVal[.w]
+        .fix <- .monolix2rx$variVal[.w]
         names(.fix) <- .estw
         .var[.w] <- .estw
         .monolix2rx$defFixed <- c(.monolix2rx$defFixed, .fix)
@@ -426,10 +426,10 @@ as.list.monolix2rxIndDef <- function(x, ...) {
   .var <- suppressWarnings(as.numeric(var))
   if (is.na(.var)) {
     .monolix2rx$var <- c(.monolix2rx$var, var)
-    .monolix2rx$varVal <- c(.monolix2rx$varVal, NA_real_)
+    .monolix2rx$variVal <- c(.monolix2rx$variVal, NA_real_)
   } else {
     .monolix2rx$var <- c(.monolix2rx$var, NA_character_)
-    .monolix2rx$varVal <- c(.monolix2rx$varVal, .var)
+    .monolix2rx$variVal <- c(.monolix2rx$variVal, .var)
   }
 }
 #' Set the maximum value of the transformation
