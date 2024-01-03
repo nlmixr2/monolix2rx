@@ -136,7 +136,7 @@
   .n <- names(.var)
   .env$err <- character(0)
   lapply(seq_along(longDef$endpoint), function(i) {
-    .env$err <- c(.env$err, longDef$endpoint[[1]]$err$typical)
+    .env$err <- c(.env$err, longDef$endpoint[[i]]$err$typical)
   })
   .env$omega <- list()
   .env$vl <- character(0)

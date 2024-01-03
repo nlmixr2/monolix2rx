@@ -12,7 +12,7 @@
 #' @importFrom stats setNames
 #' @eval .monolix2rxBuildGram()
 #' @examples
-monolix2rx <- function(mlxtran) {
+monolix2rx <- function(mlxtran, envir=parent.frame()){
   if (!requireNamespace("rxode2", quietly=FALSE) ||
         !requireNamespace("lotri", quietly=FALSE)) {
     stop("'monolix2rx' requires 'rxode2' and 'lotri'",
@@ -32,7 +32,11 @@ monolix2rx <- function(mlxtran) {
   .ini <- .def2ini(v$MODEL$INDIVIDUAL$DEFINITION,
                    v$PARAMETER$PARAMETER,
                    v$MODEL$LONGITUDINAL$DEFINITION)
-  as.call(c(list(quote(`{`)), .ini, .model))
+  .ret <- function() {}
+  body(.ret) <- as.call(c(list(quote(`{`)), .ini, .model))
+  .ret <- eval(.ret, envir=envir)
+  .ui <- .ret()
+  .ui
 }
 #' Handle a single endpoint and convert to rxode2
 #'
