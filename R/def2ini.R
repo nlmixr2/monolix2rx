@@ -92,6 +92,9 @@
              env$omegaDf <- rbind(env$omegaDf,
                                   data.frame(level=.level, name=name,
                                              var=.var))
+             if (.parsGetFixed(pars, .var)) {
+               env$extraFixed <- c(env$extraFixed, .var)
+             }
              env$omega[[.level]] <-
                c(env$omega[[.level]],
                  setNames(sqrt(.parsGetValue(pars, .var)), .var))
@@ -125,6 +128,9 @@
     .v1 <- env$omegaDf[env$omegaDf$level == level & env$omegaDf$name == .v1, "var"]
     .v2 <- env$omegaDf[env$omegaDf$level == level & env$omegaDf$name == .v2, "var"]
     .val <- .parsGetValue(pars, .cur$est)
+    if (.parsGetFixed(pars, .cur$est)) {
+      env$extraFixed <- c(env$extraFixed, .cur$est)
+    }
     env$r[.v1, .v2] <- .val
     env$r[.v2, .v1] <- .val
   })
@@ -133,6 +139,37 @@
   dimnames(.omega) <- list(.n, .n)
   .omega
 }
+#' Fix the omega blocks associated with fixed parameters in monolix model
+#'
+#' @param omega initial omega list
+#' @param fixVars fixed omega variables from monolix
+#' @return lotri object for converting to an expression
+#' @noRd
+#' @author Matthew L. Fidler
+.def2iniFixOmega <- function(omega, fixVars=character(0)) {
+  if (length(fixVars) == 0L) return(omega)
+  .env <- new.env(parent=emptyenv())
+  .env$df <- as.data.frame(omega)
+  lapply(fixVars,
+         function(v) {
+           .w <- which(.env$df$name == v)
+           .env$df$fix[.w] <- TRUE
+           .neta <- .env$df$neta1[.w]
+           .etas <- .neta
+           .fixedEtas <- NULL
+           while (length(.etas) > 0) {
+             .neta <- .etas[1]
+             .w <- which(.env$df$neta1 == .neta | .env$df$neta2 == .neta)
+             .ini$fix[.w] <- TRUE
+             .etas <- unique(c(.etas, .env$df$neta1[.w], .env$df$neta2[.w]))
+             .fixedEtas <- c(.neta, .fixedEtas)
+             .etas <- .etas[!(.etas %in% .fixedEtas)]
+           }
+         })
+  lotri::as.lotri(.env$df)
+}
+
+
 #' Get the ini block based on a mlxtran parsed sections
 #'
 #' @param def `[INDIVIDUAL] DEFINITION:` section (parsed)
@@ -155,6 +192,7 @@
   .env$omega <- list()
   .env$vl <- character(0)
   .env$omegaDf <- data.frame(level=character(0), name=character(0), var=character(0))
+  .env$extraFixed <- character(0)
   .pop <- c(list(quote(`{`)),
             lapply(.n, function(n) {
               .cur <- .var[[n]]
@@ -186,6 +224,7 @@
                               .def2iniGetCov(.env, def, pars, level)
                             }), .env$vl)
   class(.omega) <- "lotriFix"
+  .omega <- .def2iniFixOmega(.omega)
   .omega <- as.expression(.omega)
   .omega <- .omega[[2]]
   .ini <- c(.pop,
