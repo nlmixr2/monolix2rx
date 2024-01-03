@@ -3,6 +3,10 @@
 #' Translate a monolix file to rxode2
 #'
 #' @param mlxtran file name for mlxtran to translate to rxode2
+#' @param update is a boolean that represents if the final parameter
+#'   estimates should be used for the translation (when present)
+#' @param envir represents the environment used for evaluating the
+#'   corresponding rxode2 function
 #' @return rxode2 model
 #' @export
 #' @author Matthew L. Fidler
@@ -12,13 +16,13 @@
 #' @importFrom stats setNames
 #' @eval .monolix2rxBuildGram()
 #' @examples
-monolix2rx <- function(mlxtran, envir=parent.frame()){
+monolix2rx <- function(mlxtran, update=TRUE, envir=parent.frame()){
   if (!requireNamespace("rxode2", quietly=FALSE) ||
         !requireNamespace("lotri", quietly=FALSE)) {
     stop("'monolix2rx' requires 'rxode2' and 'lotri'",
          call.=FALSE)
   }
-  .ret <- mlxtran(mlxtran, equation=TRUE)
+  .ret <- mlxtran(mlxtran, equation=TRUE, update=update)
   .equation <- .ret$MODEL$LONGITUDINAL$EQUATION$rx # includes PK: macro
   .model <- c("model({",
               .ret$MODEL$INDIVIDUAL$DEFINITION$rx,

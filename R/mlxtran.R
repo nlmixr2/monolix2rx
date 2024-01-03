@@ -60,10 +60,12 @@
 #'
 #' @param lines a character vector representing a set of lines to parse
 #' @param equation when TRUE, try to parse equation too
+#' @param update when TRUE, try to update the initial estimates to the final estimates
 #' @return a mlxtran object
 #' @noRd
 #' @author Matthew L. Fidler
-.mlxtran <- function(lines, equation=FALSE) {
+.mlxtran <- function(lines, equation=FALSE,
+                     update=FALSE) {
   .mlxtranIni()
   lapply(lines, .mlxtranParseItem)
   # Add file entries
@@ -127,6 +129,9 @@
     if (!is.null(.ret$MONOLIX$TASKS$TASKS)) {
       .ret$MONOLIX$TASKS$TASKS <- .task(.ret$MONOLIX$TASKS$TASKS)
     }
+  }
+  if (update && !is.null(.ret$PARAMETER)) {
+    .ret <- .parameterUpdate(.ret)
   }
   attr(.ret, "desc") <- .mlxEnv$desc
   class(.ret) <- "monolix2rxMlxtran"
@@ -225,17 +230,21 @@
 #'
 #' @param file mlxtran file to process
 #' @param equation parse the equation block to rxode2 (some models cannot be translated)
+#' @param update when true, try to update the parameter block to the final parameter estimates
 #' @return mlxtran object
 #' @export
 #' @author Matthew L. Fidler
 #' @examples
-#'
-mlxtran <- function(file, equation=FALSE) {
+mlxtran <- function(file, equation=FALSE, update=FALSE) {
   checkmate::assertLogical(equation, any.missing=FALSE, len=1)
+  checkmate::assertLogical(update, any.missing=FALSE, len=1)
   if (inherits(file, "monolix2rxMlxtran")) {
     if (equation && !is.null(file$MODEL$LONGITUDINAL$EQUATION)) {
       file$MODEL$LONGITUDINAL$EQUATION <- .equation(file$MODEL$LONGITUDINAL$EQUATION,
                                                     file$MODEL$LONGITUDINAL$PK)
+    }
+    if (update && !is.null(file$PARAMETER)) {
+      file <- .parameterUpdate(file)
     }
     return(file)
   }
@@ -243,7 +252,7 @@ mlxtran <- function(file, equation=FALSE) {
     .lines <- file
     .dirn <- getwd()
   } else {
-    checkmate::checkFileExists(file)
+    checkmate::assertFileExists(file)
     .lines <- suppressWarnings(readLines(file))
     .dirn <- dirname(file)
   }
