@@ -366,27 +366,30 @@
   for (.w in .w0) {
     .elimination <- pk$elimination[.w, ]
     .cmtName <- .pk2rxAmt(env, pk, i)
-    if (!is.na(.elimination$V)) {
-      .V <- .pk2rxGetVar(.elimination, "V")
-    } else {
+    .w2 <- which(pk$compartment$cmt == i)
+    if (length(.w2) == 1L) {
       .V <- pk$compartment[pk$compartment$cmt == i, "volume"]
-      if (!is.na(.V)) {
-        if (.V == "") .V <- "V"
-      }
+      # Volume needs to be defined completely no need to change to "V"
+    } else {
+      .V <- NA_character_
     }
     if (!is.na(.elimination$k)) {
       .k <- .pk2rxGetVar(.elimination, "k")
       env$rhs[[i]] <- paste0(env$rhs[[i]],
                              " - ", .k, "*", .cmtName)
     } else if (!is.na(.elimination$Cl)) {
-      .Cl <- .pk2rxGetVar(.elimination, "Cl")
       if (is.na(.V)) {
         stop("cannot determine volume for this elimination type",
-             .call=FALSE)
+             call.=FALSE)
       }
+      .Cl <- .pk2rxGetVar(.elimination, "Cl")
       env$rhs[[i]] <- paste0(env$rhs[[i]],
                              " - ", .Cl, "/", .V, "*", .cmtName)
     } else if (!is.na(.elimination$Vm) && !is.na(.elimination$Km)) {
+      if (is.na(.V)) {
+        stop("cannot determine volume for this elimination type",
+             call.=FALSE)
+      }
       .Vm <- .pk2rxGetVar(.elimination, "Vm")
       .Km <- .pk2rxGetVar(.elimination, "Km")
       env$rhs[[i]] <- paste0(env$rhs[[i]],

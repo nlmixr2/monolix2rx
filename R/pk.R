@@ -406,6 +406,26 @@
   .monolix2rx$pkCe <- ce
   .monolix2rx$pkStatement <- "pkmodel"
 }
+
+#' Assign a parameter value based on value
+#'
+#' @param df data frame to assign
+#' @param par parameter name
+#' @param val parameter value
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.pkAssignBasedOnValue0 <- function(df, par, val) {
+  df <- as.character(substitute(df))
+  .df <- .monolix2rx[[df]]
+  if (!(par %in% names(.df))) {
+    stop("unsupported parameter '", par, "' for '",
+         .monolix2rx$pkStatement, "'", call.=FALSE)
+  }
+  .df[par] <- val
+  .monolix2rx[[df]] <- .df
+}
+
 #' Assign PK statement based on the statement being processed
 #'
 #' @param par parameter name
@@ -415,47 +435,47 @@
 #' @author Matthew L. Fidler
 .pkAssignBasedOnValue <- function(par, val) {
   if (.monolix2rx$pkStatement == "pkmodel") {
-    .monolix2rx$pkPars[par] <- val
+    .pkAssignBasedOnValue0(pkPars, par, val)
     return(invisible(TRUE))
   }
   if (.monolix2rx$pkStatement == "compartment") {
-    .monolix2rx$curCmt[par] <- val
+    .pkAssignBasedOnValue0(curCmt, par, val)
     return(invisible(TRUE))
   }
   if (.monolix2rx$pkStatement == "peripheral") {
-    .monolix2rx$curPerip[par] <- val
+    .pkAssignBasedOnValue0(curPerip, par, val)
     return(invisible(TRUE))
   }
   if (.monolix2rx$pkStatement == "effect") {
-    .monolix2rx$curEffect[par] <- val
+    .pkAssignBasedOnValue0(curEffect, par, val)
     return(invisible(TRUE))
   }
   if (.monolix2rx$pkStatement == "transfer") {
-    .monolix2rx$curTransfer[par] <- val
+    .pkAssignBasedOnValue0(curTransfer, par, val)
     return(invisible(TRUE))
   }
   if (.monolix2rx$pkStatement == "depot") {
-    .monolix2rx$curDepot[par] <- val
+    .pkAssignBasedOnValue0(curDepot, par, val)
     return(invisible(TRUE))
   }
   if (.monolix2rx$pkStatement == "oral") {
-    .monolix2rx$curOral[par] <- val
+    .pkAssignBasedOnValue0(curOral, par, val)
     return(invisible(TRUE))
   }
   if (.monolix2rx$pkStatement == "iv") {
-    .monolix2rx$curIv[par] <- val
+    .pkAssignBasedOnValue0(curIv, par, val)
     return(invisible(TRUE))
   }
   if (.monolix2rx$pkStatement == "empty") {
-    .monolix2rx$curEmpty[par] <- val
+    .pkAssignBasedOnValue0(curEmpty, par, val)
     return(invisible(TRUE))
   }
   if (.monolix2rx$pkStatement == "reset") {
-    .monolix2rx$curReset[par] <- val
+    .pkAssignBasedOnValue0(curReset, par, val)
     return(invisible(TRUE))
   }
   if (.monolix2rx$pkStatement == "elimination") {
-    .monolix2rx$curElimination[par] <- val
+    .pkAssignBasedOnValue0(curElimination, par, val)
     return(invisible(TRUE))
   }
   return(invisible(FALSE))

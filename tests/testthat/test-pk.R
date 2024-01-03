@@ -207,6 +207,8 @@ effect(cmt=1, ke0, concentration=Ce)
   expect_equal(as.character(.ret),
                "effect(cmt = 1, ke0, concentration = Ce)")
 
+  expect_error(.pk("elimination(cmt=1, k, volume=v2)"), 'volume')
+
   .ret <- .pk("compartment(cmt=1, amount=Ac, concentration=Cc, volume=V)
 elimination(cmt=1, k)
 iv(cmt=1)

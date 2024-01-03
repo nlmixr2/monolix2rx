@@ -132,6 +132,20 @@ effect(cmt=1, ke0=ke02, concentration=Ce2)
   env$rhsEffect <- vector("list", 1)
 
   expect_error(.pk2rxEffect(env, pk, 1))
+
+  pk <- .pk("compartment(cmt=1, amount=Ac)
+effect(cmt=1, ke0, concentration=Ce)")
+
+  env <- new.env(parent=emptyenv())
+  env$name <- vector("list", 1)
+  env$lhs <- vector("list", 1)
+  env$rhs <- vector("list", 1)
+  env$extra <- vector("list", 1)
+  env$lhsEffect <- vector("list", 1)
+  env$rhsEffect <- vector("list", 1)
+
+  expect_error(.pk2rxEffect(env, pk, 1), "concentration")
+
 })
 
 
@@ -151,5 +165,57 @@ effect(cmt=1, ke0, concentration=Ce)")
 
   expect_equal(env$tlag[[1]], "alag(Ac) <- alag")
   expect_equal(env$f[[1]], "f(Ac) <- f2")
+
+})
+
+test_that(".pk2rxElimination()", {
+
+  pk <- .pk("elimination(cmt=1, k)")
+
+  env <- new.env(parent=emptyenv())
+  env$name <- vector("list", 1)
+  env$rhs <- list("")
+
+  # doesn't need a volume
+  expect_error(.pk2rxElimination(env, pk, 1),  NA)
+
+  pk <- .pk("elimination(cmt=1, Cl)")
+
+  env <- new.env(parent=emptyenv())
+  env$name <- vector("list", 1)
+  env$rhs <- list("")
+
+  # needs a volume
+  expect_error(.pk2rxElimination(env, pk, 1), "type")
+
+  pk <- .pk("elimination(cmt=1, Vm, Km)")
+
+  env <- new.env(parent=emptyenv())
+  env$name <- vector("list", 1)
+  env$rhs <- list("")
+
+  #needs a volume
+  expect_error(.pk2rxElimination(env, pk, 1), "type")
+
+  pk <- .pk("compartment(cmt=1, amount=Ac)\nelimination(cmt=1, Cl)")
+
+  env <- new.env(parent=emptyenv())
+  env$name <- vector("list", 1)
+  env$rhs <- list("")
+
+  #needs a volume
+  expect_error(.pk2rxElimination(env, pk, 1), "type")
+
+  pk <- .pk("compartment(cmt=1, amount=Ac,volume=Vc)\nelimination(cmt=1, Cl)")
+
+  env <- new.env(parent=emptyenv())
+  env$name <- vector("list", 1)
+  env$rhs <- list("")
+
+  .pk2rxElimination(env, pk, 1)
+
+  expect_equal(env$rhs[[1]], " - Cl/Vc*Ac")
+
+  expect_error(.pk("elimination(cmt=1, k, volume=v2)"), 'volume')
 
 })
