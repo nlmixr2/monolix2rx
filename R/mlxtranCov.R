@@ -1,23 +1,3 @@
-#' Get the version of Monolix
-#'
-#' @param mlx Parsed Monolix list
-#' @return mlxtran version
-#' @noRd
-#' @author Matthew L. Fidler
-.mlxtranVersion <- function(mlx) {
-  .exportPath <- mlx$MONOLIX$SETTINGS$GLOBAL$exportpath
-  if (!file.exists(.exportPath)) return(NULL)
-  .summary <- file.path(.exportPath, "summary.txt")
-  if (!file.exists(.summary)) return(NULL)
-  .lines <- readLines(.summary, n=5)
-  .w <- which(regexpr(".*[vV]ersion *: *[^ ]*.*", .lines) != -1)
-  if (length(.w) == 1) {
-    .line <- .lines[.w]
-    # 2019 is 5.1.1
-    return(sub(".*[vV]ersion *: *([^ ]*).*", "\\1", .line))
-  }
-  return(NULL)
-}
 #' Monolix Covariance (Linearity, Raw)
 #'
 #' @param mlx mlxtran parsed information
@@ -127,21 +107,21 @@
 }
 
 .mlxtranCov <- function(mlx) {
-  .ver <- .mlxtranVersion(mlx)
-  attr(mlx, "version") <- .ver
+  .mlx <- .mlxtranSumary(mlx)
+  .ver <- attr(.mlx, "version")
   .lin <- .mlxtranCovLin(mlx)
   .sa  <- .mlxtranCovSA(mlx)
-  .jac <- .mlxtranJacobianDiag(mlx$MODEL$INDIVIDUAL$DEFINITION,
-                               mlx$PARAMETER$PARAMETER)
+  .jac <- .mlxtranJacobianDiag(.mlx$MODEL$INDIVIDUAL$DEFINITION,
+                               .mlx$PARAMETER$PARAMETER)
   .saTransformed   <- .mlxtranCovTransformed(.sa, .jac, .ver, TRUE)
   .saUntransformed <- .mlxtranCovUntransformed(.sa, .jac, .ver, TRUE)
 
   .linTransformed   <- .mlxtranCovTransformed(.lin, .jac, .ver, TRUE)
   .linUntransformed <- .mlxtranCovUntransformed(.lin, .jac, .ver, TRUE)
 
-  attr(mlx, "covSaTransformed") <- .saTransformed
-  attr(mlx, "covSaUntransformed") <- .saUntransformed
-  attr(mlx, "covLinTransformed") <- .linTransformed
-  attr(mlx, "covLinUntransformed") <- .linUntransformed
-  mlx
+  attr(.mlx, "covSaTransformed") <- .saTransformed
+  attr(.mlx, "covSaUntransformed") <- .saUntransformed
+  attr(.mlx, "covLinTransformed") <- .linTransformed
+  attr(.mlx, "covLinUntransformed") <- .linUntransformed
+  .mlx
 }

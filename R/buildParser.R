@@ -87,6 +87,12 @@
   file.rename(devtools::package_file("src/mlxtranTask.g.d_parser.c"),
               devtools::package_file("src/mlxtranTask.g.d_parser.h"))
 
+  message("Update Parser c for DATASET INFORMATION in summary.txt")
+  dparser::mkdparse(devtools::package_file("inst/summaryData.g"),
+                    devtools::package_file("src/"),
+                    grammar_ident="summaryData")
+  file.rename(devtools::package_file("src/summaryData.g.d_parser.c"),
+              devtools::package_file("src/summaryData.g.d_parser.h"))
 
   invisible("")
 }

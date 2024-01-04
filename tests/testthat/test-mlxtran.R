@@ -138,6 +138,21 @@ test_that("mlxtran initial list", {
       "prop__err,0,0,0,0,0,0,0,0,-2.51e-05,-1.16e-05,-1.8e-07,-1.79e-05,-1.31e-05,1.13e-06,-5.84e-07,-3.93e-08,-0.000418,0.000132,9.24e-06",
       "pdadd__err,0,0,0,0,0,0,0,0,-5.21e-05,-0.000231,-2.76e-05,-2.41e-05,-0.0104,-0.000396,-0.00193,-0.000428,-0.000395,9.24e-06,0.0629")
 
+    ver2019 <- "*                          Monolix version : 5.1.1                             *"
+    ver2020 <- "*                          Monolix version : 2020R1                            *"
+    ver2021 <- "*                          Monolix version : 2021R1                            *"
+
+    di1 <- c("DATASET INFORMATION",
+             "Number of individuals: 32",
+             "Number of observations (obsid 1): 251",
+             "Number of observations (obsid 2): 232",
+             "Number of doses: 32")
+
+    di2 <- c("DATASET INFORMATION",
+             "Number of individuals: 45",
+             "Number of observations (DV): 176",
+             "Number of doses: 51")
+
     v <- .mlxtran(lines)
 
     dir.create(v$MONOLIX$SETTINGS$GLOBAL$exportpath)
@@ -154,6 +169,34 @@ test_that("mlxtran initial list", {
     write.csv(.df, .dff, quote=FALSE, row.names=FALSE)
 
     v2 <- .mlxtran(lines, update=TRUE)
+
+    writeLines(ver2019,
+               file.path(v$MONOLIX$SETTINGS$GLOBAL$exportpath,"summary.txt"))
+
+    v3 <- .mlxtran(lines, update=TRUE)
+
+    expect_equal(attr(v3, "version"),
+                 "5.1.1")
+
+    writeLines(ver2020,
+               file.path(v$MONOLIX$SETTINGS$GLOBAL$exportpath,"summary.txt"))
+    v4 <- .mlxtran(lines, update=TRUE)
+
+    expect_equal(attr(v4, "version"),
+                 "2020R1")
+
+    writeLines(ver2021,
+               file.path(v$MONOLIX$SETTINGS$GLOBAL$exportpath,"summary.txt"))
+    v5 <- .mlxtran(lines, update=TRUE)
+
+    expect_equal(attr(v5, "version"),
+                 "2021R1")
+
+
+    writeLines(c(ver2021, di1),
+               file.path(v$MONOLIX$SETTINGS$GLOBAL$exportpath,"summary.txt"))
+
+    v6 <- .mlxtran(lines, update=TRUE)
 
     unlink(file.path(v$MONOLIX$SETTINGS$GLOBAL$exportpath,
                      "FisherInformation", "covarianceEstimatesLin.txt"))
