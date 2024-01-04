@@ -143,7 +143,7 @@ as.character.monolix2rxContent <- function(x, ...) {
     .asCharacterReg(x),
     vapply(x$cont, function(n) {
       paste0(n, " = {use=covariate, type=continuous}")
-    }, character(1), USE.NAMES = TRUE),
+    }, character(1), USE.NAMES = FALSE),
     .asCharacterCat(x))
 }
 

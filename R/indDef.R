@@ -300,7 +300,7 @@ as.character.monolix2rxIndDef <- function(x, ...) {
                        ", sd={", paste(.varOrFixed(.cur$sd, x$fixed), collapse=", "),"}")
       }
     } else if (!is.null(.cur$var)) {
-      if (length(.cur$sd) == 1L) {
+      if (length(.cur$var) == 1L) {
         .ret <- paste0(.ret,
                        ", var=", .varOrFixed(.cur$var, x$fixed))
       } else {

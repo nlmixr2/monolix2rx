@@ -1,5 +1,19 @@
 test_that("content", {
 
+  tmp <- .content("DV = {use=observation, name=y1, yname='1', type=continuous}")
+
+  expect_equal(as.character(tmp),
+               "DV = {use=observation, name=y1, yname='1', type=continuous}" )
+
+  tmp <- .content("SS = {use=steadystate, nbdoses=10}")
+
+  expect_equal(as.character(tmp),
+               "SS = {use=steadystate, nbdoses=10}" )
+
+  tmp <- .content("WT={use=covariate, type=continuous}")
+  expect_equal(as.character(tmp),
+               "WT = {use=covariate, type=continuous}")
+
   tmp <- .content("ID = {use=identifier}
 TIME = {use=time}
 EVID = {use=eventidentifier}
@@ -13,6 +27,9 @@ E0 = {use = regressor}
 Emax = {use = regressor}
 Race = {type=categorical, categories={Caucasian, Black, Latin}}
 Sex = {type=categorical, categories={M, F}}")
+
+  expect_snapshot(print(tmp))
+  expect_error(as.list(tmp), NA)
 
   tmp2 <- list(use1 = c(identifier = "ID", time = "TIME", eventidentifier = "EVID",
                                   amount = "AMT", interdoseinterval = NA, censored = NA, limit = NA,

@@ -56,6 +56,9 @@ correlation = {level=id, r(V, Cl)=corr1_V_Cl}
                  "ka <- exp(ka_pop)",
                  "V <- exp(V_pop + omega_V)",
                  "Cl <- exp(Cl_pop + omega_Cl)"))
+
+  expect_snapshot(print(tmp))
+  expect_error(as.list(tmp), NA)
 })
 
 test_that("iov definition", {
@@ -86,4 +89,56 @@ correlation = {level=id, r(V, Cl)=corr1_V_Cl}
                  "ka <- exp(ka_pop + rxCov_ka_Race_1*Race + beta_ka_Race_Black*Race + beta_ka_Race_Latin*Race + beta_ka_Wt*Wt)",
                  "V <- exp(V_pop + rxCov_V_Race_1*Race + beta_V_Race_Black*Race + beta_V_Race_Latin*Race + omega_V)",
                  "Cl <- exp(Cl_pop + beta_Cl_Wt*Wt + omega_Cl)"))
+})
+
+
+test_that("misc tests", {
+
+  .tmp <- .indDef("F = {distribution=logitnormal, mean=F_pop_2, sd=omega_F, min=0, max=1}")
+  expect_equal(as.character(.tmp),
+               "F = {distribution=logitnormal, mean=F_pop_2, sd=omega_F, min=0, max=1}")
+
+  .tmp <- .indDef("V = {distribution=lognormal, covariate=Race, coefficient={0, beta_V_Race_Black, beta_V_Race_Latin},typical=V_pop, sd=omega_V }")
+
+  expect_equal(as.character(.tmp),
+               "V = {distribution=lognormal, typical=V_pop, covariate=Race, coefficient= {0, beta_V_Race_Black, beta_V_Race_Latin}, sd=omega_V}")
+
+  .tmp <- .indDef("ka = {distribution=lognormal,typical=ka_pop, covariate={Race, Wt}, coefficient={{0, beta_ka_Race_Black, beta_ka_Race_Latin},beta_ka_Wt}, no-variability}")
+
+  expect_equal(as.character(.tmp),
+               "ka = {distribution=lognormal, typical=ka_pop, covariate={Race, Wt}, coefficient={ {0, beta_ka_Race_Black, beta_ka_Race_Latin}, beta_ka_Wt}, no-variability}")
+
+  .tmp <- .indDef("ka = {distribution=logNormal, typical=ka_pop, varlevel={id, id*occ}, sd={omega_ka, gamma_ka}}")
+
+  expect_equal(as.character(.tmp),
+               "ka = {distribution=lognormal, typical=ka_pop, varlevel={id, id*occ}, sd={omega_ka, gamma_ka}}")
+
+  .tmp <- .indDef("ka = {distribution=logNormal, typical=ka_pop, varlevel={id, id*occ}, var={omega_ka, gamma_ka}}")
+
+  expect_equal(as.character(.tmp),
+               "ka = {distribution=lognormal, typical=ka_pop, varlevel={id, id*occ}, var={omega_ka, gamma_ka}}")
+
+  .tmp <- .indDef("ka = {distribution=logNormal, typical=ka_pop, var=omega_ka}")
+
+  expect_equal(as.character(.tmp),
+               "ka = {distribution=lognormal, typical=ka_pop, var=omega_ka}")
+
+  .tmp <- .indDef("ka = {distribution=logNormal, typical=ka_pop,  no-variability}")
+
+  expect_equal(as.character(.tmp),
+               "ka = {distribution=lognormal, typical=ka_pop, no-variability}")
+
+
+  .tmp <- .indDef("correlation = {level=id, r(V, Cl)=corr1_V_Cl}")
+
+  expect_equal(as.character(.tmp),
+               "correlation = {r(Cl, V)=corr1_V_Cl}")
+
+  .tmp <- .indDef("correlation = {level=id*occ, r(V, Cl)=corr1_V_Cl}")
+
+  expect_equal(as.character(.tmp),
+               "correlation = {level=id*occ, r(Cl, V)=corr1_V_Cl}")
+
+
+
 })

@@ -38,4 +38,8 @@ plotResult(method = {outputplot, indfits, obspred, residualsscatter, residualsdi
   class(.ret2) <- "monolix2rxTask"
   expect_equal(.ret, .ret2)
 
+  expect_error(as.list(.ret), NA)
+
+  expect_snapshot(print(.ret))
+
 })

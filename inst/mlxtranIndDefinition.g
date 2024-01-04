@@ -35,12 +35,12 @@ sdLstItem: 'sd' '=' sdList;
 
 varItem: identifier | constant;
 varOp: 'var' '=' varItem;
-varList: '{' varOp (',' varOp)* '}';
+varList: '{' varItem (',' varItem)* '}';
 varLstItem: 'var' '=' varList;
 
 noVar: 'no-variability';
 
-varOption: (sdOp | sdLstItem | varOp | varLstItem | noVar);
+varOption: (sdOp | sdLstItem | varOp | varLstItem  | noVar);
 
 iovItem: identifier ('*' identifier)* ;
 iovItemVL: iovItem;
