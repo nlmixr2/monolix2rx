@@ -69,10 +69,14 @@
 .equationOdeType <- function(odeType) {
   .monolix2rx$odeType <- odeType
 }
-
+#' @export
+as.character.monolix2rxEquation <- function(x, ...) {
+  strsplit(x$monolix, "\n")[[1]]
+}
 #' @export
 print.monolix2rxEquation <- function(x, ...) {
-  cat(x$monolix, "\n", sep="")
+  cat(paste(as.character.monolix2rxEquation(x, ...), collapse="\n"), "\n", sep="")
+  invisible(x)
 }
 
 #' @export

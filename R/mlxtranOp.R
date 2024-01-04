@@ -50,17 +50,23 @@
 }
 
 #' @export
-print.monolix2rxOp <- function(x, ...) {
-  lapply(names(x), function(n) {
+as.character.monolix2rxOp <- function(x, ...) {
+  vapply(names(x), function(n) {
     .v <- x[[n]]
+
     if (is.logical(.v)) {
-      cat(n, " = ", ifelse(.v, "yes", "no"), "\n", sep="")
+      paste0(n, " = ", ifelse(.v, "yes", "no"))
     } else if (is.character(.v)) {
-      cat(n, " = '", .v, "'\n", sep="")
+      paste0(n, " = '", .v, "'")
     } else {
-      cat(n, " = ", .v, "\n", sep="")
+      paste0(n, " = ", .v)
     }
-  })
+  }, character(1), USE.NAMES = FALSE)
+}
+
+#' @export
+print.monolix2rxOp <- function(x, ...) {
+  cat(paste(as.character.monolix2rxOp(x, ..), collapse="\n"), "\n", sep="")
   invisible(x)
 }
 

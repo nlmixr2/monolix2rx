@@ -24,9 +24,15 @@
 }
 
 #' @export
+as.character.monolix2rxFit <- function(x, ...) {
+  c(paste0("data = {", paste(x$data, collapse=", "), "}"),
+    paste0("model = {", paste(x$model, collapse=", "), "}"))
+}
+
+#' @export
 print.monolix2rxFit <- function(x, ...) {
-  cat("data = {", paste(x$data, collapse=", "), "}\n", sep="")
-  cat("model = {", paste(x$model, collapse=", "), "}\n", sep="")
+  cat(paste(as.character.monolix2rxFit(x), collapse="\n"),"\n", sep="")
+  invisible(x)
 }
 
 #' @export

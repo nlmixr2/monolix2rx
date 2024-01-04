@@ -261,24 +261,29 @@ mlxtran <- function(file, equation=FALSE, update=FALSE) {
 }
 
 #' @export
-print.monolix2rxMlxtran <- function(x, ...) {
+as.character.monolix2rxMlxtran <- function(x, ...) {
   .env <- new.env(parent=emptyenv())
   .env$catText <- FALSE
   .desc <- attr(x, "desc")
+  .ret <- character(0)
   if (.desc != "") {
-    cat("DESCRIPTION:\n")
-    cat(.desc, "\n", sep="")
-    cat("\n")
+    .ret <- c(.ret, "DESCRIPTION:")
+    .ret <- c(.ret, .desc, "")
   }
+  .env$ret <- .ret
   lapply(names(x), function(ns) {
     if (ns != "mlxtran") {
-      cat(ifelse(.env$catText, "\n", ""), "<", ns, ">\n", sep="")
+      .env$ret <- c(.env$ret,
+                    ifelse(.env$catText, "", character(0)),
+                    paste0("<", ns, ">"))
       .env$catText <- FALSE
     }
     .sec <- x[[ns]]
     lapply(names(.sec), function(nss) {
       if (ns != nss) {
-        cat(ifelse(.env$catText, "\n", ""), "[", nss, "]\n", sep="")
+        .env$ret <- c(.env$ret,
+                      ifelse(.env$catText, "", character(0)),
+                      paste0("[", nss, "]"))
         .env$catText <- FALSE
       }
       .subsec <- .sec[[nss]]
@@ -287,13 +292,16 @@ print.monolix2rxMlxtran <- function(x, ...) {
         if (.cls == "character") {
           if (.subsec == "") return(invisible())
           .env$catText <- TRUE
-          cat(.subsec, "\n", sep="")
+          .ret <- c(.ret,
+                    .subsec)
           return(invisible())
         } else if (.cls == "list") {
           lapply(names(.subsec), function(nsss){
             .subsubsec <- .subsec[[nsss]]
             if (nss != nsss) {
-              cat(ifelse(.env$catText, "\n", ""), nsss, ":\n", sep="")
+              .env$ret <- c(.env$ret,
+                            ifelse(.env$catText, "", character(0)),
+                            paste0(nsss, ":"))
               .env$catText <- FALSE
             }
             .cls <- class(.subsubsec)
@@ -301,23 +309,32 @@ print.monolix2rxMlxtran <- function(x, ...) {
               if (.cls == "character") {
                 if (.subsubsec == "") return(invisible())
                 .env$catText <- TRUE
-                cat(.subsubsec, "\n", sep="")
+                .env$ret <- c(.env$ret,
+                              ifelse(.env$catText, "", character(0)),
+                              .subsubsec)
                 return(invisible())
               }
             }
             .env$catText <- TRUE
-            cat('; parsed: $', ns, "$", nss,"$", nsss, "\n", sep="")
-            print(.subsubsec)
+            .env$ret <- c(.env$ret,
+                          paste0('; parsed: $', ns, "$", nss,"$", nsss),
+                          as.character(.subsubsec))
           })
           return(invisible())
         }
       }
       .env$catText <- TRUE
-      cat('; parsed: $', ns, "$", nss, "\n", sep="")
-      print(.subsec)
+      .env$ret <- c(.env$ret,
+                    paste0('; parsed: $', ns, "$", nss),
+                    as.character(.subsec))
     })
   })
-  cat("\n")
+  .env$ret[!is.na(.env$ret)]
+}
+
+#' @export
+print.monolix2rxMlxtran <- function(x, ...) {
+  cat(paste(as.character.monolix2rxMlxtran(x, ...), collapse="\n"), "\n", sep="")
   invisible(x)
 }
 

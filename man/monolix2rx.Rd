@@ -4,10 +4,16 @@
 \alias{monolix2rx}
 \title{Translate a monolix file to rxode2}
 \usage{
-monolix2rx(mlxtran)
+monolix2rx(mlxtran, update = TRUE, envir = parent.frame())
 }
 \arguments{
 \item{mlxtran}{file name for mlxtran to translate to rxode2}
+
+\item{update}{is a boolean that represents if the final parameter
+estimates should be used for the translation (when present)}
+
+\item{envir}{represents the environment used for evaluating the
+corresponding rxode2 function}
 }
 \value{
 rxode2 model

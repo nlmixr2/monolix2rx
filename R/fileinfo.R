@@ -47,17 +47,23 @@
 #' @return nothing, called for side effects
 #' @noRd
 #' @author Matthew L. Fidler
-.printFile <- function(x) {
-  if (length(x$file) == 1L) {
-    cat("file = '", x$file, "'\n", sep="")
-  }
+.asCharacterFile <- function(x) {
+  if (length(x$file) != 1L) return(character(0))
+  paste0("file = '", x$file, "'")
+}
+
+#' @export
+as.character.monolix2rxFileinfo <- function(x, ...) {
+  c(.asCharacterFile(x),
+    "delimiter = comma",
+    paste0("header = {", paste(x$header, collapse=", "), "}"))
 }
 
 #' @export
 print.monolix2rxFileinfo <- function(x, ...) {
-  .printFile(x)
-  cat("delimiter = comma\n")
-  cat("header = {", paste(x$header, collapse=", "), "}\n", sep="")
+  cat(paste(as.character.monolix2rxFileinfo(x, ...), collapse="\n"),
+      "\n", sep="")
+  invisible(x)
 }
 
 #' @export

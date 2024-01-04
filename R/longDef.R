@@ -244,46 +244,54 @@
 }
 
 #' @export
-print.monolix2rxLongDef <- function(x, ...) {
-  ## name=.env$name,
-  ## val=.env$val
-  lapply(seq_along(x$endpoint),
+as.character.monolix2rxLongDef <- function(x, ...) {
+  vapply(seq_along(x$endpoint),
          function(i) {
            .lst <- x$endpoint[[i]]
            if (.lst$dist == "event") {
              .err <- .lst$err
-             cat(.lst$var, " = {type=event", sep="")
-             cat(", eventType=", .err$eventType, sep="")
+             .ret <- paste0(.lst$var, " = {type=event")
+             .ret <- paste0(.ret, ", eventType=", .err$eventType)
              if (!is.na(.err$maxEventNumber)) {
-               cat(", maxEventNumber=", .err$maxEventNumber, sep="")
+               .ret <- paste0(.ret, ", maxEventNumber=", .err$maxEventNumber)
              }
              if (!is.na(.err$rightCensoringTime)) {
-               cat(", rightCensoringTime=", .err$rightCensoringTime, sep="")
+               .ret <- paste0(.ret, ", rightCensoringTime=", .err$rightCensoringTime)
              }
              if (!is.na(.err$intervalLength)) {
-               cat(", intervalLength=", .err$intervalLength, sep="")
+               .ret <- paste0(.ret, ", intervalLength=", .err$intervalLength)
              }
-             cat(", hazard=", .lst$pred, sep="")
-             cat("}\n")
+             .ret <- paste0(.ret, ", hazard=", .lst$pred)
+             .ret <- paste0(.ret, "}")
            } else if (.lst$dist == "categorical") {
              .err <- .lst$err
-             cat(.lst$var, " = {type=categorical", sep="")
-             cat(", categories= {", paste(.err$categories, collapse=", "), "}", sep="")
-             cat(",\n", paste(.err$code, collapse="\n"), "}\n", sep="")
+             .ret <- paste0(.lst$var, " = {type=categorical", sep="")
+             .ret <- paste0(.ret, ", categories= {",
+                            paste(.err$categories, collapse=", "), "}")
+             .ret <- paste0(.ret, ",\n", paste(.err$code, collapse="\n"), "}")
            } else if (.lst$dist == "count") {
              .err <- .lst$err
-             cat(.lst$var, " = {type=count", sep="")
-             cat(",\n", paste(.err$code, collapse="\n"), "}\n", sep="")
+             .ret <- paste0(.lst$var, " = {type=count")
+             .ret <- paste0(.ret,
+                            ",\n", paste(.err$code, collapse="\n"), "}")
            } else  {
              .err <- .lst$err
              .v <- .varOrFixed(.err$typical, x$fixed)
-             cat(.lst$var, " = {distribution = ", .lst$dist,
-                 ", prediction = ", .lst$pred,
-                 ", errorModel = ",
-                 .err$errName, "(", paste(.v, collapse=", "), ")",
-                 "}\n", sep="")
+             .ret <- paste0(.lst$var, " = {distribution = ", .lst$dist,
+                            ", prediction = ", .lst$pred,
+                            ", errorModel = ",
+                            .err$errName, "(", paste(.v, collapse=", "), ")",
+                            "}")
            }
-         })
+         }, character(1),
+         USE.NAMES=FALSE)
+}
+
+#' @export
+print.monolix2rxLongDef <- function(x, ...) {
+  ## name=.env$name,
+  ## val=.env$val
+  cat(paste(as.character.monolix2rxLongDef(x, ...), collapse="\n"), "\n", sep="")
   invisible(x)
 }
 

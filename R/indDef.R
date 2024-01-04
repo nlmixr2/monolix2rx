@@ -244,83 +244,104 @@
 }
 
 #' @export
-print.monolix2rxIndDef <- function(x, ...) {
-  ## .indDef <- list(vars=.monolix2rx$defItems,
-  ##                 fixed=.monolix2rx$defFixed,
-  ##                 cor=.monolix2rx$corDf)
-  lapply(names(x$vars), function(n) {
+as.character.monolix2rxIndDef <- function(x, ...) {
+  .ret <- vapply(names(x$vars), function(n) {
     .cur <- x$vars[[n]]
-    cat(n, " = {distribution=", .cur$distribution, sep="")
+    .ret <- paste0(n, " = {distribution=", .cur$distribution)
     if (!is.null(.cur$typical)) {
-      cat(", typical=", .varOrFixed(.cur$typical, x$fixed), sep="")
+      .ret <- paste0(.ret,
+                     ", typical=", .varOrFixed(.cur$typical, x$fixed))
     } else {
-      cat(", mean=", .cur$mean, sep="")
+      .ret <- paste0(.ret,
+                     ", mean=", .cur$mean)
     }
     if (!is.null(.cur$cov)) {
-      cat(', covariate=')
+      .ret <- paste0(.ret,
+                     ', covariate=')
       if (length(.cur$cov) == 1L) {
-        cat(.cur$cov)
+        .ret <- paste0(.ret,
+                       .cur$cov)
       } else {
-        cat("{", paste(.cur$cov, collapse=", "), "}", sep="")
+        .ret <- paste0(.ret,
+                       "{", paste(.cur$cov, collapse=", "), "}")
       }
     }
     if (!is.null(.cur$coef)) {
-      cat(', coefficient=')
-      if (length(.cur$coef) > 1L) cat("{")
-      cat(paste(vapply(seq_along(.cur$coef),
-             function(i) {
-               .cv <- .varOrFixed(.cur$coef[[i]], x$fixed)
-               if (length(.cv) == 1) return(.cv)
-               paste0("{", paste(.cv, collapse=", "), "}")
-             }, character(1), USE.NAMES=TRUE), collapse=", "))
-      if (length(.cur$coef) > 1L) cat("}")
+      .ret <- paste0(.ret,
+                     ', coefficient=')
+      if (length(.cur$coef) > 1L) {
+        .ret <- paste0(.ret, "{")
+      }
+      .ret <- paste(.ret,
+                    paste(vapply(seq_along(.cur$coef),
+                                 function(i) {
+                                   .cv <- .varOrFixed(.cur$coef[[i]], x$fixed)
+                                   if (length(.cv) == 1) return(.cv)
+                                   paste0("{", paste(.cv, collapse=", "), "}")
+                                 }, character(1), USE.NAMES=TRUE), collapse=", "))
+      if (length(.cur$coef) > 1L) {
+        .ret <- paste0(.ret, "}")
+      }
     }
     if (!is.null(.cur$varlevel)) {
       if (length(.cur$varlevel) == 1L) {
-        cat(", varlevel=", .cur$varlevel, sep="")
+        .ret <- paste0(.ret,
+                       ", varlevel=", .cur$varlevel)
       } else {
-        cat(", varlevel={", paste(.cur$varlevel, collapse=", "), "}", sep="")
+        .ret <- paste0(.ret,
+                       ", varlevel={", paste(.cur$varlevel, collapse=", "), "}")
       }
     }
     if (!is.null(.cur$sd)) {
       if (length(.cur$sd) == 1L) {
-        cat(", sd=", .varOrFixed(.cur$sd, x$fixed), sep="")
+        .ret <- paste0(.ret, ", sd=", .varOrFixed(.cur$sd, x$fixed))
       } else {
-        cat(", sd={", paste(.varOrFixed(.cur$sd, x$fixed), collapse=", "),"}", sep="")
+        .ret <- paste0(.ret,
+                       ", sd={", paste(.varOrFixed(.cur$sd, x$fixed), collapse=", "),"}")
       }
     } else if (!is.null(.cur$var)) {
       if (length(.cur$sd) == 1L) {
-        cat(", var=", .varOrFixed(.cur$var, x$fixed), sep="")
+        .ret <- paste0(.ret,
+                       ", var=", .varOrFixed(.cur$var, x$fixed))
       } else {
-        cat(", var={", paste(.varOrFixed(.cur$var, x$fixed), collapse=", "),"}", sep="")
+        .ret <- paste0(.ret,
+                       ", var={", paste(.varOrFixed(.cur$var, x$fixed), collapse=", "),"}")
       }
     } else {
-      cat(", no-variability")
+      .ret <- paste0(.ret, ", no-variability")
     }
     if (!is.null(.cur$min)) {
-      cat(", min=", .cur$min, sep="")
+      .ret <- paste0(.ret, ", min=", .cur$min)
     }
     if (!is.null(.cur$max)) {
-      cat(", max=", .cur$max, sep="")
+      .ret <- paste0(.ret, ", max=", .cur$max)
     }
-    cat("}\n")
-  })
+    paste0(.ret, "}")
+  }, character(1), USE.NAMES=FALSE)
   .cor <- x$cor
   if (length(x$cor$level) > 0L) {
     .levels <- sort(unique(x$cor$level))
-    lapply(.levels,
-           function(lvl) {
-             cat("correlation = {")
-             if (length(.levels) == 1L &&
-                   .levels == "id") {
-             } else {
-               cat("level=", lvl, ", ", sep="")
-             }
-             .c <- .cor[.cor$level == lvl, ]
-             cat(paste(paste0("r(", .c$v1, ", ", .c$v2, ")=", .c$est), collapse=", "))
-             cat("}\n")
-           })
+    .ret <- c(.ret,
+              vapply(.levels,
+                     function(lvl) {
+                       .ret <- "correlation = {"
+                       if (length(.levels) == 1L &&
+                             .levels == "id") {
+                       } else {
+                         .ret <- paste0(.ret, "level=", lvl, ", ", sep="")
+                       }
+                       .c <- .cor[.cor$level == lvl, ]
+                       paste0(.ret,
+                              paste(paste0("r(", .c$v1, ", ", .c$v2, ")=", .c$est), collapse=", "),
+                              "}")
+                     }, character(1), USE.NAMES = FALSE))
   }
+  .ret
+}
+
+#' @export
+print.monolix2rxIndDef <- function(x, ...) {
+  cat(paste(as.character.monolix2rxIndDef(x, ...), colapse="\n"), "\n", sep="")
   invisible(x)
 }
 

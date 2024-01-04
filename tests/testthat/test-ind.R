@@ -38,4 +38,16 @@ SEX = {type=categorical, categories={Female, Male}}")
   class(.tmp2) <- "monolix2rxInd"
   expect_equal(.tmp, .tmp2)
 
+
+  .tmp <- .ind("
+input = {V_pop, omega_V, ka_pop, omega_ka, Cl_pop, omega_Cl, logtAge, Race, Sex, logtWeight,
+beta_Cl_Race_Caucasian, beta_Cl_Race_Latin, beta_Cl_Smoke_yes, beta_Cl_logtAge, beta_V_logtWeight, E0}
+E0 = {use = regressor}
+Race = {type=categorical, categories={'Caucasian 1', Black, Latin}}
+Sex = {type=categorical, categories={M, F}}")
+
+  expect_snapshot(print(.tmp))
+
+  expect_error(as.list(.tmp), NA)
+
 })

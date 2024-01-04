@@ -111,63 +111,71 @@
   # What does that mean?
   .monolix2rx$regLst <- c(.monolix2rx$regLst, reg)
 }
-#' Print the categorical variables in `$cat`
-#'
-#' @param x that contains $cat, a categorical covariate list
-#' @return nothing, called for side effects
-#' @noRd
-#' @author Matthew L. Fidler
-.printCat <- function(x) {
-  .cat <- x$cat
-  if (length(.cat) > 0L) {
-    lapply(names(.cat),
-           function(n) {
-             .c <- .cat[[n]]
-             cat(n, " = {type=categorical, categories=", sep="")
-             .q <- .c$quote
-             .c <- .c$cat
-             if (length(.q) > 1) {
-               cat("{")
-             }
-             cat(paste(vapply(seq_along(.c),
-                              function(i) {
-                                if (.q[i]) {
-                                  return(paste0("'", .c[i], "'"))
-                                }
-                                .c[i]
-                              }, character(1), USE.NAMES = FALSE),
-                       collapse=", "))
-             if (length(.q) > 1) {
-               cat("}")
-             }
-             cat("}\n")
-           })
-  }
-}
-#' Print regressor items
+
+#' As.character for regressor items
 #'
 #' @param x contains x$reg
-#' @return nothing, called for side effects
+#' @return character vector of regressor lines
 #' @noRd
 #' @author Matthew L. Fidler
-.printReg <- function(x) {
-  if (length(x$reg) > 0L) {
-    lapply(x$reg,
-           function(n) {
-             cat(paste0(n, " = {use = regressor}\n"))
-           })
+.asCharacterReg <- function(x) {
+  if (length(x$reg) == 0L) return(character(0))
+  vapply(x$reg,
+         function(n) {
+           paste0(n, " = {use = regressor}")
+         }, character(1), USE.NAMES = FALSE)
+}
+
+#' as.character for the categorical variables in `$cat`
+#'
+#' @param x that contains $cat, a categorical covariate list
+#' @return character vector for categorical variables
+#' @noRd
+#' @author Matthew L. Fidler
+.asCharacterCat <- function(x) {
+  .cat <- x$cat
+  if (length(.cat) == 0L) return(character(0))
+  vapply(names(.cat),
+         function(n) {
+           .c <- .cat[[n]]
+           .ret <- paste0(n, " = {type=categorical, categories=")
+           .q <- .c$quote
+           .c <- .c$cat
+           if (length(.q) > 1) {
+             .ret <- paste0(.ret, "{")
+           }
+           .ret <- paste0(.ret,
+                          paste(vapply(seq_along(.c),
+                                       function(i) {
+                                         if (.q[i]) {
+                                           return(paste0("'", .c[i], "'"))
+                                         }
+                                         .c[i]
+                                       }, character(1), USE.NAMES = FALSE),
+                                collapse=", "))
+           if (length(.q) > 1) {
+             .ret <- paste0(.ret, "}")
+           }
+           paste0(.ret, "}")
+         }, character(1), USE.NAMES = FALSE)
+}
+
+
+#' @export
+as.character.monolix2rxInd <- function(x, ...) {
+  .inp <- x$input
+  .ret <- character(0)
+  if (length(.inp) > 0L) {
+    .ret <- c(.ret, paste0("input = {", paste(.inp, collapse=", "), "}"))
   }
+  .ret <- c(.ret, .asCharacterReg(x))
+  .ret <- c(.ret, .asCharacterCat(x))
+  c(.ret, .asCharacterFile(x))
 }
 
 #' @export
 print.monolix2rxInd <- function(x, ...) {
-  .inp <- x$input
-  if (length(.inp) > 0L) {
-    cat("input = {", paste(.inp, collapse=", "), "}\n", sep="")
-  }
-  .printReg(x)
-  .printCat(x)
-  .printFile(x)
+  cat(paste0(as.character.monolix2rxInd(x, ...), collapse="\n"),"\n", sep="")
   invisible(x)
 }
 

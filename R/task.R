@@ -50,20 +50,24 @@ as.list.monolix2rxTask <- function(x, ...) {
   .x
 }
 #' @export
-print.monolix2rxTask <- function(x, ...) {
+as.character.monolix2rxTask <- function(x, ...) {
   .n <- names(x)
-  lapply(.n, function(n) {
-    cat(n, "(", sep="")
+  vapply(.n, function(n) {
+    .ret <- paste0(n, "(", sep="")
     .cur <- x[[n]]
     .n2 <- names(.cur)
-    cat(paste(vapply(.n2, function(n2) {
+    .ret <- paste0(.ret, paste(vapply(.n2, function(n2) {
       .c <- .cur[[n2]]
       if (is.list(.c)) {
         return(paste0(n2, " = {", paste(unlist(.c), collapse=", "), "}"))
       }
       paste0(n2, " = ", .c)
     }, character(1), USE.NAMES = FALSE), collapse=", "))
-    cat(")\n")
-  })
+    paste0(.ret, ")")
+  }, character(1), USE.NAMES=FALSE)
+}
+#' @export
+print.monolix2rxTask <- function(x, ...) {
+  cat(paste(as.character.monolix2rxTask(x, ...), collapse="\n"), "\n", sep="")
   invisible(x)
 }

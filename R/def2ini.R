@@ -152,11 +152,10 @@
 #' Based on a correctly setup environment with env$df = ini df fix an
 #' omega or omega block
 #'
-#'
 #' @param env environment with env$df == ini block
 #' @param v variable name to fix
 #' @return nothing, called for side effects on env
-#' @export
+#' @noRd
 #' @author Matthew L. Fidler
 .def2iniFixOmegaVar <- function(env, v) {
   .w <- which(env$df$name == v)

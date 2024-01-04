@@ -126,5 +126,4 @@
       exploratoryinterval = 200
       omegatau = 0.95
       errormodeltau = 0.95
-      
 

@@ -114,34 +114,43 @@
 }
 
 #' @export
-print.monolix2rxContent <- function(x, ...) {
-  lapply(names(x$use1), function(n) {
-    if (is.na(x$use1[n])) return(NULL)
-    cat(x$use1[n], " = {use=", n, sep="")
+as.character.monolix2rxContent <- function(x, ...) {
+  .cur <- vapply(names(x$use1), function(n) {
+    if (is.na(x$use1[n])) return(NA_character_)
+    .ret <- paste0(x$use1[n], " = {use=", n)
     if (n == "observation") {
       .name <- x$name
       .yname <- x$yname
       .type <- x$type
       if (length(.name) == 1L) {
-        cat(", name=", .name, sep="")
-        cat(", yname='", .yname, "'", sep="")
-        cat(", type=", .type, sep="")
-
+        .ret <- paste0(.ret,
+                       ", name=", .name,
+                       ", yname='", .yname, "'",
+                       ", type=", .type)
       } else {
-        cat(", name={", paste(.name, collapse=", "), "}", sep="")
-        cat(", yname={'", paste(.yname, collapse="', '"), "'}", sep="")
-        cat(", type={", paste(.type, collapse=", "), "}", sep="")
+        .ret <- paste0(.ret,
+                       ", name={", paste(.name, collapse=", "), "}",
+                       ", yname={'", paste(.yname, collapse="', '"), "'}",
+                       ", type={", paste(.type, collapse=", "), "}")
       }
     } else if (n == "steadystate") {
-      cat(", nbdoses=", x$nbdoses, sep="")
+      .ret <- paste0(.ret,
+                     ", nbdoses=", x$nbdoses)
     }
-    cat("}\n", sep="")
-  })
-  .printReg(x)
-  lapply(x$cont, function(n) {
-    cat(n, " = {use=covariate, type=continuous}\n", sep="")
-  })
-  .printCat(x)
+    paste0(.ret, "}")
+  }, character(1), USE.NAMES = FALSE)
+  c(.cur[!is.na(.cur)],
+    .asCharacterReg(x),
+    vapply(x$cont, function(n) {
+      paste0(n, " = {use=covariate, type=continuous}")
+    }, character(1), USE.NAMES = TRUE),
+    .asCharacterCat(x))
+}
+
+#' @export
+print.monolix2rxContent <- function(x, ...) {
+  cat(paste(as.character.monolix2rxContent(x, ...),
+            collapse="\n"), "\n", sep="")
   invisible(x)
 }
 

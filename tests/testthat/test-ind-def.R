@@ -44,6 +44,7 @@ correlation = {r(V, Cl)=gamma_ka}"),
 
 
 test_that("standard individual definition", {
+
   tmp <- .indDef("F = {distribution=logitnormal, typical=F_pop,sd=omega_F, min=0, max=1}
 ka = {distribution=lognormal,typical=ka_pop, no-variability}
 V = {distribution=lognormal,typical=V_pop, sd=omega_V }

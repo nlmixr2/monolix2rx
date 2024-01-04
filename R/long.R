@@ -9,6 +9,10 @@
   class(.ret) <- "monolix2rxLongitudinal"
   .ret
 }
+#' @export
+as.character.monolix2rxLongitudinal <- function(x, ...) {
+  as.character.monolix2rxInd(x, ...)
+}
 
 #' @export
 print.monolix2rxLongitudinal <- function(x, ...) {

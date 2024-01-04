@@ -72,8 +72,8 @@
   .monolix2rx$varMethod <- method
 }
 #' @export
-print.monolix2rxParameter <- function(x, ...) {
-  cat(paste(vapply(seq_along(x$name),
+as.character.monolix2rxParameter <- function(x, ...) {
+  vapply(seq_along(x$name),
          function(i) {
            if (x$method[i] == "unknown") {
              paste0(x$name[i], " = ",
@@ -83,8 +83,13 @@ print.monolix2rxParameter <- function(x, ...) {
                     x$value[i], ", method=",
                     toupper(x$method[i]), "}")
            }
-         }, character(1), USE.NAMES=FALSE),
-        collapse="\n"), "\n", sep="")
+         }, character(1), USE.NAMES=FALSE)
+}
+
+#' @export
+print.monolix2rxParameter <- function(x, ...) {
+  cat(paste(as.character.monolix2rxParameter(x, ...), collapse="\n"), "\n", sep="")
+  invisible(x)
 }
 
 #' @export

@@ -4,12 +4,14 @@
 \alias{mlxtran}
 \title{Read and parse mlxtran lines}
 \usage{
-mlxtran(file, equation = FALSE)
+mlxtran(file, equation = FALSE, update = FALSE)
 }
 \arguments{
 \item{file}{mlxtran file to process}
 
 \item{equation}{parse the equation block to rxode2 (some models cannot be translated)}
+
+\item{update}{when true, try to update the parameter block to the final parameter estimates}
 }
 \value{
 mlxtran object

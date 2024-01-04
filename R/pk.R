@@ -709,6 +709,7 @@ as.character.monolix2rxPk <- function(x, ...) {
 #' @export
 print.monolix2rxPk <- function(x, ...) {
   cat(paste(as.character.monolix2rxPk(x, ...), collapse="\n"), "\n", sep="")
+  invisible(x)
 }
 #' @export
 as.list.monolix2rxPk <- function(x, ...) {
