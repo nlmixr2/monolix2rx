@@ -1,3 +1,30 @@
+#' Logit to avoid import of logit from rxode2
+#'
+#' This way properties like Jacobian can be calculated without rxode2
+#'
+#' @param x value
+#' @param low minimum value
+#' @param high maximum value
+#' @return logit transformed value
+#' @noRd
+#' @author Matthew L. Fidler
+.logit <- function(x, low=0, high=1) {
+  p <- (x-low)/(high-low)
+  p <- ifelse(p >= 1 | p <= 0, NaN, p)
+  -log(1/p - 1.0)
+}
+#' Expit in R so that Jacobian can be calculted without rxode2
+#'
+#' @param x value
+#' @param low minimum value
+#' @param high maximum value
+#' @return expit transformed value
+#' @noRd
+#' @author Matthew L. Fidler
+.expit <- function(x, low=0, high=1) {
+  (high-low)/(1+exp(-x))+low
+}
+
 #' Get the parameter value based on the transformation
 #'
 #' This is for the typical values in monolix
@@ -15,7 +42,7 @@
   } else if (distribution == "logitnormal") {
     if (is.null(min)) min <- 0
     if (is.null(max)) max <- 1
-    return(rxode2::logit(value, min, max))
+    return(.logit(value, min, max))
   } else if (distribution == "normal") {
     return(value)
   } else if (distribution == "probitnormal") {

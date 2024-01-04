@@ -133,6 +133,7 @@
   if (update && !is.null(.ret$PARAMETER)) {
     .ret <- .parameterUpdate(.ret)
   }
+  .ret <- .mlxtranCov(.ret)
   attr(.ret, "desc") <- .mlxEnv$desc
   class(.ret) <- "monolix2rxMlxtran"
   .ret
@@ -245,6 +246,7 @@ mlxtran <- function(file, equation=FALSE, update=FALSE) {
     }
     if (update && !is.null(file$PARAMETER)) {
       file <- .parameterUpdate(file)
+      file <- .mlxtranCov(file)
     }
     return(file)
   }
