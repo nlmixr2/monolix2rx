@@ -19,6 +19,13 @@ prop__err={value=0.1, method=MLE}")
 
   expect_equal(tmp, tmp2)
 
+  expect_snapshot(print(tmp))
+  expect_error(as.list(tmp), NA)
+
   expect_error(.parameter("ktr_pop: 20"))
+
+  .par <- .parameter("ktr_pop={value=1}")
+  expect_equal(as.character(.par),
+               "ktr_pop = 1")
 
 })

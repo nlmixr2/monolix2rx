@@ -4,6 +4,9 @@ test_that("fileinfo", {
   delimiter = comma
   header = {ID, TIME, EVID, AMT, DV, ADM, YTYPE, nlmixrRowNums}")
 
+  expect_snapshot(print(.fi))
+  expect_error(as.list(.fi), NA)
+
   expect_equal(.fi$file, "pk.turnover.emax3-monolix.csv")
   expect_equal(.fi$header, c("ID", "TIME", "EVID", "AMT", "DV", "ADM", "YTYPE", "nlmixrRowNums"))
 

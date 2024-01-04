@@ -5,6 +5,9 @@ model={rx_prd_cp, rx_prd_effect}")
   tmp2 <- data.frame(data = c("y1", "y2"), model = c("rx_prd_cp", "rx_prd_effect"))
   class(tmp2) <- c("monolix2rxFit", "data.frame")
 
+  expect_snapshot(print(tmp))
+  expect_error(as.list(tmp), NA)
+
   expect_equal(tmp, tmp2)
 
 

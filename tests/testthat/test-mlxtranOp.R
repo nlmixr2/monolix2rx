@@ -12,6 +12,9 @@ test_that("mlxtranOp", {
   omegatau = 0.95
   errormodeltau = 0.95")
 
+  expect_snapshot(print(.tmp))
+  expect_error(as.list(.tmp), NA)
+
   .tmp2 <- list(exportpath = "pk.turnover.emax3-monolix",
                 exploratoryautostop = FALSE,
                 smoothingautostop = FALSE,
