@@ -6,7 +6,7 @@ model={rx_prd_cp, rx_prd_effect}")
   class(tmp2) <- c("monolix2rxFit", "data.frame")
 
   expect_snapshot(print(tmp))
-  expect_error(as.list(tmp), NA)
+  expect_error(as.data.frame(tmp), NA)
 
   expect_equal(tmp, tmp2)
 
@@ -20,7 +20,6 @@ model=rx_prd_effect")
   tmp <- .fit("data={y1}
 model={rx_prd_effect}")
   expect_equal(tmp2, tmp)
-
 
   expect_error(.fit("data=y1
 model={rx_prd_cp, rx_prd_effect}"), "<FIT>")

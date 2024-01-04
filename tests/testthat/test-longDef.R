@@ -39,6 +39,7 @@ test_that("[LONGITUDINAL] DEFINITION:", {
 rightCensoringTime = 120, intervalLength = 10, hazard = haz}")
 
   expect_snapshot(print(tmp))
+  expect_error(as.list(tmp), NA)
 
   tmp2 <- list(endpoint = list(list(var = "Seizure",
                                     dist = "event",

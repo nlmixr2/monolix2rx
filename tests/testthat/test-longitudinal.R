@@ -7,4 +7,7 @@ file='pk.turnover.emax3-monolix.txt'")
   expect_equal(f$file, "pk.turnover.emax3-monolix.txt")
   expect_true(inherits(f, "monolix2rxLongitudinal"))
 
+  expect_snapshot(print(f))
+  expect_error(as.list(f), NA)
+
 })
