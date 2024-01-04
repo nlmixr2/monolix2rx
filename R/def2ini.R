@@ -117,9 +117,15 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .def2iniGetCov <- function(env, def, pars, level) {
-  .sd <- diag(env$omega[[level]])
-  .r <- diag(length(env$omega[[level]]))
-  .n <- names(env$omega[[level]])
+  .w <- which(names(env$omega) == level)
+  if (length(env$omega[[.w]]) == 1) {
+    .r <- .sd <- diag(1)
+    .sd[1, 1] <- env$omega[[.w]]
+  } else {
+    .sd <- diag(env$omega[[.w]])
+    .r <- diag(length(env$omega[[.w]]))
+  }
+  .n <- names(env$omega[[.w]])
   dimnames(.r) <- list(.n, .n)
   env$r <- .r
   .cor <- def$cor
@@ -185,7 +191,22 @@
          })
   lotri::as.lotri(.env$df)
 }
-
+#' Rename occasion based on the nesting level
+#'
+#'
+#' @param vl occasion levels; in monolix they are defined like id*occ
+#'   and id*occ*occ instead of by a variable;
+#' @return This changes id*occ -> occ and id*occ->occ2 etc
+#' @noRd
+#' @author Matthew L. Fidler
+.def2iniRenameOcc <- function(vl) {
+  vapply(vl,
+         function(v) {
+           .s <- strsplit(v, "[*]")[[1]]
+           if (length(.s) == 1) return(v)
+           return(paste0("occ", ifelse(length(.s) == 1L, "", length(.s))))
+         }, character(1), USE.NAMES = FALSE)
+}
 
 #' Get the ini block based on a mlxtran parsed sections
 #'
@@ -239,7 +260,8 @@
   .omega <- setNames(lapply(.env$vl,
                             function(level) {
                               .def2iniGetCov(.env, def, pars, level)
-                            }), .env$vl)
+                            }),
+                     .def2iniRenameOcc(.env$vl))
   class(.omega) <- "lotriFix"
   .omega <- .def2iniFixOmega(.omega, .env$extraFixed)
   .omega <- as.expression(.omega)
