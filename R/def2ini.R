@@ -221,6 +221,18 @@
     stop("reqires 'lotri'")
   }
   .env <- new.env(parent=emptyenv())
+  .env$pars <- pars
+  lapply(names(longDef$fixed),
+         function(v) {
+           .env$pars <- rbind(.env$pars,
+                              data.frame(name=v, value=longDef$fixed[v], method="FIXED"))
+         })
+  lapply(names(def$fixed),
+         function(v) {
+           .env$pars <- rbind(.env$pars,
+                              data.frame(name=v, value=def$fixed[v], method="FIXED"))
+         })
+  pars <- .env$pars
   .var <- def$var
   .n <- names(.var)
   .env$err <- character(0)

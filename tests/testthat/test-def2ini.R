@@ -337,4 +337,61 @@ if (requireNamespace("rxode2", quietly=TRUE)) {
                  pdadd__err <- 10
                }))
 
+  # now test cases where the values were fixed in the models
+  # themselves
+
+  longDef <- c("rx_prd_cp={distribution = normal, prediction = rx_pred_cp, errorModel=combined2(pkadd__err,prop__err)}",
+               "rx_prd_effect={distribution = normal, prediction = rx_pred_effect, errorModel=constant(4)}")
+  longDef <- .longDef(paste(longDef, collapse="\n"))
+
+  .ini <- .def2ini(indDef, pars, longDef)
+
+  .ini <- eval(.ini)
+
+  expect_equal(.ini,
+               lotri::lotri({
+                 ktr_pop <- 0
+                 ka_pop <- 1
+                 cl_pop <- -2.30258509299405
+                 v_pop <- 2.30258509299405
+                 emax_pop <- 1.38629436111989
+                 ec50_pop <- -0.693147180559945
+                 kout_pop <- -2.99573227355399
+                 e0_pop <- 4.60517018598809
+                 pkadd__err <- fixed(0.1)
+                 prop__err <- 0.1
+                 rx_rx_prd_effect_constant_1 <- fixed(4)
+               }))
+
+
+  indDef <- c("ktr = {distribution=logNormal, typical=ktr_pop, no-variability}",
+              "ka = {distribution=logNormal, mean=ka_pop, no-variability}",
+              "cl = {distribution=logNormal, typical=cl_pop, no-variability}",
+              "v = {distribution=logNormal, typical=v_pop,no-variability}",
+              "emax = {distribution=logitNormal, min=0, max=1, typical=emax_pop, var=4}",
+              "ec50 = {distribution=logNormal, typical=ec50_pop, no-variability}",
+              "kout = {distribution=logNormal, typical=10, no-variability}",
+              "e0 = {distribution=logNormal, typical=e0_pop, no-variability}")
+  indDef <- .indDef(paste(indDef, collapse="\n"))
+
+
+  .ini <- .def2ini(indDef, pars, longDef)
+
+  .ini <- eval(.ini)
+
+  expect_equal(.ini,
+               lotri::lotri({
+                 ktr_pop <- 0
+                 ka_pop <- 1
+                 cl_pop <- -2.30258509299405
+                 v_pop <- 2.30258509299405
+                 emax_pop <- 1.38629436111989
+                 ec50_pop <- -0.693147180559945
+                 rxTv_kout <- fixed(2.30258509299405)
+                 e0_pop <- 4.60517018598809
+                 pkadd__err <- fixed(0.1)
+                 prop__err <- 0.1
+                 rx_rx_prd_effect_constant_1 <- fixed(4)
+                 rxVar_emax_1 ~ fix(4)
+               }))
 }
