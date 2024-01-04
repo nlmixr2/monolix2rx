@@ -295,4 +295,46 @@ if (requireNamespace("rxode2", quietly=TRUE)) {
 
   # try cases without omegas
 
+  indDef <- c("ktr = {distribution=logNormal, typical=ktr_pop, no-variability}",
+              "ka = {distribution=logNormal, mean=ka_pop, no-variability}",
+              "cl = {distribution=logNormal, typical=cl_pop, no-variability}",
+              "v = {distribution=logNormal, typical=v_pop,no-variability}",
+              "emax = {distribution=logitNormal, min=0, max=1, typical=emax_pop, no-variability}",
+              "ec50 = {distribution=logNormal, typical=ec50_pop, no-variability}",
+              "kout = {distribution=logNormal, typical=kout_pop, no-variability}",
+              "e0 = {distribution=logNormal, typical=e0_pop, no-variability}")
+  indDef <- .indDef(paste(indDef, collapse="\n"))
+
+
+  pars <- c("ktr_pop={value=1, method=MLE}",
+            "ka_pop={value=1, method=MLE}",
+            "cl_pop={value=0.1, method=MLE}",
+            "v_pop={value=10, method=MLE}",
+            "prop__err={value=0.1, method=MLE}",
+            "pkadd__err={value=0.1, method=FIXED}",
+            "emax_pop={value=0.8, method=MLE}",
+            "ec50_pop={value=0.5, method=MLE}",
+            "kout_pop={value=0.05, method=MLE}",
+            "e0_pop={value=100, method=MLE}",
+            "pdadd__err={value=10, method=MLE}")
+  pars <- .parameter(paste(pars, collapse="\n"))
+
+  .ini <- .def2ini(indDef, pars, longDef)
+  .ini <- eval(.ini)
+
+  expect_equal(.ini,
+               lotri::lotri({
+                 ktr_pop <- 0
+                 ka_pop <- 1
+                 cl_pop <- -2.30258509299405
+                 v_pop <- 2.30258509299405
+                 emax_pop <- 1.38629436111989
+                 ec50_pop <- -0.693147180559945
+                 kout_pop <- -2.99573227355399
+                 e0_pop <- 4.60517018598809
+                 pkadd__err <- fixed(0.1)
+                 prop__err <- 0.1
+                 pdadd__err <- 10
+               }))
+
 }

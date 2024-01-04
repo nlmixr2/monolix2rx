@@ -257,16 +257,20 @@
                        bquote(.(str2lang(e)) <- .(.parsGetValue(pars, e)))
                      }
                    }))
-  .omega <- setNames(lapply(.env$vl,
-                            function(level) {
-                              .def2iniGetCov(.env, def, pars, level)
-                            }),
-                     .def2iniRenameOcc(.env$vl))
-  class(.omega) <- "lotriFix"
-  .omega <- .def2iniFixOmega(.omega, .env$extraFixed)
-  .omega <- as.expression(.omega)
-  .omega <- .omega[[2]]
-  .ini <- c(.pop,
-            lapply(seq_along(.omega)[-1], function(x) {.omega[[x]]}))
+  if (length(.env$omega) != 0L) {
+    .omega <- setNames(lapply(.env$vl,
+                              function(level) {
+                                .def2iniGetCov(.env, def, pars, level)
+                              }),
+                       .def2iniRenameOcc(.env$vl))
+    class(.omega) <- "lotriFix"
+    .omega <- .def2iniFixOmega(.omega, .env$extraFixed)
+    .omega <- as.expression(.omega)
+    .omega <- .omega[[2]]
+    .ini <- c(.pop,
+              lapply(seq_along(.omega)[-1], function(x) {.omega[[x]]}))
+  } else {
+    .ini <- .pop
+  }
   as.call(c(list(quote(`ini`)), as.call(.ini)))
 }
