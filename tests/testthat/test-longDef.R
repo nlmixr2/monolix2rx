@@ -144,3 +144,34 @@ transitionRate(2,1) = q21}")
   expect_equal(tmp, tmp2)
 
 })
+
+
+test_that(".setCategoriesInt()", {
+  .monolix2rx$categoriesInt <- 100L
+  expect_error(.setCategoriesInt("1"))
+  .monolix2rx$categoriesInt <- integer(0)
+})
+
+test_that("combined1()", {
+
+  tmp <- .longDef("rx_prd_cp={distribution = normal, prediction = rx_pred_cp, errorModel=combined1(pkadd__err,1)}
+           rx_prd_effect={distribution = normal, prediction = rx_pred_effect, errorModel=proportional(pdadd__err)}")
+
+  expect_equal(tmp$endpoint[[1]]$err$errName, "combined1")
+
+  expect_equal(tmp$endpoint[[2]]$err$errName, "proportional")
+
+
+  tmp <- .longDef("rx_prd_cp={distribution = normal, prediction = rx_pred_cp, errorModel=combined1c(pkadd__err, pkprop_sd,4)}
+           rx_prd_effect={distribution = normal, prediction = rx_pred_effect, errorModel=proportional(pdadd__err)}")
+
+  expect_equal(tmp$endpoint[[1]]$err$errName,
+               "combined1c")
+})
+
+test_that("as.list works", {
+  tmp <- .longDef("rx_prd_cp={distribution = normal, prediction = rx_pred_cp, errorModel=combined1c(pkadd__err, pkprop_sd,4)}
+           rx_prd_effect={distribution = normal, prediction = rx_pred_effect, errorModel=proportional(pdadd__err)}")
+
+  expect_error(as.list(tmp), NA)
+})
