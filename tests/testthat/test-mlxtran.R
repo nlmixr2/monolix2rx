@@ -120,6 +120,21 @@ test_that("mlxtran initial list", {
 
     v <- .mlxtran(lines)
 
+    dir.create(v$MONOLIX$SETTINGS$GLOBAL$exportpath)
+
+    .df <- as.data.frame(v$PARAMETER$PARAMETER)
+    .df$value <- .df$value * 2
+    .df$parameter <- .df$name
+    .dff <- file.path(v$MONOLIX$SETTINGS$GLOBAL$exportpath, "populationParameters.txt")
+    write.csv(.df, .dff, quote=FALSE, row.names=FALSE)
+    v2 <- .mlxtran(lines, update=TRUE)
+    unlink(.dff)
+    unlink(v$MONOLIX$SETTINGS$GLOBAL$exportpath, recursive = TRUE)
+
+
+    expect_equal(v$PARAMETER$PARAMETER$value * 2,
+                 v2$PARAMETER$PARAMETER$value)
+
     expect_true(inherits(v, "monolix2rxMlxtran"))
     expect_true(inherits(v$DATAFILE$FILEINFO$FILEINFO, "monolix2rxFileinfo"))
     expect_true(inherits(v$DATAFILE$CONTENT$CONTENT, "monolix2rxContent"))
@@ -138,6 +153,13 @@ test_that("mlxtran initial list", {
     expect_snapshot(print(v))
 
     expect_error(as.list(v), NA)
+
+    unlink("pk.turnover.emax3-monolix.txt")
+
+    if (requireNamespace("rxode2", quietly=TRUE)) {
+      rx <- monolix2rx(v2)
+      expect_true(inherits(rx, "rxUi"))
+    }
 
   })
 

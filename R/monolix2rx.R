@@ -39,6 +39,9 @@ monolix2rx <- function(mlxtran, update=TRUE, envir=parent.frame()){
   .ret <- function() {}
   body(.ret) <- as.call(c(list(quote(`{`)), .ini, .model))
   .ret <- eval(.ret, envir=envir)
+  ini <- rxode2::ini
+  model <- rxode2::model
+  lotri <- lotri::lotri
   .ui <- .ret()
   .ui
 }
