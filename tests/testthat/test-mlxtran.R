@@ -155,6 +155,16 @@ test_that("mlxtran initial list", {
 
     v <- .mlxtran(lines)
 
+    expect_equal(attr(v, "version"), NULL)
+    expect_equal(attr(v, "dfSub"), 0L)
+    expect_equal(attr(v, "dfObs"), 0L)
+    expect_equal(attr(v, "ndose"), 0L)
+    expect_equal(attr(v, "obsLst"), list())
+    expect_equal(attr(v, "covSaTransformed"), NULL)
+    expect_equal(attr(v, "covSaUntransformed"), NULL)
+    expect_equal(attr(v, "covLinTransformed"), NULL)
+    expect_equal(attr(v, "covLinUntransformed"), NULL)
+
     dir.create(v$MONOLIX$SETTINGS$GLOBAL$exportpath)
     dir.create(file.path(v$MONOLIX$SETTINGS$GLOBAL$exportpath,
                          "FisherInformation"))
@@ -170,13 +180,38 @@ test_that("mlxtran initial list", {
 
     v2 <- .mlxtran(lines, update=TRUE)
 
+    expect_equal(attr(v2, "version"), NULL)
+    expect_equal(attr(v2, "dfSub"), 0L)
+    expect_equal(attr(v2, "dfObs"), 0L)
+    expect_equal(attr(v2, "ndose"), 0L)
+    expect_equal(attr(v2, "obsLst"), list())
+    expect_true(inherits(attr(v2, "covSaTransformed"), "matrix"))
+    expect_true(inherits(attr(v2, "covSaUntransformed"), "matrix"))
+    expect_true(inherits(attr(v2, "covLinTransformed"), "matrix"))
+    expect_true(inherits(attr(v2, "covLinUntransformed"), "matrix"))
+
     writeLines(ver2019,
                file.path(v$MONOLIX$SETTINGS$GLOBAL$exportpath,"summary.txt"))
 
     v3 <- .mlxtran(lines, update=TRUE)
 
-    expect_equal(attr(v3, "version"),
-                 "5.1.1")
+    expect_equal(attr(v3, "version"), "5.1.1")
+
+    expect_equal(attr(v3, "dfSub"), 0L)
+    expect_equal(attr(v3, "dfObs"), 0L)
+    expect_equal(attr(v3, "ndose"), 0L)
+    expect_equal(attr(v3, "obsLst"), list())
+    expect_true(inherits(attr(v3, "covSaTransformed"), "matrix"))
+    expect_true(inherits(attr(v3, "covSaUntransformed"), "matrix"))
+    expect_true(inherits(attr(v3, "covLinTransformed"), "matrix"))
+    expect_true(inherits(attr(v3, "covLinUntransformed"), "matrix"))
+
+    # The default is to assume everything is untransformed; v2 and v3
+    # matrices should be the same
+    expect_equal(attr(v2, "covSaTransformed"), attr(v3, "covSaTransformed"))
+    expect_equal(attr(v2, "covSaUntransformed"), attr(v3, "covSaUntransformed"))
+    expect_equal(attr(v2, "covLinTransformed"), attr(v3, "covLinTransformed"))
+    expect_equal(attr(v2, "covLinUntransformed"), attr(v3, "covLinUntransformed"))
 
     writeLines(ver2020,
                file.path(v$MONOLIX$SETTINGS$GLOBAL$exportpath,"summary.txt"))
@@ -184,6 +219,21 @@ test_that("mlxtran initial list", {
 
     expect_equal(attr(v4, "version"),
                  "2020R1")
+    expect_equal(attr(v4, "dfSub"), 0L)
+    expect_equal(attr(v4, "dfObs"), 0L)
+    expect_equal(attr(v4, "ndose"), 0L)
+    expect_equal(attr(v4, "obsLst"), list())
+    expect_true(inherits(attr(v4, "covSaTransformed"), "matrix"))
+    expect_true(inherits(attr(v4, "covSaUntransformed"), "matrix"))
+    expect_true(inherits(attr(v4, "covLinTransformed"), "matrix"))
+    expect_true(inherits(attr(v4, "covLinUntransformed"), "matrix"))
+
+    # 2020 SA is transformed and Lin is untransformed
+    expect_equal(attr(v2, "covLinTransformed"), attr(v4, "covLinTransformed"))
+    expect_equal(attr(v2, "covLinUntransformed"), attr(v4, "covLinUntransformed"))
+
+    expect_false(identical(attr(v2, "covSaTransformed"), attr(v4, "covSaTransformed")))
+    expect_false(identical(attr(v2, "covSaUntransformed"), attr(v4, "covSaUntransformed")))
 
     writeLines(ver2021,
                file.path(v$MONOLIX$SETTINGS$GLOBAL$exportpath,"summary.txt"))
@@ -191,12 +241,69 @@ test_that("mlxtran initial list", {
 
     expect_equal(attr(v5, "version"),
                  "2021R1")
+    expect_equal(attr(v5, "dfSub"), 0L)
+    expect_equal(attr(v5, "dfObs"), 0L)
+    expect_equal(attr(v5, "ndose"), 0L)
+    expect_equal(attr(v5, "obsLst"), list())
+    expect_true(inherits(attr(v5, "covSaTransformed"), "matrix"))
+    expect_true(inherits(attr(v5, "covSaUntransformed"), "matrix"))
+    expect_true(inherits(attr(v5, "covLinTransformed"), "matrix"))
+    expect_true(inherits(attr(v5, "covLinUntransformed"), "matrix"))
 
+    # 2021 all cov are transformed
+    expect_equal(attr(v4, "covSaTransformed"), attr(v5, "covLinTransformed"))
+    expect_equal(attr(v4, "covSaUntransformed"), attr(v5, "covLinUntransformed"))
+
+    expect_equal(attr(v4, "covSaTransformed"), attr(v5, "covSaTransformed"))
+    expect_equal(attr(v4, "covSaUntransformed"), attr(v5, "covSaUntransformed"))
 
     writeLines(c(ver2021, di1),
                file.path(v$MONOLIX$SETTINGS$GLOBAL$exportpath,"summary.txt"))
 
     v6 <- .mlxtran(lines, update=TRUE)
+
+    expect_equal(attr(v6, "version"),
+                 "2021R1")
+    expect_equal(attr(v6, "dfSub"), 32L)
+    expect_equal(attr(v6, "dfObs"), 483L)
+    expect_equal(attr(v6, "ndose"), 32L)
+    expect_equal(attr(v6, "obsLst"), list(`obsid 1`=251L, `obsid 2`=232L))
+    expect_true(inherits(attr(v6, "covSaTransformed"), "matrix"))
+    expect_true(inherits(attr(v6, "covSaUntransformed"), "matrix"))
+    expect_true(inherits(attr(v6, "covLinTransformed"), "matrix"))
+    expect_true(inherits(attr(v6, "covLinUntransformed"), "matrix"))
+
+    # 2021 all cov are transformed
+    expect_equal(attr(v4, "covSaTransformed"), attr(v6, "covLinTransformed"))
+    expect_equal(attr(v4, "covSaUntransformed"), attr(v6, "covLinUntransformed"))
+
+    expect_equal(attr(v4, "covSaTransformed"), attr(v6, "covSaTransformed"))
+    expect_equal(attr(v4, "covSaUntransformed"), attr(v6, "covSaUntransformed"))
+
+    writeLines(c(ver2021, di2),
+               file.path(v$MONOLIX$SETTINGS$GLOBAL$exportpath,"summary.txt"))
+
+    v7 <- .mlxtran(lines, update=TRUE)
+
+    expect_equal(attr(v7, "version"),
+                 "2021R1")
+    expect_equal(attr(v7, "dfSub"), 45L)
+    expect_equal(attr(v7, "dfObs"), 176L)
+    expect_equal(attr(v7, "ndose"), 51L)
+    expect_equal(attr(v7, "obsLst"), list(`DV`=176L))
+    expect_true(inherits(attr(v7, "covSaTransformed"), "matrix"))
+    expect_true(inherits(attr(v7, "covSaUntransformed"), "matrix"))
+    expect_true(inherits(attr(v7, "covLinTransformed"), "matrix"))
+    expect_true(inherits(attr(v7, "covLinUntransformed"), "matrix"))
+
+    # 2021 all cov are transformed
+    expect_equal(attr(v4, "covSaTransformed"), attr(v7, "covLinTransformed"))
+    expect_equal(attr(v4, "covSaUntransformed"), attr(v7, "covLinUntransformed"))
+
+    expect_equal(attr(v4, "covSaTransformed"), attr(v7, "covSaTransformed"))
+    expect_equal(attr(v4, "covSaUntransformed"), attr(v7, "covSaUntransformed"))
+
+
 
     unlink(file.path(v$MONOLIX$SETTINGS$GLOBAL$exportpath,
                      "FisherInformation", "covarianceEstimatesLin.txt"))

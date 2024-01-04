@@ -54,7 +54,7 @@
     if (sa) {
       return(.num < 2020)
     } else {
-      return(.num < 2021)
+      return(.num <= 2020)
     }
   }
   TRUE
@@ -116,8 +116,8 @@
   .saTransformed   <- .mlxtranCovTransformed(.sa, .jac, .ver, TRUE)
   .saUntransformed <- .mlxtranCovUntransformed(.sa, .jac, .ver, TRUE)
 
-  .linTransformed   <- .mlxtranCovTransformed(.lin, .jac, .ver, TRUE)
-  .linUntransformed <- .mlxtranCovUntransformed(.lin, .jac, .ver, TRUE)
+  .linTransformed   <- .mlxtranCovTransformed(.lin, .jac, .ver, FALSE)
+  .linUntransformed <- .mlxtranCovUntransformed(.lin, .jac, .ver, FALSE)
 
   attr(.mlx, "covSaTransformed") <- .saTransformed
   attr(.mlx, "covSaUntransformed") <- .saUntransformed

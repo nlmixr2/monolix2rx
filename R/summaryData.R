@@ -1,8 +1,21 @@
 .mlxtranSumary <- function(mlxtran) {
   .exportPath <- mlxtran$MONOLIX$SETTINGS$GLOBAL$exportpath
-  if (!file.exists(.exportPath)) return(mlxtran)
+  .monolix2rx$dfSub <- 0L
+  .monolix2rx$dfObs <- 0L
+  .monolix2rx$obsLst <- list()
+  .monolix2rx$ndose <- 0L
+  attr(mlxtran, "version") <- NULL
+  attr(mlxtran, "dfSub") <- .monolix2rx$dfSub
+  attr(mlxtran, "dfObs") <- .monolix2rx$dfObs
+  attr(mlxtran, "obsLst") <- .monolix2rx$obsLst
+  attr(mlxtran, "ndose") <- .monolix2rx$ndose
+  if (!file.exists(.exportPath)) {
+    return(mlxtran)
+  }
   .summary <- file.path(.exportPath, "summary.txt")
-  if (!file.exists(.summary)) return(mlxtran)
+  if (!file.exists(.summary)){
+    return(mlxtran)
+  }
   .lines <- readLines(.summary)
   .env <- new.env(parent=emptyenv())
   .env$foundVersion <- FALSE
@@ -38,10 +51,6 @@
            }
            .env$n <- .env$n + 1L
          })
-  .monolix2rx$dfSub <- 0L
-  .monolix2rx$dfObs <- 0L
-  .monolix2rx$obsLst <- list()
-  .monolix2rx$ndose <- 0L
   if (length(.env$diLine) > 0) {
     .Call(`_monolix2rx_trans_summaryData`, paste(.env$diLine, collapse="\n"))
   }
