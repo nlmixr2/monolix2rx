@@ -97,6 +97,7 @@
                     if (is.na(jac[n])) return(1)
                     1/jac[n]
                   }, numeric(1), USE.NAMES = TRUE)
+  .jInv <- diag(.jInv)
   .cov <- .jInv %*% mat %*% .jInv
   dimnames(.cov) <- dimnames(mat)
   .cov
@@ -114,12 +115,13 @@
   if (is.null(mat)) return(NULL)
   if (.mlxtranCovarianceIsUntransformed(ver, sa)) return(mat)
   .dn <- dimnames(mat)[[1]]
-  .jInv <- vapply(.dn,
-                  function(n) {
-                    if (is.na(jac[n])) return(1)
-                    jac[n]
-                  }, numeric(1), USE.NAMES = TRUE)
-  .cov <- .jInv %*% mat %*% .jInv
+  .j <- vapply(.dn,
+               function(n) {
+                 if (is.na(jac[n])) return(1)
+                 jac[n]
+               }, numeric(1), USE.NAMES = TRUE)
+  .j <- diag(.j)
+  .cov <- .j %*% mat %*% .j
   dimnames(.cov) <- dimnames(mat)
   .cov
 }
