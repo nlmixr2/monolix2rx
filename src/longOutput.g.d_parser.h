@@ -16,44 +16,54 @@ D_Reduction d_reduction_2_longOutput = {2, 2, NULL, NULL, 0, 0, 0, 0, -1, 0, NUL
 D_Reduction d_reduction_3_longOutput = {1, 2, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
 D_Reduction d_reduction_4_longOutput = {1, 3, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
 D_Reduction d_reduction_5_longOutput = {2, 4, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
-D_Reduction d_reduction_7_longOutput = {1, 5, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_8_longOutput = {0, 5, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_9_longOutput = {1, 6, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_10_longOutput = {0, 6, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_11_longOutput = {1, 7, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
-D_Reduction d_reduction_12_longOutput = {1, 8, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
-D_Reduction d_reduction_13_longOutput = {6, 9, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
-D_Reduction d_reduction_14_longOutput = {2, 10, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_15_longOutput = {0, 10, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_16_longOutput = {2, 11, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_17_longOutput = {6, 12, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
-D_Reduction d_reduction_18_longOutput = {2, 13, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_19_longOutput = {0, 13, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_20_longOutput = {2, 14, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_21_longOutput = {1, 15, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
-D_Reduction d_reduction_22_longOutput = {1, 16, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
-D_Reduction d_reduction_23_longOutput = {1, 17, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
-D_Reduction d_reduction_24_longOutput = {1, 18, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
-D_Reduction d_reduction_25_longOutput = {2, 19, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_26_longOutput = {0, 19, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_27_longOutput = {1, 20, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
-D_Reduction d_reduction_29_longOutput = {2, 21, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
-D_Shift d_shift_0_longOutput = {22, 0, 0, 0, 0, 0, NULL};
-D_Shift d_shift_1_longOutput = {23, 0, 0, 0, 0, 0, NULL};
-D_Shift d_shift_2_longOutput = {24, 0, 0, 0, 0, 0, NULL};
-D_Shift d_shift_3_longOutput = {25, 0, 0, 0, 0, 0, NULL};
-D_Shift d_shift_4_longOutput = {26, 0, 0, 0, 0, 0, NULL};
-D_Shift d_shift_5_longOutput = {27, 0, 0, 0, 0, 0, NULL};
-D_Shift d_shift_6_longOutput = {28, 0, 0, 0, 0, 0, NULL};
-D_Shift d_shift_7_longOutput = {29, 0, 0, 0, 0, 0, NULL};
-D_Shift d_shift_8_longOutput = {30, 0, 0, 0, 0, 0, NULL};
-D_Shift d_shift_9_longOutput = {31, 0, 0, 0, 0, 0, NULL};
-D_Shift d_shift_10_longOutput = {32, 0, 0, 0, -2, 0, NULL};
-D_Shift d_shift_11_longOutput = {33, 0, 0, 0, -3, 0, NULL};
-D_Shift d_shift_12_longOutput = {34, 0, 0, 0, -4, 0, NULL};
-D_Shift d_shift_13_longOutput = {35, 0, 0, 0, 0, 0, NULL};
-D_Shift d_shift_14_longOutput = {36, 0, 0, 0, 0, 0, NULL};
-D_Shift d_shift_15_longOutput = {37, 0, 0, 0, 0, 0, NULL};
+D_Reduction d_reduction_9_longOutput = {1, 5, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_10_longOutput = {0, 5, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_11_longOutput = {1, 6, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_12_longOutput = {0, 6, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_13_longOutput = {1, 7, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_14_longOutput = {0, 7, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_15_longOutput = {1, 8, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_16_longOutput = {0, 8, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_17_longOutput = {1, 9, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
+D_Reduction d_reduction_18_longOutput = {1, 10, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
+D_Reduction d_reduction_19_longOutput = {3, 11, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
+D_Reduction d_reduction_20_longOutput = {6, 12, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
+D_Reduction d_reduction_21_longOutput = {2, 13, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_22_longOutput = {0, 13, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_23_longOutput = {2, 14, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_24_longOutput = {6, 15, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
+D_Reduction d_reduction_25_longOutput = {2, 16, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_26_longOutput = {0, 16, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_27_longOutput = {2, 17, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_28_longOutput = {3, 18, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
+D_Reduction d_reduction_29_longOutput = {1, 19, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
+D_Reduction d_reduction_30_longOutput = {1, 20, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
+D_Reduction d_reduction_31_longOutput = {1, 21, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
+D_Reduction d_reduction_32_longOutput = {1, 22, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
+D_Reduction d_reduction_33_longOutput = {2, 23, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_34_longOutput = {0, 23, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_35_longOutput = {1, 24, NULL, NULL, 0, 0, 0, 0, -1, 0, NULL};
+D_Reduction d_reduction_37_longOutput = {2, 25, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL};
+D_Shift d_shift_0_longOutput = {26, 0, 0, 0, 0, 0, NULL};
+D_Shift d_shift_1_longOutput = {27, 0, 0, 0, 0, 0, NULL};
+D_Shift d_shift_2_longOutput = {28, 0, 0, 0, 0, 0, NULL};
+D_Shift d_shift_3_longOutput = {29, 0, 0, 0, 0, 0, NULL};
+D_Shift d_shift_4_longOutput = {30, 0, 0, 0, 0, 0, NULL};
+D_Shift d_shift_5_longOutput = {31, 0, 0, 0, 0, 0, NULL};
+D_Shift d_shift_6_longOutput = {32, 0, 0, 0, 0, 0, NULL};
+D_Shift d_shift_7_longOutput = {33, 0, 0, 0, 0, 0, NULL};
+D_Shift d_shift_8_longOutput = {34, 0, 0, 0, 0, 0, NULL};
+D_Shift d_shift_9_longOutput = {35, 0, 0, 0, 0, 0, NULL};
+D_Shift d_shift_10_longOutput = {36, 0, 0, 0, 0, 0, NULL};
+D_Shift d_shift_11_longOutput = {37, 0, 0, 0, 0, 0, NULL};
+D_Shift d_shift_12_longOutput = {38, 0, 0, 0, 0, 0, NULL};
+D_Shift d_shift_13_longOutput = {39, 0, 0, 0, 0, 0, NULL};
+D_Shift d_shift_14_longOutput = {40, 0, 0, 0, -2, 0, NULL};
+D_Shift d_shift_15_longOutput = {41, 0, 0, 0, -3, 0, NULL};
+D_Shift d_shift_16_longOutput = {42, 0, 0, 0, -4, 0, NULL};
+D_Shift d_shift_17_longOutput = {43, 0, 0, 0, 0, 0, NULL};
+D_Shift d_shift_18_longOutput = {44, 0, 0, 0, 0, 0, NULL};
+D_Shift d_shift_19_longOutput = {45, 0, 0, 0, 0, 0, NULL};
 
 D_Shift * d_accepts_diff_0_0_longOutput[] = {0};
 D_Shift ** d_accepts_diff_0_longOutput[] = {
@@ -144,7 +154,7 @@ unsigned char d_scanner_0_9_1_longOutput[SCANNER_BLOCK_SIZE] = {
 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_0_10_longOutput[] = {&d_shift_5_longOutput,NULL};
+D_Shift * d_shift_0_10_longOutput[] = {&d_shift_7_longOutput,NULL};
 
 D_Shift * d_shift_0_11_longOutput[] = {&d_shift_0_longOutput,NULL};
 
@@ -174,107 +184,114 @@ unsigned char d_scanner_8_0_0_longOutput[SCANNER_BLOCK_SIZE] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_8_1_longOutput[] = {&d_shift_14_longOutput,NULL};
+D_Shift * d_shift_8_1_longOutput[] = {&d_shift_18_longOutput,NULL};
 
-D_Shift * d_accepts_diff_11_0_longOutput[] = {0};
-D_Shift ** d_accepts_diff_11_longOutput[] = {
-d_accepts_diff_11_0_longOutput
+D_Shift * d_accepts_diff_13_0_longOutput[] = {0};
+D_Shift ** d_accepts_diff_13_longOutput[] = {
+d_accepts_diff_13_0_longOutput
 };
 
-unsigned char d_scanner_11_0_0_longOutput[SCANNER_BLOCK_SIZE] = {
+unsigned char d_scanner_13_0_0_longOutput[SCANNER_BLOCK_SIZE] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 2, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 
 };
 
-unsigned char d_scanner_11_1_0_longOutput[SCANNER_BLOCK_SIZE] = {
+unsigned char d_scanner_13_1_0_longOutput[SCANNER_BLOCK_SIZE] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 2, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_11_1_longOutput[] = {&d_shift_13_longOutput,NULL};
+D_Shift * d_shift_13_1_longOutput[] = {&d_shift_17_longOutput,NULL};
 
-D_Shift * d_accepts_diff_12_0_longOutput[] = {0};
-D_Shift ** d_accepts_diff_12_longOutput[] = {
-d_accepts_diff_12_0_longOutput
+D_Shift * d_accepts_diff_14_0_longOutput[] = {0};
+D_Shift ** d_accepts_diff_14_longOutput[] = {
+d_accepts_diff_14_0_longOutput
 };
 
-D_Shift * d_shift_12_1_longOutput[] = {&d_shift_2_longOutput,NULL};
-
-D_Shift * d_accepts_diff_15_0_longOutput[] = {0};
-D_Shift ** d_accepts_diff_15_longOutput[] = {
-d_accepts_diff_15_0_longOutput
-};
-
-unsigned char d_scanner_15_0_0_longOutput[SCANNER_BLOCK_SIZE] = {
-0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 
-2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
-2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
-2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
-};
-
-unsigned char d_scanner_15_0_1_longOutput[SCANNER_BLOCK_SIZE] = {
-2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
-2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
-2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
-2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
-};
-
-D_Shift * d_shift_15_0_longOutput[] = {&d_shift_15_longOutput,NULL};
-
-D_Shift * d_accepts_diff_23_0_longOutput[] = {0};
-D_Shift ** d_accepts_diff_23_longOutput[] = {
-d_accepts_diff_23_0_longOutput
-};
-
-unsigned char d_scanner_23_0_1_longOutput[SCANNER_BLOCK_SIZE] = {
+unsigned char d_scanner_14_0_1_longOutput[SCANNER_BLOCK_SIZE] = {
 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 
 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
-2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 
+2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 
 };
 
-unsigned char d_scanner_23_1_0_longOutput[SCANNER_BLOCK_SIZE] = {
+unsigned char d_scanner_14_1_0_longOutput[SCANNER_BLOCK_SIZE] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 
 };
 
-unsigned char d_scanner_23_1_1_longOutput[SCANNER_BLOCK_SIZE] = {
+unsigned char d_scanner_14_1_1_longOutput[SCANNER_BLOCK_SIZE] = {
 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 2, 
 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 
 };
 
-D_Shift * d_shift_23_1_longOutput[] = {&d_shift_12_longOutput,NULL};
+D_Shift * d_shift_14_1_longOutput[] = {&d_shift_16_longOutput,NULL};
 
-D_Shift * d_accepts_diff_31_0_longOutput[] = {0};
-D_Shift ** d_accepts_diff_31_longOutput[] = {
-d_accepts_diff_31_0_longOutput
+D_Shift * d_shift_14_2_longOutput[] = {&d_shift_4_longOutput,NULL};
+
+D_Shift * d_accepts_diff_17_0_longOutput[] = {0};
+D_Shift ** d_accepts_diff_17_longOutput[] = {
+d_accepts_diff_17_0_longOutput
 };
 
-unsigned char d_scanner_31_0_0_longOutput[SCANNER_BLOCK_SIZE] = {
+unsigned char d_scanner_17_0_0_longOutput[SCANNER_BLOCK_SIZE] = {
+0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 
+2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+};
+
+unsigned char d_scanner_17_0_1_longOutput[SCANNER_BLOCK_SIZE] = {
+2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+};
+
+D_Shift * d_shift_17_0_longOutput[] = {&d_shift_19_longOutput,NULL};
+
+D_Shift * d_accepts_diff_29_0_longOutput[] = {0};
+D_Shift ** d_accepts_diff_29_longOutput[] = {
+d_accepts_diff_29_0_longOutput
+};
+
+unsigned char d_scanner_29_0_1_longOutput[SCANNER_BLOCK_SIZE] = {
+0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 
+0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 
+};
+
+D_Shift * d_accepts_diff_39_0_longOutput[] = {0};
+D_Shift ** d_accepts_diff_39_longOutput[] = {
+d_accepts_diff_39_0_longOutput
+};
+
+unsigned char d_scanner_39_0_0_longOutput[SCANNER_BLOCK_SIZE] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 };
 
-unsigned char d_scanner_31_0_1_longOutput[SCANNER_BLOCK_SIZE] = {
+unsigned char d_scanner_39_0_1_longOutput[SCANNER_BLOCK_SIZE] = {
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 
 };
 
-D_Shift * d_shift_31_1_longOutput[] = {&d_shift_3_longOutput,NULL};
+D_Shift * d_shift_39_1_longOutput[] = {&d_shift_5_longOutput,NULL};
 
-D_Shift * d_shift_31_2_longOutput[] = {&d_shift_4_longOutput,NULL};
+D_Shift * d_shift_39_2_longOutput[] = {&d_shift_6_longOutput,NULL};
 
 SB_uint8 d_scanner_0_longOutput[12] = {
 {NULL, {d_scanner_0_0_0_longOutput, d_scanner_0_0_1_longOutput
@@ -358,16 +375,16 @@ SB_trans_uint8 d_transition_8_longOutput[2] = {
  , d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput}}
 };
 
-SB_uint8 d_scanner_11_longOutput[3] = {
-{NULL, {d_scanner_11_0_0_longOutput, d_scanner_0_0_0_longOutput
+SB_uint8 d_scanner_13_longOutput[3] = {
+{NULL, {d_scanner_13_0_0_longOutput, d_scanner_0_0_0_longOutput
  , d_scanner_0_0_0_longOutput, d_scanner_0_0_0_longOutput}},
-{d_shift_11_1_longOutput, {d_scanner_11_1_0_longOutput, d_scanner_0_0_0_longOutput
+{d_shift_13_1_longOutput, {d_scanner_13_1_0_longOutput, d_scanner_0_0_0_longOutput
  , d_scanner_0_0_0_longOutput, d_scanner_0_0_0_longOutput}},
 {d_shift_8_1_longOutput, {d_scanner_0_0_0_longOutput, d_scanner_0_0_0_longOutput
  , d_scanner_0_0_0_longOutput, d_scanner_0_0_0_longOutput}}
 };
 
-SB_trans_uint8 d_transition_11_longOutput[3] = {
+SB_trans_uint8 d_transition_13_longOutput[3] = {
 {{d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput
  , d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput}},
 {{d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput
@@ -376,58 +393,62 @@ SB_trans_uint8 d_transition_11_longOutput[3] = {
  , d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput}}
 };
 
-SB_uint8 d_scanner_12_longOutput[2] = {
-{NULL, {d_scanner_0_0_0_longOutput, d_scanner_8_0_0_longOutput
+SB_uint8 d_scanner_14_longOutput[3] = {
+{NULL, {d_scanner_0_0_0_longOutput, d_scanner_14_0_1_longOutput
  , d_scanner_0_0_0_longOutput, d_scanner_0_0_0_longOutput}},
-{d_shift_12_1_longOutput, {d_scanner_0_0_0_longOutput, d_scanner_0_0_0_longOutput
+{d_shift_14_1_longOutput, {d_scanner_14_1_0_longOutput, d_scanner_14_1_1_longOutput
+ , d_scanner_0_0_0_longOutput, d_scanner_0_0_0_longOutput}},
+{d_shift_14_2_longOutput, {d_scanner_0_0_0_longOutput, d_scanner_0_0_0_longOutput
  , d_scanner_0_0_0_longOutput, d_scanner_0_0_0_longOutput}}
 };
 
-SB_trans_uint8 d_transition_12_longOutput[2] = {
+SB_trans_uint8 d_transition_14_longOutput[3] = {
+{{d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput
+ , d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput}},
 {{d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput
  , d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput}},
 {{d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput
  , d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput}}
 };
 
-SB_uint8 d_scanner_15_longOutput[2] = {
-{d_shift_15_0_longOutput, {d_scanner_15_0_0_longOutput, d_scanner_15_0_1_longOutput
- , d_scanner_15_0_1_longOutput, d_scanner_15_0_1_longOutput}},
-{d_shift_15_0_longOutput, {d_scanner_15_0_0_longOutput, d_scanner_15_0_1_longOutput
- , d_scanner_15_0_1_longOutput, d_scanner_15_0_1_longOutput}}
+SB_uint8 d_scanner_17_longOutput[2] = {
+{d_shift_17_0_longOutput, {d_scanner_17_0_0_longOutput, d_scanner_17_0_1_longOutput
+ , d_scanner_17_0_1_longOutput, d_scanner_17_0_1_longOutput}},
+{d_shift_17_0_longOutput, {d_scanner_17_0_0_longOutput, d_scanner_17_0_1_longOutput
+ , d_scanner_17_0_1_longOutput, d_scanner_17_0_1_longOutput}}
 };
 
-SB_trans_uint8 d_transition_15_longOutput[2] = {
+SB_trans_uint8 d_transition_17_longOutput[2] = {
 {{d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput
  , d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput}},
 {{d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput
  , d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput}}
 };
 
-SB_uint8 d_scanner_23_longOutput[2] = {
-{NULL, {d_scanner_0_0_0_longOutput, d_scanner_23_0_1_longOutput
+SB_uint8 d_scanner_29_longOutput[2] = {
+{NULL, {d_scanner_0_0_0_longOutput, d_scanner_29_0_1_longOutput
  , d_scanner_0_0_0_longOutput, d_scanner_0_0_0_longOutput}},
-{d_shift_23_1_longOutput, {d_scanner_23_1_0_longOutput, d_scanner_23_1_1_longOutput
+{d_shift_14_1_longOutput, {d_scanner_14_1_0_longOutput, d_scanner_14_1_1_longOutput
  , d_scanner_0_0_0_longOutput, d_scanner_0_0_0_longOutput}}
 };
 
-SB_trans_uint8 d_transition_23_longOutput[2] = {
+SB_trans_uint8 d_transition_29_longOutput[2] = {
 {{d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput
  , d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput}},
 {{d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput
  , d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput}}
 };
 
-SB_uint8 d_scanner_31_longOutput[3] = {
-{NULL, {d_scanner_31_0_0_longOutput, d_scanner_31_0_1_longOutput
+SB_uint8 d_scanner_39_longOutput[3] = {
+{NULL, {d_scanner_39_0_0_longOutput, d_scanner_39_0_1_longOutput
  , d_scanner_0_0_0_longOutput, d_scanner_0_0_0_longOutput}},
-{d_shift_31_1_longOutput, {d_scanner_0_0_0_longOutput, d_scanner_0_0_0_longOutput
+{d_shift_39_1_longOutput, {d_scanner_0_0_0_longOutput, d_scanner_0_0_0_longOutput
  , d_scanner_0_0_0_longOutput, d_scanner_0_0_0_longOutput}},
-{d_shift_31_2_longOutput, {d_scanner_0_0_0_longOutput, d_scanner_0_0_0_longOutput
+{d_shift_39_2_longOutput, {d_scanner_0_0_0_longOutput, d_scanner_0_0_0_longOutput
  , d_scanner_0_0_0_longOutput, d_scanner_0_0_0_longOutput}}
 };
 
-SB_trans_uint8 d_transition_31_longOutput[3] = {
+SB_trans_uint8 d_transition_39_longOutput[3] = {
 {{d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput
  , d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput}},
 {{d_accepts_diff_0_0_0_longOutput, d_accepts_diff_0_0_0_longOutput
@@ -437,136 +458,160 @@ SB_trans_uint8 d_transition_31_longOutput[3] = {
 };
 
 unsigned char d_goto_valid_0_longOutput[] = {
-0x1e,0x12,0x40,0x8,0x0};
+0x1e,0x98,0x4,0x4,0x2,0x0};
 unsigned char d_goto_valid_1_longOutput[] = {
-0x0,0x0,0xc,0x0,0x0};
-D_Reduction * d_reductions_1_longOutput[] = {&d_reduction_26_longOutput};
-D_RightEpsilonHint d_right_epsilon_hints_1_longOutput[] = {{0, 11, &d_reduction_24_longOutput}};
+0x0,0x0,0xc0,0x0,0x0,0x0};
+D_Reduction * d_reductions_1_longOutput[] = {&d_reduction_34_longOutput};
+D_RightEpsilonHint d_right_epsilon_hints_1_longOutput[] = {{0, 13, &d_reduction_32_longOutput}};
 unsigned char d_goto_valid_2_longOutput[] = {
-0x0,0x0,0x80,0x0,0x0};
+0x0,0x0,0x0,0x8,0x0,0x0};
 unsigned char d_goto_valid_3_longOutput[] = {
-0x0,0x0,0x80,0x0,0x0};
+0x0,0x0,0x0,0x8,0x0,0x0};
 unsigned char d_goto_valid_5_longOutput[] = {
-0x18,0x12,0x40,0x8,0x0};
+0x18,0x98,0x4,0x4,0x2,0x0};
 D_Reduction * d_reductions_5_longOutput[] = {&d_reduction_1_longOutput};
 D_Reduction * d_reductions_6_longOutput[] = {&d_reduction_3_longOutput};
 D_Reduction * d_reductions_7_longOutput[] = {&d_reduction_4_longOutput};
 unsigned char d_goto_valid_8_longOutput[] = {
-0x40,0x0,0x20,0x0,0x10};
+0x20,0x0,0x0,0x2,0x0,0x10};
 D_Reduction * d_reductions_8_longOutput[] = {&d_reduction_10_longOutput};
-D_RightEpsilonHint d_right_epsilon_hints_8_longOutput[] = {{0, 16, &d_reduction_5_longOutput}};
+D_RightEpsilonHint d_right_epsilon_hints_8_longOutput[] = {{0, 18, &d_reduction_5_longOutput}};
 unsigned char d_goto_valid_9_longOutput[] = {
-0x20,0x0,0x20,0x0,0x10};
-D_Reduction * d_reductions_9_longOutput[] = {&d_reduction_8_longOutput};
-D_RightEpsilonHint d_right_epsilon_hints_9_longOutput[] = {{0, 18, &d_reduction_5_longOutput}};
+0x0,0x1,0x0,0x2,0x0,0x10};
+D_Reduction * d_reductions_9_longOutput[] = {&d_reduction_16_longOutput};
+D_RightEpsilonHint d_right_epsilon_hints_9_longOutput[] = {{0, 20, &d_reduction_5_longOutput}};
+unsigned char d_goto_valid_10_longOutput[] = {
+0x80,0x0,0x0,0x2,0x0,0x10};
+D_Reduction * d_reductions_10_longOutput[] = {&d_reduction_14_longOutput};
+D_RightEpsilonHint d_right_epsilon_hints_10_longOutput[] = {{0, 22, &d_reduction_5_longOutput}};
 unsigned char d_goto_valid_11_longOutput[] = {
-0x0,0x0,0x30,0x0,0x18};
-D_Reduction * d_reductions_11_longOutput[] = {&d_reduction_24_longOutput};
-unsigned char d_goto_valid_12_longOutput[] = {
-0x0,0x0,0x0,0x1,0x0};
+0x40,0x0,0x0,0x2,0x0,0x10};
+D_Reduction * d_reductions_11_longOutput[] = {&d_reduction_12_longOutput};
+D_RightEpsilonHint d_right_epsilon_hints_11_longOutput[] = {{0, 24, &d_reduction_5_longOutput}};
 unsigned char d_goto_valid_13_longOutput[] = {
-0x0,0x0,0x0,0x1,0x0};
-D_Reduction * d_reductions_14_longOutput[] = {&d_reduction_2_longOutput};
+0x0,0x0,0x0,0x3,0x0,0x18};
+D_Reduction * d_reductions_13_longOutput[] = {&d_reduction_32_longOutput};
+unsigned char d_goto_valid_14_longOutput[] = {
+0x0,0x2,0x20,0x40,0x0,0x4};
 unsigned char d_goto_valid_15_longOutput[] = {
-0x0,0x0,0x0,0x0,0x20};
-D_Reduction * d_reductions_16_longOutput[] = {&d_reduction_5_longOutput};
-D_Reduction * d_reductions_17_longOutput[] = {&d_reduction_9_longOutput};
+0x0,0x4,0x20,0x40,0x0,0x4};
+D_Reduction * d_reductions_16_longOutput[] = {&d_reduction_2_longOutput};
+unsigned char d_goto_valid_17_longOutput[] = {
+0x0,0x0,0x0,0x0,0x0,0x20};
 D_Reduction * d_reductions_18_longOutput[] = {&d_reduction_5_longOutput};
-D_Reduction * d_reductions_19_longOutput[] = {&d_reduction_7_longOutput};
-D_Reduction * d_reductions_20_longOutput[] = {&d_reduction_27_longOutput};
-D_Reduction * d_reductions_21_longOutput[] = {&d_reduction_25_longOutput};
-D_Reduction * d_reductions_22_longOutput[] = {&d_reduction_27_longOutput};
-unsigned char d_goto_valid_23_longOutput[] = {
-0x80,0x0,0x2,0x0,0x4};
-unsigned char d_goto_valid_24_longOutput[] = {
-0x0,0x1,0x2,0x0,0x4};
-D_Reduction * d_reductions_25_longOutput[] = {&d_reduction_29_longOutput};
-D_Reduction * d_reductions_26_longOutput[] = {&d_reduction_23_longOutput};
-unsigned char d_goto_valid_27_longOutput[] = {
-0x0,0x4,0x0,0x0,0x0};
-D_Reduction * d_reductions_27_longOutput[] = {&d_reduction_15_longOutput};
-D_Reduction * d_reductions_28_longOutput[] = {&d_reduction_11_longOutput};
+D_Reduction * d_reductions_19_longOutput[] = {&d_reduction_9_longOutput};
+D_Reduction * d_reductions_20_longOutput[] = {&d_reduction_5_longOutput};
+D_Reduction * d_reductions_21_longOutput[] = {&d_reduction_15_longOutput};
+D_Reduction * d_reductions_22_longOutput[] = {&d_reduction_5_longOutput};
+D_Reduction * d_reductions_23_longOutput[] = {&d_reduction_13_longOutput};
+D_Reduction * d_reductions_24_longOutput[] = {&d_reduction_5_longOutput};
+D_Reduction * d_reductions_25_longOutput[] = {&d_reduction_11_longOutput};
+D_Reduction * d_reductions_26_longOutput[] = {&d_reduction_35_longOutput};
+D_Reduction * d_reductions_27_longOutput[] = {&d_reduction_33_longOutput};
+D_Reduction * d_reductions_28_longOutput[] = {&d_reduction_35_longOutput};
 unsigned char d_goto_valid_29_longOutput[] = {
-0x0,0x20,0x0,0x0,0x0};
-D_Reduction * d_reductions_29_longOutput[] = {&d_reduction_19_longOutput};
-D_Reduction * d_reductions_30_longOutput[] = {&d_reduction_12_longOutput};
-unsigned char d_goto_valid_31_longOutput[] = {
-0x0,0x8,0x0,0x6,0x0};
-unsigned char d_goto_valid_32_longOutput[] = {
-0x0,0x40,0x0,0x6,0x0};
+0x0,0x2,0x20,0x0,0x0,0x4};
+D_Reduction * d_reductions_30_longOutput[] = {&d_reduction_31_longOutput};
+D_Reduction * d_reductions_31_longOutput[] = {&d_reduction_19_longOutput};
+D_Reduction * d_reductions_32_longOutput[] = {&d_reduction_17_longOutput};
 unsigned char d_goto_valid_33_longOutput[] = {
-0x80,0x0,0x2,0x0,0x4};
-D_Reduction * d_reductions_34_longOutput[] = {&d_reduction_13_longOutput};
-D_Reduction * d_reductions_35_longOutput[] = {&d_reduction_14_longOutput};
-unsigned char d_goto_valid_36_longOutput[] = {
-0x0,0x1,0x2,0x0,0x4};
-D_Reduction * d_reductions_37_longOutput[] = {&d_reduction_17_longOutput};
-D_Reduction * d_reductions_38_longOutput[] = {&d_reduction_18_longOutput};
-D_Reduction * d_reductions_39_longOutput[] = {&d_reduction_16_longOutput};
-D_Reduction * d_reductions_40_longOutput[] = {&d_reduction_20_longOutput};
-unsigned short d_gotos_longOutput[70] = {
-5,6,7,8,11,12,13,14,9,15,8,10,17,19,24,9,
-22,23,10,25,26,3,32,33,28,39,4,18,3,20,30,21,
-16,4,29,36,37,38,40,31,0,0,16,41,16,0,0,0,
-29,34,35,27,31,0,0,0,27,0,0,0,0,0,0,0,
-0,27,0,0,0,27};
+0x0,0x4,0x20,0x0,0x0,0x4};
+D_Reduction * d_reductions_34_longOutput[] = {&d_reduction_28_longOutput};
+D_Reduction * d_reductions_35_longOutput[] = {&d_reduction_18_longOutput};
+D_Reduction * d_reductions_36_longOutput[] = {&d_reduction_37_longOutput};
+unsigned char d_goto_valid_37_longOutput[] = {
+0x0,0x20,0x0,0x0,0x0,0x0};
+D_Reduction * d_reductions_37_longOutput[] = {&d_reduction_22_longOutput};
+unsigned char d_goto_valid_38_longOutput[] = {
+0x0,0x0,0x1,0x0,0x0,0x0};
+D_Reduction * d_reductions_38_longOutput[] = {&d_reduction_26_longOutput};
+unsigned char d_goto_valid_39_longOutput[] = {
+0x0,0x40,0x0,0x80,0x1,0x0};
+unsigned char d_goto_valid_40_longOutput[] = {
+0x0,0x0,0x2,0x80,0x1,0x0};
+unsigned char d_goto_valid_41_longOutput[] = {
+0x0,0x2,0x20,0x0,0x0,0x4};
+D_Reduction * d_reductions_42_longOutput[] = {&d_reduction_20_longOutput};
+D_Reduction * d_reductions_43_longOutput[] = {&d_reduction_21_longOutput};
+unsigned char d_goto_valid_44_longOutput[] = {
+0x0,0x4,0x20,0x0,0x0,0x4};
+D_Reduction * d_reductions_45_longOutput[] = {&d_reduction_24_longOutput};
+D_Reduction * d_reductions_46_longOutput[] = {&d_reduction_25_longOutput};
+D_Reduction * d_reductions_47_longOutput[] = {&d_reduction_23_longOutput};
+D_Reduction * d_reductions_48_longOutput[] = {&d_reduction_27_longOutput};
+unsigned short d_gotos_longOutput[97] = {
+5,6,7,8,13,14,15,16,19,21,9,10,17,8,11,23,
+37,12,25,40,9,10,32,41,11,3,22,12,20,28,29,0,
+4,24,33,3,0,26,0,35,39,38,4,30,44,18,48,18,
+27,18,36,36,18,33,47,31,18,0,33,34,0,42,43,0,
+49,0,0,0,45,46,0,31,31,0,31,36,0,0,0,31,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+31};
 
-D_ErrorRecoveryHint d_error_recovery_hints_0_longOutput[] = {{0, 9, "}"}};
-D_ErrorRecoveryHint d_error_recovery_hints_2_longOutput[] = {{1, 9, "}"}};
-D_ErrorRecoveryHint d_error_recovery_hints_3_longOutput[] = {{1, 12, "}"}};
-D_ErrorRecoveryHint d_error_recovery_hints_12_longOutput[] = {{2, 9, "}"}};
-D_ErrorRecoveryHint d_error_recovery_hints_13_longOutput[] = {{2, 12, "}"}};
-D_ErrorRecoveryHint d_error_recovery_hints_23_longOutput[] = {{3, 9, "}"}};
-D_ErrorRecoveryHint d_error_recovery_hints_24_longOutput[] = {{3, 12, "}"}};
-D_ErrorRecoveryHint d_error_recovery_hints_27_longOutput[] = {{4, 9, "}"}};
-D_ErrorRecoveryHint d_error_recovery_hints_29_longOutput[] = {{4, 12, "}"}};
-D_ErrorRecoveryHint d_error_recovery_hints_31_longOutput[] = {{5, 9, "}"}};
-D_ErrorRecoveryHint d_error_recovery_hints_32_longOutput[] = {{5, 12, "}"}};
-D_ErrorRecoveryHint d_error_recovery_hints_34_longOutput[] = {{6, 9, "}"}};
-D_ErrorRecoveryHint d_error_recovery_hints_37_longOutput[] = {{6, 12, "}"}};
+D_ErrorRecoveryHint d_error_recovery_hints_0_longOutput[] = {{0, 12, "}"}};
+D_ErrorRecoveryHint d_error_recovery_hints_2_longOutput[] = {{1, 12, "}"}};
+D_ErrorRecoveryHint d_error_recovery_hints_3_longOutput[] = {{1, 15, "}"}};
+D_ErrorRecoveryHint d_error_recovery_hints_14_longOutput[] = {{2, 12, "}"}};
+D_ErrorRecoveryHint d_error_recovery_hints_15_longOutput[] = {{2, 15, "}"}};
+D_ErrorRecoveryHint d_error_recovery_hints_29_longOutput[] = {{3, 12, "}"}};
+D_ErrorRecoveryHint d_error_recovery_hints_33_longOutput[] = {{3, 15, "}"}};
+D_ErrorRecoveryHint d_error_recovery_hints_37_longOutput[] = {{4, 12, "}"}};
+D_ErrorRecoveryHint d_error_recovery_hints_38_longOutput[] = {{4, 15, "}"}};
+D_ErrorRecoveryHint d_error_recovery_hints_39_longOutput[] = {{5, 12, "}"}};
+D_ErrorRecoveryHint d_error_recovery_hints_40_longOutput[] = {{5, 15, "}"}};
+D_ErrorRecoveryHint d_error_recovery_hints_42_longOutput[] = {{6, 12, "}"}};
+D_ErrorRecoveryHint d_error_recovery_hints_45_longOutput[] = {{6, 15, "}"}};
 
 D_State d_states_longOutput[] = {
 {d_goto_valid_0_longOutput, 1, {0, NULL}, {0, NULL}, {1, d_error_recovery_hints_0_longOutput}, 1, NULL, (void*)d_scanner_0_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_0_longOutput, d_accepts_diff_0_longOutput, -1},
-{d_goto_valid_1_longOutput, 14, {1, d_reductions_1_longOutput}, {1, d_right_epsilon_hints_1_longOutput}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
-{d_goto_valid_2_longOutput, 17, {0, NULL}, {0, NULL}, {1, d_error_recovery_hints_2_longOutput}, 1, NULL, (void*)d_scanner_2_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_2_longOutput, d_accepts_diff_2_longOutput, -1},
-{d_goto_valid_3_longOutput, 16, {0, NULL}, {0, NULL}, {1, d_error_recovery_hints_3_longOutput}, 1, NULL, (void*)d_scanner_2_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_2_longOutput, d_accepts_diff_2_longOutput, -1},
+{d_goto_valid_1_longOutput, 18, {1, d_reductions_1_longOutput}, {1, d_right_epsilon_hints_1_longOutput}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
+{d_goto_valid_2_longOutput, 21, {0, NULL}, {0, NULL}, {1, d_error_recovery_hints_2_longOutput}, 1, NULL, (void*)d_scanner_2_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_2_longOutput, d_accepts_diff_2_longOutput, -1},
+{d_goto_valid_3_longOutput, 20, {0, NULL}, {0, NULL}, {1, d_error_recovery_hints_3_longOutput}, 1, NULL, (void*)d_scanner_2_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_2_longOutput, d_accepts_diff_2_longOutput, -1},
 {NULL, -2147483647, {0, NULL}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 1, D_SCAN_ALL, NULL, NULL, -1},
-{d_goto_valid_5_longOutput, -6, {1, d_reductions_5_longOutput}, {0, NULL}, {1, d_error_recovery_hints_0_longOutput}, 1, NULL, (void*)d_scanner_0_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_0_longOutput, d_accepts_diff_0_longOutput, -1},
+{d_goto_valid_5_longOutput, -9, {1, d_reductions_5_longOutput}, {0, NULL}, {1, d_error_recovery_hints_0_longOutput}, 1, NULL, (void*)d_scanner_0_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_0_longOutput, d_accepts_diff_0_longOutput, -1},
 {NULL, -2147483647, {1, d_reductions_6_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
 {NULL, -2147483647, {1, d_reductions_7_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
-{d_goto_valid_8_longOutput, -6, {1, d_reductions_8_longOutput}, {1, d_right_epsilon_hints_8_longOutput}, {0, NULL}, 1, NULL, (void*)d_scanner_8_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_8_longOutput, d_accepts_diff_8_longOutput, -1},
-{d_goto_valid_9_longOutput, -8, {1, d_reductions_9_longOutput}, {1, d_right_epsilon_hints_9_longOutput}, {0, NULL}, 1, NULL, (void*)d_scanner_8_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_8_longOutput, d_accepts_diff_8_longOutput, -1},
+{d_goto_valid_8_longOutput, -3, {1, d_reductions_8_longOutput}, {1, d_right_epsilon_hints_8_longOutput}, {0, NULL}, 1, NULL, (void*)d_scanner_8_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_8_longOutput, d_accepts_diff_8_longOutput, -1},
+{d_goto_valid_9_longOutput, -1, {1, d_reductions_9_longOutput}, {1, d_right_epsilon_hints_9_longOutput}, {0, NULL}, 1, NULL, (void*)d_scanner_8_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_8_longOutput, d_accepts_diff_8_longOutput, -1},
+{d_goto_valid_10_longOutput, -8, {1, d_reductions_10_longOutput}, {1, d_right_epsilon_hints_10_longOutput}, {0, NULL}, 1, NULL, (void*)d_scanner_8_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_8_longOutput, d_accepts_diff_8_longOutput, -1},
+{d_goto_valid_11_longOutput, -12, {1, d_reductions_11_longOutput}, {1, d_right_epsilon_hints_11_longOutput}, {0, NULL}, 1, NULL, (void*)d_scanner_8_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_8_longOutput, d_accepts_diff_8_longOutput, -1},
 {NULL, -2147483647, {0, NULL}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 1, D_SCAN_ALL, NULL, NULL, -1},
-{d_goto_valid_11_longOutput, 4, {1, d_reductions_11_longOutput}, {0, NULL}, {0, NULL}, 1, NULL, (void*)d_scanner_11_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_11_longOutput, d_accepts_diff_11_longOutput, -1},
-{d_goto_valid_12_longOutput, 10, {0, NULL}, {0, NULL}, {1, d_error_recovery_hints_12_longOutput}, 1, NULL, (void*)d_scanner_12_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_12_longOutput, d_accepts_diff_12_longOutput, -1},
-{d_goto_valid_13_longOutput, 5, {0, NULL}, {0, NULL}, {1, d_error_recovery_hints_13_longOutput}, 1, NULL, (void*)d_scanner_12_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_12_longOutput, d_accepts_diff_12_longOutput, -1},
-{NULL, -2147483647, {1, d_reductions_14_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
-{d_goto_valid_15_longOutput, 17, {0, NULL}, {0, NULL}, {0, NULL}, 1, NULL, (void*)d_scanner_15_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_15_longOutput, d_accepts_diff_15_longOutput, -1},
+{d_goto_valid_13_longOutput, -5, {1, d_reductions_13_longOutput}, {0, NULL}, {0, NULL}, 1, NULL, (void*)d_scanner_13_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_13_longOutput, d_accepts_diff_13_longOutput, -1},
+{d_goto_valid_14_longOutput, -13, {0, NULL}, {0, NULL}, {1, d_error_recovery_hints_14_longOutput}, 1, NULL, (void*)d_scanner_14_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_14_longOutput, d_accepts_diff_14_longOutput, -1},
+{d_goto_valid_15_longOutput, -29, {0, NULL}, {0, NULL}, {1, d_error_recovery_hints_15_longOutput}, 1, NULL, (void*)d_scanner_14_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_14_longOutput, d_accepts_diff_14_longOutput, -1},
 {NULL, -2147483647, {1, d_reductions_16_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
-{NULL, -2147483647, {1, d_reductions_17_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
+{d_goto_valid_17_longOutput, 29, {0, NULL}, {0, NULL}, {0, NULL}, 1, NULL, (void*)d_scanner_17_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_17_longOutput, d_accepts_diff_17_longOutput, -1},
 {NULL, -2147483647, {1, d_reductions_18_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
 {NULL, -2147483647, {1, d_reductions_19_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
 {NULL, -2147483647, {1, d_reductions_20_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
 {NULL, -2147483647, {1, d_reductions_21_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
 {NULL, -2147483647, {1, d_reductions_22_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
-{d_goto_valid_23_longOutput, -17, {0, NULL}, {0, NULL}, {1, d_error_recovery_hints_23_longOutput}, 1, NULL, (void*)d_scanner_23_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_23_longOutput, d_accepts_diff_23_longOutput, -1},
-{d_goto_valid_24_longOutput, -22, {0, NULL}, {0, NULL}, {1, d_error_recovery_hints_24_longOutput}, 1, NULL, (void*)d_scanner_23_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_23_longOutput, d_accepts_diff_23_longOutput, -1},
+{NULL, -2147483647, {1, d_reductions_23_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
+{NULL, -2147483647, {1, d_reductions_24_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
 {NULL, -2147483647, {1, d_reductions_25_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
 {NULL, -2147483647, {1, d_reductions_26_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
-{d_goto_valid_27_longOutput, -12, {1, d_reductions_27_longOutput}, {0, NULL}, {1, d_error_recovery_hints_27_longOutput}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
+{NULL, -2147483647, {1, d_reductions_27_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
 {NULL, -2147483647, {1, d_reductions_28_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
-{d_goto_valid_29_longOutput, -10, {1, d_reductions_29_longOutput}, {0, NULL}, {1, d_error_recovery_hints_29_longOutput}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
+{d_goto_valid_29_longOutput, -32, {0, NULL}, {0, NULL}, {1, d_error_recovery_hints_29_longOutput}, 1, NULL, (void*)d_scanner_29_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_29_longOutput, d_accepts_diff_29_longOutput, -1},
 {NULL, -2147483647, {1, d_reductions_30_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
-{d_goto_valid_31_longOutput, -24, {0, NULL}, {0, NULL}, {1, d_error_recovery_hints_31_longOutput}, 1, NULL, (void*)d_scanner_31_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_31_longOutput, d_accepts_diff_31_longOutput, -1},
-{d_goto_valid_32_longOutput, -11, {0, NULL}, {0, NULL}, {1, d_error_recovery_hints_32_longOutput}, 1, NULL, (void*)d_scanner_31_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_31_longOutput, d_accepts_diff_31_longOutput, -1},
-{d_goto_valid_33_longOutput, -31, {0, NULL}, {0, NULL}, {0, NULL}, 1, NULL, (void*)d_scanner_23_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_23_longOutput, d_accepts_diff_23_longOutput, -1},
-{NULL, -2147483647, {1, d_reductions_34_longOutput}, {0, NULL}, {1, d_error_recovery_hints_34_longOutput}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
+{NULL, -2147483647, {1, d_reductions_31_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
+{NULL, -2147483647, {1, d_reductions_32_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
+{d_goto_valid_33_longOutput, -30, {0, NULL}, {0, NULL}, {1, d_error_recovery_hints_33_longOutput}, 1, NULL, (void*)d_scanner_29_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_29_longOutput, d_accepts_diff_29_longOutput, -1},
+{NULL, -2147483647, {1, d_reductions_34_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
 {NULL, -2147483647, {1, d_reductions_35_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
-{d_goto_valid_36_longOutput, -35, {0, NULL}, {0, NULL}, {0, NULL}, 1, NULL, (void*)d_scanner_23_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_23_longOutput, d_accepts_diff_23_longOutput, -1},
-{NULL, -2147483647, {1, d_reductions_37_longOutput}, {0, NULL}, {1, d_error_recovery_hints_37_longOutput}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
-{NULL, -2147483647, {1, d_reductions_38_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
-{NULL, -2147483647, {1, d_reductions_39_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
-{NULL, -2147483647, {1, d_reductions_40_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1}
+{NULL, -2147483647, {1, d_reductions_36_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
+{d_goto_valid_37_longOutput, -6, {1, d_reductions_37_longOutput}, {0, NULL}, {1, d_error_recovery_hints_37_longOutput}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
+{d_goto_valid_38_longOutput, -7, {1, d_reductions_38_longOutput}, {0, NULL}, {1, d_error_recovery_hints_38_longOutput}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
+{d_goto_valid_39_longOutput, -30, {0, NULL}, {0, NULL}, {1, d_error_recovery_hints_39_longOutput}, 1, NULL, (void*)d_scanner_39_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_39_longOutput, d_accepts_diff_39_longOutput, -1},
+{d_goto_valid_40_longOutput, -37, {0, NULL}, {0, NULL}, {1, d_error_recovery_hints_40_longOutput}, 1, NULL, (void*)d_scanner_39_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_39_longOutput, d_accepts_diff_39_longOutput, -1},
+{d_goto_valid_41_longOutput, -37, {0, NULL}, {0, NULL}, {0, NULL}, 1, NULL, (void*)d_scanner_29_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_29_longOutput, d_accepts_diff_29_longOutput, -1},
+{NULL, -2147483647, {1, d_reductions_42_longOutput}, {0, NULL}, {1, d_error_recovery_hints_42_longOutput}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
+{NULL, -2147483647, {1, d_reductions_43_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
+{d_goto_valid_44_longOutput, -54, {0, NULL}, {0, NULL}, {0, NULL}, 1, NULL, (void*)d_scanner_29_longOutput, sizeof(unsigned char) , 0, D_SCAN_ALL, (void*)d_transition_29_longOutput, d_accepts_diff_29_longOutput, -1},
+{NULL, -2147483647, {1, d_reductions_45_longOutput}, {0, NULL}, {1, d_error_recovery_hints_45_longOutput}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
+{NULL, -2147483647, {1, d_reductions_46_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
+{NULL, -2147483647, {1, d_reductions_47_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1},
+{NULL, -2147483647, {1, d_reductions_48_longOutput}, {0, NULL}, {0, NULL}, 0, NULL, NULL, sizeof(unsigned char) , 0, D_SCAN_ALL, NULL, NULL, -1}
 };
 
 D_Symbol d_symbols_longOutput[] = {
@@ -575,23 +620,29 @@ D_Symbol d_symbols_longOutput[] = {
 {D_SYMBOL_INTERNAL, "statement_list__3", 17, -1},
 {D_SYMBOL_EBNF, "statement_list__2", 17, -1},
 {D_SYMBOL_NTERM, "statement", 9, -1},
+{D_SYMBOL_INTERNAL, "statement__8", 12, -1},
+{D_SYMBOL_INTERNAL, "statement__7", 12, -1},
 {D_SYMBOL_INTERNAL, "statement__6", 12, -1},
 {D_SYMBOL_INTERNAL, "statement__5", 12, -1},
 {D_SYMBOL_NTERM, "outputItem", 10, -1},
 {D_SYMBOL_NTERM, "tableItem", 9, -1},
+{D_SYMBOL_NTERM, "outputLine1", 11, -1},
 {D_SYMBOL_NTERM, "outputLine", 10, -1},
-{D_SYMBOL_INTERNAL, "outputLine__11", 14, -1},
-{D_SYMBOL_EBNF, "outputLine__10", 14, -1},
+{D_SYMBOL_INTERNAL, "outputLine__14", 14, -1},
+{D_SYMBOL_EBNF, "outputLine__13", 14, -1},
 {D_SYMBOL_NTERM, "tableLine", 9, -1},
-{D_SYMBOL_INTERNAL, "tableLine__14", 13, -1},
-{D_SYMBOL_EBNF, "tableLine__13", 13, -1},
+{D_SYMBOL_INTERNAL, "tableLine__17", 13, -1},
+{D_SYMBOL_EBNF, "tableLine__16", 13, -1},
+{D_SYMBOL_NTERM, "tableLine1", 10, -1},
 {D_SYMBOL_NTERM, "float1", 6, -1},
 {D_SYMBOL_NTERM, "float2", 6, -1},
 {D_SYMBOL_NTERM, "identifier", 10, -1},
 {D_SYMBOL_NTERM, "whitespace", 10, 1},
-{D_SYMBOL_INTERNAL, "whitespace__20", 14, -1},
-{D_SYMBOL_EBNF, "whitespace__19", 14, -1},
+{D_SYMBOL_INTERNAL, "whitespace__24", 14, -1},
+{D_SYMBOL_EBNF, "whitespace__23", 14, -1},
 {D_SYMBOL_NTERM, "singleLineComment", 17, -1},
+{D_SYMBOL_STRING, "output", 6, -1},
+{D_SYMBOL_STRING, "=", 1, -1},
 {D_SYMBOL_STRING, "output", 6, -1},
 {D_SYMBOL_STRING, "=", 1, -1},
 {D_SYMBOL_STRING, "{", 1, -1},
@@ -602,6 +653,8 @@ D_Symbol d_symbols_longOutput[] = {
 {D_SYMBOL_STRING, "{", 1, -1},
 {D_SYMBOL_STRING, ",", 1, -1},
 {D_SYMBOL_STRING, "}", 1, -1},
+{D_SYMBOL_STRING, "table", 5, -1},
+{D_SYMBOL_STRING, "=", 1, -1},
 {D_SYMBOL_REGEX, "([0-9]+.[0-9]*|[0-9]*.[0-9]+)([eE][\\\\-\\\\+]?[0-9]+)?", 55, -1},
 {D_SYMBOL_REGEX, "[0-9]+[eE][\\\\-\\\\+]?[0-9]+", 29, -1},
 {D_SYMBOL_REGEX, "[a-zA-Z][a-zA-Z0-9_]*", 21, -1},
@@ -611,4 +664,4 @@ D_Symbol d_symbols_longOutput[] = {
 };
 
 D_ParserTables parser_tables_longOutput = {
-41, d_states_longOutput, d_gotos_longOutput, 1, 38, d_symbols_longOutput, NULL, 0, NULL, 0};
+49, d_states_longOutput, d_gotos_longOutput, 1, 46, d_symbols_longOutput, NULL, 0, NULL, 0};

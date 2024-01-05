@@ -50,11 +50,17 @@ as.list.monolix2rxLongOut <- function(x, ...) {
 #' @export
 as.character.monolix2rxLongOut <- function(x, ...) {
   .ret <- character(0)
-  if (length(x$output) > 0L) {
+  if (length(x$output) == 1L) {
+    .ret <- c(.ret, paste0("output = ", x$output))
+  }
+  if (length(x$output) > 1L) {
     .ret <- c(.ret, paste0("output = {", paste(x$output, collapse=", "), "}"))
   }
-  if (length(x$table) > 0L) {
+  if (length(x$table) > 1L) {
     .ret <- c(.ret, paste0("table = {", paste(x$table, collapse=", "), "}"))
+  }
+  if (length(x$table) == 1L) {
+    .ret <- c(.ret, paste0("table = ", x$table))
   }
   .ret
 }

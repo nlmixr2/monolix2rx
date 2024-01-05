@@ -9,4 +9,11 @@ table  = {Ap, T12}")
   class(.ret2) <- "monolix2rxLongOut"
   expect_equal(.ret, .ret2)
 
+  .ret <- .longOut("output = Conc
+table  = Ap")
+
+  expect_equal(as.character(.ret),
+               c("output = Conc",
+                 "table = Ap" ))
+
 })
