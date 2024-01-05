@@ -4,13 +4,23 @@
 \alias{monolix2rx}
 \title{Translate a monolix file to rxode2}
 \usage{
-monolix2rx(mlxtran, update = TRUE, envir = parent.frame())
+monolix2rx(
+  mlxtran,
+  update = TRUE,
+  thetaMatType = c("sa", "lin"),
+  envir = parent.frame()
+)
 }
 \arguments{
 \item{mlxtran}{file name for mlxtran to translate to rxode2}
 
 \item{update}{is a boolean that represents if the final parameter
 estimates should be used for the translation (when present)}
+
+\item{thetaMatType}{This lists the preferred source for \code{thetaMat}
+covariance matrix.  By default it is \code{sa} for simulated
+annealing, though you could use \code{lin} for linearized covariance
+calculation. If only one is present, then use whatever is present}
 
 \item{envir}{represents the environment used for evaluating the
 corresponding rxode2 function}

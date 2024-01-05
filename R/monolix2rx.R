@@ -5,6 +5,10 @@
 #' @param mlxtran file name for mlxtran to translate to rxode2
 #' @param update is a boolean that represents if the final parameter
 #'   estimates should be used for the translation (when present)
+#' @param thetaMatType This lists the preferred source for `thetaMat`
+#'   covariance matrix.  By default it is `sa` for simulated
+#'   annealing, though you could use `lin` for linearized covariance
+#'   calculation. If only one is present, then use whatever is present
 #' @param envir represents the environment used for evaluating the
 #'   corresponding rxode2 function
 #' @return rxode2 model
@@ -16,34 +20,63 @@
 #' @importFrom stats setNames
 #' @eval .monolix2rxBuildGram()
 #' @examples
-monolix2rx <- function(mlxtran, update=TRUE, envir=parent.frame()){
+monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"), envir=parent.frame()){
   if (!requireNamespace("rxode2", quietly=FALSE) ||
         !requireNamespace("lotri", quietly=FALSE)) {
     stop("'monolix2rx' requires 'rxode2' and 'lotri'",
          call.=FALSE)
   }
-  .ret <- mlxtran(mlxtran, equation=TRUE, update=update)
-  .equation <- .ret$MODEL$LONGITUDINAL$EQUATION$rx # includes PK: macro
+  thetaMatType <- match.arg(thetaMatType)
+  .mlxtran <- mlxtran(mlxtran, equation=TRUE, update=update)
+  .equation <- .mlxtran$MODEL$LONGITUDINAL$EQUATION$rx # includes PK: macro
   .model <- c("model({",
-              .ret$MODEL$INDIVIDUAL$DEFINITION$rx,
+              .mlxtran$MODEL$INDIVIDUAL$DEFINITION$rx,
               .equation,
-              vapply(seq_along(.ret$MODEL$LONGITUDINAL$DEFINITION$endpoint),
+              vapply(seq_along(.mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint),
                      function(i) {
-                       .handleSingleEndpoint(.ret$MODEL$LONGITUDINAL$DEFINITION$endpoint[[i]])
+                       .handleSingleEndpoint(.mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint[[i]])
                      }, character(1), USE.NAMES = FALSE),
               "})")
   .model <- str2lang(paste0(.model, collapse="\n"))
-  .ini <- .def2ini(v$MODEL$INDIVIDUAL$DEFINITION,
-                   v$PARAMETER$PARAMETER,
-                   v$MODEL$LONGITUDINAL$DEFINITION)
+  .ini <- .def2ini(.mlxtran$MODEL$INDIVIDUAL$DEFINITION,
+                   .mlxtran$PARAMETER$PARAMETER,
+                   .mlxtran$MODEL$LONGITUDINAL$DEFINITION)
   .ret <- function() {}
   body(.ret) <- as.call(c(list(quote(`{`)), .ini, .model))
   .ret <- eval(.ret, envir=envir)
   ini <- rxode2::ini
   model <- rxode2::model
   lotri <- lotri::lotri
-  .ui <- .ret()
-  .ui
+  .ui <- try(.ret(), silent=TRUE)
+  if (inherits(.ui, "try-error")) {
+    print(.ret)
+    .ret()
+  }
+  .ui <- rxode2::rxUiDecompress(.ui)
+  .dfObs <- attr(.mlxtran, "dfObs")
+  if (.dfObs > 0L) assign("dfObs", as.double(.dfObs), envir=.ui$meta)
+  .dfSub <- attr(.mlxtran, "dfSub")
+  if (.dfSub > 0L) assign("dfSub", as.double(.dfSub), envir=.ui$meta)
+  if (thetaMatType == "sa") {
+    .thetaMatType <- c("covSaUntransformed", "covLinUntransformed")
+  } else {
+    .thetaMatType <- c("covLinUntransformed", "covSaUntransformed")
+  }
+  for (.tt in .thetaMatType) {
+    if (inherits(attr(.mlxtran, .tt), "matrix")) {
+      .thetaMat <- names(.ui$theta)
+      .thetaMat <- attr(.mlxtran, .tt)[.thetaMat, .thetaMat]
+      .thetaMatType <- .tt
+      break
+    }
+  }
+  if (length(.thetaMatType) == 1L) {
+    assign("thetaMat", .thetaMat, envir=.ui$meta)
+  }
+  if (!is.null(attr(.mlxtran, "desc"))) {
+    assign("description", attr(.mlxtran, "desc"), envir=.ui$meta)
+  }
+  rxode2::rxUiCompress(.ui)
 }
 #' Handle a single endpoint and convert to rxode2
 #'

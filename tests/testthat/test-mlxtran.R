@@ -336,9 +336,17 @@ test_that("mlxtran initial list", {
 
     unlink("pk.turnover.emax3-monolix.txt")
 
+    v7$PARAMETER$PARAMETER <- v$PARAMETER$PARAMETER
+
     if (requireNamespace("rxode2", quietly=TRUE)) {
-      rx <- monolix2rx(v2)
+      expect_error(monolix2rx(v6, update=FALSE)) # emax out of range in updated parameters
+      rx <- monolix2rx(v7, update=FALSE)
       expect_true(inherits(rx, "rxUi"))
+      expect_true(inherits(rx$thetaMat, "matrix"))
+      expect_equal(rx$dfSub, 45)
+      expect_equal(rx$dfObs, 176)
+      expect_equal(rx$description,
+                   "model translated from `babelmixr2` and `nlmixr2` function pk.turnover.emax3 to pk.turnover.emax3-monolix.txt")
     }
 
   })
