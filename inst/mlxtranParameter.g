@@ -2,7 +2,7 @@
 statement_list :
         (statement)+ ;
 
-methodOp: 'method' '=' ('MLE' | 'FIXED' | 'fixed' | 'Fixed' | 'mle' | 'Mle');
+methodOp: 'method' '=' ('MLE' | 'FIXED' | 'fixed' | 'Fixed' | 'mle' | 'Mle' | 'MAP' | 'Map' | 'map');
 
 estLineMlx: identifier '=' '{' 'value' '=' constant (',' methodOp)? '}';
 estLine2: identifier '=' constant;
