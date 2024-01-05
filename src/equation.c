@@ -158,13 +158,13 @@ int equation_identifier_or_constant(char *name,  D_ParseNode *pn) {
     } else if (!strcmp("t", v)) {
       sAppendN(&curLine, "time", 4);
       return 1;
-    } else if (!strcmp("t_0", v) || !strcmp("t0", v)) {
-      sClear(&sbTransErr);
-      sAppend(&sbTransErr, "'t_0' or 't0' Monolix declaration not supported in translation");
-      updateSyntaxCol();
-      trans_syntax_error_report_fn0(sbTransErr.s);
-      finalizeSyntaxError();
-      return 1;
+    /* } else if (!strcmp("t_0", v) || !strcmp("t0", v)) { */
+    /*   sClear(&sbTransErr); */
+    /*   sAppend(&sbTransErr, "'t_0' or 't0' Monolix declaration not supported in translation"); */
+    /*   updateSyntaxCol(); */
+    /*   trans_syntax_error_report_fn0(sbTransErr.s); */
+    /*   finalizeSyntaxError(); */
+    /*   return 1; */
     }
     // ddt_x becomes d/dt(x)
     char *v2 = v;
@@ -290,6 +290,21 @@ void wprint_parsetree_equation(D_ParserTables pt, D_ParseNode *pn, int depth, pr
       if (i == 0 && !strcmp("assignment", name)) {
         const char *none="";
         curDdt=rc_dup_str(none, none);
+        D_ParseNode *xpn = d_get_child(pn, 0);
+        char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+        if (!strcmp(v, "t_0") || !strcmp(v, "t0")) {
+          xpn = d_get_child(pn, 2);
+          v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+          char *v2 = v;
+          while (v2[0] == ' ' || v2[0] == '0' || v2[0] == '.' || v2[0] == '\t' || v2[0] == '\n') {
+            v2++;
+          }
+          if (v2[0] != 0) {
+            Rf_warning("%s 't_0' or 't0' are assigned to a non-zero value (which is unsupported by rxode2), ignoring",
+                       v2);
+          }
+          return;
+        }
         gIsAssignmentStart=1;
       } else if (!strcmp("assignment", name)) {
         gIsAssignmentStart=0;

@@ -85,9 +85,11 @@ ddt_dx = -x-dx", pk)
 
   expect_error(.equation("a=inftDose", pk), "inftDose")
 
-  expect_error(.equation("t0=0", pk), "t0")
+  expect_warning(.equation("t0=0", pk), NA)
+  expect_warning(.equation("t0=10", pk))
 
-  expect_error(.equation("t_0=0", pk), "t0")
+  expect_warning(.equation("t_0=0", pk), NA)
+  expect_warning(.equation("t_0=10", pk))
 
   .ret <- .equation("a=invlogit(b)", pk)
   expect_equal(.ret$rx, "a <- expit(b)")
