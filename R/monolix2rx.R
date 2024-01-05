@@ -73,7 +73,8 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"), envir=
   if (length(.thetaMatType) == 1L) {
     assign("thetaMat", .thetaMat, envir=.ui$meta)
   }
-  if (!is.null(attr(.mlxtran, "desc"))) {
+  if (!is.null(attr(.mlxtran, "desc")) &&
+        attr(.mlxtran, "desc") != "") {
     assign("description", attr(.mlxtran, "desc"), envir=.ui$meta)
   }
   rxode2::rxUiCompress(.ui)

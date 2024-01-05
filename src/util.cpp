@@ -49,11 +49,11 @@ extern "C" SEXP monolix2rxSetDistTypicalEst(const char *var, int isMean) {
   END_RCPP
 }
 
-extern "C" SEXP monolix2rxSetDistTypicalFixed(const char *var, int isMean) {
+extern "C" SEXP monolix2rxDoubleI(const char *var, int isMean, const char *fn) {
   BEGIN_RCPP
   Environment monolix2rxNs = loadNamespace("monolix2rx");
-  Function setTypicalFixed(".setTypicalFixed", monolix2rxNs);
-  setTypicalFixed(var, isMean);
+  Function fun(fn, monolix2rxNs);
+  fun(var, isMean);
   return R_NilValue;
   END_RCPP
 }

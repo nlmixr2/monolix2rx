@@ -160,7 +160,7 @@ int intDef_handle_typical_def(const char* name,  D_ParseNode *pn) {
       return 1;
     }
     // fixed value
-    monolix2rxSetDistTypicalFixed(v, mean);
+    monolix2rxDoubleI(v, mean, ".setTypicalFixed");
     return 1;
   }
   return 0;

@@ -2,10 +2,13 @@
 statement_list :
         (statement)+ ;
 
-datId: identifier;
+char_t1: "\'([^\'\\]|\\[^])*\'";
+char_t2: "\"([^\"\\]|\\[^])*\"";
+
+datId: identifier | char_t1 | char_t2;
 dataLine: 'data' '=' '{' datId (',' datId)* '}';
 dataLine1: 'data' '='  datId;
-modelId: identifier;
+modelId: identifier | char_t1 | char_t2;
 modelLine: 'model' '=' '{' modelId (',' modelId)* '}';
 modelLine1: 'model' '=' modelId;
 

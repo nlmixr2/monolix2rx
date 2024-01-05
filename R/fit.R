@@ -1,6 +1,8 @@
 .fitIni <- function() {
   .monolix2rx$fitDat <- character(0)
+  .monolix2rx$fitQuote <- logical(0)
   .monolix2rx$modelDat <- character(0)
+  .monolix2rx$modelQuote <- logical(0)
 }
 
 .fit <- function(text) {
@@ -10,23 +12,38 @@
     stop("number of model and data endpoints in <FIT> need to be the same",
          call.=FALSE)
   }
-  .ret <- data.frame(data=.monolix2rx$fitDat, model=.monolix2rx$modelDat)
+  .ret <- data.frame(data=.monolix2rx$fitDat, dataQuote=.monolix2rx$fitQuote,
+                     model=.monolix2rx$modelDat, modelQuote=.monolix2rx$modelQuote)
   class(.ret) <- c("monolix2rxFit", class(.ret))
   .ret
 }
 
-.fitDatId <- function(datId) {
+.fitDatId <- function(datId, quote) {
   .monolix2rx$fitDat <- c(.monolix2rx$fitDat, datId)
+  .monolix2rx$fitQuote <- c(.monolix2rx$fitQuote, as.logical(quote))
 }
 
-.fitModelId <- function(modelId) {
+.fitModelId <- function(modelId, quote) {
   .monolix2rx$modelDat <- c(.monolix2rx$modelDat, modelId)
+  .monolix2rx$modelQuote <- c(.monolix2rx$modelQuote, as.logical(quote))
 }
-
 #' @export
 as.character.monolix2rxFit <- function(x, ...) {
-  c(paste0("data = {", paste(x$data, collapse=", "), "}"),
-    paste0("model = {", paste(x$model, collapse=", "), "}"))
+  c(paste0("data = {", paste(vapply(seq_along(x$data),
+                                    function(i) {
+                                      if (x$dataQuote[i]) {
+                                        return(paste0("'",x$data[i], "'"))
+                                      }
+                                      x$data[i]
+                                    }, character(1), USE.NAMES = FALSE),
+                             collapse=", "), "}"),
+    paste0("model = {", paste(vapply(seq_along(x$model),
+                                     function(i) {
+                                       if (x$modelQuote[i]) {
+                                         return(paste0("'",x$model[i], "'"))
+                                       }
+                                       x$model[i]
+                                     }, character(1), USE.NAMES = FALSE), collapse=", "), "}"))
 }
 
 #' @export

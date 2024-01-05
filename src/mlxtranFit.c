@@ -77,7 +77,18 @@ int fit_process_datId(const char *name, D_ParseNode *pn) {
   if (!strcmp("datId", name)) {
     D_ParseNode *xpn = d_get_child(pn, 0);
     char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
-    monolix2rxSingle(v, ".fitDatId");
+    int quote = 0;
+    if (v[0] == '\'' || v[0] == '"') {
+      quote=1;
+      v++;
+      char *v2 = v;
+      while(v2[0] != 0) {
+        v2++;
+      }
+      v2--;
+      v2[0] =0;
+    }
+    monolix2rxDoubleI(v, quote, ".fitDatId");
     return 1;
   }
   return 0;
@@ -87,7 +98,18 @@ int fit_process_modelId(const char *name, D_ParseNode *pn) {
   if (!strcmp("modelId", name)) {
     D_ParseNode *xpn = d_get_child(pn, 0);
     char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
-    monolix2rxSingle(v, ".fitModelId");
+    int quote = 0;
+    if (v[0] == '\'' || v[0] == '"') {
+      quote=1;
+      v++;
+      char *v2 = v;
+      while(v2[0] != 0) {
+        v2++;
+      }
+      v2--;
+      v2[0] =0;
+    }
+    monolix2rxDoubleI(v, quote, ".fitModelId");
     return 1;
   }
   return 0;

@@ -19,6 +19,7 @@ SEXP monolix2rxSetDistTypicalFixed(const char *var, int isMean);
 SEXP monolix2rxPushCoefList(void);
 SEXP monolix2rxSingle(const char *var, const char *fn);
 SEXP monolix2rxDouble(const char *var, const char *v2, const char *fn);
+SEXP monolix2rxDoubleI(const char *var, int isMean, const char *fn);
 SEXP monolix2rxTriple(const char *var, const char *v2, const char *v3, const char *fn);
 
 #define monolix2rxAddVar(v) monolix2rxSingle(v, ".addVar")
