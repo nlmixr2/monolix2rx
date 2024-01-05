@@ -102,3 +102,8 @@ Sex = {type=categorical, categories={M, F}}")
 
 
 })
+
+test_that("single name=y works", {
+  expect_equal(as.character(.content("y={use=observation, name=y, type=continuous}")),
+               "y = {use=observation, name=y, type=continuous}")
+})

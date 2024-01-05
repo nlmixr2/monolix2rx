@@ -43,6 +43,9 @@
                yname=.monolix2rx$yname,
                name=.monolix2rx$name,
                type=.monolix2rx$type)
+  if (length(.lst$name) == 1L && length(.lst$yname) == 0) {
+    .lst$yname <- NA_character_
+  }
   if (length(.lst$yname) != length(.lst$name)) {
     stop("for 'observation' type the length of 'name' and 'yname' should match",
          call.=FALSE)
@@ -125,7 +128,7 @@ as.character.monolix2rxContent <- function(x, ...) {
       if (length(.name) == 1L) {
         .ret <- paste0(.ret,
                        ", name=", .name,
-                       ", yname='", .yname, "'",
+                       ifelse(is.na(.yname), "", paste0(", yname='", .yname, "'")),
                        ", type=", .type)
       } else {
         .ret <- paste0(.ret,
