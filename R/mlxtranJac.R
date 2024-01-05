@@ -35,9 +35,9 @@
              if (!is.null(.cur$min)) .low <- .cur$min
              if (!is.null(.cur$max)) .hi <- .cur$max
              .env$jac <- c(.env$jac, setNames(exp(-.x)*(.hi - .low)/(1 + exp(-.x))^2, .var))
-           } else if (distribution == "normal") {
+           } else if (.cur$distribution == "normal") {
              .env$jac <- c(.env$jac, setNames(1, .var))
-           } else if (distribution == "probitnormal") {
+           } else if (.cur$distribution == "probitnormal") {
              .env$jac <- c(.env$jac, setNames(0.5*sqrt(2)*exp((-1/2)*.x^2)*1.0/sqrt(pi), .var))
            }
          })

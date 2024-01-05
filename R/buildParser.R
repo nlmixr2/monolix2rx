@@ -1,3 +1,4 @@
+## nocov start
 .monolix2rxBuildGram <- function() {
   message("monolix user txt model parsing")
 
@@ -96,3 +97,4 @@
 
   invisible("")
 }
+## nocov end
