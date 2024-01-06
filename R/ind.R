@@ -138,6 +138,9 @@
   vapply(names(.cat),
          function(n) {
            .c <- .cat[[n]]
+           if (length(.c$cat) == 0L) {
+             return(paste0(n, " = {use=covariate, type=categorical}"))
+           }
            .ret <- paste0(n, " = {type=categorical, categories=")
            .q <- .c$quote
            .c <- .c$cat

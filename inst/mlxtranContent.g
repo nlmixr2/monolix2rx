@@ -15,6 +15,7 @@ nbd: decimalint;
 ssLine: identifier '=' '{' 'use' '=' 'steadystate' (',' 'nbdoses' '=' nbd)? '}';
 regressorLine: identifier '=' '{' 'use' '=' 'regressor' '}';
 contLine: identifier '=' '{' 'use' '=' 'covariate' ',' 'type' '=' 'continuous' '}';
+catLine: identifier '=' '{' 'use' '=' 'covariate' ',' 'type' '=' 'categorical' '}';
 
 ynameType: char_t1 | char_t2 | identifier;
 ynameOp1: 'yname' '='  ynameType;
@@ -54,6 +55,7 @@ statement: idLine singleLineComment?
     | ssLine singleLineComment?
     | regressorLine singleLineComment?
     | contLine singleLineComment?
+    | catLine singleLineComment?
     | catCov singleLineComment?
     | obsLine singleLineComment?
     ;

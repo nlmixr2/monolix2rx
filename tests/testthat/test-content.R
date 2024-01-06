@@ -107,3 +107,8 @@ test_that("single name=y works", {
   expect_equal(as.character(.content("y={use=observation, name=y, type=continuous}")),
                "y = {use=observation, name=y, type=continuous}")
 })
+
+test_that("{use=covariate, type=categorical} works", {
+  expect_equal(as.character(.content("sex={use=covariate,type=categorical}")),
+               "sex = {use=covariate, type=categorical}")
+})

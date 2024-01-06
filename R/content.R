@@ -35,6 +35,7 @@
 .content <- function(text) {
   .contentIni(TRUE)
   .Call(`_monolix2rx_trans_content`, text)
+  .indPushCat()
   .lst <- list(use1=.monolix2rx$use1,
                cont=.monolix2rx$contLst,
                cat=.monolix2rx$catLst2,
@@ -61,6 +62,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .contSetUse1 <- function(use1, name) {
+  .indPushCat()
   .monolix2rx$use1[use1] <- name
 }
 #' Set the steady state number of doses
@@ -79,6 +81,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .contentContCov <- function(val) {
+  .indPushCat()
   .monolix2rx$contLst <- c(.monolix2rx$contLst, val)
 }
 #' Content Yname
