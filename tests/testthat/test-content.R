@@ -32,17 +32,19 @@ Sex = {type=categorical, categories={M, F}}")
   expect_error(as.list(tmp), NA)
 
   tmp2 <- list(use1 = c(identifier = "ID", time = "TIME", eventidentifier = "EVID",
-                                  amount = "AMT", interdoseinterval = NA, censored = NA, limit = NA,
-                                  observationtype = "YTYPE", administration = "ADM", steadystate = NA,
+                        amount = "AMT", interdoseinterval = NA, censored = NA, limit = NA,
+                        observationtype = "YTYPE", administration = "ADM", steadystate = NA,
                         observation = "DV"),
                cont = c("WT", "CRCL"),
                cat = list(Race = list(cat = c("Caucasian", "Black", "Latin"),
-                                      quote = c(FALSE, FALSE, FALSE))),
+                                      quote = c(FALSE, FALSE, FALSE)),
+                          Sex = list(cat = c("M", "F"),
+                                     quote = c(FALSE, FALSE))),
                reg = c("E0", "Emax"),
                nbdoses = 7L,
                yname = c("1", "2"),
                name = c("y1", "y2"),
-               type=c("continuous", "continuous"))
+               type = c("continuous",  "continuous"))
   class(tmp2) <- "monolix2rxContent"
 
   expect_equal(tmp, tmp2)
@@ -66,19 +68,21 @@ cens = {use=censored}
 limit = {use=limit}")
 
   tmp2 <- list(use1 = c(identifier = "ID", time = "TIME", eventidentifier = "EVID",
-                        amount = "AMT", interdoseinterval = "II", censored = "cens",
-                        limit = "limit", observationtype = "YTYPE", administration = "ADM",
-                        steadystate = "SS", observation = "DV"),
+                        amount = "AMT", interdoseinterval = "II", censored = "cens", limit = "limit",
+                        observationtype = "YTYPE", administration = "ADM", steadystate = "SS", observation = "DV"),
                cont = c("WT", "CRCL"),
                cat = list(Race = list(cat = c("Caucasian", "Black", "Latin"),
-                                      quote = c(FALSE, FALSE, FALSE))),
+                                     quote = c(FALSE, FALSE, FALSE)),
+                          Sex = list(cat = c("M", "F"),
+                                     quote = c(FALSE, FALSE))),
                reg = c("E0", "Emax"),
                nbdoses = 10L,
                yname = c("1", "2"),
-               name = c("y1", "y2"),
-               type=c("continuous", "continuous"))
+               name = c("y1",  "y2"),
+               type = c("continuous", "continuous"))
 
   class(tmp2) <- "monolix2rxContent"
+
   expect_equal(tmp, tmp2)
 
   expect_error(.content("DV = {use=observation, name={y1, y2, y3}, yname={'1', '2'}, type={continuous, continuous}}"))

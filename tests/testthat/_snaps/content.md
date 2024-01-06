@@ -15,4 +15,5 @@
       WT = {use=covariate, type=continuous}
       CRCL = {use=covariate, type=continuous}
       Race = {type=categorical, categories={Caucasian, Black, Latin}}
+      Sex = {type=categorical, categories={M, F}}
 
