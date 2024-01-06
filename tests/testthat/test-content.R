@@ -43,6 +43,7 @@ Sex = {type=categorical, categories={M, F}}")
                reg = c("E0", "Emax"),
                nbdoses = 7L,
                yname = c("1", "2"),
+               ynameQuote=c(TRUE, TRUE),
                name = c("y1", "y2"),
                type = c("continuous",  "continuous"))
   class(tmp2) <- "monolix2rxContent"
@@ -78,6 +79,7 @@ limit = {use=limit}")
                reg = c("E0", "Emax"),
                nbdoses = 10L,
                yname = c("1", "2"),
+               ynameQuote=c(TRUE, TRUE),
                name = c("y1",  "y2"),
                type = c("continuous", "continuous"))
 
@@ -115,4 +117,9 @@ test_that("single name=y works", {
 test_that("{use=covariate, type=categorical} works", {
   expect_equal(as.character(.content("sex={use=covariate,type=categorical}")),
                "sex = {use=covariate, type=categorical}")
+})
+
+test_that("complex dv observation works", {
+  expect_equal(as.character(.content("dv={use=observation, yname={'1', '2'}, type={continuous, continuous}}")),
+               "dv = {use=observation, yname={'1', '2'}, type={continuous, continuous}}")
 })

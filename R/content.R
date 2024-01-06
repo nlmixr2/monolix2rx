@@ -22,6 +22,7 @@
     .monolix2rx$contLst <- character(0)
     .monolix2rx$ssNbdoses <- 7L
     .monolix2rx$yname <- character(0)
+    .monolix2rx$ynameQuote <- logical(0)
     .monolix2rx$name <- character(0)
     .monolix2rx$type <- character(0)
   }
@@ -42,12 +43,11 @@
                reg=.monolix2rx$regLst,
                nbdoses=.monolix2rx$ssNbdoses,
                yname=.monolix2rx$yname,
+               ynameQuote=.monolix2rx$ynameQuote,
                name=.monolix2rx$name,
                type=.monolix2rx$type)
-  if (length(.lst$name) == 1L && length(.lst$yname) == 0) {
-    .lst$yname <- NA_character_
-  }
-  if (length(.lst$yname) != length(.lst$name)) {
+  if (length(.lst$yname) != length(.lst$name) &&
+        length(.lst$yname) != 0 && length(.lst$name) != 0) {
     stop("for 'observation' type the length of 'name' and 'yname' should match",
          call.=FALSE)
   }
@@ -91,14 +91,17 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .contentYname <- function(var) {
-   .v1 <- substr(var, 1, 1)
+  .v1 <- substr(var, 1, 1)
+  .quote <- FALSE
   if (.v1 == "'" || .v1 == '"') {
+    .quote <- TRUE
     .v2 <- substr(var, nchar(var), nchar(var))
     if (.v1 == .v2) {
       var <- substr(var, 2, nchar(var)-1)
     }
   }
   .monolix2rx$yname <- c(.monolix2rx$yname, var)
+  .monolix2rx$ynameQuote <- c(.monolix2rx$ynameQuote, .quote)
 }
 #' Content name
 #'
@@ -119,6 +122,21 @@
   .monolix2rx$type <- c(.monolix2rx$type, val)
 }
 
+.asCharacterSingleOrList <- function(name, what, quote=NULL, comma=", ") {
+  if (!is.null(quote) && length(quote) == length(what)) {
+    what <- vapply(seq_along(what),
+                   function(i) {
+                     if (quote[i]) {
+                       return(paste0("'", what[i], "'"))
+                     }
+                     what[i]
+                   }, character(1), USE.NAMES = FALSE)
+  }
+  if (length(what) == 0L) return("")
+  if (length(what) == 1L) return(paste0(comma, name, "=", what))
+  paste0(comma, name, "={", paste(what, collapse=", "), "}")
+}
+
 #' @export
 as.character.monolix2rxContent <- function(x, ...) {
   .cur <- vapply(names(x$use1), function(n) {
@@ -128,20 +146,13 @@ as.character.monolix2rxContent <- function(x, ...) {
       .name <- x$name
       .yname <- x$yname
       .type <- x$type
-      if (length(.name) == 1L) {
-        .ret <- paste0(.ret,
-                       ", name=", .name,
-                       ifelse(is.na(.yname), "", paste0(", yname='", .yname, "'")),
-                       ", type=", .type)
-      } else {
-        .ret <- paste0(.ret,
-                       ", name={", paste(.name, collapse=", "), "}",
-                       ", yname={'", paste(.yname, collapse="', '"), "'}",
-                       ", type={", paste(.type, collapse=", "), "}")
-      }
+      .ret <- paste0(.ret,
+                     .asCharacterSingleOrList("name", .name),
+                     .asCharacterSingleOrList("yname", .yname, x$ynameQuote),
+                     .asCharacterSingleOrList("type", .type))
     } else if (n == "steadystate") {
       .ret <- paste0(.ret,
-                     ", nbdoses=", x$nbdoses)
+                     .asCharacterSingleOrList("nbdoses", x$nbdoses))
     }
     paste0(.ret, "}")
   }, character(1), USE.NAMES = FALSE)
