@@ -73,11 +73,11 @@ void wprint_node_fileinfo(int depth, char *token_name, char *token_value, void *
 
 extern sbuf curLine;
 
-int fileinfo_process_catId(const char *name, D_ParseNode *pn) {
-  if (!strcmp("catId", name)) {
+int fileinfo_process_delimiter(const char *name, D_ParseNode *pn) {
+  if (!strcmp("delimiterType", name)) {
     D_ParseNode *xpn = d_get_child(pn, 0);
     char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
-    monolix2rxInputCatItem(v);
+    monolix2rxSingle(v, ".fileinfoDelimiter");
     return 1;
   }
   return 0;
@@ -86,7 +86,9 @@ int fileinfo_process_catId(const char *name, D_ParseNode *pn) {
 void wprint_parsetree_fileinfo(D_ParserTables pt, D_ParseNode *pn, int depth, print_node_fn_t fn, void *client_data) {
   char *name = (char*)pt.symbols[pn->symbol].name;
   int nch = d_get_number_of_children(pn);
-  if (!strcmp("filename_t3", name) ||
+  if (fileinfo_process_delimiter(name, pn)) {
+    return;
+  } else if (!strcmp("filename_t3", name) ||
       !strcmp("filename_t4", name)) {
     char *v = (char*)rc_dup_str(pn->start_loc.s, pn->end);
     monolix2rxFileinfoFile(v);

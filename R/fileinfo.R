@@ -6,6 +6,7 @@
 .fileinfoIni <- function() {
   .monolix2rx$file <- character(0)
   .monolix2rx$header <- character(0)
+  .monolix2rx$delimiter <- character(0)
   .monolix2rx$fileinfo <- list()
 }
 #' Parse fileinfo text
@@ -18,7 +19,8 @@
   .fileinfoIni()
   .Call(`_monolix2rx_trans_fileinfo`, text)
   .fileinfo <- list(file=.monolix2rx$file,
-                    header=.monolix2rx$header)
+                    header=.monolix2rx$header,
+                    delimiter=.monolix2rx$delimiter)
   class(.fileinfo) <- "monolix2rxFileinfo"
   .fileinfoIni()
   .monolix2rx$fileinfo <- .fileinfo
@@ -31,6 +33,16 @@
 #' @author Matthew L. Fidler
 .fileinfoFile <- function(file) {
   .monolix2rx$file <- file
+}
+#' Assign the File Info delimiter
+#'
+#' @param d delimiter
+#' @return nothing, called for side effects
+#' @export
+#' @author Matthew L. Fidler
+#' @examples
+.fileinfoDelimiter <- function(d) {
+  .monolix2rx$delimiter <- d
 }
 #' Add a header column
 #'
@@ -55,7 +67,7 @@
 #' @export
 as.character.monolix2rxFileinfo <- function(x, ...) {
   c(.asCharacterFile(x),
-    "delimiter = comma",
+    paste0("delimiter = ", x$delimiter),
     paste0("header = {", paste(x$header, collapse=", "), "}"))
 }
 
