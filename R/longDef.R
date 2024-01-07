@@ -8,6 +8,7 @@
 .longDefIni <- function(full=FALSE) {
   .monolix2rx$varName  <- NA_character_
   .monolix2rx$dist     <- NA_character_
+  .monolix2rx$autocor <- character(0)
   .monolix2rx$pred     <- NA_character_
   .monolix2rx$min      <- -Inf
   .monolix2rx$max      <- Inf
@@ -128,7 +129,8 @@
     .end <- list(var=.monolix2rx$varName,
                  dist=.monolix2rx$dist, # type in non cont.
                  pred=.monolix2rx$pred, # hazard in tte
-                 err=.err)
+                 err=.err,
+                 autocor=.monolix2rx$autocor)
     .monolix2rx$longDef <- c(.monolix2rx$longDef, list(.end))
     .longDefIni(FALSE)
   }
@@ -152,6 +154,15 @@
 #' @author Matthew L. Fidler
 .addPrediction <- function(var) {
   .monolix2rx$pred <- var
+}
+#' Add autocorrelation
+#'
+#' @param cor correlation parameter
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.addAutocor <- function(cor) {
+  .monolix2rx$autocor <- cor
 }
 #' This gets the values or the NA based on the supplied inputs
 #'
@@ -250,25 +261,18 @@ as.character.monolix2rxLongDef <- function(x, ...) {
            .lst <- x$endpoint[[i]]
            if (.lst$dist == "event") {
              .err <- .lst$err
-             .ret <- paste0(.lst$var, " = {type=event")
-             .ret <- paste0(.ret, ", eventType=", .err$eventType)
-             if (!is.na(.err$maxEventNumber)) {
-               .ret <- paste0(.ret, ", maxEventNumber=", .err$maxEventNumber)
-             }
-             if (!is.na(.err$rightCensoringTime)) {
-               .ret <- paste0(.ret, ", rightCensoringTime=", .err$rightCensoringTime)
-             }
-             if (!is.na(.err$intervalLength)) {
-               .ret <- paste0(.ret, ", intervalLength=", .err$intervalLength)
-             }
+             .ret <- paste0(.lst$var, " = {type=event",
+                            .asCharacterSingleOrList("eventType", .err$eventType),
+                            .asCharacterSingleOrList("maxEventNumber", .err$maxEventNumber),
+                            .asCharacterSingleOrList("rightCensoringTime", .err$rightCensoringTime),
+                            .asCharacterSingleOrList("intervalLength", .err$intervalLength))
              .ret <- paste0(.ret, ", hazard=", .lst$pred)
              .ret <- paste0(.ret, "}")
            } else if (.lst$dist == "categorical") {
              .err <- .lst$err
-             .ret <- paste0(.lst$var, " = {type=categorical", sep="")
-             .ret <- paste0(.ret, ", categories= {",
-                            paste(.err$categories, collapse=", "), "}")
-             .ret <- paste0(.ret, ",\n", paste(.err$code, collapse="\n"), "}")
+             .ret <- paste0(.lst$var, " = {type=categorical",
+                            .asCharacterSingleOrList("categories", .err$categories),
+                            ",\n", paste(.err$code, collapse="\n"), "}")
            } else if (.lst$dist == "count") {
              .err <- .lst$err
              .ret <- paste0(.lst$var, " = {type=count")
@@ -277,10 +281,12 @@ as.character.monolix2rxLongDef <- function(x, ...) {
            } else  {
              .err <- .lst$err
              .v <- .varOrFixed(.err$typical, x$fixed)
-             .ret <- paste0(.lst$var, " = {distribution = ", .lst$dist,
-                            ", prediction = ", .lst$pred,
+             .ret <- paste0(.lst$var, " = {",
+                            .asCharacterSingleOrList("distribution", .lst$dist, comma=""),
+                            .asCharacterSingleOrList("prediction", .lst$pred),
                             ", errorModel = ",
                             .err$errName, "(", paste(.v, collapse=", "), ")",
+                            .asCharacterSingleOrList("autoCorrCoef", .lst$autocor),
                             "}")
            }
          }, character(1),

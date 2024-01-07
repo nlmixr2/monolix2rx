@@ -135,7 +135,13 @@
                    }, character(1), USE.NAMES = FALSE)
   }
   if (length(what) == 0L) return("")
-  if (length(what) == 1L) return(paste0(comma, name, "=", what))
+  if (length(what) == 1L) {
+    if (!is.na(what)) {
+      return(paste0(comma, name, "=", what))
+    } else {
+      return("")
+    }
+  }
   paste0(comma, name, "={", paste(what, collapse=", "), "}")
 }
 

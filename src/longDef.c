@@ -279,6 +279,16 @@ int longdef_process_count(const char *name, D_ParseNode *pn, int i) {
   return 0;
 }
 
+int longdef_process_autocor(const char *name, D_ParseNode *pn) {
+  if (!strcmp("autoCorPar", name)) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxSingle(v, ".addAutocor");
+    return 1;
+  }
+  return 0;
+}
+
 void wprint_parsetree_longdef(D_ParserTables pt, D_ParseNode *pn, int depth, print_node_fn_t fn, void *client_data) {
   char *name = (char*)pt.symbols[pn->symbol].name;
   if (longdef_process_distOp(name, pn) ||
@@ -295,7 +305,8 @@ void wprint_parsetree_longdef(D_ParserTables pt, D_ParseNode *pn, int depth, pri
       longdef_process_rightCensoringTime(name, pn) ||
       longdef_process_intervalLength(name, pn) ||
       longdef_process_categoriesInt(name, pn) ||
-      longdef_process_codeLine(name, pn)
+      longdef_process_codeLine(name, pn) ||
+      longdef_process_autocor(name, pn)
       ) {
     return;
   }

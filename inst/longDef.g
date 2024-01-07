@@ -27,7 +27,10 @@ errModels: proportional
          ;
 errOp: 'errorModel' '=' errModels;
 
-endpointOp: distOp | errOp | predOp;
+autoCorPar: constant | identifier;
+autoCorOp: 'autoCorrCoef' '=' autoCorPar;
+
+endpointOp: distOp | errOp | predOp | autoCorOp;
 endpoint: identifier '=' '{' endpointOp (',' endpointOp)*'}';
 
 
