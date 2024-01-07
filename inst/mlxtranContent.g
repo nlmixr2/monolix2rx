@@ -12,6 +12,7 @@ limitLine: identifier '=' '{' 'use' '=' 'limit' '}';
 ytypeLine: identifier '=' '{' 'use' '=' 'observationtype' '}';
 admLine: identifier '=' '{' 'use' '=' 'administration' '}';
 occLine: identifier '=' '{' 'use' '=' 'occasion' '}';
+rateLine: identifier '=' '{' 'use' '=' 'rate' '}';
 nbd: decimalint;
 ssLine: identifier '=' '{' 'use' '=' 'steadystate' (',' 'nbdoses' '=' nbd)? '}';
 regressorLine: identifier '=' '{' 'use' '=' 'regressor' '}';
@@ -54,6 +55,7 @@ statement: idLine singleLineComment?
     | ytypeLine singleLineComment?
     | admLine singleLineComment?
     | occLine singleLineComment?
+    | rateLine singleLineComment?
     | ssLine singleLineComment?
     | regressorLine singleLineComment?
     | contLine singleLineComment?

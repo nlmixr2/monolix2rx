@@ -164,6 +164,15 @@ int content_process_occ(const char *name, D_ParseNode *pn) {
   return 0;
 }
 
+int content_process_rate(const char *name, D_ParseNode *pn) {
+  if (!strcmp(name, "rateLine")) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxContentSetUse1("rate", v);
+    return 1;
+  }
+  return 0;
+}
 
 int content_process_adm(const char *name, D_ParseNode *pn) {
   if (!strcmp(name, "admLine")) {
@@ -274,7 +283,8 @@ void wprint_parsetree_content(D_ParserTables pt, D_ParseNode *pn, int depth, pri
       content_process_name(name, pn) ||
       content_process_type(name, pn) ||
       content_process_cat(name, pn) ||
-      content_process_occ(name, pn)
+      content_process_occ(name, pn) ||
+      content_process_rate(name, pn)
       ) {
     // return early; no need to process more
     return;

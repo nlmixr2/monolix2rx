@@ -19,7 +19,8 @@
         administration=NA_character_,
         steadystate=NA_character_,
         observation=NA_character_,
-        occasion=NA_character_)
+        occasion=NA_character_,
+        rate=NA_character_)
     .monolix2rx$contLst <- character(0)
     .monolix2rx$ssNbdoses <- 7L
     .monolix2rx$yname <- character(0)

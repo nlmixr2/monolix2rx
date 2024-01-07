@@ -129,3 +129,8 @@ test_that("use occ", {
   expect_equal(as.character(.content("DOSE_OCC={use = occasion}")),
                "DOSE_OCC = {use=occasion}")
 })
+
+test_that("use rate", {
+  expect_equal(as.character(.content("RATE={use=rate}")),
+               "RATE = {use=rate}")
+})
