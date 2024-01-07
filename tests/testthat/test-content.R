@@ -123,3 +123,9 @@ test_that("complex dv observation works", {
   expect_equal(as.character(.content("dv={use=observation, yname={'1', '2'}, type={continuous, continuous}}")),
                "dv = {use=observation, yname={'1', '2'}, type={continuous, continuous}}")
 })
+
+
+test_that("use occ", {
+  expect_equal(as.character(.content("DOSE_OCC={use = occasion}")),
+               "DOSE_OCC = {use=occasion}")
+})

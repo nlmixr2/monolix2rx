@@ -38,9 +38,8 @@
 #'
 #' @param d delimiter
 #' @return nothing, called for side effects
-#' @export
+#' @noRd
 #' @author Matthew L. Fidler
-#' @examples
 .fileinfoDelimiter <- function(d) {
   .monolix2rx$delimiter <- d
 }
