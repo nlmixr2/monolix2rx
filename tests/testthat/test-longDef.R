@@ -197,3 +197,9 @@ test_that("autocorrelation works", {
   expect_equal(as.character(.longDef("rx_prd_effect={distribution = normal, prediction = rx_pred_effect, errorModel=proportional(pdadd__err), autoCorrCoef = r}")),
                "rx_prd_effect = {distribution=normal, prediction=rx_pred_effect, errorModel = proportional(pdadd__err), autoCorrCoef=r}")
 })
+
+
+test_that("min/max works with logitnorm", {
+  expect_equal(as.character(.longDef("Effect = {distribution=logitNormal, min=0, max=100, prediction=E, errorModel=constant(a)}")),
+               "Effect = {distribution=logitnormal, prediction=E, min=0, max=100, errorModel = constant(a)}")
+})

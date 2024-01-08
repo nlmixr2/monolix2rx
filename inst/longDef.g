@@ -30,7 +30,14 @@ errOp: 'errorModel' '=' errModels;
 autoCorPar: constant | identifier;
 autoCorOp: 'autoCorrCoef' '=' autoCorPar;
 
-endpointOp: distOp | errOp | predOp | autoCorOp;
+minVal: constant;
+minOp: 'min' '=' minVal;
+
+maxVal: constant;
+maxOp: 'max' '=' maxVal;
+
+
+endpointOp: distOp | errOp | predOp | autoCorOp | maxOp | minOp;
 endpoint: identifier '=' '{' endpointOp (',' endpointOp)*'}';
 
 

@@ -10,8 +10,8 @@
   .monolix2rx$dist     <- NA_character_
   .monolix2rx$autocor <- character(0)
   .monolix2rx$pred     <- NA_character_
-  .monolix2rx$min      <- -Inf
-  .monolix2rx$max      <- Inf
+  .monolix2rx$min      <- 0
+  .monolix2rx$max      <- 1
   .monolix2rx$err      <- NULL
   .monolix2rx$eventType <- "exact" # monolix default
   .monolix2rx$maxEventNumber <- NA_integer_
@@ -131,6 +131,11 @@
                  pred=.monolix2rx$pred, # hazard in tte
                  err=.err,
                  autocor=.monolix2rx$autocor)
+    if (.monolix2rx$dist == "logitnormal") {
+      .end <- c(.end,
+                list(min=.monolix2rx$min,
+                     max=.monolix2rx$max))
+    }
     .monolix2rx$longDef <- c(.monolix2rx$longDef, list(.end))
     .longDefIni(FALSE)
   }
@@ -253,6 +258,24 @@
 .setProp <- function(var) {
   .monolix2rx$err <- .getErrValue(list(var), "proportional")
 }
+#' Set the minimum value of the distribution
+#'
+#' @param var number for the min
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.longDefSetMin <- function(var) {
+  .monolix2rx$min <- as.numeric(var)
+}
+#' Set the maximum of the logit dist
+#'
+#' @param var maximum value
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.longDefSetMax <- function(var) {
+  .monolix2rx$max <- as.numeric(var)
+}
 
 #' @export
 as.character.monolix2rxLongDef <- function(x, ...) {
@@ -284,6 +307,10 @@ as.character.monolix2rxLongDef <- function(x, ...) {
              .ret <- paste0(.lst$var, " = {",
                             .asCharacterSingleOrList("distribution", .lst$dist, comma=""),
                             .asCharacterSingleOrList("prediction", .lst$pred),
+                            ifelse(.lst$dist == "logitnormal",
+                                   paste0(.asCharacterSingleOrList("min", .lst$min),
+                                          .asCharacterSingleOrList("max", .lst$max)),
+                                   ""),
                             ", errorModel = ",
                             .err$errName, "(", paste(.v, collapse=", "), ")",
                             .asCharacterSingleOrList("autoCorrCoef", .lst$autocor),
