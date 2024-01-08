@@ -148,3 +148,8 @@ test_that("use addl = {use=additionaldose}", {
   expect_equal(as.character(.content("addl={use=additionaldose}")),
                "addl = {use=additionaldose}")
 })
+
+test_that("discrete", {
+  expect_equal(as.character(.content("Y = {use=observation, name={Concentration, Seizure}, yname={'1', '2'}, type={continuous, discrete}}")),
+               "Y = {use=observation, name={Concentration, Seizure}, yname={'1', '2'}, type={continuous, discrete}}")
+})

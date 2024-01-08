@@ -37,7 +37,7 @@ nameOp2: 'name' '=' '{' nameType (',' nameType)* '}';
 nameOp: nameOp1 | nameOp2;
 
 // FIXME: more types of endpoints
-typeVals: 'continuous' | 'event' | 'categorical' | 'count';
+typeVals: 'continuous' | 'event' | 'categorical' | 'count' | 'discrete';
 typeOp1: 'type' '=' typeVals;
 typeOp2: 'type' '=' '{' typeVals (',' typeVals)* '}';
 typeOp: typeOp1 | typeOp2;
