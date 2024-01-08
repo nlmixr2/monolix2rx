@@ -53,6 +53,16 @@
   .monolix2rx$codeLine <- c(.monolix2rx$codeLine, var)
 }
 
+#' Push all code lines for error models that support them
+#'
+#' @param allCode -- all code lines
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.setAllCode <- function(allCode) {
+  .monolix2rx$codeLine <- c(.monolix2rx$codeLine, strsplit(allCode, "\n")[[1]])
+}
+
 #' Set the interval length
 #'
 #' @param var string of interval length

@@ -17,7 +17,8 @@ Imports:
     checkmate,
     dparser,
     magrittr,
-    withr
+    withr,
+    stringi
 Suggests:
     devtools,
     rxode2 (> 2.0.13),

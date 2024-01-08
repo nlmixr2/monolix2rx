@@ -220,3 +220,15 @@ test_that("event with missing comma works, even though it technically is malform
 }")),
 "Event = {type=event, eventType=intervalCensored, intervalLength=5, hazard=h}")
 })
+
+
+test_that("complex count def", {
+  expect_equal(as.character(.longDef("Event = {type=count,
+if k>0
+  lpk = - HAZ + k*log(HAZ) - factln(k)
+else
+  lpk = -HAZ
+end
+log(P(Event=k)) = lpk
+}")), "Event = {type=count,\nif k>0\n  lpk = - HAZ + k*log(HAZ) - factln(k)\nelse\n  lpk = -HAZ\nend\nlog(P(Event=k)) = lpk}")
+})

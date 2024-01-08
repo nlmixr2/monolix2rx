@@ -20,6 +20,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .mlxtranParseItem <- function(l) {
+  l <- stringi::stri_trans_general(l, "latin-ascii")
   l <- trimws(l)
   .begin <- 1
   .end <- .nc <- nchar(l)
