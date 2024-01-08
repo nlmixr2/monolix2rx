@@ -34,7 +34,7 @@ Sex = {type=categorical, categories={M, F}}")
   tmp2 <- list(use1 = c(identifier = "ID", time = "TIME", eventidentifier = "EVID",
                         amount = "AMT", interdoseinterval = NA, censored = NA, limit = NA,
                         observationtype = "YTYPE", administration = "ADM", steadystate = NA,
-                        observation = "DV"),
+                        observation = "DV", occasion=NA, rate=NA),
                cont = c("WT", "CRCL"),
                cat = list(Race = list(cat = c("Caucasian", "Black", "Latin"),
                                       quote = c(FALSE, FALSE, FALSE)),
@@ -44,6 +44,8 @@ Sex = {type=categorical, categories={M, F}}")
                nbdoses = 7L,
                yname = c("1", "2"),
                ynameQuote=c(TRUE, TRUE),
+               ytype=character(0),
+               ytypeQuote=logical(0),
                name = c("y1", "y2"),
                type = c("continuous",  "continuous"))
   class(tmp2) <- "monolix2rxContent"
@@ -70,7 +72,8 @@ limit = {use=limit}")
 
   tmp2 <- list(use1 = c(identifier = "ID", time = "TIME", eventidentifier = "EVID",
                         amount = "AMT", interdoseinterval = "II", censored = "cens", limit = "limit",
-                        observationtype = "YTYPE", administration = "ADM", steadystate = "SS", observation = "DV"),
+                        observationtype = "YTYPE", administration = "ADM", steadystate = "SS", observation = "DV",
+                        occasion=NA, rate=NA),
                cont = c("WT", "CRCL"),
                cat = list(Race = list(cat = c("Caucasian", "Black", "Latin"),
                                      quote = c(FALSE, FALSE, FALSE)),
@@ -80,9 +83,10 @@ limit = {use=limit}")
                nbdoses = 10L,
                yname = c("1", "2"),
                ynameQuote=c(TRUE, TRUE),
+               ytype=character(0),
+               ytypeQuote=logical(0),
                name = c("y1",  "y2"),
                type = c("continuous", "continuous"))
-
   class(tmp2) <- "monolix2rxContent"
 
   expect_equal(tmp, tmp2)
@@ -133,4 +137,9 @@ test_that("use occ", {
 test_that("use rate", {
   expect_equal(as.character(.content("RATE={use=rate}")),
                "RATE = {use=rate}")
+})
+
+test_that("use ytype", {
+  expect_equal(as.character(.content("Y = {use=observation, name={y1, y2, y3}, ytype={1, 2, 3}, type={continuous, continuous, continuous}}")),
+               "Y = {use=observation, name={y1, y2, y3}, ytype={1, 2, 3}, type={continuous, continuous, continuous}}")
 })

@@ -25,6 +25,8 @@
     .monolix2rx$ssNbdoses <- 7L
     .monolix2rx$yname <- character(0)
     .monolix2rx$ynameQuote <- logical(0)
+    .monolix2rx$ytype <- character(0)
+    .monolix2rx$ytypeQuote <- logical(0)
     .monolix2rx$name <- character(0)
     .monolix2rx$type <- character(0)
   }
@@ -46,6 +48,8 @@
                nbdoses=.monolix2rx$ssNbdoses,
                yname=.monolix2rx$yname,
                ynameQuote=.monolix2rx$ynameQuote,
+               ytype=.monolix2rx$ytype,
+               ytypeQuote=.monolix2rx$ytypeQuote,
                name=.monolix2rx$name,
                type=.monolix2rx$type)
   if (length(.lst$yname) != length(.lst$name) &&
@@ -114,6 +118,18 @@
 .contentName <- function(val) {
   .monolix2rx$name <- c(.monolix2rx$name, val)
 }
+#' Push a ytype value for an observation
+#'
+#'
+#' @param val value of the ytype
+#' @param quote is the ytype quoted? (0 or 1)
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.contentYtype <- function(val, quote) {
+  .monolix2rx$ytype <- c(.monolix2rx$ytype, val)
+  .monolix2rx$ytypeQuote <- c(.monolix2rx$ytypeQuote, as.logical(quote))
+}
 #' Content type
 #'
 #' @param val type string
@@ -157,6 +173,7 @@ as.character.monolix2rxContent <- function(x, ...) {
       .ret <- paste0(.ret,
                      .asCharacterSingleOrList("name", .name),
                      .asCharacterSingleOrList("yname", .yname, x$ynameQuote),
+                     .asCharacterSingleOrList("ytype", x$ytype, x$ytypeQuote),
                      .asCharacterSingleOrList("type", .type))
     } else if (n == "steadystate") {
       .ret <- paste0(.ret,

@@ -253,6 +253,26 @@ int content_process_name(const char *name, D_ParseNode *pn) {
   return 0;
 }
 
+int content_process_ytypeObs(const char *name, D_ParseNode *pn) {
+  if (!strcmp("ytypeType", name)) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    if (v[0] == '\'' || v[0] == '\"') {
+      char *v2 = v+1;
+      while (v2[0] != 0) {
+        v2++;
+      }
+      v2--;
+      v2[0] = 0;
+      monolix2rxDoubleI(v+1, 1, ".contentYtype");
+    } else {
+      monolix2rxDoubleI(v, 0, ".contentYtype");
+    }
+    return 1;
+  }
+  return 0;
+}
+
 int content_process_type(const char *name, D_ParseNode *pn) {
   if (!strcmp(name, "typeVals")) {
     D_ParseNode *xpn = d_get_child(pn, 0);
@@ -284,7 +304,8 @@ void wprint_parsetree_content(D_ParserTables pt, D_ParseNode *pn, int depth, pri
       content_process_type(name, pn) ||
       content_process_cat(name, pn) ||
       content_process_occ(name, pn) ||
-      content_process_rate(name, pn)
+      content_process_rate(name, pn) ||
+      content_process_ytypeObs(name, pn)
       ) {
     // return early; no need to process more
     return;

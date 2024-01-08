@@ -2,6 +2,10 @@ test_that("mlxtran initial list", {
 
   withr::with_dir(tempdir(), {
 
+
+    # need to process items like: file = 'lib:infusion_1cpt_Vk.txt'
+    # need warning for ignored autocor types
+
    modelLines <- c("DESCRIPTION:",
                     "model translated from `babelmixr2` and `nlmixr2` function pk.turnover.emax3 to pk.turnover.emax3-monolix.txt",
                     "",

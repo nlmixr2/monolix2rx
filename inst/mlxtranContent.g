@@ -19,10 +19,16 @@ regressorLine: identifier '=' '{' 'use' '=' 'regressor' '}';
 contLine: identifier '=' '{' 'use' '=' 'covariate' ',' 'type' '=' 'continuous' '}';
 catLine: identifier '=' '{' 'use' '=' 'covariate' ',' 'type' '=' 'categorical' '}';
 
+ytypeType: char_t1 | char_t2 | identifier | constant;
+ytypeOp1: 'ytype' '='  ytypeType;
+ytypeOp2: 'ytype' '=' '{' ytypeType (',' ytypeType)* '}';
+ytypeOp: ytypeOp1 | ytypeOp2;
+
 ynameType: char_t1 | char_t2 | identifier;
 ynameOp1: 'yname' '='  ynameType;
 ynameOp2: 'yname' '=' '{' ynameType (',' ynameType)* '}';
 ynameOp: ynameOp1 | ynameOp2;
+
 
 nameType: identifier;
 nameOp1: 'name' '='  nameType;
@@ -35,7 +41,7 @@ typeOp1: 'type' '=' typeVals;
 typeOp2: 'type' '=' '{' typeVals (',' typeVals)* '}';
 typeOp: typeOp1 | typeOp2;
 
-obsOp: ynameOp | nameOp | typeOp;
+obsOp: ynameOp | nameOp | typeOp | ytypeOp;
 
 obsLine: identifier '=' '{' 'use' '=' 'observation' (',' obsOp)* '}';
 
