@@ -81,17 +81,6 @@ logit(P(level <=2)) = th1 + th2 + th3}")
 
   expect_equal(as.character(tmp), "level = {type=categorical, categories={0, 1, 2, 3},\nlogit(P(level <=0)) = th1\nlogit(P(level <=1)) = th1 + th2\nlogit(P(level <=2)) = th1 + th2 + th3}")
 
-
-  tmp <- .longDef("Level = {type = categorical, categories={1,2,3}
-            logit(P(Level<=1)) = lp1
-            logit(P(Level<=2)) = lp2
-}")
-
-  expect_equal(as.character(tmp),
-               "Level = {type=categorical, categories={1, 2, 3},\nlogit(P(Level<=1)) = lp1\nlogit(P(Level<=2)) = lp2}"
-)
-
-
   tmp2 <- list(endpoint = list(list(var = "level",
                                     dist = "categorical",
                                     pred = NA_character_,

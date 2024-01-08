@@ -71,11 +71,11 @@ categoriesInt: decimalint;
 categoriesOp: 'categories' '=' '{' categoriesInt (',' categoriesInt)* '}';
 
 
-catOps: (',' categoriesOp | ','? codeLine);
+catOps: categoriesOp | codeLine;
 
-categorical: identifier '=' '{' 'type' '=' 'categorical' (catOps)* '}';
+categorical: identifier '=' '{' 'type' '=' 'categorical' (',' catOps)* '}';
 
-count: identifier '=' '{' 'type' '=' 'count' (','? codeLine)* '}';
+count: identifier '=' '{' 'type' '=' 'count' (',' codeLine)* '}';
 
 statement: endpoint singleLineComment?
     | tte singleLineComment?
