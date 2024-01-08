@@ -169,7 +169,8 @@ as.character.monolix2rxInd <- function(x, ...) {
   .inp <- x$input
   .ret <- character(0)
   if (length(.inp) > 0L) {
-    .ret <- c(.ret, paste0("input = {", paste(.inp, collapse=", "), "}"))
+    .ret <- c(.ret,
+              .asCharacterSingleOrList("input", .inp,comma="", eq=" = "))
   }
   .ret <- c(.ret, .asCharacterReg(x))
   .ret <- c(.ret, .asCharacterCat(x))

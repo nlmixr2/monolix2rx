@@ -141,7 +141,7 @@
   .monolix2rx$type <- c(.monolix2rx$type, val)
 }
 
-.asCharacterSingleOrList <- function(name, what, quote=NULL, comma=", ") {
+.asCharacterSingleOrList <- function(name, what, quote=NULL, comma=", ", eq="=") {
   if (!is.null(quote) && length(quote) == length(what)) {
     what <- vapply(seq_along(what),
                    function(i) {
@@ -154,12 +154,12 @@
   if (length(what) == 0L) return("")
   if (length(what) == 1L) {
     if (!is.na(what)) {
-      return(paste0(comma, name, "=", what))
+      return(paste0(comma, name, eq, what))
     } else {
       return("")
     }
   }
-  paste0(comma, name, "={", paste(what, collapse=", "), "}")
+  paste0(comma, name, eq, "{", paste(what, collapse=", "), "}")
 }
 
 #' @export

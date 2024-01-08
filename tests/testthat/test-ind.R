@@ -50,4 +50,10 @@ Sex = {type=categorical, categories={M, F}}")
 
   expect_error(as.list(.tmp), NA)
 
+  expect_equal(as.character(.ind("lcat = {type=categorical, categories={1, 2}}")),
+               "lcat = {type=categorical, categories={1, 2}}")
+
+  expect_equal(as.character(.ind("input=p1")),
+               "input = p1")
+
 })

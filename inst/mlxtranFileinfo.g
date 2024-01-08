@@ -9,7 +9,7 @@ filename_t3: "[^ '\"\n]+";
 filename_t4: ("[^ .\n]+")+ '.'  "[A-Za-z0-9_]+";
 
 fileLine: 'file' '=' filename;
-delimiterType: ('comma' |'tab' | 'space');
+delimiterType: ('comma' |'tab' | 'space' | 'semicolon');
 delimiterLine: 'delimiter' '=' delimiterType;
 headerLine: 'header' '=' '{' identifier (',' identifier)* '}';
 
