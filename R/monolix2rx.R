@@ -110,6 +110,9 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"), envir=
                   .add,
                   "(",
                   endpoint$err$typical[1],
+                  ifelse(endpoint$dist == "logitnormal",
+                         paste0(", " endpoint$min, ", ", endpoint$max),
+                         ""),
                   ") | ",
                   endpoint$var))
   } else if (endpoint$err$errName == "proportional") {
