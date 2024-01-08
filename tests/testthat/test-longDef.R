@@ -92,13 +92,12 @@ logit(P(level <=2)) = th1 + th2 + th3}")
 )
 
 
-  tmp2 <- list(endpoint = list(list(var = "level",
+  tmp2 <- list(endpoint = list(list(var = "Level",
                                     dist = "categorical",
                                     pred = NA_character_,
-                                    err = list(categories = 0:3,
-                                               code = c("logit(P(level <=0)) = th1",
-                                                        "logit(P(level <=1)) = th1 + th2",
-                                                        "logit(P(level <=2)) = th1 + th2 + th3")),
+                                    err = list(categories = 1:3,
+                                               code = c("logit(P(Level<=1)) = lp1",
+                                                        "logit(P(Level<=2)) = lp2")),
                                     autocor=character(0))),
                fixed = numeric(0))
   class(tmp2) <- "monolix2rxLongDef"
@@ -205,10 +204,10 @@ test_that("as.list works", {
 test_that("autocorrelation works", {
 
   expect_equal(as.character(.longDef("rx_prd_effect={distribution = normal, prediction = rx_pred_effect, errorModel=proportional(pdadd__err), autoCorrCoef = r}")),
-               "rx_prd_effect = {distribution=normal, prediction=rx_pred_effect, errorModel = proportional(pdadd__err), autoCorrCoef=r}")
+               "rx_prd_effect = {distribution=normal, prediction=rx_pred_effect, errorModel=proportional(pdadd__err), autoCorrCoef=r}")
 })
 
 test_that("min/max works with logitnorm", {
   expect_equal(as.character(.longDef("Effect = {distribution=logitNormal, min=0, max=100, prediction=E, errorModel=constant(a)}")),
-               "Effect = {distribution=logitnormal, prediction=E, min=0, max=100, errorModel = constant(a)}")
+               "Effect = {distribution=logitnormal, prediction=E, min=0, max=100, errorModel=constant(a)}")
 })

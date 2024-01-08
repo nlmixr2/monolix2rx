@@ -311,7 +311,7 @@ as.character.monolix2rxLongDef <- function(x, ...) {
                                    paste0(.asCharacterSingleOrList("min", .lst$min),
                                           .asCharacterSingleOrList("max", .lst$max)),
                                    ""),
-                            ", errorModel = ",
+                            ", errorModel=",
                             .err$errName, "(", paste(.v, collapse=", "), ")",
                             .asCharacterSingleOrList("autoCorrCoef", .lst$autocor),
                             "}")

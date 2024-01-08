@@ -46,8 +46,8 @@
       
       DEFINITION:
       ; parsed: $MODEL$LONGITUDINAL$DEFINITION
-      rx_prd_cp = {distribution = normal, prediction = rx_pred_cp, errorModel = combined2(pkadd__err, prop__err)}
-      rx_prd_effect = {distribution = normal, prediction = rx_pred_effect, errorModel = constant(pdadd__err)}
+      rx_prd_cp = {distribution=normal, prediction=rx_pred_cp, errorModel=combined2(pkadd__err, prop__err)}
+      rx_prd_effect = {distribution=normal, prediction=rx_pred_effect, errorModel=constant(pdadd__err)}
       
       PK:
       ; parsed: $MODEL$LONGITUDINAL$PK
