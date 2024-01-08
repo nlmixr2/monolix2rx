@@ -20,7 +20,7 @@ regressorLine: identifier '=' '{' 'use' '=' 'regressor' '}';
 contLine: identifier '=' '{' 'use' '=' 'covariate' ',' 'type' '=' 'continuous' '}';
 catLine: identifier '=' '{' 'use' '=' 'covariate' ',' 'type' '=' 'categorical' '}';
 
-ytypeType: char_t1 | char_t2 | identifier | constant;
+ytypeType: char_t1 | char_t2 | identifier | number;
 ytypeOp1: 'ytype' '='  ytypeType;
 ytypeOp2: 'ytype' '=' '{' ytypeType (',' ytypeType)* '}';
 ytypeOp: ytypeOp1 | ytypeOp2;
@@ -72,6 +72,7 @@ statement: idLine singleLineComment?
     | obsLine singleLineComment?
     ;
 
+number: ('+' | '-')? constant;
 constant : decimalint | float1 | float2;
 decimalint: "0|([1-9][0-9]*)" $term -1;
 float1: "([0-9]+.[0-9]*|[0-9]*.[0-9]+)([eE][\-\+]?[0-9]+)?" $term -2;

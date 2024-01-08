@@ -20,7 +20,7 @@ pkmodel2: '{' identifier ',' identifier '}' '=' 'pkmodel' '(' pkparsE (',' pkpar
 
 cmtOp: 'cmt' '=' decimalint;
 amtOp: 'amount' '=' identifier;
-vOp:   'volume' '=' (identifier | constant);
+vOp:   'volume' '=' (identifier | number);
 cpOp:  'concentration' '=' identifier;
 cmtOps: cmtOp | amtOp | vOp | cpOp;
 cmtLine: 'compartment'  '(' cmtOps (',' cmtOps)* ')';
@@ -91,6 +91,7 @@ statement: pkmodel1 singleLineComment?
     | codeLine singleLineComment?
     ;
 
+number: ('+' | '-' )? constant;
 constant : decimalint | float1 | float2;
 decimalint: "0|([1-9][0-9]*)" $term -1;
 float1: "([0-9]+.[0-9]*|[0-9]*.[0-9]+)([eE][\-\+]?[0-9]+)?" $term -2;

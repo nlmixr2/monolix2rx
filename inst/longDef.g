@@ -7,7 +7,7 @@ predOp: 'prediction' '=' identifier;
 distType: 'logNormal' | 'logitNormal' | 'normal' | 'lognormal' | 'logitnormal';
 distOp: 'distribution' '=' distType;
 
-errPar: constant | identifier;
+errPar: number | identifier;
 
 combined1: 'combined1' '(' errPar ',' errPar ')';
 combined2: 'combined2' '(' errPar ',' errPar ')';
@@ -27,13 +27,13 @@ errModels: proportional
          ;
 errOp: 'errorModel' '=' errModels;
 
-autoCorPar: constant | identifier;
+autoCorPar: number | identifier;
 autoCorOp: 'autoCorrCoef' '=' autoCorPar;
 
-minVal: constant;
+minVal: number;
 minOp: 'min' '=' minVal;
 
-maxVal: constant;
+maxVal: number;
 maxOp: 'max' '=' maxVal;
 
 
@@ -44,8 +44,8 @@ endpoint: identifier '=' '{' endpointOp (',' endpointOp)*'}';
 eventTypes: 'exact' | 'intervalCensored';
 eventTypeOp: 'eventType' '=' eventTypes;
 maxEventNumberOp: 'maxEventNumber' '=' decimalint;
-rightCensoringTimeOp: 'rightCensoringTime' '=' constant;
-intervalLengthOp: 'intervalLength' '=' constant;
+rightCensoringTimeOp: 'rightCensoringTime' '=' number;
+intervalLengthOp: 'intervalLength' '=' number;
 hazardOp: 'hazard' '=' identifier;
 
 tteOps: eventTypeOp | maxEventNumberOp | rightCensoringTimeOp | intervalLengthOp | hazardOp;
@@ -53,7 +53,7 @@ tteOps: eventTypeOp | maxEventNumberOp | rightCensoringTimeOp | intervalLengthOp
 tte: identifier '=' '{' 'type' '=' 'event' (',' tteOps)* '}';
 
 
-pIn: identifier ('=' | '<=' | '==' | '>=' | '~=' | '!=') ( identifier | constant);
+pIn: identifier ('=' | '<=' | '==' | '>=' | '~=' | '!=') ( identifier | number);
 pOut: 'P(' pIn ('|' pIn)? ')';
 pTrans0: 'log(P(' | 'logit(P(' | 'probit(P(';
 pTrans: pTrans0 pIn ('|' pIn)? '))';
@@ -83,6 +83,7 @@ statement: endpoint singleLineComment?
     | count singleLineComment?
     ;
 
+number: ('+' | '-')? constant;
 constant : decimalint | float1 | float2;
 decimalint: "0|([1-9][0-9]*)" $term -1;
 float1: "([0-9]+.[0-9]*|[0-9]*.[0-9]+)([eE][\-\+]?[0-9]+)?" $term -2;

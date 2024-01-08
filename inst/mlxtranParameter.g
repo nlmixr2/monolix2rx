@@ -4,13 +4,14 @@ statement_list :
 
 methodOp: 'method' '=' ('MLE' | 'FIXED' | 'fixed' | 'Fixed' | 'mle' | 'Mle' | 'MAP' | 'Map' | 'map');
 
-estLineMlx: identifier '=' '{' 'value' '=' constant (',' methodOp)? '}';
-estLine2: identifier '=' constant;
+estLineMlx: identifier '=' '{' 'value' '=' number (',' methodOp)? '}';
+estLine2: identifier '=' number;
 
 statement: estLineMlx singleLineComment?
     | estLine2 singleLineComment?
     ;
 
+number: ('-' | '+')? constant;
 constant : decimalint | float1 | float2;
 decimalint: "0|([1-9][0-9]*)" $term -1;
 float1: "([0-9]+.[0-9]*|[0-9]*.[0-9]+)([eE][\-\+]?[0-9]+)?" $term -2;

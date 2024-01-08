@@ -9,8 +9,8 @@ distribution: 'distribution' '=' ('normal' | 'logNormal' | 'lognormal' | 'probit
 typicalVar: 'typical' '=' identifier;
 meanVar: 'mean' '=' identifier;
 
-typicalFixed: 'typical' '=' constant;
-meanFixed: 'mean' '=' constant;
+typicalFixed: 'typical' '=' number;
+meanFixed: 'mean' '=' number;
 
 typicalOption: (typicalVar | typicalFixed | meanVar | meanFixed);
 
@@ -19,21 +19,21 @@ covariateSingleOp: 'covariate' '=' covId;
 covariateMultOp: 'covariate' '=' '{' covId (',' covId)* '}';
 covariateOp: covariateSingleOp | covariateMultOp;
 
-coefItem: identifier | constant;
-coefItemL: identifier | constant;
+coefItem: identifier | number;
+coefItemL: identifier | number;
 
 coeffSingle: 'coefficient' '=' coefItem;
 coeffList: '{' coefItemL (',' coefItemL)* '}';
 coeffComplex: 'coefficient' '=' '{' (coefItem | coeffList) (',' (coefItem | coeffList))* '}';
 coeffOp: coeffSingle | coeffComplex;
 
-sdItem: identifier | constant;
+sdItem: identifier | number;
 
 sdList: '{' sdItem (',' sdItem)* '}';
 sdOp: 'sd' '=' sdItem;
 sdLstItem: 'sd' '=' sdList;
 
-varItem: identifier | constant;
+varItem: identifier | number;
 varOp: 'var' '=' varItem;
 varList: '{' varItem (',' varItem)* '}';
 varLstItem: 'var' '=' varList;
@@ -49,8 +49,8 @@ iovOp1: 'varlevel' '=' '{' iovItemVL (',' iovItemVL)* '}';
 iovOp2: 'varlevel' '='  iovItemVL;
 iovOp: iovOp1 | iovOp2;
 
-minVal: 'min' '=' constant;
-maxVal: 'max' '=' constant;
+minVal: 'min' '=' number;
+maxVal: 'max' '=' number;
 
 otherOptions: typicalOption | varOption | covariateOp | coeffOp | iovOp;
 logitOptions: otherOptions | minVal | maxVal ;
@@ -71,6 +71,7 @@ statement: distLine singleLineComment?
     | corLine singleLineComment?
     ;
 
+number: ('+' | '-')? constant;
 constant : decimalint | float1 | float2;
 decimalint: "0|([1-9][0-9]*)" $term -1;
 float1: "([0-9]+.[0-9]*|[0-9]*.[0-9]+)([eE][\-\+]?[0-9]+)?" $term -2;

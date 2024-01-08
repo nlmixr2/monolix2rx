@@ -6,7 +6,7 @@ charOp1: identifier '=' identifier;
 charOp2: identifier '=' (char_t1 | char_t2);
 
 logicalOp: identifier '=' ('yes' | 'no');
-numOp: identifier '=' constant;
+numOp: identifier '=' number;
 
 char_t1: "\'([^\'\\]|\\[^])*\'";
 char_t2: "\"([^\"\\]|\\[^])*\"";
@@ -17,6 +17,7 @@ statement: charOp1 singleLineComment?
     | numOp singleLineComment?
     ;
 
+number: ('+' | '-')? constant;
 constant : decimalint | float1 | float2;
 decimalint: "0|([1-9][0-9]*)" $term -1;
 float1: "([0-9]+.[0-9]*|[0-9]*.[0-9]+)([eE][\-\+]?[0-9]+)?" $term -2;
