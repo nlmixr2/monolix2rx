@@ -20,27 +20,11 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .mlxtranParseItem <- function(l) {
+  l <- trimws(l)
   .begin <- 1
   .end <- .nc <- nchar(l)
-
   .f <- substr(l, .begin, .begin)
-  while (.f %in% c(" ", "\t")) {
-    .begin <- .begin + 1
-    if (.begin > .nc) {
-      .mlxtranLine(l)
-      return(invisible())
-    }
-    .f <- substr(l, .begin, .begin)
-  }
   .e <- substr(l, .end, .end)
-  while (.e %in% c(" ", "\t")) {
-    .end <- .end - 1
-    if (.end < 1) {
-      .mlxtranLine(l)
-      return(invisible())
-    }
-    .e <- substr(l, .begin, .begin)
-  }
   if (.f == "<" && .e == ">") {
     .mlxtranSection(substr(l, .begin + 1, .end - 1))
     return(invisible())
