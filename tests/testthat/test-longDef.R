@@ -211,3 +211,12 @@ test_that("min/max works with logitnorm", {
   expect_equal(as.character(.longDef("Effect = {distribution=logitNormal, min=0, max=100, prediction=E, errorModel=constant(a)}")),
                "Effect = {distribution=logitnormal, prediction=E, min=0, max=100, errorModel=constant(a)}")
 })
+
+
+test_that("event with missing comma works, even though it technically is malformed", {
+  expect_equal(as.character(.longDef("Event = {type=event, hazard = h
+  eventType=intervalCensored,
+  intervalLength=5     ; used for the graphics (not mandatory)
+}")),
+"Event = {type=event, eventType=intervalCensored, intervalLength=5, hazard=h}")
+})

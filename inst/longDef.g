@@ -38,7 +38,7 @@ maxOp: 'max' '=' maxVal;
 
 
 endpointOp: distOp | errOp | predOp | autoCorOp | maxOp | minOp;
-endpoint: identifier '=' '{' endpointOp (',' endpointOp)*'}';
+endpoint: identifier '=' '{' endpointOp (','? endpointOp)*'}';
 
 
 eventTypes: 'exact' | 'intervalCensored';
@@ -50,7 +50,7 @@ hazardOp: 'hazard' '=' identifier;
 
 tteOps: eventTypeOp | maxEventNumberOp | rightCensoringTimeOp | intervalLengthOp | hazardOp;
 
-tte: identifier '=' '{' 'type' '=' 'event' (',' tteOps)* '}';
+tte: identifier '=' '{' 'type' '=' 'event' (','? tteOps)* '}';
 
 
 pIn: identifier ('=' | '<=' | '==' | '>=' | '~=' | '!=') ( identifier | number);
@@ -67,11 +67,13 @@ dependenceLine: 'dependence' '=' 'Markov';
 codeLine: (dependenceLine | pLine | logicLine )+;
 
 
+
+
 categoriesInt: decimalint;
-categoriesOp: 'categories' '=' '{' categoriesInt (',' categoriesInt)* '}';
+categoriesOp: 'categories' '=' '{' categoriesInt (','? categoriesInt)* '}';
 
 
-catOps: (',' categoriesOp | ','? codeLine);
+catOps: (','? categoriesOp | ','? codeLine);
 
 categorical: identifier '=' '{' 'type' '=' 'categorical' (catOps)* '}';
 
