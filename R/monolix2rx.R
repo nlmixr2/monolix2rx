@@ -111,7 +111,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"), envir=
                   "(",
                   endpoint$err$typical[1],
                   ifelse(endpoint$dist == "logitnormal",
-                         paste0(", " endpoint$min, ", ", endpoint$max),
+                         paste0(", ", endpoint$min, ", ", endpoint$max),
                          ""),
                   ") | ",
                   endpoint$var))

@@ -34,7 +34,7 @@ Sex = {type=categorical, categories={M, F}}")
   tmp2 <- list(use1 = c(identifier = "ID", time = "TIME", eventidentifier = "EVID",
                         amount = "AMT", interdoseinterval = NA, censored = NA, limit = NA,
                         observationtype = "YTYPE", administration = "ADM", steadystate = NA,
-                        observation = "DV", occasion=NA, rate=NA),
+                        observation = "DV", occasion=NA, rate=NA, additionaldose=NA),
                cont = c("WT", "CRCL"),
                cat = list(Race = list(cat = c("Caucasian", "Black", "Latin"),
                                       quote = c(FALSE, FALSE, FALSE)),
@@ -73,7 +73,7 @@ limit = {use=limit}")
   tmp2 <- list(use1 = c(identifier = "ID", time = "TIME", eventidentifier = "EVID",
                         amount = "AMT", interdoseinterval = "II", censored = "cens", limit = "limit",
                         observationtype = "YTYPE", administration = "ADM", steadystate = "SS", observation = "DV",
-                        occasion=NA, rate=NA),
+                        occasion=NA, rate=NA, additionaldose=NA),
                cont = c("WT", "CRCL"),
                cat = list(Race = list(cat = c("Caucasian", "Black", "Latin"),
                                      quote = c(FALSE, FALSE, FALSE)),
@@ -142,4 +142,9 @@ test_that("use rate", {
 test_that("use ytype", {
   expect_equal(as.character(.content("Y = {use=observation, name={y1, y2, y3}, ytype={1, 2, 3}, type={continuous, continuous, continuous}}")),
                "Y = {use=observation, name={y1, y2, y3}, ytype={1, 2, 3}, type={continuous, continuous, continuous}}")
+})
+
+test_that("use addl = {use=additionaldose}", {
+  expect_equal(as.character(.content("addl={use=additionaldose}")),
+               "addl = {use=additionaldose}")
 })

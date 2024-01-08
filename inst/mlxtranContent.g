@@ -2,6 +2,7 @@
 statement_list :
         (statement)+ ;
 
+addlLine: identifier '=' '{' 'use' '=' 'additionaldose' '}';
 idLine: identifier '=' '{' 'use' '=' 'identifier' '}';
 timeLine: identifier '=' '{' 'use' '=' 'time' '}';
 evidLine: identifier '=' '{' 'use' '=' 'eventidentifier' '}';
@@ -52,6 +53,7 @@ catId: identifier | char_t1 | char_t2;
 catCov: identifier '=' '{' 'type' '=' 'categorical' ',' 'categories' '=' '{' catId (',' catId)*   '}' '}';
 
 statement: idLine singleLineComment?
+    | addlLine singleLineComment?
     | timeLine singleLineComment?
     | evidLine singleLineComment?
     | amtLine singleLineComment?
