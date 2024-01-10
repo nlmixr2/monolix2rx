@@ -53,12 +53,12 @@
   file.rename(devtools::package_file("src/longDef.g.d_parser.c"),
               devtools::package_file("src/longDef.g.d_parser.h"))
 
-  message("Update Parser c for <MODEL> [INDIVIDUAL] PK:")
-  dparser::mkdparse(devtools::package_file("inst/mlxtranPk.g"),
-                    devtools::package_file("src/"),
-                    grammar_ident="mlxtranPk")
-  file.rename(devtools::package_file("src/mlxtranPk.g.d_parser.c"),
-              devtools::package_file("src/mlxtranPk.g.d_parser.h"))
+  ## message("Update Parser c for <MODEL> [INDIVIDUAL] PK:")
+  ## dparser::mkdparse(devtools::package_file("inst/mlxtranPk.g"),
+  ##                   devtools::package_file("src/"),
+  ##                   grammar_ident="mlxtranPk")
+  ## file.rename(devtools::package_file("src/mlxtranPk.g.d_parser.c"),
+  ##             devtools::package_file("src/mlxtranPk.g.d_parser.h"))
 
   message("Update Parser c for <PARAMETER>")
   dparser::mkdparse(devtools::package_file("inst/mlxtranParameter.g"),

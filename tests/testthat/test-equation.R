@@ -111,3 +111,34 @@ ddt_dx = -x-dx", pk)
   expect_error(.equation("ddt_x = ka*x-k*rem(tau)", pk), "rem")
 
 })
+
+test_that("mixing pk and equation", {
+
+  tmp <- .equation("Cc = pkmodel(Tlag,ka,V,Cl)
+  E_0 = Rin/kout
+  ddt_E= Rin*(1-Cc/(Cc+IC50)) - kout*E")
+
+  expect_equal(tmp$rx,
+               c("d/dt(cmt1d) <-  - ka*cmt1d",
+                 "alag(cmt1d) <- Tlag",
+                 "d/dt(cmt1) <-  + ka*cmt1d - Cl/V*cmt1",
+                 "Cc <- cmt1/V",
+                 "E(0) <- Rin / kout",
+                 "d/dt(E) <- Rin * (1 - Cc / (Cc + IC50)) - kout * E"))
+
+})
+
+test_that("wsmm mixture not supported", {
+  expect_error(.equation("f = wsmm(f1, p, f2, 1-p)"),
+               "wssm")
+})
+
+test_that("wsmm", {
+  expect_error(.equation("f = wsmm(f1, p, f2, 1-p)"),
+               "wssm")
+})
+
+test_that("bsmm", {
+  expect_error(.equation("M = bsmm(M1,p1,M2,1-p1)"),
+               "bsmm")
+})

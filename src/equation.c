@@ -241,6 +241,20 @@ int equation_function_name(char *name,  D_ParseNode *pn) {
     }
     sAppend(&curLine, "%s", v);
     return 1;
+  } else if (!strcmp("bssm_fun", name)) {
+    sClear(&sbTransErr);
+    sAppend(&sbTransErr, "bssm() not supported in translation");
+    updateSyntaxCol();
+    trans_syntax_error_report_fn0(sbTransErr.s);
+    finalizeSyntaxError();
+    return 1;
+  } else if (!strcmp("wsmm_fun", name)) {
+    sClear(&sbTransErr);
+    sAppend(&sbTransErr, "wsmm() not supported in translation");
+    updateSyntaxCol();
+    trans_syntax_error_report_fn0(sbTransErr.s);
+    finalizeSyntaxError();
+    return 1;
   }
   return 0;
 }
@@ -264,6 +278,157 @@ int equation_if(char *name,  D_ParseNode *pn, int i) {
   return 0;
 }
 
+int mlxtran_pk_process_pkmodel1(const char* name, D_ParseNode *pn, int i) {
+  if (!strcmp("pkmodel1", name)) {
+    if (i == 0) {
+      D_ParseNode *xpn = d_get_child(pn, 0);
+      char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+      monolix2rxSingle(v, ".pkSetCc");
+      monolix2rxSingle("pkmodel", ".pkSetStatement");
+      return 1;
+    } else if (i == 1 && i == 2) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+int mlxtran_pk_process_pkmodel2(const char* name, D_ParseNode *pn, int i) {
+  if (!strcmp("pkmodel2", name)) {
+    if (i == 0) {
+      D_ParseNode *xpn = d_get_child(pn, 1);
+      char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+      monolix2rxSingle(v, ".pkSetCc");
+      xpn = d_get_child(pn, 3);
+      v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+      monolix2rxSingle(v, ".pkSetCe");
+      monolix2rxSingle("pkmodel", ".pkSetStatement");
+      return 1;
+    } else if (i == 1 && i == 2 && i == 3 && i == 4 && i == 5 && i == 6) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+int mlxtran_pk_process_declarePars(const char* name, D_ParseNode *pn, int i) {
+  if (i == 0 &&
+      (!strcmp("pkpars", name) ||
+       !strcmp("pkparsE", name) ||
+       !strcmp("ke0Op", name) ||
+       !strcmp("TlagOp", name) ||
+       !strcmp("pOp", name) ||
+       !strcmp("Tk0Op", name) ||
+       !strcmp("kaOp", name) ||
+       !strcmp("KtrOp", name) ||
+       !strcmp("ktOp", name) ||
+       !strcmp("MttOp", name) ||
+       !strcmp("kOp", name) ||
+       !strcmp("clOp", name) ||
+       !strcmp("vmOp", name) ||
+       !strcmp("kmOp", name))) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    // check for '=' and call par declare followed by assign if found.
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    char *v2 = v;
+    while (v2[0] != 0 && v2[0] != '=') {
+      v2++;
+    }
+    if (v2[0] == '=') {
+      // This argument was somehow missed by the parser
+      v2[0] = 0;
+      monolix2rxSingle(v, ".pkParDeclare");
+      // take off white space for second argument
+      v2++;
+      while (v2[0] == ' ' || v2[0] == '\t') {
+        v2++;
+      }
+      v = v2;
+      while (v[0] != 0) {
+        v++;
+      }
+      v--;
+      while (v[0] == ' ' || v[0] == '\t') {
+        v[0] = 0;
+        v--;
+      }
+      monolix2rxSingle(v2, ".pkParAssign");
+    } else {
+      monolix2rxSingle(v, ".pkParDeclare");
+    }
+    return 1;
+  }
+  return 0;
+}
+
+int mlxtran_pk_process_eqExpr(const char* name, D_ParseNode *pn) {
+  if (!strcmp("eqExpr", name)) {
+    D_ParseNode *xpn = d_get_child(pn, 1);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxSingle(v, ".pkParAssign");
+    return 1;
+  }
+  return 0;
+}
+
+int mlxtran_pk_process_strict_ops(const char *name, D_ParseNode *pn) {
+  // option = value types
+  if (!strcmp("cmtOp", name) ||
+      !strcmp("amtOp", name) ||
+      !strcmp("vOp", name) ||
+      !strcmp("cpOp", name) ||
+      !strcmp("fromOp", name) ||
+      !strcmp("toOp", name) ||
+      !strcmp("targetOp", name)) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxSingle(v, ".pkParDeclare");
+    xpn = d_get_child(pn, 2);
+    v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxSingle(v, ".pkParAssign");
+    return 1;
+  } else if (!strcmp("admOp", name)) {
+    monolix2rxSingle("adm", ".pkParDeclare");
+    D_ParseNode *xpn = d_get_child(pn, 2);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxSingle(v, ".pkParAssign");
+    return 1;
+  }
+  return 0;
+}
+
+int mlxtran_pk_process_knum(const char *name, D_ParseNode *pn) {
+  if (!strcmp(name, "kNN") ||
+      !strcmp(name, "kN_N")) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s+1, xpn->end);
+    monolix2rxSingle(v, ".pkSetK");
+    return 1;
+  }
+  return 0;
+}
+
+
+int mlxtran_pk_process_setStatement(const char* name, D_ParseNode *pn, int i) {
+  if (i == 0 &&
+      (!strcmp("cmtLine", name) ||
+       !strcmp("peripLine", name) ||
+       !strcmp("effectLine", name) ||
+       !strcmp("transferLine", name) ||
+       !strcmp("depotLine", name) ||
+       !strcmp("absorptionLine", name) ||
+       !strcmp("ivLine", name) ||
+       !strcmp("emptyLine", name) ||
+       !strcmp("resetLine", name) ||
+       !strcmp("eliminationLine", name))) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxSingle(v, ".pkSetStatement");
+    return 1;
+  }
+  return 0;
+}
+
 int equation_handle_odeType(char *name,  D_ParseNode *pn) {
   if (!strcmp(name, "odeType")) {
     D_ParseNode *xpn = d_get_child(pn, 2);
@@ -280,14 +445,24 @@ void wprint_parsetree_equation(D_ParserTables pt, D_ParseNode *pn, int depth, pr
       equation_logic_operators(name, pn) ||
       equation_identifier_or_constant(name, pn) ||
       equation_function_name(name,  pn) ||
-      equation_handle_odeType(name, pn)) {
+      equation_handle_odeType(name, pn) ||
+      mlxtran_pk_process_strict_ops(name, pn) ||
+      mlxtran_pk_process_eqExpr(name, pn) ||
+      mlxtran_pk_process_knum(name, pn)) {
     return;
   }
   int nch = d_get_number_of_children(pn);
   if (nch != 0) {
     int needEnd=0, needEnd2=0;
     for (int i = 0; i < nch; i++) {
+      if (mlxtran_pk_process_pkmodel2(name, pn, i) ||
+          mlxtran_pk_process_pkmodel1(name, pn, i) ||
+          mlxtran_pk_process_setStatement(name, pn, i) ||
+          mlxtran_pk_process_declarePars(name, pn, i)) {
+        continue;
+      }
       if (i == 0 && !strcmp("assignment", name)) {
+        sClear(&curLine);
         const char *none="";
         curDdt=rc_dup_str(none, none);
         D_ParseNode *xpn = d_get_child(pn, 0);
@@ -354,10 +529,10 @@ void trans_equation(const char* parse){
   finalizeSyntaxError();
 }
 
-SEXP _monolix2rx_trans_equation(SEXP in) {
+SEXP _monolix2rx_trans_equation(SEXP in, SEXP what) {
   sClear(&curLine);
   sClear(&firstErr);
-  record = "[LONGITUDINAL] EQUATION:";
+  record = R_CHAR(STRING_ELT(what, 0));
   trans_equation(R_CHAR(STRING_ELT(in, 0)));
   parseFree(0);
   return R_NilValue;

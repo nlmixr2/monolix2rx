@@ -11,9 +11,30 @@
   if (is.null(pk)) pk <- .pk("")
   if (is.character(pk)) pk <- .pk(pk)
   .monolix2rx$pk <- .pk2rx(pk)
-  .Call(`_monolix2rx_trans_equation`, text)
+  # Apparently pk macros can also be in the EQUATION: block
+  .pkIni(TRUE)
+  .Call(`_monolix2rx_trans_equation`, text, "[LONGITUDINAL] EQUATION:")
+  .pkPushStatement()
+  .validatePkModel(.monolix2rx$pkPars, .monolix2rx$pkCe)
+  .pk2 <- list(Cc=.monolix2rx$pkCc,
+               Ce=.monolix2rx$pkCe,
+               pkmodel=.monolix2rx$pkPars,
+               compartment=.monolix2rx$pkCmt,
+               peripheral=.monolix2rx$pkPerip,
+               effect=.monolix2rx$pkEffect,
+               transfer=.monolix2rx$pkTransfer,
+               depot=.monolix2rx$pkDepot,
+               oral=.monolix2rx$pkOral,
+               iv=.monolix2rx$pkIv,
+               empty=.monolix2rx$pkEmpty,
+               reset=.monolix2rx$pkReset,
+               elimination=.monolix2rx$pkElimination,
+               admd=.monolix2rx$admd)
+  class(.pk2) <- "monolix2rxPk"
+  .pk3 <- .pk2rx(.pk2)
   .ret <- list(monolix=text,
                rx=c(.monolix2rx$pk$pk,
+                    .pk3$pk,
                     .monolix2rx$equationLine,
                     .monolix2rx$pk$equation$endLines),
                odeType=.monolix2rx$odeType)

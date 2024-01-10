@@ -283,6 +283,7 @@
     .pkIni(FALSE)
     return(invisible())
   }
+  return(invisible())
 }
 #' Validate the pkmodel
 #'
@@ -335,7 +336,7 @@
 #' @author Matthew L. Fidler
 .pk <- function(text) {
   .pkIni(TRUE)
-  if (text != "") .Call(`_monolix2rx_trans_mlxtran_pk`, text)
+  if (text != "") .Call(`_monolix2rx_trans_equation`, text, "[LONGITUDINAL] EQUATION:")
   .pkPushStatement()
   .validatePkModel(.monolix2rx$pkPars, .monolix2rx$pkCe)
   .ret <- list(Cc=.monolix2rx$pkCc,
@@ -434,6 +435,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .pkAssignBasedOnValue <- function(par, val) {
+  pkPars <- curCmt <- curPerip <- curEffect <- curTransfer <- curDepot <- NULL
   if (.monolix2rx$pkStatement == "pkmodel") {
     .pkAssignBasedOnValue0(pkPars, par, val)
     return(invisible(TRUE))
@@ -458,6 +460,7 @@
     .pkAssignBasedOnValue0(curDepot, par, val)
     return(invisible(TRUE))
   }
+  curOral <- curIv <- curEmpty <- curReset <- curElimination <- NULL
   if (.monolix2rx$pkStatement == "oral") {
     .pkAssignBasedOnValue0(curOral, par, val)
     return(invisible(TRUE))

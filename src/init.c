@@ -13,10 +13,9 @@
 void R_init_monolix2rx(DllInfo *info) {
   R_CallMethodDef callMethods[]  = {
     {"_monolix2rx_trans_summaryData", (DL_FUNC) &_monolix2rx_trans_summaryData, 1},
-    {"_monolix2rx_trans_equation", (DL_FUNC) &_monolix2rx_trans_equation, 1},
+    {"_monolix2rx_trans_equation", (DL_FUNC) &_monolix2rx_trans_equation, 2},
     {"_monolix2rx_trans_mlxtrantask", (DL_FUNC) &_monolix2rx_trans_mlxtrantask, 1},
     {"_monolix2rx_trans_longoutput", (DL_FUNC) &_monolix2rx_trans_longoutput, 1},
-    {"_monolix2rx_trans_mlxtran_pk", (DL_FUNC) &_monolix2rx_trans_mlxtran_pk, 1},
     {"_monolix2rx_trans_mlxtran_op", (DL_FUNC) &_monolix2rx_trans_mlxtran_op, 2},
     {"_monolix2rx_trans_fit", (DL_FUNC) &_monolix2rx_trans_fit, 1},
     {"_monolix2rx_trans_longdef", (DL_FUNC) &_monolix2rx_trans_longdef, 1},

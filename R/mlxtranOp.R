@@ -66,7 +66,7 @@ as.character.monolix2rxOp <- function(x, ...) {
 
 #' @export
 print.monolix2rxOp <- function(x, ...) {
-  cat(paste(as.character.monolix2rxOp(x, ..), collapse="\n"), "\n", sep="")
+  cat(paste(as.character.monolix2rxOp(x, ...), collapse="\n"), "\n", sep="")
   invisible(x)
 }
 
