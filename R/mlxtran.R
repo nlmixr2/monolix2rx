@@ -24,6 +24,15 @@
   l <- trimws(l)
   .begin <- 1
   .end <- .nc <- nchar(l)
+  if (.nc >= 12) {
+    if (substr(l, 1, 12) == "DESCRIPTION:") {
+      .mlxEnv$isDesc <- TRUE
+      if (.nc >= 14) {
+        .mlxEnv$desc <- .mlxtranPasteLine(.mlxEnv$desc, trimws(substr(l, 13, .nc)))
+      }
+      return(invisible())
+    }
+  }
   .f <- substr(l, .begin, .begin)
   .e <- substr(l, .end, .end)
   if (.f == "<" && .e == ">") {
