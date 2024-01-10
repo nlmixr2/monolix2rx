@@ -101,6 +101,11 @@
         .ret$MODEL$LONGITUDINAL$OUTPUT <- .longOut(.ret$MODEL$LONGITUDINAL$OUTPUT)
       }
     }
+    if (!is.null(.ret$MODEL$POPULATION)) {
+      if (!is.null(.ret$MODEL$POPULATION$DEFINITION)) {
+        .ret$MODEL$POPULATION$DEFINITION <- .popDef(.ret$MODEL$POPULATION$DEFINITION)
+      }
+    }
   }
   if (!is.null(.ret$MONOLIX)) {
     if (!is.null(.ret$MONOLIX$SETTINGS)) {
@@ -115,6 +120,7 @@
       .ret$MONOLIX$TASKS$TASKS <- .task(.ret$MONOLIX$TASKS$TASKS)
     }
   }
+
   if (update && !is.null(.ret$PARAMETER)) {
     .ret <- .parameterUpdate(.ret)
   }
