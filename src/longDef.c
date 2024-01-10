@@ -257,17 +257,6 @@ int longdef_process_categoriesInt(const char *name, D_ParseNode *pn) {
   return 0;
 }
 
-int longdef_process_codeLine(const char *name, D_ParseNode *pn) {
-  if (!strcmp("pLine", name) ||
-      !strcmp("logicLine", name) ||
-      !strcmp("dependenceLine", name)) {
-    char *v = (char*)rc_dup_str(pn->start_loc.s, pn->end);
-    monolix2rxLongDefSetCodeLine(v);
-    return 1;
-  }
-  return 0;
-}
-
 int longdef_process_count(const char *name, D_ParseNode *pn, int i) {
   if (i == 0 && !strcmp("count", name)) {
     D_ParseNode *xpn = d_get_child(pn, 0);
@@ -335,7 +324,6 @@ void wprint_parsetree_longdef(D_ParserTables pt, D_ParseNode *pn, int depth, pri
       longdef_process_rightCensoringTime(name, pn) ||
       longdef_process_intervalLength(name, pn) ||
       longdef_process_categoriesInt(name, pn) ||
-      longdef_process_codeLine(name, pn) ||
       longdef_process_autocor(name, pn) ||
       longdef_process_max(name, pn) ||
       longdef_process_min(name, pn) ||

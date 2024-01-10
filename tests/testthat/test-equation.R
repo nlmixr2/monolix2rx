@@ -130,12 +130,12 @@ test_that("mixing pk and equation", {
 
 test_that("wsmm mixture not supported", {
   expect_error(.equation("f = wsmm(f1, p, f2, 1-p)"),
-               "wssm")
+               "wsmm")
 })
 
-test_that("wsmm", {
-  expect_error(.equation("f = wsmm(f1, p, f2, 1-p)"),
-               "wssm")
+test_that("bsmm", {
+  expect_error(.equation("f = bsmm(f1, p, f2, 1-p)"),
+               "bsmm")
 })
 
 test_that("bsmm", {

@@ -597,6 +597,4 @@ empty(adm=3, target=Ap)")
   expect_error(.pk("Cc = pkmodel(Tlag, ka, p, V, Vm, Km, k12, k21, k13, k31, ke0)"))
 
   expect_error(.pk("peripheral(k2_13, k13_2, k14_4)"))
-
-
 })

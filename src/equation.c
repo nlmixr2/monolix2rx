@@ -241,9 +241,9 @@ int equation_function_name(char *name,  D_ParseNode *pn) {
     }
     sAppend(&curLine, "%s", v);
     return 1;
-  } else if (!strcmp("bssm_fun", name)) {
+  } else if (!strcmp("bsmm_fun", name)) {
     sClear(&sbTransErr);
-    sAppend(&sbTransErr, "bssm() not supported in translation");
+    sAppend(&sbTransErr, "bsmm() not supported in translation");
     updateSyntaxCol();
     trans_syntax_error_report_fn0(sbTransErr.s);
     finalizeSyntaxError();

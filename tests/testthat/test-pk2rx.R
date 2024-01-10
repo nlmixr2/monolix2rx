@@ -319,3 +319,8 @@ depot(target=Ac3, p=p3, Tlag=tlag3)")
                     rhsDepot = list()))
 
 })
+
+test_that("pkmodel translation", {
+  .pkm <- .pk("{Cc,Ce} = pkmodel(Tlag, Tk0, k=Cl/Vol, V=Vol, ke0)")
+  expect_error(.pk2rx(.pkm), NA)
+})

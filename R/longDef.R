@@ -42,17 +42,6 @@
   }
   .monolix2rx$categoriesInt <- c(.monolix2rx$categoriesInt, .i)
 }
-
-#' Push a code line for error models that support them
-#'
-#' @param var code line
-#' @return nothing, called for side effects
-#' @noRd
-#' @author Matthew L. Fidler
-.setCodeLine <- function(var) {
-  .monolix2rx$codeLine <- c(.monolix2rx$codeLine, var)
-}
-
 #' Push all code lines for error models that support them
 #'
 #' @param allCode -- all code lines

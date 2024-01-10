@@ -28,8 +28,7 @@
     return(pk)
   }
   .pkmodel <- pk$pkmodel
-  .macro <- paste0("compartment(cmt=1, volume=", ifelse(.pkmodel["V"] == "", "V",
-                                                        paste0("V=",.pkmodel["V"])),
+  .macro <- paste0("compartment(cmt=1, volume=", ifelse(.pkmodel["V"] == "", "V", .pkmodel["V"]),
                    ", concentration=",
                    pk$Cc, ")")
   if (!is.na(.pkmodel["ka"]) || !is.na(.pkmodel["Tk0"])) {

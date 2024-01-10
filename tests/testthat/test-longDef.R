@@ -88,8 +88,7 @@ logit(P(level <=2)) = th1 + th2 + th3}")
 }")
 
   expect_equal(as.character(tmp),
-               "Level = {type=categorical, categories={1, 2, 3},\nlogit(P(Level<=1)) = lp1\nlogit(P(Level<=2)) = lp2}"
-)
+               "Level = {type=categorical, categories={1, 2, 3},\nlogit(P(Level<=1)) = lp1\n            logit(P(Level<=2)) = lp2}")
 
 
   tmp2 <- list(endpoint = list(list(var = "Level",
@@ -97,7 +96,7 @@ logit(P(level <=2)) = th1 + th2 + th3}")
                                     pred = NA_character_,
                                     err = list(categories = 1:3,
                                                code = c("logit(P(Level<=1)) = lp1",
-                                                        "logit(P(Level<=2)) = lp2")),
+                                                        "            logit(P(Level<=2)) = lp2")),
                                     autocor=character(0))),
                fixed = numeric(0))
   class(tmp2) <- "monolix2rxLongDef"

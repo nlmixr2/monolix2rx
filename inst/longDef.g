@@ -52,30 +52,13 @@ tteOps: eventTypeOp | maxEventNumberOp | rightCensoringTimeOp | intervalLengthOp
 
 tte: identifier '=' '{' 'type' '=' 'event' (','? tteOps)* '}';
 
-
-pIn: identifier ('=' | '<=' | '==' | '>=' | '~=' | '!=') ( identifier | number);
-pOut: 'P(' pIn ('|' pIn)? ')';
-pTrans0: 'log(P(' | 'logit(P(' | 'probit(P(';
-pTrans: pTrans0 pIn ('|' pIn)? '))';
-pFull: pTrans | pOut;
-
-tLine: 'transitionRate(' decimalint ',' decimalint ')';
-
-pLine: (pFull | identifier | tLine ) '=' "[^\n},;]*";
-logicLine: ('if' | 'else' | 'end' | 'elseif') "^[\n},;]*";
-dependenceLine: 'dependence' '=' 'Markov';
-codeLine: (dependenceLine | pLine | logicLine )+;
-
-
-
-
 categoriesInt: decimalint;
 categoriesOp: 'categories' '=' '{' categoriesInt (','? categoriesInt)* '}';
 
 
-catOps: (','? categoriesOp | ','? codeLine);
+catOps: (','? categoriesOp);
 
-categorical: identifier '=' '{' 'type' '=' 'categorical' (catOps)* '}';
+categorical: identifier '=' '{' 'type' '=' 'categorical' (catOps)*  ','? allCode '}';
 
 allCode: "[^}]+";
 
