@@ -88,6 +88,14 @@
     }
   }
   if (!is.null(.ret$MODEL)) {
+    if (!is.null(.ret$MODEL$COVARIATE)) {
+      if (!is.null(.ret$MODEL$COVARIATE$COVARIATE)) {
+        .ret$MODEL$COVARIATE$COVARIATE <- .ind(.ret$MODEL$COVARIATE$COVARIATE)
+      }
+      if (!is.null(.ret$MODEL$COVARIATE$DEFINITION)) {
+        .ret$MODEL$COVARIATE$DEFINITION <- .longDef(.ret$MODEL$COVARIATE$DEFINITION)
+      }
+    }
     if (!is.null(.ret$MODEL$INDIVIDUAL)) {
       .ret$MODEL$INDIVIDUAL$INDIVIDUAL <- .ind(.ret$MODEL$INDIVIDUAL$INDIVIDUAL)
       if (!is.null(.ret$MODEL$INDIVIDUAL$DEFINITION)) {
@@ -123,6 +131,12 @@
       }
       if (!is.null(.ret$MONOLIX$SETTINGS$POPULATION)) {
         .ret$MONOLIX$SETTINGS$POPULATION <- .mlxtranOp(.ret$MONOLIX$SETTINGS$POPULATION, "<MONOLIX> [SETTINGS] POPULATION:")
+      }
+      if (!is.null(.ret$MONOLIX$SETTINGS$LL)) {
+        .ret$MONOLIX$SETTINGS$LL <- .mlxtranOp(.ret$MONOLIX$SETTINGS$LL, "<MONOLIX> [SETTINGS] LL:")
+      }
+      if (!is.null(.ret$MONOLIX$SETTINGS$INDIVIDUAL)) {
+        .ret$MONOLIX$SETTINGS$INDIVIDUAL <- .mlxtranOp(.ret$MONOLIX$SETTINGS$INDIVIDUAL, "<MONOLIX> [SETTINGS] INDIVIDUAL:")
       }
     }
     if (!is.null(.ret$MONOLIX$TASKS$TASKS)) {
