@@ -308,6 +308,129 @@ int longdef_process_allCode(const char *name, D_ParseNode *pn) {
   return 0;
 }
 
+int longdef_process_transformLine(const char *name, D_ParseNode *pn, int i) {
+  if (i == 0 && !strcmp("transformLine", name)) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxSingle(v, ".longDefSetTransformTo");
+    return 1;
+  }
+  return 0;
+}
+int longdef_process_transformCatDef1(const char *name, D_ParseNode *pn) {
+  if (!strcmp("transformCatDef1", name)) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    int quote = 0;
+    if (v[0] == '\'' || v[0] == '"') {
+      quote=1;
+      v++;
+      char *v2 = v;
+      while(v2[0] != 0) {
+        v2++;
+      }
+      v2--;
+      v2[0] =0;
+    }
+    monolix2rxDoubleI(v, quote, ".longDefSetTransformLabel");
+    xpn = d_get_child(pn, 2);
+    v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    quote = 0;
+    if (v[0] == '\'' || v[0] == '"') {
+      quote=1;
+      v++;
+      char *v2 = v;
+      while(v2[0] != 0) {
+        v2++;
+      }
+      v2--;
+      v2[0] =0;
+    }
+    monolix2rxDoubleI(v, quote, ".longDefSetTransformValue");
+    monolix2rxSingleI(0, ".longDefSetTransformB");
+    return 1;
+  }
+  return 0;
+}
+
+int longdef_process_transformCatDef2(const char *name, D_ParseNode *pn) {
+  if (!strcmp("transformCatDef2", name)) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    int quote = 0;
+    if (v[0] == '\'' || v[0] == '"') {
+      quote=1;
+      v++;
+      char *v2 = v;
+      while(v2[0] != 0) {
+        v2++;
+      }
+      v2--;
+      v2[0] =0;
+    }
+    monolix2rxDoubleI(v, quote, ".longDefSetTransformLabel");
+    xpn = d_get_child(pn, 3);
+    v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    quote = 0;
+    if (v[0] == '\'' || v[0] == '"') {
+      quote=1;
+      v++;
+      char *v2 = v;
+      while(v2[0] != 0) {
+        v2++;
+      }
+      v2--;
+      v2[0] =0;
+    }
+    monolix2rxDoubleI(v, quote, ".longDefSetTransformValue");
+    monolix2rxSingleI(1, ".longDefSetTransformB");
+    return 1;
+  }
+  return 0;
+}
+
+int longdef_process_transformOpRef(const char *name, D_ParseNode *pn) {
+  if (!strcmp("transformOpRef", name)) {
+    D_ParseNode *xpn = d_get_child(pn, 2);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    int quote = 0;
+    if (v[0] == '\'' || v[0] == '"') {
+      quote=1;
+      v++;
+      char *v2 = v;
+      while(v2[0] != 0) {
+        v2++;
+      }
+      v2--;
+      v2[0] =0;
+    }
+    monolix2rxDoubleI(v, quote, ".longDefSetTransformRef");
+    return 1;
+  }
+  return 0;
+}
+int longdef_process_transformOpTrans(const char *name, D_ParseNode *pn) {
+  if (!strcmp("transformOpTrans", name)) {
+    D_ParseNode *xpn = d_get_child(pn, 2);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    int quote = 0;
+    if (v[0] == '\'' || v[0] == '"') {
+      quote=1;
+      v++;
+      char *v2 = v;
+      while(v2[0] != 0) {
+        v2++;
+      }
+      v2--;
+      v2[0] =0;
+    }
+    monolix2rxDoubleI(v, quote, ".longDefSetTransformFrom");
+    return 1;
+  }
+  return 0;
+}
+
+
 void wprint_parsetree_longdef(D_ParserTables pt, D_ParseNode *pn, int depth, print_node_fn_t fn, void *client_data) {
   char *name = (char*)pt.symbols[pn->symbol].name;
   if (longdef_process_distOp(name, pn) ||
@@ -327,7 +450,11 @@ void wprint_parsetree_longdef(D_ParserTables pt, D_ParseNode *pn, int depth, pri
       longdef_process_autocor(name, pn) ||
       longdef_process_max(name, pn) ||
       longdef_process_min(name, pn) ||
-      longdef_process_allCode(name, pn)
+      longdef_process_allCode(name, pn) ||
+      longdef_process_transformCatDef1(name, pn) ||
+      longdef_process_transformCatDef2(name, pn) ||
+      longdef_process_transformOpRef(name, pn) ||
+      longdef_process_transformOpTrans(name, pn)
       ) {
     return;
   }
@@ -337,7 +464,8 @@ void wprint_parsetree_longdef(D_ParserTables pt, D_ParseNode *pn, int depth, pri
       if (longdef_process_endpoint(name, pn, i) ||
           longdef_process_tte(name, pn, i) ||
           longdef_process_categorical(name, pn, i) ||
-          longdef_process_count(name, pn, i)) {
+          longdef_process_count(name, pn, i) ||
+          longdef_process_transformLine(name, pn, i)) {
         continue; // process next args
       }
       D_ParseNode *xpn = d_get_child(pn, i);
@@ -370,10 +498,10 @@ void trans_longdef(const char* parse){
   finalizeSyntaxError();
 }
 
-SEXP _monolix2rx_trans_longdef(SEXP in) {
+SEXP _monolix2rx_trans_longdef(SEXP in, SEXP wh) {
   sClear(&curLine);
   sClear(&firstErr);
-  record = "[LONGITUDINAL] DEFINITION:";
+  record = R_CHAR(STRING_ELT(wh, 0));
   trans_longdef(R_CHAR(STRING_ELT(in, 0)));
   parseFree(0);
   return R_NilValue;

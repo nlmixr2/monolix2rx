@@ -64,12 +64,34 @@ allCode: "[^}]+";
 
 count: identifier '=' '{' 'type' '=' 'count' ','? allCode '}';
 
+// tSex =
+// {
+//     transform = sex,
+//     categories = {
+//         'F' = {'0'},
+//         'M' = {'1'}  },
+//     reference = 'M'
+// }
+
+transformItem: char_t1 | char_t2 | number | identifier;
+transformOpTrans: 'transform' '=' transformItem;
+transformOpRef: 'reference' '=' transformItem;
+transformCatDef1:  transformItem '=' transformItem;
+transformCatDef2: transformItem '=' '{' transformItem '}';
+transformCatDef: transformCatDef1 | transformCatDef2;
+transformCatOp: 'categories' '=' '{' transformCatDef (','? transformCatDef)* '}';
+transformOp: transformOpTrans | transformOpRef | transformCatDef1 | transformCatDef2 | transformCatOp;
+transformLine: identifier '=' '{' transformOp (','? transformOp)* '}';
+
 statement: endpoint singleLineComment?
     | tte singleLineComment?
     | categorical singleLineComment?
     | count singleLineComment?
+    | transformLine singleLineComment?
     ;
 
+char_t1: "\'([^\'\\]|\\[^])*\'";
+char_t2: "\"([^\"\\]|\\[^])*\"";
 number: ('+' | '-')? constant;
 constant : decimalint | float1 | float2;
 decimalint: "0|([1-9][0-9]*)" $term -1;

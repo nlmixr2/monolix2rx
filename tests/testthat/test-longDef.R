@@ -231,3 +231,39 @@ end
 log(P(Event=k)) = lpk
 }")), "Event = {type=count,\nif k>0\n  lpk = - HAZ + k*log(HAZ) - factln(k)\nelse\n  lpk = -HAZ\nend\nlog(P(Event=k)) = lpk}")
 })
+
+
+test_that("covariate transform", {
+
+  tmp <- .longDef(" tSex = {
+     transform = 'sex',
+     categories = {
+        'F' = {'0'},
+         'M' = {'1'}  },
+    reference = 'M'}")
+
+  expect_equal(as.character(tmp),
+               "tSex = {transform='sex', categories={'F'={'0'}, 'M'={'1'}}, reference='M'}")
+
+  tmp <- .longDef(" tSex = {
+     transform = sex,
+     categories = {
+        F = {0},
+         M = {1}  },
+    reference = M}")
+
+
+  expect_equal(as.character(tmp),
+               "tSex = {transform=sex, categories={F={0}, M={1}}, reference=M}")
+
+  tmp <- .longDef(" tSex = {
+     transform = sex,
+     categories = {
+        F = 0,
+        'M' = '1'  },
+    reference = M}")
+
+  expect_equal(as.character(tmp),
+               "tSex = {transform=sex, categories={F=0, 'M'='1'}, reference=M}")
+
+})

@@ -19,9 +19,20 @@
   .monolix2rx$intervalLength <- NA_real_
   .monolix2rx$categoriesInt <- integer(0)
   .monolix2rx$codeLine <- character(0)
+  .monolix2rx$transformTo <- character(0)
+  .monolix2rx$transformFrom <- character(0)
+  .monolix2rx$transformQ <- character(0)
+  .monolix2rx$transformCatB <- logical(0)
+  .monolix2rx$transformCatLabel <- character(0)
+  .monolix2rx$transformCatLabelQ <- logical(0)
+  .monolix2rx$transformCatValue <- character(0)
+  .monolix2rx$transformCatValueQ <- logical(0)
+  .monolix2rx$transformReference <- character(0)
+  .monolix2rx$transformReferenceQ <- logical(0)
   if (full) {
     .monolix2rx$defFixed <- numeric(0)
     .monolix2rx$longDef <- NULL
+    .monolix2rx$longDefTransform <- NULL
   }
 }
 #' Set the categories integer vector
@@ -94,12 +105,15 @@
 #' @return longDef definition
 #' @noRd
 #' @author Matthew L. Fidler
-.longDef <- function(text) {
+.longDef <- function(text, where="[LONGITUDINAL] DEFINITION:") {
   .longDefIni(TRUE)
-  .Call(`_monolix2rx_trans_longdef`,  text)
+  .Call(`_monolix2rx_trans_longdef`,  text, where)
   .pushEndpoint()
   .ret <- list(endpoint=.monolix2rx$longDef,
                fixed=.monolix2rx$defFixed)
+  if (!is.null(.monolix2rx$longDefTransform)) {
+    .ret$transform <- .monolix2rx$longDefTransform
+  }
   class(.ret) <- "monolix2rxLongDef"
   .longDefIni(TRUE)
   .ret
@@ -111,6 +125,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .pushEndpoint <- function() {
+  .reset <- FALSE
   if (!is.na(.monolix2rx$varName)) {
     if (.monolix2rx$dist == "event") {
       .err <- list(eventType=.monolix2rx$eventType,
@@ -136,8 +151,24 @@
                      max=.monolix2rx$max))
     }
     .monolix2rx$longDef <- c(.monolix2rx$longDef, list(.end))
-    .longDefIni(FALSE)
+    .reset <- TRUE
   }
+  if (length(.monolix2rx$transformTo) == 1L && length(.monolix2rx$transformFrom) == 1L) {
+    .val <- list(transform = .monolix2rx$transformFrom,
+                 transformQ=.monolix2rx$transformQ,
+                 catLabel=.monolix2rx$transformCatLabel,
+                 catLabelQ=.monolix2rx$transformCatLabelQ,
+                 catValue=.monolix2rx$transformCatValue,
+                 catValueQ=.monolix2rx$transformCatValueQ,
+                 catB=.monolix2rx$transformCatB,
+                 reference = .monolix2rx$transformReference,
+                 referenceQ = .monolix2rx$transformReferenceQ)
+    .val <- list(.val)
+    names(.val) <- .monolix2rx$transformTo
+    .monolix2rx$longDefTransform <- c(.monolix2rx$longDefTransform, .val)
+    .reset <- TRUE
+  }
+  if (.reset) .longDefIni(FALSE)
 }
 #' Interfaces with the parser to add an endpoint
 #'
@@ -275,48 +306,105 @@
 .longDefSetMax <- function(var) {
   .monolix2rx$max <- as.numeric(var)
 }
+.longDefSetTransformTo <- function(var) {
+  .monolix2rx$transformTo <- var
+}
+.longDefSetTransformFrom <- function(var, q) {
+  .monolix2rx$transformFrom <- var
+  .monolix2rx$transformQ <- as.logical(q)
+}
+.longDefSetTransformLabel <- function(var, q) {
+  .monolix2rx$transformCatLabel <- c(.monolix2rx$transformCatLabel, var)
+  .monolix2rx$transformCatLabelQ <- c(.monolix2rx$transformCatLabelQ, as.logical(q))
+}
+.longDefSetTransformValue <- function(var, q) {
+  .monolix2rx$transformCatValue <- c(.monolix2rx$transformCatValue, var)
+  .monolix2rx$transformCatValueQ <- c(.monolix2rx$transformCatValueQ, as.logical(q))
+}
+.longDefSetTransformB <- function(q) {
+  .monolix2rx$transformCatB <- c(.monolix2rx$transformCatB, as.logical(q))
+}
+
+.longDefSetTransformB <- function(q) {
+  .monolix2rx$transformCatB <- c(.monolix2rx$transformCatB, as.logical(q))
+}
+.longDefSetTransformRef <- function(var, q) {
+  .monolix2rx$transformReference <- var
+  .monolix2rx$transformReferenceQ <- as.logical(q)
+}
 
 #' @export
 as.character.monolix2rxLongDef <- function(x, ...) {
-  vapply(seq_along(x$endpoint),
-         function(i) {
-           .lst <- x$endpoint[[i]]
-           if (.lst$dist == "event") {
-             .err <- .lst$err
-             .ret <- paste0(.lst$var, " = {type=event",
-                            .asCharacterSingleOrList("eventType", .err$eventType),
-                            .asCharacterSingleOrList("maxEventNumber", .err$maxEventNumber),
-                            .asCharacterSingleOrList("rightCensoringTime", .err$rightCensoringTime),
-                            .asCharacterSingleOrList("intervalLength", .err$intervalLength))
-             .ret <- paste0(.ret, ", hazard=", .lst$pred)
-             .ret <- paste0(.ret, "}")
-           } else if (.lst$dist == "categorical") {
-             .err <- .lst$err
-             .ret <- paste0(.lst$var, " = {type=categorical",
-                            .asCharacterSingleOrList("categories", .err$categories),
-                            ",\n", paste(.err$code, collapse="\n"), "}")
-           } else if (.lst$dist == "count") {
-             .err <- .lst$err
-             .ret <- paste0(.lst$var, " = {type=count")
-             .ret <- paste0(.ret,
-                            ",\n", paste(.err$code, collapse="\n"), "}")
-           } else  {
-             .err <- .lst$err
-             .v <- .varOrFixed(.err$typical, x$fixed)
-             .ret <- paste0(.lst$var, " = {",
-                            .asCharacterSingleOrList("distribution", .lst$dist, comma=""),
-                            .asCharacterSingleOrList("prediction", .lst$pred),
-                            ifelse(.lst$dist == "logitnormal",
-                                   paste0(.asCharacterSingleOrList("min", .lst$min),
-                                          .asCharacterSingleOrList("max", .lst$max)),
-                                   ""),
-                            ", errorModel=",
-                            .err$errName, "(", paste(.v, collapse=", "), ")",
-                            .asCharacterSingleOrList("autoCorrCoef", .lst$autocor),
-                            "}")
-           }
-         }, character(1),
-         USE.NAMES=FALSE)
+  .ret <- vapply(seq_along(x$endpoint),
+                 function(i) {
+                   .lst <- x$endpoint[[i]]
+                   if (.lst$dist == "event") {
+                     .err <- .lst$err
+                     .ret <- paste0(.lst$var, " = {type=event",
+                                    .asCharacterSingleOrList("eventType", .err$eventType),
+                                    .asCharacterSingleOrList("maxEventNumber", .err$maxEventNumber),
+                                    .asCharacterSingleOrList("rightCensoringTime", .err$rightCensoringTime),
+                                    .asCharacterSingleOrList("intervalLength", .err$intervalLength))
+                     .ret <- paste0(.ret, ", hazard=", .lst$pred)
+                     .ret <- paste0(.ret, "}")
+                   } else if (.lst$dist == "categorical") {
+                     .err <- .lst$err
+                     .ret <- paste0(.lst$var, " = {type=categorical",
+                                    .asCharacterSingleOrList("categories", .err$categories),
+                                    ",\n", paste(.err$code, collapse="\n"), "}")
+                   } else if (.lst$dist == "count") {
+                     .err <- .lst$err
+                     .ret <- paste0(.lst$var, " = {type=count")
+                     .ret <- paste0(.ret,
+                                    ",\n", paste(.err$code, collapse="\n"), "}")
+                   } else  {
+                     .err <- .lst$err
+                     .v <- .varOrFixed(.err$typical, x$fixed)
+                     .ret <- paste0(.lst$var, " = {",
+                                    .asCharacterSingleOrList("distribution", .lst$dist, comma=""),
+                                    .asCharacterSingleOrList("prediction", .lst$pred),
+                                    ifelse(.lst$dist == "logitnormal",
+                                           paste0(.asCharacterSingleOrList("min", .lst$min),
+                                                  .asCharacterSingleOrList("max", .lst$max)),
+                                           ""),
+                                    ", errorModel=",
+                                    .err$errName, "(", paste(.v, collapse=", "), ")",
+                                    .asCharacterSingleOrList("autoCorrCoef", .lst$autocor),
+                                    "}")
+                   }
+                 }, character(1),
+                 USE.NAMES=FALSE)
+  if (!is.null(x$transform)) {
+    .ret <- c(.ret,
+              vapply(names(x$transform),
+                     function(n) {
+                       .cur <- x$transform[[n]]
+                       .transform <- .cur$transform
+                       if (.cur$transformQ) .transform <- paste0("'", .transform, "'")
+                       .ret <- paste0(n, " = {transform=", .transform)
+                       if (length(.cur$catLabel) > 0L) {
+                         .ret <- paste0(.ret, ", categories={")
+                         .ret0 <- vapply(seq_along(.cur$catLabel),
+                                         function(i){
+                                           .lab <- .cur$catLabel[i]
+                                           if (.cur$catLabelQ[i]) .lab <- paste0("'", .lab, "'")
+                                           .val <- .cur$catValue[i]
+                                           if (.cur$catValueQ[i]) .val <- paste0("'", .val, "'")
+                                           if (.cur$catB[i]) .val <- paste0("{", .val, "}")
+                                           paste0(.lab, "=", .val)
+                                         }, character(1), USE.NAMES = FALSE)
+                         .ret <-paste0(.ret, paste(.ret0, collapse=", "), "}")
+                         if (length(.cur$reference) == 1L) {
+                           .reference <- .cur$reference
+                           if (.cur$referenceQ) .reference <- paste0("'", .reference, "'")
+                           .ret <- paste0(.ret, ", reference=", .reference)
+                         }
+                       }
+                       paste0(.ret, "}")
+                     },
+                     character(1), USE.NAMES = FALSE))
+  }
+  .ret
 }
 
 #' @export

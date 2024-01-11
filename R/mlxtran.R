@@ -96,7 +96,8 @@
         .ret$MODEL$COVARIATE$COVARIATE <- .ind(.ret$MODEL$COVARIATE$COVARIATE)
       }
       if (!is.null(.ret$MODEL$COVARIATE$DEFINITION)) {
-        .ret$MODEL$COVARIATE$DEFINITION <- .longDef(.ret$MODEL$COVARIATE$DEFINITION)
+        .ret$MODEL$COVARIATE$DEFINITION <- .longDef(.ret$MODEL$COVARIATE$DEFINITION,
+                                                    "<MODEL> [COVARIATE] DEFINITION:")
       }
     }
     if (!is.null(.ret$MODEL$INDIVIDUAL)) {
