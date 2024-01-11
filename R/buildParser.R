@@ -103,7 +103,6 @@
   file.rename(devtools::package_file("src/dataSettings.g.d_parser.c"),
               devtools::package_file("src/dataSettings.g.d_parser.h"))
 
-
   invisible("")
 }
 ## nocov end

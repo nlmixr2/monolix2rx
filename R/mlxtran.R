@@ -86,6 +86,9 @@
     if (!is.null(.ret$DATAFILE$CONTENT)) {
       .ret$DATAFILE$CONTENT$CONTENT <- .content(.ret$DATAFILE$CONTENT$CONTENT)
     }
+    if (!is.null(.ret$DATAFILE$SETTINGS)) {
+      .ret$DATAFILE$SETTINGS$SETTINGS <- .dataSettings(.ret$DATAFILE$SETTINGS$SETTINGS)
+    }
   }
   if (!is.null(.ret$MODEL)) {
     if (!is.null(.ret$MODEL$COVARIATE)) {
