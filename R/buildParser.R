@@ -95,6 +95,15 @@
   file.rename(devtools::package_file("src/summaryData.g.d_parser.c"),
               devtools::package_file("src/summaryData.g.d_parser.h"))
 
+  message("Update Parser c for <DATAFILE> [SETTINGS]")
+
+  dparser::mkdparse(devtools::package_file("inst/dataSettings.g"),
+                    devtools::package_file("src/"),
+                    grammar_ident="dataSettings")
+  file.rename(devtools::package_file("src/dataSettings.g.d_parser.c"),
+              devtools::package_file("src/dataSettings.g.d_parser.h"))
+
+
   invisible("")
 }
 ## nocov end
