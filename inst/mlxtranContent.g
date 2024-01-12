@@ -10,7 +10,7 @@ amtLine: identifier '=' '{' 'use' '=' 'amount' '}';
 iiLine: identifier '=' '{' 'use' '=' 'interdoseinterval' '}';
 censLine: identifier '=' '{' 'use' '=' 'censored' '}';
 limitLine: identifier '=' '{' 'use' '=' 'limit' '}';
-ytypeLine: identifier '=' '{' 'use' '=' 'observationtype' '}';
+ytypeLine: identifier '=' '{' 'use' '=' ('observationtype' | 'observationType') '}';
 admLine: identifier '=' '{' 'use' '=' 'administration' '}';
 occLine: identifier '=' '{' 'use' '=' 'occasion' '}';
 rateLine: identifier '=' '{' 'use' '=' 'rate' '}';
