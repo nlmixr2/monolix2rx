@@ -5,6 +5,10 @@ statement_list :
 charOp1: identifier '=' identifier;
 charOp2: identifier '=' (char_t1 | char_t2);
 
+all_val: char_t1 | char_t2 | identifier | number;
+
+listOp: identifier '=' '{' all_val (','? all_val)* '}';
+
 logicalOp: identifier '=' ('yes' | 'no');
 numOp: identifier '=' number;
 
@@ -15,6 +19,7 @@ statement: charOp1 singleLineComment?
     | charOp2 singleLineComment?
     | logicalOp singleLineComment?
     | numOp singleLineComment?
+    | listOp singleLineComment?
     ;
 
 number: ('+' | '-')? constant;

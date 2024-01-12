@@ -30,4 +30,9 @@ test_that("mlxtranOp", {
 
   expect_equal(.tmp, .tmp2)
 
+  .tmp <- .mlxtranOp("abc = {a, 'b', 1}")
+
+  expect_equal(as.character(.tmp),
+               "abc = {a, 'b', 1}")
+
 })
