@@ -65,7 +65,7 @@
   # Add file entries
   if (!is.null(.mlxEnv$lst$MODEL$LONGITUDINAL)) {
     .long <- .longitudinal(.mlxEnv$lst$MODEL$LONGITUDINAL$LONGITUDINAL)
-    .file <- .long$file
+    .file <- .mlxtranLib(.long$file)
     if (file.exists(.file)) {
       .m2 <- c("<MODEL>",
                suppressWarnings(readLines(.file)))
