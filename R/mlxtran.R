@@ -44,8 +44,11 @@
     return(invisible())
   }
   if (.e == ":") {
-    .mlxtranSubsubsection(substr(l, .begin, .end - 1))
-    return(invisible())
+    .sec <- substr(l, .begin, .end - 1)
+    if (toupper(.sec) == .sec) {
+      .mlxtranSubsubsection(.sec)
+      return(invisible())
+    }
   }
   .mlxtranLine(l)
   return(invisible())
