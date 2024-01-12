@@ -90,7 +90,7 @@ transformOpRef: 'reference' '=' transformItem;
 transformCatDef1:  transformItem '=' transformItem;
 transformCatDef2: transformItem '=' '{' transformItem '}';
 transform3Val: transformItem;
-transformCatDef3: transformItem '=' '{' transformItem (','? transform3Val)* '}';
+transformCatDef3: transformItem '=' '{' transformItem (','? transform3Val)+ '}';
 transformCatDef: transformCatDef1 | transformCatDef2 | transformCatDef3;
 transformCatOp: 'categories' '=' '{' transformCatDef (','? transformCatDef)* '}';
 transformOp: transformOpTrans | transformOpRef | transformCatDef1 | transformCatDef2 | transformCatOp;
