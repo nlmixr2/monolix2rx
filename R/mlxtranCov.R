@@ -6,7 +6,8 @@
 #' @noRd
 .mlxtranCovLin <- function(mlx) {
   .exportPath <- mlx$MONOLIX$SETTINGS$GLOBAL$exportpath
-  if (!file.exists(.exportPath)) return(NULL)
+  .try <- try(file.exists(.exportPath), silent=TRUE)
+  if (!isTRUE(.try)) return(NULL)
   .covLin <- file.path(.exportPath, "FisherInformation", "covarianceEstimatesLin.txt")
   if (!file.exists(.covLin)) return(NULL)
   .c <- read.csv(.covLin, header=FALSE)
@@ -23,7 +24,8 @@
 #' @author Matthew L. Fidler
 .mlxtranCovSA <- function(mlx) {
   .exportPath <- mlx$MONOLIX$SETTINGS$GLOBAL$exportpath
-  if (!file.exists(.exportPath)) return(NULL)
+  .try <- try(file.exists(.exportPath), silent=TRUE)
+  if (!isTRUE(.try)) return(NULL)
   .covSA <- file.path(.exportPath, "FisherInformation", "covarianceEstimatesSA.txt")
   if (!file.exists(.covSA)) return(NULL)
   .c <- read.csv(.covSA, header=FALSE)

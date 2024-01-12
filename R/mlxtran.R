@@ -53,29 +53,7 @@
   .mlxtranLine(l)
   return(invisible())
 }
-#' This applies mlxtran to a set of lines
-#'
-#' @param lines a character vector representing a set of lines to parse
-#' @param equation when TRUE, try to parse equation too
-#' @param update when TRUE, try to update the initial estimates to the final estimates
-#' @return a mlxtran object
-#' @noRd
-#' @author Matthew L. Fidler
-.mlxtran <- function(lines, equation=FALSE,
-                     update=FALSE) {
-  .mlxtranIni()
-  lapply(lines, .mlxtranParseItem)
-  # Add file entries
-  if (!is.null(.mlxEnv$lst$MODEL$LONGITUDINAL)) {
-    .long <- .longitudinal(.mlxEnv$lst$MODEL$LONGITUDINAL$LONGITUDINAL)
-    .file <- .mlxtranLib(.long$file)
-    if (file.exists(.file)) {
-      .m2 <- c("<MODEL>",
-               suppressWarnings(readLines(.file)))
-      lapply(.m2, .mlxtranParseItem)
-    }
-  }
-  .ret <- .mlxEnv$lst
+.mlxtranFinalize <- function(.ret, equation=FALSE, update=FALSE) {
   if (!is.null(.ret$DATA_FORMATTING)) {
     if (!is.null(.ret$DATA_FORMATTING$FILEINFO$FILEINFO)) {
       .ret$DATA_FORMATTING$FILEINFO$FILEINFO <- .fileinfo(.ret$DATA_FORMATTING$FILEINFO$FILEINFO)
@@ -169,6 +147,26 @@
   attr(.ret, "desc") <- .mlxEnv$desc
   class(.ret) <- "monolix2rxMlxtran"
   .ret
+}
+#' This applies mlxtran to a set of lines
+#'
+#' @param lines a character vector representing a set of lines to parse
+#' @param equation when TRUE, try to parse equation too
+#' @param update when TRUE, try to update the initial estimates to the final estimates
+#' @return a mlxtran object
+#' @noRd
+#' @author Matthew L. Fidler
+.mlxtran <- function(lines, equation=FALSE,
+                     update=FALSE) {
+  .mlxtranIni()
+  lapply(lines, .mlxtranParseItem)
+  # Add file entries
+  if (!is.null(.mlxEnv$lst$MODEL$LONGITUDINAL)) {
+    .long <- .longitudinal(.mlxEnv$lst$MODEL$LONGITUDINAL$LONGITUDINAL)
+    .file <- .long$file
+    mlxTxt(.long$file,  retFile=TRUE)
+  }
+  .mlxtranFinalize(.mlxEnv$lst, equation=equation, update=update)
 }
 #' Paste together lines, ignoring empty ones and adding \n between substantial lines
 #'

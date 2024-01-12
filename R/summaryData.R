@@ -9,7 +9,8 @@
   attr(mlxtran, "dfObs") <- .monolix2rx$dfObs
   attr(mlxtran, "obsLst") <- .monolix2rx$obsLst
   attr(mlxtran, "ndose") <- .monolix2rx$ndose
-  if (!file.exists(.exportPath)) {
+  .try <- try(file.exists(.exportPath), silent = TRUE)
+  if (!isTRUE(.try)) {
     return(mlxtran)
   }
   .summary <- file.path(.exportPath, "summary.txt")

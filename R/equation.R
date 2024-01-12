@@ -6,6 +6,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .equation <- function(text, pk=NULL) {
+  if (inherits(text, "monolix2rxEquation")) return(text)
   .monolix2rx$equationLine <- character(0)
   .monolix2rx$odeType <- "nonStiff"
   if (is.null(pk)) pk <- .pk("")
@@ -117,3 +118,29 @@ print.monolix2rxCovEq <- print.monolix2rxEquation
 
 #' @export
 as.list.monolix2rxCovEq <- as.list.monolix2rxEquation
+
+#' Get equation block from a Monolix model txt file
+#'
+#' @param file string representing the model text file.  Can be
+#'   lib:fileName.txt if library setup/available
+#'
+#' @param retFile boolean that tells `mlxTxt()` to return the file
+#'   name instead of error if the file does not exist
+#'
+#' @return parsed equation or file name
+#' @export
+#' @author Matthew L. Fidler
+#' @examples
+mlxTxt <- function(file, retFile=FALSE) {
+  if (!retFile) .mlxtranIni()
+  .f <- .mlxtranLib(file)
+  if (file.exists(.f)) {
+    .m2 <- c("<MODEL>",
+             suppressWarnings(readLines(.f)))
+    lapply(.m2, .mlxtranParseItem)
+    if (retFile) return(file)
+    return(.mlxtranFinalize(.mlxEnv$lst, equation=TRUE, update=FALSE))
+  }
+  if (retFile) return(file)
+  stop("could not find the file for getting model text")
+}
