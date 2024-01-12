@@ -5,7 +5,7 @@ statement_list :
 inpId: identifier;
 input1Line: 'input' '=' inpId;
 inputLine: 'input' '=' '{' inpId (',' inpId)* '}';
-catId: identifier | char_t1 | char_t2 | number;
+catId: identifier | char_t1 | char_t2 | number | "[^ '\",\t\n}]+";
 catCov: identifier '=' '{' 'type' '=' 'categorical' ',' 'categories' '=' '{' catId (',' catId)*   '}' '}';
 regressorLine: identifier '=' '{' 'use' '=' 'regressor' '}';
 

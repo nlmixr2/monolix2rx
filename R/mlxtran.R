@@ -134,12 +134,14 @@
       if (!is.null(.ret$MONOLIX$SETTINGS$INDIVIDUAL)) {
         .ret$MONOLIX$SETTINGS$INDIVIDUAL <- .mlxtranOp(.ret$MONOLIX$SETTINGS$INDIVIDUAL, "<MONOLIX> [SETTINGS] INDIVIDUAL:")
       }
+      if (!is.null(.ret$MONOLIX$SETTINGS$REPORTING)) {
+        .ret$MONOLIX$SETTINGS$REPORTING <- .mlxtranOp(.ret$MONOLIX$SETTINGS$REPORTING, "<MONOLIX> [SETTINGS] REPORTING:")
+      }
     }
     if (!is.null(.ret$MONOLIX$TASKS$TASKS)) {
       .ret$MONOLIX$TASKS$TASKS <- .task(.ret$MONOLIX$TASKS$TASKS)
     }
   }
-
   if (update && !is.null(.ret$PARAMETER)) {
     .ret <- .parameterUpdate(.ret)
   }
