@@ -2,7 +2,7 @@
 statement_list :
         (statement)+ ;
 
-methodOp: 'method' '=' ('MLE' | 'FIXED' | 'fixed' | 'Fixed' | 'mle' | 'Mle' | 'MAP' | 'Map' | 'map');
+methodOp: 'method' '=' ('MLE' | 'FIXED' | 'fixed' | 'Fixed' | 'mle' | 'Mle' | 'MAP' | 'Map' | 'map' | 'BAYES' | 'bayes' | 'Bayes');
 
 estLineMlx: identifier '=' '{' 'value' '=' number (',' methodOp)? '}';
 estLine2: identifier '=' number;
