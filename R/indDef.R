@@ -46,6 +46,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .indDefFinalize <- function() {
+  .pushCoefList()
   .addIndDefItem()
   .indDef <- list(vars=.monolix2rx$defItems,
                   fixed=.monolix2rx$defFixed,
@@ -272,7 +273,7 @@ as.character.monolix2rxIndDef <- function(x, ...) {
       if (length(.cur$coef) > 1L) {
         .ret <- paste0(.ret, "{")
       }
-      .ret <- paste(.ret,
+      .ret <- paste0(.ret,
                     paste(vapply(seq_along(.cur$coef),
                                  function(i) {
                                    .cv <- .varOrFixed(.cur$coef[[i]], x$fixed)
@@ -359,6 +360,7 @@ as.list.monolix2rxIndDef <- function(x, ...) {
 #' @noRd
 #' @author Matthew L. Fidler
 .addVar <- function(var) {
+  .pushCoefList()
   .addIndDefItem()
   .monolix2rx$varName <- var
 }

@@ -101,12 +101,12 @@ test_that("misc tests", {
   .tmp <- .indDef("V = {distribution=lognormal, covariate=Race, coefficient={0, beta_V_Race_Black, beta_V_Race_Latin},typical=V_pop, sd=omega_V }")
 
   expect_equal(as.character(.tmp),
-               "V = {distribution=lognormal, typical=V_pop, covariate=Race, coefficient= {0, beta_V_Race_Black, beta_V_Race_Latin}, sd=omega_V}")
+               "V = {distribution=lognormal, typical=V_pop, covariate=Race, coefficient={0, beta_V_Race_Black, beta_V_Race_Latin}, sd=omega_V}")
 
   .tmp <- .indDef("ka = {distribution=lognormal,typical=ka_pop, covariate={Race, Wt}, coefficient={{0, beta_ka_Race_Black, beta_ka_Race_Latin},beta_ka_Wt}, no-variability}")
 
   expect_equal(as.character(.tmp),
-               "ka = {distribution=lognormal, typical=ka_pop, covariate={Race, Wt}, coefficient={ {0, beta_ka_Race_Black, beta_ka_Race_Latin}, beta_ka_Wt}, no-variability}")
+               "ka = {distribution=lognormal, typical=ka_pop, covariate={Race, Wt}, coefficient={{0, beta_ka_Race_Black, beta_ka_Race_Latin}, beta_ka_Wt}, no-variability}")
 
   .tmp <- .indDef("ka = {distribution=logNormal, typical=ka_pop, varlevel={id, id*occ}, sd={omega_ka, gamma_ka}}")
 
@@ -139,6 +139,10 @@ test_that("misc tests", {
   expect_equal(as.character(.tmp),
                "correlation = {level=id*occ, r(Cl, V)=corr1_V_Cl}")
 
+})
 
+test_that("edge case cov", {
 
+  expect_equal(as.character(.indDef("Tlag = {distribution=logNormal, typical=Tlag_pop, covariate={age, wt, sex}, coefficient={beta_Tlag_age, beta_Tlag_wt, {0, beta_Tlag_sex_1}}, sd=omega_Tlag}")),
+               "Tlag = {distribution=lognormal, typical=Tlag_pop, covariate={age, wt, sex}, coefficient={beta_Tlag_age, beta_Tlag_wt, {0, beta_Tlag_sex_1}}, sd=omega_Tlag}")
 })
