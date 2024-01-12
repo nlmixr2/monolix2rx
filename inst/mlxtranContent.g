@@ -2,21 +2,21 @@
 statement_list :
         (statement)+ ;
 
-addlLine: identifier '=' '{' 'use' '=' 'additionaldose' '}';
+addlLine: identifier '=' '{' 'use' '=' ('additionaldose' | 'additionalDose') '}';
 idLine: identifier '=' '{' 'use' '=' 'identifier' '}';
 timeLine: identifier '=' '{' 'use' '=' 'time' '}';
-evidLine: identifier '=' '{' 'use' '=' 'eventidentifier' '}';
+evidLine: identifier '=' '{' 'use' '=' ('eventidentifier' | 'eventIdentifier' ) '}';
 amtLine: identifier '=' '{' 'use' '=' 'amount' '}';
-iiLine: identifier '=' '{' 'use' '=' 'interdoseinterval' '}';
+iiLine: identifier '=' '{' 'use' '=' ('interdoseinterval' | 'interDoseInterval' ) '}';
 censLine: identifier '=' '{' 'use' '=' 'censored' '}';
 limitLine: identifier '=' '{' 'use' '=' 'limit' '}';
 ytypeLine: identifier '=' '{' 'use' '=' ('observationtype' | 'observationType') '}';
 admLine: identifier '=' '{' 'use' '=' 'administration' '}';
 occLine: identifier '=' '{' 'use' '=' 'occasion' '}';
 rateLine: identifier '=' '{' 'use' '=' 'rate' '}';
-mdvLine: identifier '=' '{' 'use' '=' 'missingdependentvariable' '}';
+mdvLine: identifier '=' '{' 'use' '=' ('missingdependentvariable' | 'missingDependentVariable' ) '}';
 nbd: decimalint;
-ssLine: identifier '=' '{' 'use' '=' 'steadystate' (',' 'nbdoses' '=' nbd)? '}';
+ssLine: identifier '=' '{' 'use' '=' ('steadystate' | 'steadyState' ) (',' 'nbdoses' '=' nbd)? '}';
 regressorLine: identifier '=' '{' 'use' '=' 'regressor' '}';
 contLine: identifier '=' '{' 'use' '=' 'covariate' ',' 'type' '=' 'continuous' '}';
 catLine: identifier '=' '{' 'use' '=' 'covariate' ',' 'type' '=' 'categorical' '}';
