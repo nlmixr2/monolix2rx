@@ -106,3 +106,14 @@ as.list.monolix2rxEquation <- function(x, ...) {
   class(.x) <- NULL
   .x
 }
+
+
+
+#' @export
+as.character.monolix2rxCovEq <- as.character.monolix2rxEquation
+
+#' @export
+print.monolix2rxCovEq <- print.monolix2rxEquation
+
+#' @export
+as.list.monolix2rxCovEq <- as.list.monolix2rxEquation

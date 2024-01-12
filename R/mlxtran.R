@@ -73,6 +73,14 @@
     }
   }
   .ret <- .mlxEnv$lst
+  if (!is.null(.ret$DATA_FORMATTING)) {
+    if (!is.null(.ret$DATA_FORMATTING$FILEINFO$FILEINFO)) {
+      .ret$DATA_FORMATTING$FILEINFO$FILEINFO <- .fileinfo(.ret$DATA_FORMATTING$FILEINFO$FILEINFO)
+    }
+    if (!is.null(.ret$DATA_FORMATTING$CONTENT$CONTENT)) {
+      .ret$DATA_FORMATTING$CONTENT$CONTENT <- .content(.ret$DATA_FORMATTING$CONTENT$CONTENT)
+    }
+  }
   if (!is.null(.ret$PARAMETER)) {
     .ret$PARAMETER$PARAMETER <- .parameter(.ret$PARAMETER$PARAMETER)
   }
@@ -98,6 +106,9 @@
       if (!is.null(.ret$MODEL$COVARIATE$DEFINITION)) {
         .ret$MODEL$COVARIATE$DEFINITION <- .longDef(.ret$MODEL$COVARIATE$DEFINITION,
                                                     "<MODEL> [COVARIATE] DEFINITION:")
+      }
+      if (!is.null(.ret$MODEL$COVARIATE$EQUATION)) {
+        .ret$MODEL$COVARIATE$EQUATION <- .covEq(.ret$MODEL$COVARIATE$EQUATION)
       }
     }
     if (!is.null(.ret$MODEL$INDIVIDUAL)) {
@@ -349,8 +360,54 @@ as.character.monolix2rxMlxtran <- function(x, ...) {
                     as.character(.subsec))
     })
   })
-  .env$ret[!is.na(.env$ret)]
+  .up <- .unparsedMlxtran(x, ...)
+  if (length(.up) > 0) .up <- c("", "; unparsed sections:", paste0(";  $", .up))
+  c(.env$ret[!is.na(.env$ret)], .up)
 }
+
+.unparsedMlxtran <- function(x, ...) {
+  .env <- new.env(parent=emptyenv())
+  .desc <- attr(x, "desc")
+  .ret <- character(0)
+  .env$ret <- .ret
+  lapply(names(x), function(ns) {
+    .sec <- x[[ns]]
+    lapply(names(.sec), function(nss) {
+      .subsec <- .sec[[nss]]
+      .cls <- class(.subsec)
+      if (length(.cls) == 1L) {
+        if (.cls == "character") {
+          if (.subsec == "") return(invisible())
+          .env$ret <- c(.env$ret,
+                        paste0(ns, "$", nss))
+          return(invisible())
+        } else if (inherits(.subsec, "data.frame")) {
+        } else if (.cls == "list") {
+          lapply(names(.subsec), function(nsss){
+            .subsubsec <- .subsec[[nsss]]
+            .cls <- class(.subsubsec)
+            if (length(.cls) == 1L) {
+              if (.cls == "character") {
+                if (.subsubsec == "") return(invisible())
+                .env$ret <- c(.env$ret,
+                              paste0(ns, "$", nss,"$", nsss))
+                return(invisible())
+              }
+            }
+          })
+          return(invisible())
+        }
+      }
+      if (length(.cls) == 1L) {
+        .env$ret <- c(.env$ret,
+                      paste0(ns, "$", nss))
+
+      }
+    })
+  })
+  .env$ret
+}
+
 
 #' @export
 print.monolix2rxMlxtran <- function(x, ...) {

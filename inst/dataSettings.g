@@ -8,7 +8,7 @@ dataTypeLabel: char_t1 | char_t2 | identifier | number;
 
 dLabel: dataTypeLabel '=' dataTypeLabel;
 
-dataType: 'dataType' '=' '{' dLabel (','? dLabel) '}';
+dataType: 'dataType' '=' '{' dLabel (','? dLabel)* '}';
 statement: dataType singleLineComment?
             ;
 
