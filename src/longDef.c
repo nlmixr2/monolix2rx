@@ -389,6 +389,69 @@ int longdef_process_transformCatDef2(const char *name, D_ParseNode *pn) {
   return 0;
 }
 
+int longdef_process_transformCatDef3(const char *name, D_ParseNode *pn, int i) {
+  if (!strcmp("transformCatDef3", name)) {
+    if (i ==0) {
+    } else if (i == 1 || i == 2 || i == 3) {
+      return 1;
+    } else {
+      return 0;
+    }
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    int quote = 0;
+    if (v[0] == '\'' || v[0] == '"') {
+      quote=1;
+      v++;
+      char *v2 = v;
+      while(v2[0] != 0) {
+        v2++;
+      }
+      v2--;
+      v2[0] =0;
+    }
+    monolix2rxDoubleI(v, quote, ".longDefSetTransformLabel");
+    xpn = d_get_child(pn, 3);
+    v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    quote = 0;
+    if (v[0] == '\'' || v[0] == '"') {
+      quote=1;
+      v++;
+      char *v2 = v;
+      while(v2[0] != 0) {
+        v2++;
+      }
+      v2--;
+      v2[0] =0;
+    }
+    monolix2rxDoubleI(v, quote, ".longDefSetTransformValue");
+    monolix2rxSingleI(1, ".longDefSetTransformB");
+    return 1;
+  }
+  return 0;
+}
+
+int longdef_process_transform3Val(const char *name, D_ParseNode *pn) {
+  if (!strcmp(name, "transform3Val")) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    int quote = 0;
+    if (v[0] == '\'' || v[0] == '"') {
+      quote=1;
+      v++;
+      char *v2 = v;
+      while(v2[0] != 0) {
+        v2++;
+      }
+      v2--;
+      v2[0] =0;
+    }
+    monolix2rxDoubleI(v, quote, ".longDefSetTransformValueExtra");
+    return 1;
+  }
+  return 0;
+}
+
 int longdef_process_transformOpRef(const char *name, D_ParseNode *pn) {
   if (!strcmp("transformOpRef", name)) {
     D_ParseNode *xpn = d_get_child(pn, 2);
@@ -454,7 +517,8 @@ void wprint_parsetree_longdef(D_ParserTables pt, D_ParseNode *pn, int depth, pri
       longdef_process_transformCatDef1(name, pn) ||
       longdef_process_transformCatDef2(name, pn) ||
       longdef_process_transformOpRef(name, pn) ||
-      longdef_process_transformOpTrans(name, pn)
+      longdef_process_transformOpTrans(name, pn) ||
+      longdef_process_transform3Val(name, pn)
       ) {
     return;
   }
@@ -465,7 +529,8 @@ void wprint_parsetree_longdef(D_ParserTables pt, D_ParseNode *pn, int depth, pri
           longdef_process_tte(name, pn, i) ||
           longdef_process_categorical(name, pn, i) ||
           longdef_process_count(name, pn, i) ||
-          longdef_process_transformLine(name, pn, i)) {
+          longdef_process_transformLine(name, pn, i) ||
+          longdef_process_transformCatDef3(name, pn, i)) {
         continue; // process next args
       }
       D_ParseNode *xpn = d_get_child(pn, i);

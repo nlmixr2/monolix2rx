@@ -73,12 +73,25 @@ count: identifier '=' '{' 'type' '=' 'count' ','? allCode '}';
 //     reference = 'M'
 // }
 
+// or
+// tAPGAR =
+// {
+//     transform = APGAR,
+//     categories = {
+//         High = {10, 8, 9},
+//         Low = {1, 2, 3},
+//         Med = {4, 5, 6, 7}  },
+//     reference = Med
+// }
+
 transformItem: char_t1 | char_t2 | number | identifier;
 transformOpTrans: 'transform' '=' transformItem;
 transformOpRef: 'reference' '=' transformItem;
 transformCatDef1:  transformItem '=' transformItem;
 transformCatDef2: transformItem '=' '{' transformItem '}';
-transformCatDef: transformCatDef1 | transformCatDef2;
+transform3Val: transformItem;
+transformCatDef3: transformItem '=' '{' transformItem (','? transform3Val)* '}';
+transformCatDef: transformCatDef1 | transformCatDef2 | transformCatDef3;
 transformCatOp: 'categories' '=' '{' transformCatDef (','? transformCatDef)* '}';
 transformOp: transformOpTrans | transformOpRef | transformCatDef1 | transformCatDef2 | transformCatOp;
 transformLine: identifier '=' '{' transformOp (','? transformOp)* '}';

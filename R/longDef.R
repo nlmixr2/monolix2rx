@@ -25,8 +25,8 @@
   .monolix2rx$transformCatB <- logical(0)
   .monolix2rx$transformCatLabel <- character(0)
   .monolix2rx$transformCatLabelQ <- logical(0)
-  .monolix2rx$transformCatValue <- character(0)
-  .monolix2rx$transformCatValueQ <- logical(0)
+  .monolix2rx$transformCatValue <- NULL
+  .monolix2rx$transformCatValueQ <- NULL
   .monolix2rx$transformReference <- character(0)
   .monolix2rx$transformReferenceQ <- logical(0)
   if (full) {
@@ -318,9 +318,19 @@
   .monolix2rx$transformCatLabelQ <- c(.monolix2rx$transformCatLabelQ, as.logical(q))
 }
 .longDefSetTransformValue <- function(var, q) {
-  .monolix2rx$transformCatValue <- c(.monolix2rx$transformCatValue, var)
-  .monolix2rx$transformCatValueQ <- c(.monolix2rx$transformCatValueQ, as.logical(q))
+  .monolix2rx$transformCatValue <- c(.monolix2rx$transformCatValue, list(var))
+  .monolix2rx$transformCatValueQ <- c(.monolix2rx$transformCatValueQ, list(as.logical(q)))
 }
+
+.longDefSetTransformValueExtra <- function(var, q) {
+  .v <- .monolix2rx$transformCatValue
+ .v[[length(.v)]] <- c(.v[[length(.v)]], var)
+  .monolix2rx$transformCatValue <- .v
+  .v <- .monolix2rx$transformCatValueQ
+  .v[[length(.v)]] <- c(.v[[length(.v)]], as.logical(q))
+  .monolix2rx$transformCatValueQ <- .v
+}
+
 .longDefSetTransformB <- function(q) {
   .monolix2rx$transformCatB <- c(.monolix2rx$transformCatB, as.logical(q))
 }
@@ -388,17 +398,17 @@ as.character.monolix2rxLongDef <- function(x, ...) {
                                          function(i){
                                            .lab <- .cur$catLabel[i]
                                            if (.cur$catLabelQ[i]) .lab <- paste0("'", .lab, "'")
-                                           .val <- .cur$catValue[i]
-                                           if (.cur$catValueQ[i]) .val <- paste0("'", .val, "'")
-                                           if (.cur$catB[i]) .val <- paste0("{", .val, "}")
-                                           paste0(.lab, "=", .val)
+                                           .asCharacterSingleOrList(.lab,
+                                                                    .cur$catValue[[i]],
+                                                                    .cur$catValueQ[[i]],comma="",
+                                                                    bracket=.cur$catB[i])
                                          }, character(1), USE.NAMES = FALSE)
                          .ret <-paste0(.ret, paste(.ret0, collapse=", "), "}")
-                         if (length(.cur$reference) == 1L) {
-                           .reference <- .cur$reference
-                           if (.cur$referenceQ) .reference <- paste0("'", .reference, "'")
-                           .ret <- paste0(.ret, ", reference=", .reference)
-                         }
+                       }
+                       if (length(.cur$reference) == 1L) {
+                         .reference <- .cur$reference
+                         if (.cur$referenceQ) .reference <- paste0("'", .reference, "'")
+                         .ret <- paste0(.ret, ", reference=", .reference)
                        }
                        paste0(.ret, "}")
                      },

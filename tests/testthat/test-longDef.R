@@ -266,4 +266,17 @@ test_that("covariate transform", {
   expect_equal(as.character(tmp),
                "tSex = {transform=sex, categories={F=0, 'M'='1'}, reference=M}")
 
+  tmp <- .longDef("tAPGAR =
+{
+  transform = APGAR,
+  categories = {
+  High = {10, 8, 9},
+  Low = {1, 2, 3},
+  Med = {4, 5, 6, 7}  },
+  reference = Med
+}")
+
+  expect_equal(as.character(tmp),
+               "tAPGAR = {transform=APGAR, categories={High={10, 8, 9}, Low={1, 2, 3}, Med={4, 5, 6, 7}}, reference=Med}")
+
 })
