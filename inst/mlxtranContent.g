@@ -14,6 +14,7 @@ ytypeLine: identifier '=' '{' 'use' '=' 'observationtype' '}';
 admLine: identifier '=' '{' 'use' '=' 'administration' '}';
 occLine: identifier '=' '{' 'use' '=' 'occasion' '}';
 rateLine: identifier '=' '{' 'use' '=' 'rate' '}';
+mdvLine: identifier '=' '{' 'use' '=' 'missingdependentvariable' '}';
 nbd: decimalint;
 ssLine: identifier '=' '{' 'use' '=' 'steadystate' (',' 'nbdoses' '=' nbd)? '}';
 regressorLine: identifier '=' '{' 'use' '=' 'regressor' '}';
@@ -64,6 +65,7 @@ statement: idLine singleLineComment?
     | admLine singleLineComment?
     | occLine singleLineComment?
     | rateLine singleLineComment?
+    | mdvLine singleLineComment?
     | ssLine singleLineComment?
     | regressorLine singleLineComment?
     | contLine singleLineComment?
