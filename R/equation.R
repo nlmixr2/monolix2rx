@@ -108,8 +108,6 @@ as.list.monolix2rxEquation <- function(x, ...) {
   .x
 }
 
-
-
 #' @export
 as.character.monolix2rxCovEq <- as.character.monolix2rxEquation
 
@@ -134,8 +132,7 @@ as.list.monolix2rxCovEq <- as.list.monolix2rxEquation
 mlxTxt <- function(file, retFile=FALSE) {
   if (!retFile) .mlxtranIni()
   .f <- .mlxtranLib(file)
-  .try <- try(file.exists(.f), silent=TRUE)
-  if (isTRUE(.f)) {
+  if (checkmate::testFileExists(.f, "r")) {
     .m2 <- c("<MODEL>",
              suppressWarnings(readLines(.f)))
     lapply(.m2, .mlxtranParseItem)
