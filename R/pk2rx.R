@@ -59,6 +59,14 @@
     }
     env$conc[[i]] <- paste0(concentration, " <- ", .pk2rxAmt(env, pk, i, amount), .v)
     attr(env$conc[[i]], "conc") <- concentration
+  } else if (i == 1 && is.na(concentration)) {
+    concentration <- "Cc"
+    .v <- ""
+    if (!is.na(volume)) {
+      .v <- paste0("/", volume)
+    }
+    env$conc[[i]] <- paste0(concentration, " <- ", .pk2rxAmt(env, pk, i, amount), .v)
+    attr(env$conc[[i]], "conc") <- concentration
   }
 }
 #' Setup the name and concentration of a comparment() macro
