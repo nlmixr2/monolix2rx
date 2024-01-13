@@ -62,7 +62,7 @@
     .monolix2rx$pkLhs <- c(.monolix2rx$pkLhs, concentration)
     env$conc[[i]] <- paste0(concentration, " <- ", .pk2rxAmt(env, pk, i, amount), .v)
     attr(env$conc[[i]], "conc") <- concentration
-  } else if (i == 1 && is.na(concentration)) {
+  } else if (i == 1 && is.na(concentration) && !(.monolix2rx$endpointPred[1] %in% .monolix2rx$curLhs)) {
     concentration <- .monolix2rx$endpointPred[1]
     .v <- ""
     if (!is.na(volume)) {

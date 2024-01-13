@@ -178,12 +178,14 @@ int equation_identifier_or_constant(char *name,  D_ParseNode *pn) {
         v2[0] == 't' && v2++ &&
         v2[0] == '_') {
       sAppend(&curLine, "d/dt(%s)", v2+1);
+      monolix2rxSingle(v2+1, ".equationLhs");
       if (gIsAssignmentStart) {
         curDdt = (char*)rc_dup_str(v2+1, v2+1+strlen(v2+1));
       }
       return 1;
     }
     v2 = v;
+    monolix2rxSingle(v, ".equationLhs");
     sAppend(&curLine, "%s", v);
     return 1;
   } else if (!strcmp("constant", name)) {

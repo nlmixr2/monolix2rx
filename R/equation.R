@@ -36,8 +36,10 @@
   class(.pk2) <- "monolix2rxPk"
   .lhs <- c(pk$Cc, pk$Ce, .monolix2rx$equationLhs, .pk2$Cc, .pk2$Ce)
   .lhs <- .lhs[!is.na(.lhs)]
+  .monolix2rx$curLhs <- .lhs
   .monolix2rx$pk <- .pk2rx(pk)
   .lhs <- c(.lhs, .monolix2rx$pkLhs)
+  .monolix2rx$curLhs <- .lhs
   .pk3 <- .pk2rx(.pk2)
   .lhs <- unique(c(.lhs, .monolix2rx$pkLhs))
   .w <- which(.monolix2rx$endpointPred %in% .lhs)
@@ -149,18 +151,28 @@ as.list.monolix2rxCovEq <- as.list.monolix2rxEquation
 #'   name instead of error if the file does not exist
 #'
 #' @return parsed equation or file name
-#' @export
+#' @export,r
 #' @author Matthew L. Fidler
 #' @examples
 mlxTxt <- function(file, retFile=FALSE) {
   if (!retFile) .mlxtranIni()
   .f <- .mlxtranLib(file)
+  if (length(file) > 1L) {
+    .lines <- file
+    .dirn <- getwd()
+  } else {
+    checkmate::assertFileExists(file)
+    .lines <- suppressWarnings(readLines(file))
+    .dirn <- dirname(file)
+  }
   if (checkmate::testFileExists(.f, "r")) {
     .m2 <- c("<MODEL>",
-             suppressWarnings(readLines(.f)))
+             .lines)
     lapply(.m2, .mlxtranParseItem)
     if (retFile) return(file)
-    return(.mlxtranFinalize(.mlxEnv$lst, equation=TRUE, update=FALSE))
+    .ret <- .mlxtranFinalize(.mlxEnv$lst, equation=TRUE, update=FALSE)
+    attr(.ret, "dirn") <- .dirn
+    return(.ret)
   }
   if (retFile) return(file)
   stop("could not find the file for getting model text")

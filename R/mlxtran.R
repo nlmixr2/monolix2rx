@@ -290,8 +290,10 @@ mlxtran <- function(file, equation=FALSE, update=FALSE) {
     .lines <- suppressWarnings(readLines(file))
     .dirn <- dirname(file)
   }
-  withr::with_dir(.dirn,
-                  .mlxtran(.lines, equation=equation))
+  .ret <- withr::with_dir(.dirn,
+                          .mlxtran(.lines, equation=equation))
+  attr(.ret, "dirn") <- .dirn
+  .ret
 }
 
 #' @export
