@@ -156,16 +156,20 @@ as.list.monolix2rxCovEq <- as.list.monolix2rxEquation
 #' @examples
 mlxTxt <- function(file, retFile=FALSE) {
   if (!retFile) .mlxtranIni()
-  .f <- .mlxtranLib(file)
+  .exit <- FALSE
   if (length(file) > 1L) {
     .lines <- file
     .dirn <- getwd()
   } else {
-    checkmate::assertFileExists(file)
-    .lines <- suppressWarnings(readLines(file))
-    .dirn <- dirname(file)
+    .f <- .mlxtranLib(file)
+    if (checkmate::testFileExists(.f, "r")) {
+      .lines <- suppressWarnings(readLines(.f))
+      .dirn <- dirname(.f)
+    } else {
+      .exit <- TRUE
+    }
   }
-  if (checkmate::testFileExists(.f, "r")) {
+  if (!.exit) {
     .m2 <- c("<MODEL>",
              .lines)
     lapply(.m2, .mlxtranParseItem)
