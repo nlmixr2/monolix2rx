@@ -46,7 +46,7 @@ eventTypeOp: 'eventType' '=' eventTypes;
 maxEventNumberOp: 'maxEventNumber' '=' decimalint;
 rightCensoringTimeOp: 'rightCensoringTime' '=' number;
 intervalLengthOp: 'intervalLength' '=' number;
-hazardOp: 'hazard' '=' identifier;
+hazardOp: 'hazard' '=' "[^\n, \t}=]+";
 
 tteOps: eventTypeOp | maxEventNumberOp | rightCensoringTimeOp | intervalLengthOp | hazardOp;
 

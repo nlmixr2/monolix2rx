@@ -279,4 +279,15 @@ test_that("covariate transform", {
   expect_equal(as.character(tmp),
                "tAPGAR = {transform=APGAR, categories={High={10, 8, 9}, Low={1, 2, 3}, Med={4, 5, 6, 7}}, reference=Med}")
 
+
+  tmp <- .longDef("Event = {type=event,
+              hazard=1/Te,
+              eventType=intervalCensored,
+              intervalLength=5,     ; used for the graphics (not mandatory)
+              rightCensoringTime=200  ; used for the graphics (not mandatory)
+}")
+
+  expect_equal(as.character(tmp),
+               "Event = {type=event, eventType=intervalCensored, rightCensoringTime=200, intervalLength=5, hazard=1/Te}")
+
 })
