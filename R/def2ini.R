@@ -167,6 +167,11 @@
     if (.parsGetFixed(pars, .cur$est)) {
       env$extraFixed <- c(env$extraFixed, .v1, .v2)
     }
+    if (is.na(.val)) {
+      warning("cannot find correlation estimate between ", .v1, " and ", .v2,
+              call. = FALSE)
+      .val <- 0
+    }
     env$r[.v1, .v2] <- .val
     env$r[.v2, .v1] <- .val
   })
@@ -303,6 +308,7 @@
                        .def2iniRenameOcc(.env$vl))
     class(.omega) <- "lotriFix"
     .omega <- .def2iniFixOmega(.omega, .env$extraFixed)
+    assign("omega", .omega, globalenv())
     .omega <- as.expression(.omega)
     .omega <- .omega[[2]]
     .ini <- c(.pop,
