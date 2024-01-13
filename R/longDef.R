@@ -431,3 +431,23 @@ as.list.monolix2rxLongDef <- function(x, ...) {
   class(.x) <- NULL
   .x
 }
+#' Get monolix predictions from <MODEL> [LONGITUDINAL] DEFINITION:
+#'
+#'
+#' @param x mlxtran/longitudinal monolix section
+#' @return character vector of defined endpoints
+#' @noRd
+#' @author Matthew L. Fidler
+.getMonolixPreds <- function(x) {
+  if (inherits(x, "monolix2rxMlxtran")) {
+    x <- x$MODEL$LONGITUDINAL$DEFINITION
+  }
+  if (!inherits(x, "monolix2rxLongDef")) return(character(0))
+  x <- as.list(x)
+  vapply(seq_along(x$endpoint),
+         function(i) {
+           .ret <- x$endpoint[[i]]
+           if (!checkmate::testCharacter(.ret$pred, len=1)) return(NA_character_)
+           .ret$pred
+         }, character(1), USE.NAMES = TRUE)
+}

@@ -34,6 +34,7 @@
     }
   }
   env$name[[i]] <- paste0(env$cmtDefault, i)
+  if (env$name[[i]] == "cmt1") env$name[[i]] <- "central" # align with linCmt()
   env$lhs[[i]] <- paste0("d/dt(", env$name[[i]], ")")
   env$rhs[[i]] <- ""
   env$extra[[i]] <- character(0)
@@ -52,20 +53,23 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .pk2rxConc <- function(env, pk, i, amount=NA_character_, volume=NA_character_, concentration=NA_character_) {
+  # This apparently depends on the
   if (!is.na(concentration)) {
     .v <- ""
     if (!is.na(volume)) {
       .v <- paste0("/", volume)
     }
+    .monolix2rx$pkLhs <- c(.monolix2rx$pkLhs, concentration)
     env$conc[[i]] <- paste0(concentration, " <- ", .pk2rxAmt(env, pk, i, amount), .v)
     attr(env$conc[[i]], "conc") <- concentration
   } else if (i == 1 && is.na(concentration)) {
-    concentration <- "Cc"
+    concentration <- .monolix2rx$endpointPred[1]
     .v <- ""
     if (!is.na(volume)) {
       .v <- paste0("/", volume)
     }
     env$conc[[i]] <- paste0(concentration, " <- ", .pk2rxAmt(env, pk, i, amount), .v)
+    .monolix2rx$pkLhs <- c(.monolix2rx$pkLhs, concentration)
     attr(env$conc[[i]], "conc") <- concentration
   }
 }
@@ -262,6 +266,7 @@
       # ka
       .cmtNameC <- .cmtName
       .cmtName <- paste0(.cmtName, env$depotPostfix)
+      if (.cmtName == paste0("central", env$depotPostfix)) .cmtName <- "depot" # align with linCmt
       if (is.null(env$lhsDepot[[i]])) {
         env$lhsDepot[[i]] <- paste0("d/dt(", .cmtName, ")")
       }
@@ -498,6 +503,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .pk2rx <- function(pk, amountPrefix="cmt", depotPostfix="d") {
+  .monolix2rx$pkLhs <- character(0)
   .pk <- .pkmodel2macro(pk)
   .r <- suppressWarnings(range(c(.pk$compartment$cmt,
                                  .pk$peripheral$in.i, .pk$peripheral$in.j,

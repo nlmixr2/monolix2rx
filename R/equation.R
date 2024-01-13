@@ -8,10 +8,10 @@
 .equation <- function(text, pk=NULL) {
   if (inherits(text, "monolix2rxEquation")) return(text)
   .monolix2rx$equationLine <- character(0)
+  .monolix2rx$equationLhs <- character(0)
   .monolix2rx$odeType <- "nonStiff"
   if (is.null(pk)) pk <- .pk("")
   if (is.character(pk)) pk <- .pk(pk)
-  .monolix2rx$pk <- .pk2rx(pk)
   # Apparently pk macros can also be in the EQUATION: block
   .pkIni(TRUE)
   if (text!="") {
@@ -34,12 +34,24 @@
                elimination=.monolix2rx$pkElimination,
                admd=.monolix2rx$admd)
   class(.pk2) <- "monolix2rxPk"
+  .lhs <- c(pk$Cc, pk$Ce, .monolix2rx$equationLhs, .pk2$Cc, .pk2$Ce)
+  .lhs <- .lhs[!is.na(.lhs)]
+  .monolix2rx$pk <- .pk2rx(pk)
+  .lhs <- c(.lhs, .monolix2rx$pkLhs)
   .pk3 <- .pk2rx(.pk2)
+  .lhs <- unique(c(.lhs, .monolix2rx$pkLhs))
+  .w <- which(.monolix2rx$endpointPred %in% .lhs)
+  .extraPred <- character(0)
+  if (length(.w) == 1L && length(.monolix2rx$endpointPred) > 1L) {
+    .extraPred <- paste0(.monolix2rx$endpointPred[-.w], " <- ", .monolix2rx$endpointPred[.w])
+  }
   .ret <- list(monolix=text,
                rx=c(.monolix2rx$pk$pk,
                     .pk3$pk,
                     .monolix2rx$equationLine,
+                    .extraPred,
                     .monolix2rx$pk$equation$endLines),
+               lhs=.monolix2rx$equationLhs,
                odeType=.monolix2rx$odeType)
   class(.ret) <- "monolix2rxEquation"
   .ret
@@ -83,6 +95,15 @@
   } else {
     .monolix2rx$equationLine <- c(.monolix2rx$equationLine, line)
   }
+}
+#' Add to the lhs variables of the equation object
+#'
+#' @param v value of the equation object
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.equationLhs <- function(v) {
+  .monolix2rx$equationLhs <- c(.monolix2rx$equationLhs, v)
 }
 #' Set the ode type
 #'

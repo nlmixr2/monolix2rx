@@ -184,15 +184,6 @@ int equation_identifier_or_constant(char *name,  D_ParseNode *pn) {
       return 1;
     }
     v2 = v;
-    // x_0 becomes x(0)
-    /* while (v2[0] != 0 && v2[0] != '_') { */
-    /*   v2++; */
-    /* } */
-    /* if (v2[0] == '_' && !strcmp(v2+1, "0")) { */
-    /*   v2[0] = 0; */
-    /*   sAppend(&curLine, "%s(0)", v); */
-    /*   return 1; */
-    /* } */
     sAppend(&curLine, "%s", v);
     return 1;
   } else if (!strcmp("constant", name)) {
