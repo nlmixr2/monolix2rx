@@ -8,8 +8,8 @@ test_that("pkmodel()", {
                 "elimination(cmt=1, Cl)"))
 
   expect_equal(.pk2rx(.ret)$pk,
-               c("d/dt(cmt1) <-  - Cl/V*cmt1",
-                 "Cc <- cmt1/V"))
+               c("d/dt(central) <-  - Cl/V*central",
+                 "Cc <- central/V"))
 
   .ret <- .pk("Cc = pkmodel(V, Cl, ka)")
 
@@ -19,9 +19,9 @@ test_that("pkmodel()", {
                 "elimination(cmt=1, Cl)"))
 
   expect_equal(.pk2rx(.ret)$pk,
-               c("d/dt(cmt1d) <-  - ka*cmt1d",
-                 "d/dt(cmt1) <-  + ka*cmt1d - Cl/V*cmt1",
-                 "Cc <- cmt1/V"))
+               c("d/dt(depot) <-  - ka*depot",
+                 "d/dt(central) <-  + ka*depot - Cl/V*central",
+                 "Cc <- central/V"))
 
 
   .ret <- .pk("{Cp, Ce} = pkmodel(V, Cl, ka, ke0)")
@@ -33,9 +33,9 @@ test_that("pkmodel()", {
                  "effect(cmt=1, ke0, concentration=Ce)"))
 
   expect_equal(.pk2rx(.ret)$pk,
-               c("d/dt(cmt1d) <-  - ka*cmt1d",
-                 "d/dt(cmt1) <-  + ka*cmt1d - Cl/V*cmt1",
-                 "Cp <- cmt1/V",
+               c("d/dt(depot) <-  - ka*depot",
+                 "d/dt(central) <-  + ka*depot - Cl/V*central",
+                 "Cp <- central/V",
                  "d/dt(Ce) <- ke0*(Cp - Ce)"))
 
   .ret <- .pk("{Cp, Ce} = pkmodel(V, Cl, ka, ke0, Mtt, Ktr)")
@@ -47,9 +47,9 @@ test_that("pkmodel()", {
                  "effect(cmt=1, ke0, concentration=Ce)"))
 
   expect_equal(.pk2rx(.ret)$pk,
-               c("d/dt(cmt1d) <-  - ka*cmt1d + transit(Mtt*Ktr-1, Mtt, 1.0)",
-                 "d/dt(cmt1) <-  + ka*cmt1d - Cl/V*cmt1",
-                 "Cp <- cmt1/V",
+               c("d/dt(depot) <-  - ka*depot + transit(Mtt*Ktr-1, Mtt, 1)",
+                 "d/dt(central) <-  + ka*depot - Cl/V*central",
+                 "Cp <- central/V",
                  "d/dt(Ce) <- ke0*(Cp - Ce)"))
 
   .ret <- .pk("{Cp, Ce} = pkmodel(V, Cl, ka, ke0, Mtt, Ktr, p=f)")
@@ -61,9 +61,9 @@ test_that("pkmodel()", {
                  "effect(cmt=1, ke0, concentration=Ce)"))
 
   expect_equal(.pk2rx(.ret)$pk,
-               c("d/dt(cmt1d) <-  - ka*cmt1d + transit(Mtt*Ktr-1, Mtt, f)",
-                 "d/dt(cmt1) <-  + ka*cmt1d - Cl/V*cmt1",
-                 "Cp <- cmt1/V",
+               c("d/dt(depot) <-  - ka*depot + transit(Mtt*Ktr-1, Mtt, f)",
+                 "d/dt(central) <-  + ka*depot - Cl/V*central",
+                 "Cp <- central/V",
                  "d/dt(Ce) <- ke0*(Cp - Ce)"))
 
   .ret <- .pk("{Cp, Ce} = pkmodel(V, Cl, ka, ke0, Mtt, Ktr, p=f, Tlag)")
@@ -75,10 +75,10 @@ test_that("pkmodel()", {
                  "effect(cmt=1, ke0, concentration=Ce)"))
 
   expect_equal(.pk2rx(.ret)$pk,
-               c("d/dt(cmt1d) <-  - ka*cmt1d + transit(Mtt*Ktr-1, Mtt, f)",
-                 "alag(cmt1d) <- Tlag",
-                 "d/dt(cmt1) <-  + ka*cmt1d - Cl/V*cmt1",
-                 "Cp <- cmt1/V",
+               c("d/dt(depot) <-  - ka*depot + transit(Mtt*Ktr-1, Mtt, f)",
+                 "alag(depot) <- Tlag",
+                 "d/dt(central) <-  + ka*depot - Cl/V*central",
+                 "Cp <- central/V",
                  "d/dt(Ce) <- ke0*(Cp - Ce)"))
 
 
@@ -92,12 +92,12 @@ test_that("pkmodel()", {
                  "effect(cmt=1, ke0, concentration=Ce)"))
 
   expect_equal(.pk2rx(.ret)$pk,
-               c("d/dt(cmt1d) <-  - ka*cmt1d + transit(Mtt*Ktr-1, Mtt, f)",
-                 "alag(cmt1d) <- Tlag",
-                 "d/dt(cmt1) <-  - Q/V*cmt1 + Q/V2*cmt2 + ka*cmt1d - Cl/V*cmt1",
-                 "Cp <- cmt1/V",
+               c("d/dt(depot) <-  - ka*depot + transit(Mtt*Ktr-1, Mtt, f)",
+                 "alag(depot) <- Tlag",
+                 "d/dt(central) <-  - Q/V*central + Q/V2*cmt2 + ka*depot - Cl/V*central",
+                 "Cp <- central/V",
                  "d/dt(Ce) <- ke0*(Cp - Ce)",
-                 "d/dt(cmt2) <-  + Q/V*cmt1 - Q/V2*cmt2"))
+                 "d/dt(cmt2) <-  + Q/V*central - Q/V2*cmt2"))
 
   .ret <- .pk("Cp = pkmodel(V, Cl, ka, p=f, Tlag, k12, k21, k13, k31)")
 
@@ -109,13 +109,13 @@ test_that("pkmodel()", {
                  "elimination(cmt=1, Cl)"))
 
   expect_equal(.pk2rx(.ret)$pk,
-               c("d/dt(cmt1d) <-  - ka*cmt1d",
-                 "f(cmt1d) <- f",
-                 "alag(cmt1d) <- Tlag",
-                 "d/dt(cmt1) <-  - k12*cmt1 + k21*cmt2 - k13*cmt1 + k31*cmt3 + ka*cmt1d - Cl/V*cmt1",
-                 "Cp <- cmt1/V",
-                 "d/dt(cmt2) <-  + k12*cmt1 - k21*cmt2",
-                 "d/dt(cmt3) <-  + k13*cmt1 - k31*cmt3"))
+               c("d/dt(depot) <-  - ka*depot",
+                 "f(depot) <- f",
+                 "alag(depot) <- Tlag",
+                 "d/dt(central) <-  - k12*central + k21*cmt2 - k13*central + k31*cmt3 + ka*depot - Cl/V*central",
+                 "Cp <- central/V",
+                 "d/dt(cmt2) <-  + k12*central - k21*cmt2",
+                 "d/dt(cmt3) <-  + k13*central - k31*cmt3"))
 
   .ret <- .pk("Cp = pkmodel(V, Cl, p=f, Tlag, k12, k21, k13, k31, Tk0)")
 
@@ -127,13 +127,13 @@ test_that("pkmodel()", {
                  "elimination(cmt=1, Cl)"))
 
   expect_equal(.pk2rx(.ret)$pk,
-               c("d/dt(cmt1) <-  - k12*cmt1 + k21*cmt2 - k13*cmt1 + k31*cmt3 - Cl/V*cmt1",
-                 "dur(cmt1) <- Tk0",
-                 "f(cmt1) <- f",
-                 "alag(cmt1) <- Tlag",
-                 "Cp <- cmt1/V",
-                 "d/dt(cmt2) <-  + k12*cmt1 - k21*cmt2",
-                 "d/dt(cmt3) <-  + k13*cmt1 - k31*cmt3"))
+               c("d/dt(central) <-  - k12*central + k21*cmt2 - k13*central + k31*cmt3 - Cl/V*central",
+                 "dur(central) <- Tk0",
+                 "f(central) <- f",
+                 "alag(central) <- Tlag",
+                 "Cp <- central/V",
+                 "d/dt(cmt2) <-  + k12*central - k21*cmt2",
+                 "d/dt(cmt3) <-  + k13*central - k31*cmt3"))
 
   .ret <- .pk("Cp = pkmodel(V, Km, Vm, p=f, Tlag, k12, k21, k13, k31, Tk0)")
 
@@ -145,13 +145,13 @@ test_that("pkmodel()", {
                  "elimination(cmt=1, Vm, Km)"))
 
   expect_equal(.pk2rx(.ret)$pk,
-               c("d/dt(cmt1) <-  - k12*cmt1 + k21*cmt2 - k13*cmt1 + k31*cmt3 - (Vm*cmt1/V)/(Km + cmt1/V)",
-                 "dur(cmt1) <- Tk0",
-                 "f(cmt1) <- f",
-                 "alag(cmt1) <- Tlag",
-                 "Cp <- cmt1/V",
-                 "d/dt(cmt2) <-  + k12*cmt1 - k21*cmt2",
-                 "d/dt(cmt3) <-  + k13*cmt1 - k31*cmt3"))
+               c("d/dt(central) <-  - k12*central + k21*cmt2 - k13*central + k31*cmt3 - (Vm*central/V)/(Km + central/V)",
+                 "dur(central) <- Tk0",
+                 "f(central) <- f",
+                 "alag(central) <- Tlag",
+                 "Cp <- central/V",
+                 "d/dt(cmt2) <-  + k12*central - k21*cmt2",
+                 "d/dt(cmt3) <-  + k13*central - k31*cmt3"))
 
   .ret <- .pk("; To define a compartment with ID 1, of volume V, an amount called Ac, and a concentration called Cc
 compartment(cmt=1, amount=Ac, volume=V, concentration=Cc)")
@@ -172,12 +172,12 @@ compartment(cmt=1, amount=Ac, volume=V, concentration=Cc)")
                  "elimination(cmt=1, k = kel)"))
 
   expect_equal(.pk2rx(.ret)$pk,
-               c("d/dt(cmt1) <-  - k12*cmt1 + k21*cmt2 - k13*cmt1 + k31*cmt3 - kel*cmt1",
-                 "dur(cmt1) <- Tk0",
-                 "f(cmt1) <- f",
-                 "alag(cmt1) <- Tlag",
-                 "Cp <- cmt1/V",
-                 "d/dt(cmt2) <-  + k12*cmt1 - k21*cmt2",
-                 "d/dt(cmt3) <-  + k13*cmt1 - k31*cmt3"))
+               c("d/dt(central) <-  - k12*central + k21*cmt2 - k13*central + k31*cmt3 - kel*central",
+                 "dur(central) <- Tk0",
+                 "f(central) <- f",
+                 "alag(central) <- Tlag",
+                 "Cp <- central/V",
+                 "d/dt(cmt2) <-  + k12*central - k21*cmt2",
+                 "d/dt(cmt3) <-  + k13*central - k31*cmt3"))
 
 })

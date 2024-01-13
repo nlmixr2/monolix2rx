@@ -92,9 +92,9 @@
   }
   .monolix2rx$pkStatement <- NA_character_
   .monolix2rx$curPkPar <- NA_character_
-  .monolix2rx$curCmt <- data.frame(cmt=NA_integer_,
+  .monolix2rx$curCmt <- data.frame(cmt=1L,
                                    amount=NA_character_,
-                                   volume=NA_character_,
+                                   volume="1.0",
                                    concentration=NA_character_)
 
   .monolix2rx$curPerip <- data.frame(in.i=NA_integer_,
@@ -104,50 +104,50 @@
                                      out.j=NA_integer_,
                                      out.eq=NA_character_,
                                      amount=NA_character_,
-                                     volume=NA_character_,
+                                     volume="1.0",
                                      concentration=NA_character_)
 
-  .monolix2rx$curEffect <- data.frame(cmt=NA_integer_,
+  .monolix2rx$curEffect <- data.frame(cmt=1L,
                                       ke0=NA_character_,
                                       concentration=NA_character_)
 
-  .monolix2rx$curTransfer <- data.frame(from=NA_integer_,
-                                        to=NA_integer_,
+  .monolix2rx$curTransfer <- data.frame(from=1L,
+                                        to=1L,
                                         kt=NA_character_)
 
-  .monolix2rx$curDepot <- data.frame(adm=NA_integer_,
+  .monolix2rx$curDepot <- data.frame(adm=1L,
                                      admd=NA_integer_,
                                      target=NA_character_,
-                                     Tlag=NA_character_,
-                                     p=NA_character_,
+                                     Tlag="0",
+                                     p="1",
                                      Tk0=NA_character_,
                                      ka=NA_character_,
                                      Ktr=NA_character_,
                                      Mtt=NA_character_)
 
-  .monolix2rx$curOral <- data.frame(adm=NA_integer_,
+  .monolix2rx$curOral <- data.frame(adm=1L,
                                     admd=NA_integer_,
-                                    cmt=NA_integer_,
-                                    Tlag=NA_character_,
-                                    p=NA_character_,
+                                    cmt=1L,
+                                    Tlag="0",
+                                    p="1",
                                     Tk0=NA_character_,
                                     ka=NA_character_,
                                     Ktr=NA_character_,
                                     Mtt=NA_character_)
 
-  .monolix2rx$curIv <- data.frame(adm=NA_integer_,
+  .monolix2rx$curIv <- data.frame(adm=1L,
                                   admd=NA_integer_,
                                   cmt=NA_integer_,
-                                  Tlag=NA_character_,
-                                  p=NA_character_)
+                                  Tlag="0",
+                                  p="1")
 
-  .monolix2rx$curEmpty <- data.frame(adm=NA_integer_,
+  .monolix2rx$curEmpty <- data.frame(adm=1L,
                                      admd=NA_integer_,
                                      target=NA_character_)
-  .monolix2rx$curReset <- data.frame(adm=NA_integer_,
+  .monolix2rx$curReset <- data.frame(adm=1L,
                                      admd=NA_integer_,
                                      target=NA_character_)
-  .monolix2rx$curElimination <- data.frame(cmt=NA_integer_,
+  .monolix2rx$curElimination <- data.frame(cmt=1L,
                                            V=NA_character_,
                                            k=NA_character_,
                                            Cl=NA_character_,
@@ -187,14 +187,20 @@
   }
   .f <- FALSE
   if (any(names(df) == "p")) {
-    if (!is.na(df$p)) {
+    .p <- df$p
+    .pn <- suppressWarnings(as.numeric(.p))
+    if (!identical(.pn, 1.0)) {
       .f <- TRUE
     }
   }
   .tlag <- FALSE
   if (any(names(df) == "Tlag")) {
-    if (!is.na(df$Tlag)) {
+    .tlag <- df$Tlag
+    .tlagn <- suppressWarnings(as.numeric(.tlag))
+    if (!identical(.tlagn, 0.0)) {
       .tlag <- TRUE
+    } else {
+      .tlag <- FALSE
     }
   }
   .admd <- .monolix2rx$admd[.monolix2rx$admd$adm == .adm, "admd"]
@@ -600,7 +606,7 @@ as.character.monolix2rxPk <- function(x, ...) {
                                  x$peripheral$in.i, x$peripheral$in.j,
                                  x$peripheral$out.i, x$peripheral$out.j,
                                  x$effect$cmt, x$transfer$from, x$transfer$to, x$oral$cmt,
-                                 x$iv$cmt, x$elimination$cmt)))
+                                 x$iv$cmt, x$elimination$cmt), na.rm=TRUE))
   .prn <- FALSE
   if (is.finite(.r[1])) {
     for (.i in seq(.r[1], .r[2])) {

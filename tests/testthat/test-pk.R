@@ -137,7 +137,7 @@ elimination(cmt=1, k)")
 
   .ret2 <- emptyObj()
   .ret2$compartment <- data.frame(cmt = 1L, amount = "Ac", volume = "V", concentration = "Cc")
-  .ret2$iv <- data.frame(adm = 1L, admd=1L, cmt = 1L, Tlag = NA_character_, p = NA_character_)
+  .ret2$iv <- data.frame(adm = 1L, admd=1L, cmt = 1L, Tlag = "0", p = "1")
   .ret2$elimination <- data.frame(cmt = 1L, V = NA_character_, k = "", Cl = NA_character_,
                                   Vm = NA_character_, Km = NA_character_)
   .ret2$admd <- data.frame(adm = 1L, admd = 1L, cmt = 1L, target = NA_character_,
@@ -147,7 +147,7 @@ elimination(cmt=1, k)")
 
   expect_equal(as.character(.ret),
                c("compartment(cmt = 1, amount = Ac, volume = V, concentration = Cc)",
-                 "iv(adm = 1, cmt = 1)",
+                 "iv(adm = 1, cmt = 1, Tlag = 0, p = 1)",
                  "elimination(cmt = 1, k)"))
 
 
@@ -169,7 +169,7 @@ peripheral(k2_13, k13_2)
                                  out.j = c(1L, 1L, 2L),
                                  out.eq = c("", "", ""),
                                  amount = c("Ap", NA, NA),
-                                 volume = c("V2", NA, NA),
+                                 volume = c("V2", "1.0", "1.0"),
                                  concentration = c("Cp", NA, NA))
 
   expect_equal(.ret, .ret2)
@@ -177,21 +177,21 @@ peripheral(k2_13, k13_2)
   expect_equal(as.character(.ret),
                c("peripheral(k12, k21, amount = Ap, volume = V2, concentration = Cp)",
                  "",
-                 "peripheral(k13, k31)",
+                 "peripheral(k13, k31, volume = 1.0)",
                  "",
-                 "peripheral(k2_13, k13_2)"))
+                 "peripheral(k2_13, k13_2, volume = 1.0)"))
 
   .ret <- .pk("peripheral(k12=Q/V, k21=Q/V2)")
 
   .ret2 <- emptyObj()
   .ret2$peripheral <- data.frame(in.i = 1L, in.j = 2L, in.eq = "Q/V",
                                  out.i = 2L, out.j = 1L, out.eq = "Q/V2",
-                                 amount = NA_character_, volume = NA_character_, concentration = NA_character_)
+                                 amount = NA_character_, volume = "1.0", concentration = NA_character_)
 
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
-               "peripheral(k12 = Q/V, k21 = Q/V2)")
+               "peripheral(k12 = Q/V, k21 = Q/V2, volume = 1.0)")
 
   .ret <- .pk("; Define an effect compartment linked to the base compartment 1,
 ; with a transfer rate ke0 to the effect compartment,
@@ -218,7 +218,7 @@ effect(cmt=1, ke0, concentration=Ce)")
   .ret2$compartment <- data.frame(cmt = 1L, amount = "Ac", volume = "V", concentration = "Cc")
   .ret2$elimination <- data.frame(cmt = 1L, V = NA_character_, k = "",
                                   Cl = NA_character_, Vm = NA_character_, Km = NA_character_)
-  .ret2$iv <- data.frame(adm =1L, admd=1L, cmt = 1L, Tlag = NA_character_, p = NA_character_)
+  .ret2$iv <- data.frame(adm =1L, admd=1L, cmt = 1L, Tlag = "0", p = "1")
   .ret2$effect <- data.frame(cmt = 1L, ke0 = "", concentration = "Ce")
   .ret2$admd <- data.frame(adm = 1L, admd = 1L, cmt = 1L, target = NA_character_, depot = FALSE, dur = FALSE, f = FALSE, tlag = FALSE)
 
@@ -226,7 +226,7 @@ effect(cmt=1, ke0, concentration=Ce)")
 
   expect_equal(as.character(.ret),
                c("compartment(cmt = 1, amount = Ac, volume = V, concentration = Cc)",
-                 "iv(adm = 1, cmt = 1)",
+                 "iv(adm = 1, cmt = 1, Tlag = 0, p = 1)",
                  "elimination(cmt = 1, k)",
                  "effect(cmt = 1, ke0, concentration = Ce)"))
 
@@ -247,8 +247,8 @@ transfer(from=1, to=2, kt)")
   .ret2 <- emptyObj()
   .ret2$compartment <- data.frame(cmt = 1:2, amount = c("Ac", "Ad"),
                                   volume = c("V1", "V2"), concentration = c("Cc1", "Cc2"))
-  .ret2$oral <- data.frame(adm = 1L, admd=1L, cmt = 1L, Tlag = NA_character_,
-                           p = NA_character_, Tk0 = NA_character_, ka = "1",
+  .ret2$oral <- data.frame(adm = 1L, admd=1L, cmt = 1L, Tlag = "0",
+                           p = "1", Tk0 = NA_character_, ka = "1",
                            Ktr = NA_character_, Mtt = NA_character_)
   .ret2$transfer <- data.frame(from = 1L, to = 2L, kt = "")
   .ret2$admd <- data.frame(adm = 1L, admd = 1L, cmt = 1L, target = NA_character_,
@@ -257,7 +257,7 @@ transfer(from=1, to=2, kt)")
 
   expect_equal(as.character(.ret),
                c("compartment(cmt = 1, amount = Ac, volume = V1, concentration = Cc1)",
-                 "oral(adm = 1, cmt = 1, ka = 1)",
+                 "oral(adm = 1, cmt = 1, Tlag = 0, p = 1, ka = 1)",
                  "",
                  "compartment(cmt = 2, amount = Ad, volume = V2, concentration = Cc2)",
                  "transfer(from = 1, to = 2, kt)"))
@@ -279,14 +279,14 @@ transfer(from=1, to=2, kt)")
   .ret <- .pk("depot(type=2, target=Ac, Tk0)")
 
   .ret2 <- emptyObj()
-  .ret2$depot <- data.frame(adm = 2L, admd=1L, target = "Ac", Tlag = NA_character_,
-                            p = NA_character_, Tk0 = "", ka = NA_character_,
+  .ret2$depot <- data.frame(adm = 2L, admd=1L, target = "Ac", Tlag = "0",
+                            p = "1", Tk0 = "", ka = NA_character_,
                             Ktr = NA_character_, Mtt = NA_character_)
   .ret2$admd <- data.frame(adm = 2L, admd = 1L, cmt = NA_integer_, target = "Ac", depot = FALSE, dur = TRUE, f = FALSE, tlag = FALSE)
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
-               "depot(adm = 2, target = Ac, Tk0)")
+               "depot(adm = 2, target = Ac, Tlag = 0, p = 1, Tk0)")
 
   .ret <- .pk("depot(target=Ac, ka, Tlag=2.1, p=0.3)")
 
@@ -302,10 +302,10 @@ transfer(from=1, to=2, kt)")
                "depot(adm = 1, target = Ac, Tlag = 2.1, p = 0.3, ka)")
 
   .ret <- .pk("; zero order absorption process for the doses of type 1, in compartment 1 with a delay Tlag of 1 and a duration Tk0
-absorption(adm=1, cmt=1, Tlag=1, Tk0 = 2, p=1)")
+absorption(adm=1, cmt=1, Tlag=1, Tk0 = 2, p=0.75)")
 
   .ret2 <- emptyObj()
-  .ret2$oral <- data.frame(adm = 1L, admd=1L, cmt = 1L, Tlag = "1", p = "1",
+  .ret2$oral <- data.frame(adm = 1L, admd=1L, cmt = 1L, Tlag = "1", p = "0.75",
                            Tk0 = "2", ka = NA_character_, Ktr = NA_character_,
                            Mtt = NA_character_)
   .ret2$admd <- data.frame(adm = 1L, admd = 1L, cmt = 1L, target = NA_character_,
@@ -313,21 +313,21 @@ absorption(adm=1, cmt=1, Tlag=1, Tk0 = 2, p=1)")
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
-               "oral(adm = 1, cmt = 1, Tlag = 1, p = 1, Tk0 = 2)")
+               "oral(adm = 1, cmt = 1, Tlag = 1, p = 0.75, Tk0 = 2)")
 
   .ret <- .pk("; first order absorption process for the doses of type 1, in compartment 1 with a delay Tlag of 1 and a rate ka
 absorption(type=1, cmt=1, Tlag=1, ka)")
 
   .ret2 <- emptyObj()
   .ret2$oral <- data.frame(adm = 1L, admd=1L, cmt = 1L, Tlag = "1",
-                           p = NA_character_, Tk0 = NA_character_,
+                           p = "1", Tk0 = NA_character_,
                            ka = "", Ktr = NA_character_, Mtt = NA_character_)
   .ret2$admd <- data.frame(adm = 1L, admd = 1L, cmt = 1L, target = NA_character_,
                            depot = TRUE, dur = FALSE, f = FALSE, tlag = TRUE)
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
-               "oral(adm = 1, cmt = 1, Tlag = 1, ka)")
+               "oral(adm = 1, cmt = 1, Tlag = 1, p = 1, ka)")
 
   .ret <- .pk("absorption(adm=1, cmt=1, Tk0, p=F1)
 absorption(adm=1, cmt=1, ka, p=1-F1, Tlag=Tk0)
@@ -335,7 +335,7 @@ absorption(adm=1, cmt=1, ka, p=1-F1, Tlag=Tk0)
 
   .ret2 <- emptyObj()
   .ret2$oral <- data.frame(adm = c(1L, 1L), admd=c(1L, 2L), cmt = c(1L, 1L),
-                           Tlag = c(NA, "Tk0"), p = c("F1", "1-F1"),
+                           Tlag = c("0", "Tk0"), p = c("F1", "1-F1"),
                            Tk0 = c("", NA), ka = c(NA, ""),
                            Ktr = c(NA_character_, NA_character_),
                            Mtt = c(NA_character_, NA_character_))
@@ -347,7 +347,7 @@ absorption(adm=1, cmt=1, ka, p=1-F1, Tlag=Tk0)
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
-               c("oral(adm = 1, cmt = 1, p = F1, Tk0)",
+               c("oral(adm = 1, cmt = 1, Tlag = 0, p = F1, Tk0)",
                  "oral(adm = 1, cmt = 1, Tlag = Tk0, p = 1-F1, ka)"))
 
   .ret <- .pk("absorption(adm=1, cmt=1, ka, p=F1)
@@ -355,7 +355,7 @@ absorption(adm=1, cmt=1, Tk0, p=1-F1)")
 
   .ret2 <- emptyObj()
   .ret2$oral <- data.frame(adm = c(1L, 1L), admd=1:2, cmt = c(1L, 1L),
-                           Tlag = c(NA_character_, NA_character_), p = c("F1", "1-F1"),
+                           Tlag = c("0", "0"), p = c("F1", "1-F1"),
                            Tk0 = c(NA, ""), ka = c("", NA),
                            Ktr = c(NA_character_, NA_character_), Mtt = c(NA_character_, NA_character_))
   .ret2$admd <- data.frame(adm = c(1L, 1L), admd = 1:2, cmt = c(1L, 1L),
@@ -364,8 +364,8 @@ absorption(adm=1, cmt=1, Tk0, p=1-F1)")
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
-               c("oral(adm = 1, cmt = 1, p = F1, ka)",
-                 "oral(adm = 1, cmt = 1, p = 1-F1, Tk0)"))
+               c("oral(adm = 1, cmt = 1, Tlag = 0, p = F1, ka)",
+                 "oral(adm = 1, cmt = 1, Tlag = 0, p = 1-F1, Tk0)"))
 
 
   .ret <- .pk("compartment(cmt=1, amount=A1, concentration=Cc_zoa, volume=V)
@@ -386,8 +386,8 @@ elimination(cmt=3, k=1)
                                   volume = c("V", "V", "V"),
                                   concentration = c("Cc_zoa", "Cc_foa", "Cc_foaT"))
   .ret2$oral <- data.frame(adm = c(1L, 1L, 1L), admd=1:3, cmt = 1:3,
-                           Tlag = c(NA, "", ""),
-                           p = c(NA_character_, NA_character_, NA_character_),
+                           Tlag = c("0", "", ""),
+                           p = c("1", "1", "1"),
                            Tk0 = c("", NA, NA), ka = c(NA, "", ""),
                            Ktr = c(NA, NA, ""), Mtt = c(NA, NA, ""))
   .ret2$elimination <- data.frame(cmt = 1:3,
@@ -406,27 +406,27 @@ elimination(cmt=3, k=1)
 
   expect_equal(as.character(.ret),
                c("compartment(cmt = 1, amount = A1, volume = V, concentration = Cc_zoa)",
-                 "oral(adm = 1, cmt = 1, Tk0)",
+                 "oral(adm = 1, cmt = 1, Tlag = 0, p = 1, Tk0)",
                  "elimination(cmt = 1, k = 1)",
                  "",
                  "compartment(cmt = 2, amount = A2, volume = V, concentration = Cc_foa)",
-                 "oral(adm = 1, cmt = 2, Tlag, ka)",
+                 "oral(adm = 1, cmt = 2, Tlag, p = 1, ka)",
                  "elimination(cmt = 2, k = 1)",
                  "",
                  "compartment(cmt = 3, amount = A3, volume = V, concentration = Cc_foaT)",
-                 "oral(adm = 1, cmt = 3, Tlag, ka, Ktr, Mtt)", "elimination(cmt = 3, k = 1)"))
+                 "oral(adm = 1, cmt = 3, Tlag, p = 1, ka, Ktr, Mtt)", "elimination(cmt = 3, k = 1)"))
 
   .ret <- .pk("; intravenous bolus for the doses of type 1, in compartment 1 with a delay Tlag at 1
-iv(adm=1, cmt=1, Tlag=1, p=1)")
+iv(adm=1, cmt=1, Tlag=1, p=0.75)")
 
   .ret2 <- emptyObj()
-  .ret2$iv <- data.frame(adm = 1L, admd=1L, cmt = 1L, Tlag = "1", p = "1")
+  .ret2$iv <- data.frame(adm = 1L, admd=1L, cmt = 1L, Tlag = "1", p = "0.75")
   .ret2$admd <- data.frame(adm = 1L, admd = 1L, cmt = 1L, target = NA_character_,
                            depot = FALSE, dur = FALSE, f = TRUE, tlag = TRUE)
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
-               "iv(adm = 1, cmt = 1, Tlag = 1, p = 1)")
+               "iv(adm = 1, cmt = 1, Tlag = 1, p = 0.75)")
 
   .ret <- .pk("compartment(cmt=1, amount=A1, concentration=Cc_iv_bolus, volume=V)
 iv(cmt=1, adm=1, Tlag)
@@ -442,7 +442,7 @@ elimination(cmt=2, k=1)
                                   volume = c("V", "V"),
                                   concentration = c("Cc_iv_bolus", "Cc_iv_inf"))
   .ret2$iv <- data.frame(adm = 1:2, admd=c(1L, 1L), cmt = 1:2, Tlag = c("", ""),
-                         p = c(NA_character_, NA_character_))
+                         p = c("1", "1"))
   .ret2$elimination <- data.frame(cmt = 1:2,
                                   V = c(NA_character_, NA_character_),
                                   k = c("1", "1"),
@@ -458,19 +458,19 @@ elimination(cmt=2, k=1)
 
   expect_equal(as.character(.ret),
                c("compartment(cmt = 1, amount = A1, volume = V, concentration = Cc_iv_bolus)",
-                 "iv(adm = 1, cmt = 1, Tlag)",
+                 "iv(adm = 1, cmt = 1, Tlag, p = 1)",
                  "elimination(cmt = 1, k = 1)",
                  "",
                  "compartment(cmt = 2, amount = A2, volume = V, concentration = Cc_iv_inf)",
-                 "iv(adm = 2, cmt = 2, Tlag)",
+                 "iv(adm = 2, cmt = 2, Tlag, p = 1)",
                  "elimination(cmt = 2, k = 1)"))
 
   .ret <- .pk("compartment(cmt=1, amount=A1, concentration=Cc_zoa, volume=V)
-absorption(cmt=1, type=1, Tlag, Tk0, p=1)
+absorption(cmt=1, type=1, Tlag, Tk0, p=0.75)
 elimination(cmt=1,k=.25)
 
 compartment(cmt=2, amount=A2, concentration=Cc_foa, volume=V)
-absorption(cmt=2, type=1, Tlag, ka, p=1)
+absorption(cmt=2, type=1, Tlag, ka, p=0.75)
 elimination(cmt=2,k=.25)
 
 compartment(cmt=3, amount=A3, concentration=Cc_mixed, volume=V)
@@ -488,7 +488,7 @@ elimination(cmt=3,k=.25)
                            admd=1:4,
                            cmt = c(1L, 2L, 3L, 3L),
                            Tlag = c("", "", "", ""),
-                           p = c("1", "1", "F", "1-F"),
+                           p = c("0.75", "0.75", "F", "1-F"),
                            Tk0 = c("", NA, "", NA), ka = c(NA, "", NA, ""),
                            Ktr = c(NA_character_, NA_character_, NA_character_, NA_character_),
                            Mtt = c(NA_character_, NA_character_, NA_character_, NA_character_))
@@ -510,11 +510,11 @@ elimination(cmt=3,k=.25)
 
   expect_equal(as.character(.ret),
                c("compartment(cmt = 1, amount = A1, volume = V, concentration = Cc_zoa)",
-                 "oral(adm = 1, cmt = 1, Tlag, p = 1, Tk0)",
+                 "oral(adm = 1, cmt = 1, Tlag, p = 0.75, Tk0)",
                  "elimination(cmt = 1, k = .25)",
                  "",
                  "compartment(cmt = 2, amount = A2, volume = V, concentration = Cc_foa)",
-                 "oral(adm = 1, cmt = 2, Tlag, p = 1, ka)",
+                 "oral(adm = 1, cmt = 2, Tlag, p = 0.75, ka)",
                  "elimination(cmt = 2, k = .25)",
                  "",
                  "compartment(cmt = 3, amount = A3, volume = V, concentration = Cc_mixed)",
@@ -538,7 +538,7 @@ elimination(cmt=3,k=.25)
 
   .ret2 <- emptyObj()
   .ret2$depot <- data.frame(adm = 1L, admd=1L, target = "Ap",
-                            Tlag = NA_character_, p = "-Ap/amtDose",
+                            Tlag = "0", p = "-Ap/amtDose",
                             Tk0 = NA_character_, ka = NA_character_,
                             Ktr = NA_character_, Mtt = NA_character_)
   .ret2$admd <- data.frame(adm = 1L, admd = 1L, cmt = NA_integer_, target = "Ap",
@@ -546,7 +546,7 @@ elimination(cmt=3,k=.25)
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
-               "depot(adm = 1, target = Ap, p = -Ap/amtDose)")
+               "depot(adm = 1, target = Ap, Tlag = 0, p = -Ap/amtDose)")
 
   .ret <- .pk("reset(adm=2, target=Ac)")
 
@@ -583,6 +583,10 @@ empty(adm=3, target=Ap)")
 
   expect_equal(as.character(.ret),
                "reset(adm = 3, target = all)")
+
+  .ret <- .pk("compartment(amount=Ac)\nabsorption(Tk0, p=Fr)\nabsorption(ka, p=1-Fr)\nelimination(k=Cl/V)\nCc=Ac/V")
+
+
 
   expect_true(is.list(as.list(.ret)))
 

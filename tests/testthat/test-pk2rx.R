@@ -204,7 +204,8 @@ test_that(".pk2rxElimination()", {
   env$rhs <- list("")
 
   #needs a volume
-  expect_error(.pk2rxElimination(env, pk, 1), "type")
+  # now uses default volume of
+  #expect_error(.pk2rxElimination(env, pk, 1), "type")
 
   pk <- .pk("compartment(cmt=1, amount=Ac,volume=Vc)\nelimination(cmt=1, Cl)")
 
@@ -250,8 +251,8 @@ test_that("pk2rxTransfer()", {
 
   .pk2rxTransfer(.env, pk, 2)
 
-  expect_equal(.env$rhs[[1]], " - kt*cmt1")
-  expect_equal(.env$rhs[[2]], " + kt*cmt1")
+  expect_equal(.env$rhs[[1]], " - kt*central")
+  expect_equal(.env$rhs[[2]], " + kt*central")
 
 })
 

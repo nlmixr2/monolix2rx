@@ -62,7 +62,8 @@
     .monolix2rx$pkLhs <- c(.monolix2rx$pkLhs, concentration)
     env$conc[[i]] <- paste0(concentration, " <- ", .pk2rxAmt(env, pk, i, amount), .v)
     attr(env$conc[[i]], "conc") <- concentration
-  } else if (i == 1 && is.na(concentration) && !(.monolix2rx$endpointPred[1] %in% .monolix2rx$curLhs)) {
+  } else if (i == 1 && length(.monolix2rx$endpointPred) > 0 &&
+               is.na(concentration) && !(.monolix2rx$endpointPred[1] %in% .monolix2rx$curLhs)) {
     concentration <- .monolix2rx$endpointPred[1]
     .v <- ""
     if (!is.na(volume)) {
@@ -246,7 +247,9 @@
       }
       env$dur[[i]] <- paste0(env$dur[[i]],
                              .pk2rxAdmVal(pk, .oral, "dur", .tk0))
-      if (!is.na(.oral$p)) {
+      .p <- .oral$p
+      .pn <- suppressWarnings(as.numeric(.p))
+      if (!identical(.pn, 1.0)) {
         .p <- .pk2rxGetVar(.oral, "p")
         if (is.null(env$f[[i]])) {
           env$f[[i]] <-  paste0("f(", .cmtName, ") <- ")
@@ -254,7 +257,9 @@
         env$f[[i]] <- paste0(env$f[[i]],
                              .pk2rxAdmVal(pk, .oral, "f", .p))
       }
-      if (!is.na(.oral$Tlag)) {
+      .tlag <- .oral$Tlag
+      .tlagn <- suppressWarnings(as.numeric(.tlag))
+      if (!identical(.tlagn, 0.0)) {
         .Tlag <- .pk2rxGetVar(.oral, "Tlag")
         if (is.null(env$tlag[[i]])) {
           env$tlag[[i]] <- paste0("alag(", .cmtName, ") <- ")
@@ -278,6 +283,8 @@
                                   " - ", .ka, "*", .cmtName)
       env$rhs[[i]] <- paste0(env$rhs[[i]],
                              " + ", .ka, "*", .cmtName)
+      .p <- .oral$p
+      .pn <- suppressWarnings(as.numeric(.p))
       if (!is.na(.oral$Mtt) && !is.na(.oral$Ktr)) {
         .Mtt <- .pk2rxGetVar(.oral, "Mtt")
         .Ktr <- .pk2rxGetVar(.oral, "Ktr")
@@ -288,7 +295,7 @@
                                     .Mtt, ", ",
                                     ifelse(is.na(.p), "1.0", .p),
                                     ")")
-      } else if (!is.na(.oral$p)) {
+      } else if (!identical(.pn, 1.0)) {
         .p <- .pk2rxGetVar(.oral, "p")
         if (is.null(env$fDepot[[i]])) {
           env$fDepot[[i]] <- paste0("f(", .cmtName, ") <- ")
@@ -296,7 +303,9 @@
         env$fDepot[[i]] <- paste0(env$fDepot[[i]],
                                   .pk2rxAdmVal(pk, .oral, "f", .p))
       }
-      if (!is.na(.oral$Tlag)) {
+      .tlag <- .oral$Tlag
+      .tlagn <- suppressWarnings(as.numeric(.tlag))
+      if (!identical(.tlagn, 0.0)) {
         .Tlag <- .pk2rxGetVar(.oral, "Tlag")
         if (is.null(env$tlagDepot[[i]])) {
           env$tlagDepot[[i]] <- paste0("alag(", .cmtName, ") <- ")
@@ -346,7 +355,9 @@
   for (.w in .w0) {
     .iv <- pk$iv[.w, ]
     .ca <- .pk2rxAmt(env, pk, i)
-    if (!is.na(.iv$Tlag)) {
+    .tlag <- .iv$Tlag
+    .tlagn <- suppressWarnings(as.numeric(.tlag))
+    if (!identical(.tlagn, 0.0)) {
       .tlag <- .pk2rxGetVar(.iv, "Tlag")
       if (is.null(env$tlag[[i]])) {
         env$tlag[[i]] <- paste0("alag(", .ca, ") <- ")
@@ -354,7 +365,9 @@
       env$tlag[[i]] <- paste0(env$tlag[[i]],
                                .pk2rxAdmVal(pk, .iv, "tlag", .tlag))
     }
-    if (!is.na(.iv$p)) {
+    .p <- .iv$p
+    .pn <- suppressWarnings(as.numeric(.p))
+    if (!identical(1.0, .pn)) {
       .p <- .pk2rxGetVar(.iv, "p")
       if (is.null(env$f[[i]])) {
         env$f[[i]] <- paste0("f(", .ca, ") <- ")
@@ -433,6 +446,8 @@
              env$rhsDepot[[.target]] <- paste0(env$rhsDepot[[.target]],
                                                " - ", .ka, "*", .target, env$depotPostfix)
              env$extraDepot[[.target]] <- paste0(" + ", .ka, "*", .target, env$depotPostfix)
+             .p <- .depot$p
+             .pn <- suppressWarnings(as.numeric(.p))
              if (!is.na(.depot$Mtt) && !is.na(.depot$Ktr)) {
                .Mtt <- .pk2rxGetVar(.depot, "Mtt")
                .Ktr <- .pk2rxGetVar(.depot, "Ktr")
@@ -443,7 +458,7 @@
                                                  .Mtt, ", ",
                                                  ifelse(is.na(.p), "1.0", .p),
                                                  ")")
-             } else if (!is.na(.depot$p)) {
+             } else if (!identical(.pn, 1.0)) {
                .p <- .pk2rxGetVar(.depot, "p")
                if (is.null(env$fDepot[[.target]])) {
                  env$fDepot[[.target]] <- paste0("f(", .target, env$depotPostfix, ") <- ")
@@ -451,7 +466,9 @@
                env$fDepot[[.target]] <- paste0(env$fDepot[[.target]],
                                                .pk2rxAdmVal(pk, .depot, "f", .p))
              }
-             if (!is.na(.depot$Tlag)) {
+             .tlag <- .depot$Tlag
+             .tlagn <- suppressWarnings(as.numeric(.tlag))
+             if (!identical(.tlagn, 0.0)) {
                .Tlag <- .pk2rxGetVar(.depot, "Tlag")
                if (is.null(env$tlagDepot[[.target]])) {
                  env$tlagDepot[[.target]] <- paste0("alag(",
@@ -462,7 +479,9 @@
                                                   .pk2rxAdmVal(pk, .depot, "tlag", .Tlag))
              }
            } else {
-             if (!is.na(.depot$p)) {
+             .p <- .depot$p
+             .pn <- suppressWarnings(as.numeric(.p))
+             if (!identical(.pn, 1.0)) {
                .p <- .pk2rxGetVar(.depot, "p")
                if (is.null(env$f[[.target]])) {
                  env$f[[.target]] <- paste0("f(", .target, ") <- ")
@@ -470,7 +489,9 @@
                env$f[[.target]] <- paste0(env$f[[.target]],
                                           .pk2rxAdmVal(pk, .depot, "f", .p))
              }
-             if (!is.na(.depot$Tlag)) {
+             .tlag <- .depot$Tlag
+             .tlagn <- suppressWarnings(as.numeric(.tlag))
+             if (!identical(.tlagn, 0.0)) {
                .Tlag <- .pk2rxGetVar(.depot, "Tlag")
                if (is.null(env$tlag[[.target]])) {
                  env$tlag[[.target]] <- paste0("alag(",
