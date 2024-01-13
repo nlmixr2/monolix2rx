@@ -29,7 +29,14 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"), envir=
   }
   thetaMatType <- match.arg(thetaMatType)
   .mlxtran <- mlxtran(mlxtran, equation=TRUE, update=update)
-  .equation <- .mlxtran$MODEL$LONGITUDINAL$EQUATION$rx # includes PK: macro
+  if (is.null(.mlxtran$MODEL$LONGITUDINAL$EQUATION) &&
+        !is.null(.mlxtran$MODEL$LONGITUDINAL$PK)) {
+    .equation <- .equation("", .mlxtran$MODEL$LONGITUDINAL$PK)$rx
+  } else if (!is.null(.mlxtran$MODEL$LONGITUDINAL$EQUATION)) {
+    .equation <- .mlxtran$MODEL$LONGITUDINAL$EQUATION$rx # includes PK: macro
+  } else {
+    .equation <- character(0)
+  }
   .model <- c("model({",
               .mlxtran$MODEL$INDIVIDUAL$DEFINITION$rx,
               .equation,

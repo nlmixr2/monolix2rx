@@ -14,7 +14,9 @@
   .monolix2rx$pk <- .pk2rx(pk)
   # Apparently pk macros can also be in the EQUATION: block
   .pkIni(TRUE)
-  .Call(`_monolix2rx_trans_equation`, text, "[LONGITUDINAL] EQUATION:")
+  if (text!="") {
+    .Call(`_monolix2rx_trans_equation`, text, "[LONGITUDINAL] EQUATION:")
+  }
   .pkPushStatement()
   .validatePkModel(.monolix2rx$pkPars, .monolix2rx$pkCe)
   .pk2 <- list(Cc=.monolix2rx$pkCc,
