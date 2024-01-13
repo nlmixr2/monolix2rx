@@ -80,6 +80,18 @@ void pushModel(void) {
   if (curLine.s == NULL) return;
   if (curLine.s[0] == 0) return;
   monolix2rxDouble(curLine.s, curDdt, ".equationLine");
+  // now check for X_0 = which will be followed by X(0) = X_0
+  char *v2 = curLine.s;
+  while (v2[0] != 0 && v2[0] != '_' && v2[0] != '=') {
+    v2++;
+  }
+  if (v2[0] == '_' && v2[1] == '0' && (v2[2] == ' ' || v2[2] == '=')) {
+    v2[0] = 0;
+    char *v = (char*)rc_dup_str(curLine.s, v2);
+    sClear(&curLine);
+    sAppend(&curLine, "%s(0) = %s_0", v, v);
+    monolix2rxDouble(curLine.s, curDdt, ".equationLine");
+  }
   sClear(&curLine);
 }
 
@@ -158,13 +170,6 @@ int equation_identifier_or_constant(char *name,  D_ParseNode *pn) {
     } else if (!strcmp("t", v)) {
       sAppendN(&curLine, "time", 4);
       return 1;
-    /* } else if (!strcmp("t_0", v) || !strcmp("t0", v)) { */
-    /*   sClear(&sbTransErr); */
-    /*   sAppend(&sbTransErr, "'t_0' or 't0' Monolix declaration not supported in translation"); */
-    /*   updateSyntaxCol(); */
-    /*   trans_syntax_error_report_fn0(sbTransErr.s); */
-    /*   finalizeSyntaxError(); */
-    /*   return 1; */
     }
     // ddt_x becomes d/dt(x)
     char *v2 = v;
@@ -180,14 +185,14 @@ int equation_identifier_or_constant(char *name,  D_ParseNode *pn) {
     }
     v2 = v;
     // x_0 becomes x(0)
-    while (v2[0] != 0 && v2[0] != '_') {
-      v2++;
-    }
-    if (v2[0] == '_' && !strcmp(v2+1, "0")) {
-      v2[0] = 0;
-      sAppend(&curLine, "%s(0)", v);
-      return 1;
-    }
+    /* while (v2[0] != 0 && v2[0] != '_') { */
+    /*   v2++; */
+    /* } */
+    /* if (v2[0] == '_' && !strcmp(v2+1, "0")) { */
+    /*   v2[0] = 0; */
+    /*   sAppend(&curLine, "%s(0)", v); */
+    /*   return 1; */
+    /* } */
     sAppend(&curLine, "%s", v);
     return 1;
   } else if (!strcmp("constant", name)) {
