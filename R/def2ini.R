@@ -168,9 +168,9 @@
       env$extraFixed <- c(env$extraFixed, .v1, .v2)
     }
     if (is.na(.val)) {
-      warning("cannot find correlation estimate between ", .v1, " and ", .v2,
+      warning("cannot find correlation estimate between ", .v1, " and ", .v2," assuming 0.00001",
               call. = FALSE)
-      .val <- 0
+      .val <- 0.00001
     }
     env$r[.v1, .v2] <- .val
     env$r[.v2, .v1] <- .val
