@@ -29,8 +29,8 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .mlxtranLib <- function(file) {
+  if (!checkmate::testCharacter(file, min.chars = 5, len=1)) return(file)
   .nc <- nchar(file)
-  if (.nc < 5) return(file)
   .pre <- substr(file, 1, 4)
   if (.pre != "lib:") return(file)
   .dir <- getOption("monolix2rx.library", NULL)

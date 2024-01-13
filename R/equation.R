@@ -134,7 +134,8 @@ as.list.monolix2rxCovEq <- as.list.monolix2rxEquation
 mlxTxt <- function(file, retFile=FALSE) {
   if (!retFile) .mlxtranIni()
   .f <- .mlxtranLib(file)
-  if (file.exists(.f)) {
+  .try <- try(file.exists(.f), silent=TRUE)
+  if (isTRUE(.f)) {
     .m2 <- c("<MODEL>",
              suppressWarnings(readLines(.f)))
     lapply(.m2, .mlxtranParseItem)
