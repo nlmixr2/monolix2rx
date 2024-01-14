@@ -148,8 +148,21 @@
   if (length(env$omega[[.w]]) == 1) {
     .r <- .sd <- diag(1)
     .sd[1, 1] <- env$omega[[.w]]
+    if (is.na(.sd[1, 1])) {
+      warning("cannot find estimate of ", names(env$omega), " assuming 1",
+              call. = FALSE)
+      .sd[1, 1] <- 1
+    }
   } else {
-    .sd <- diag(env$omega[[.w]])
+    .omega <- env$omega[[.w]]
+    .w2 <- which(is.na(.omega))
+    if (length(.w2) > 0) {
+      warning("cannot find estimate of ", paste(names(.omega)[.w2], collapse=", "),
+              " assuming 1",
+              call. = FALSE)
+      .omega[.w2] <- 1
+    }
+    .sd <- diag(.omega)
     .r <- diag(length(env$omega[[.w]]))
   }
   .n <- names(env$omega[[.w]])
@@ -284,6 +297,12 @@
               } else if (!is.null(.cur$mean)) {
                 .var <- .cur$mean
                 .val <- .parsGetValue(pars, .var)
+              }
+              if (is.na(.val)) {
+                warning("cannot find estimate of ", .var,
+                        " assuming 2",
+                        call. = FALSE)
+                .val <- 2
               }
               .def2iniSetupDiagSd(.cur, .env, pars, n)
               if (.parsGetFixed(pars, .var)) {
