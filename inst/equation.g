@@ -10,7 +10,7 @@ pkpars0: 'V' | 'Tk0' | 'ka' | 'Ktr' | 'Mtt' | 'Tlag' | 'p'
 
 pkparsE0:  pkpars | 'ke0';
 
-eqExpr: '=' "[^\n,\)]+";
+eqExpr: '=' logical_or_expression;
 
 pkpars: pkpars0 eqExpr?;
 

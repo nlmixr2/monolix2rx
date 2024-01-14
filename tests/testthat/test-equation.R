@@ -6,7 +6,7 @@ test_that("equation tests", {
 ddt_x = -k*x", pk)
 
   expect_equal(.ret$rx,
-               c("x(0) <- V", "d/dt(x) <-  - k * x"))
+               c("x_0 <- V", "x(0) <- x_0", "d/dt(x) <-  - k * x"))
 
   .ret <- .equation("if t<=10
    c = 1
@@ -67,8 +67,10 @@ ddt_x = dx
 ddt_dx = -x-dx", pk)
 
   expect_equal(.ret$rx,
-               c("x(0) <- a",
-                 "dx(0) <- b",
+               c("x_0 <- a",
+                 "x(0) <- x_0",
+                 "dx_0 <- b",
+                 "dx(0) <- dx_0",
                  "d/dt(x) <- dx",
                  "d/dt(dx) <-  - x - dx"))
 
@@ -119,11 +121,12 @@ test_that("mixing pk and equation", {
   ddt_E= Rin*(1-Cc/(Cc+IC50)) - kout*E")
 
   expect_equal(tmp$rx,
-               c("d/dt(cmt1d) <-  - ka*cmt1d",
-                 "alag(cmt1d) <- Tlag",
-                 "d/dt(cmt1) <-  + ka*cmt1d - Cl/V*cmt1",
-                 "Cc <- cmt1/V",
-                 "E(0) <- Rin / kout",
+               c("d/dt(depot) <-  - ka*depot",
+                 "alag(depot) <- Tlag",
+                 "d/dt(central) <-  + ka*depot - Cl/V*central",
+                 "Cc <- central/V",
+                 "E_0 <- Rin / kout",
+                 "E(0) <- E_0",
                  "d/dt(E) <- Rin * (1 - Cc / (Cc + IC50)) - kout * E"))
 
 })

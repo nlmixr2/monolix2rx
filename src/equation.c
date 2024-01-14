@@ -89,7 +89,7 @@ void pushModel(void) {
     v2[0] = 0;
     char *v = (char*)rc_dup_str(curLine.s, v2);
     sClear(&curLine);
-    sAppend(&curLine, "%s(0) = %s_0", v, v);
+    sAppend(&curLine, "%s(0) <- %s_0", v, v);
     monolix2rxDouble(curLine.s, curDdt, ".equationLine");
   }
   sClear(&curLine);

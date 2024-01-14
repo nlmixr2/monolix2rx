@@ -175,7 +175,7 @@ as.list.monolix2rxCovEq <- as.list.monolix2rxEquation
 #'   name instead of error if the file does not exist
 #'
 #' @return parsed equation or file name
-#' @export,r
+#' @export
 #' @author Matthew L. Fidler
 #' @examples
 mlxTxt <- function(file, retFile=FALSE) {

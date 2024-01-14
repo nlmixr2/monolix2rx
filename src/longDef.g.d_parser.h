@@ -3194,7 +3194,7 @@ unsigned char d_scanner_205_0_0_longDef[SCANNER_BLOCK_SIZE] = {
 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 
 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 
-2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 
 };
 
 D_Shift * d_shift_205_1_longDef[] = {&d_shift_57_longDef,NULL};
@@ -6100,7 +6100,7 @@ D_Symbol d_symbols_longDef[] = {
 {D_SYMBOL_STRING, "=", 1, -1},
 {D_SYMBOL_STRING, "hazard", 6, -1},
 {D_SYMBOL_STRING, "=", 1, -1},
-{D_SYMBOL_REGEX, "[^\\n, \\t}]+", 13, -1},
+{D_SYMBOL_REGEX, "[^\\n, \\t}=]+", 14, -1},
 {D_SYMBOL_STRING, "=", 1, -1},
 {D_SYMBOL_STRING, "{", 1, -1},
 {D_SYMBOL_STRING, "type", 4, -1},
