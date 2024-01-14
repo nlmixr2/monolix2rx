@@ -206,5 +206,5 @@ mlxTxt <- function(file, retFile=FALSE) {
     return(.ret)
   }
   if (retFile) return(file)
-  stop("could not find the file for getting model text")
+  stop("could not find the model file", call.=FALSE)
 }

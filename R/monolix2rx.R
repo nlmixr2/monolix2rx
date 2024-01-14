@@ -43,7 +43,11 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   .monolix2rx$iniCor <- cor
   .monolix2rx$iniTheta <- theta
   thetaMatType <- match.arg(thetaMatType)
-  .mlxtran <- mlxtran(mlxtran, equation=TRUE, update=update)
+  if (grepl("[.]txt$", mlxtran, ignore.case = TRUE)) {
+    .mlxtran <- mlxTxt(mlxtran)
+  } else {
+    .mlxtran <- mlxtran(mlxtran, equation=TRUE, update=update)
+  }
   if (is.null(.mlxtran$MODEL$LONGITUDINAL$EQUATION) &&
         !is.null(.mlxtran$MODEL$LONGITUDINAL$PK)) {
     .equation <- .equation("", .mlxtran$MODEL$LONGITUDINAL$PK)$rx
@@ -60,7 +64,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
                        .handleSingleEndpoint(.mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint[[i]])
                      }, character(1), USE.NAMES = FALSE),
               "})")
-  if (all(.model == c("model({", "})"))) {
+  if (length(.model) == 2L && all(.model == c("model({", "})"))) {
     stop("there are not equations to translate in this mlxtran file",
          call.=FALSE)
   }

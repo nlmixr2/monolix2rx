@@ -34,13 +34,13 @@
   .pre <- substr(file, 1, 4)
   if (.pre != "lib:") return(file)
   .dir <- getOption("monolix2rx.library", NULL)
-  if (is.null(.dir)) {
+  if (!checkmate::testDirectoryExists(.dir)) {
     warning("model is from monolix model library; need to save file to translate (or setup library)",
             call.=FALSE)
     return(file)
   }
   .dir <- sub("[/\\]$", "", .dir)
-  .file <- substr(file, 5, .nc)
+  .file <- trimws(substr(file, 5, .nc))
   .file <- .mlxtranGetLib(.dir, .file)
   if (is.null(.file)) {
     warning("while options('monolix2rx.library') is set, could not find model file '", file, "'\nplease save the model to translate")
