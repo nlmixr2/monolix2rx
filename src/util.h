@@ -11,6 +11,8 @@ SEXP _monolix2rx_trans_mlxtrantask(SEXP in);
 SEXP _monolix2rx_trans_equation(SEXP in, SEXP what);
 SEXP _monolix2rx_trans_summaryData(SEXP in);
 SEXP _monolix2rx_trans_data_settings(SEXP in);
+SEXP _monolix2rx_r_parseFree(void);
+SEXP _monolix2rx_r_parseIni(void);
 
 void monolix2rx_full_ini(void);
 

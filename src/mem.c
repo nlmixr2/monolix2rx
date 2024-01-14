@@ -20,6 +20,19 @@
 #endif
 
 void monolix2rx_indDef_parseFree(int last);
+void monolix2rx_content_parseFree(int last);
+void monolix2rx_data_settings_parseFree(int last);
+void monolix2rx_equation_parseFree(int last);
+void monolix2rx_fileinfo_parseFree(int last);
+void monolix2rx_fit_parseFree(int last);
+void monolix2rx_indDef_parseFree(int last);
+void monolix2rx_individual_parseFree(int last);
+void monolix2rx_longdef_parseFree(int last);
+void monolix2rx_longoutput_parseFree(int last);
+void monolix2rx_mlxtran_op_parseFree(int last);
+void monolix2rx_parameter_parseFree(int last);
+void monolix2rx_mlxtrantask_parseFree(int last);
+void monolix2rx_summaryData_parseFree(int last);
 
 extern sbuf firstErr;
 extern sbuf sbErr1;
@@ -44,9 +57,20 @@ void monolix2rx_full_parseFree(int last) {
     sClear(&curLine);
     lineIni(&_dupStrs);
   }
+  monolix2rx_content_parseFree(last);
+  monolix2rx_data_settings_parseFree(last);
+  monolix2rx_equation_parseFree(last);
+  monolix2rx_fileinfo_parseFree(last);
+  monolix2rx_fit_parseFree(last);
   monolix2rx_indDef_parseFree(last);
+  monolix2rx_individual_parseFree(last);
+  monolix2rx_longdef_parseFree(last);
+  monolix2rx_longoutput_parseFree(last);
+  monolix2rx_mlxtran_op_parseFree(last);
+  monolix2rx_parameter_parseFree(last);
+  monolix2rx_mlxtrantask_parseFree(last);
+  monolix2rx_summaryData_parseFree(last);
 }
-
 
 int monolix2rx_full_ini_done = 0;
 void monolix2rx_full_ini(void) {

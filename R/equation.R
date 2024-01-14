@@ -179,6 +179,9 @@ as.list.monolix2rxCovEq <- as.list.monolix2rxEquation
 #' @author Matthew L. Fidler
 #' @examples
 mlxTxt <- function(file, retFile=FALSE) {
+  on.exit({
+    .Call(`_monolix2rx_r_parseFree`)
+  })
   if (!retFile) .mlxtranIni()
   .exit <- FALSE
   if (length(file) > 1L) {

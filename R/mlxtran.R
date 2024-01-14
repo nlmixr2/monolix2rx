@@ -275,6 +275,9 @@
 mlxtran <- function(file, equation=FALSE, update=FALSE) {
   checkmate::assertLogical(equation, any.missing=FALSE, len=1)
   checkmate::assertLogical(update, any.missing=FALSE, len=1)
+  on.exit({
+    .Call(`_monolix2rx_r_parseFree`)
+  })
   if (inherits(file, "monolix2rxMlxtran")) {
     .monolix2rx$endpointPred <- .getMonolixPreds(file)
     if (equation && !is.null(file$MODEL$LONGITUDINAL$EQUATION)) {

@@ -33,6 +33,9 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
     stop("'monolix2rx' requires 'rxode2' and 'lotri'",
          call.=FALSE)
   }
+  on.exit({
+    .Call(`_monolix2rx_r_parseFree`)
+  })
   checkmate::assertNumeric(sd, lower=0, finite=TRUE, any.missing = FALSE, len=1)
   checkmate::assertNumeric(cor, lower= -1, upper=1, finite=TRUE, any.missing = FALSE, len=1)
   checkmate::assertNumeric(theta, finite=TRUE, any.missing = FALSE, len=1)

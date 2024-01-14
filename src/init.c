@@ -12,6 +12,8 @@
 
 void R_init_monolix2rx(DllInfo *info) {
   R_CallMethodDef callMethods[]  = {
+    {"_monolix2rx_r_parseIni", (DL_FUNC) &_monolix2rx_r_parseIni, 0},
+    {"_monolix2rx_r_parseFree", (DL_FUNC) &_monolix2rx_r_parseFree, 0},
     {"_monolix2rx_trans_data_settings", (DL_FUNC) &_monolix2rx_trans_data_settings, 1},
     {"_monolix2rx_trans_summaryData", (DL_FUNC) &_monolix2rx_trans_summaryData, 1},
     {"_monolix2rx_trans_equation", (DL_FUNC) &_monolix2rx_trans_equation, 2},
