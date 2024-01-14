@@ -45,12 +45,20 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"), envir=
                        .handleSingleEndpoint(.mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint[[i]])
                      }, character(1), USE.NAMES = FALSE),
               "})")
+  if (all(.model == c("model({", "})"))) {
+    stop("there are not equations to translate in this mlxtran file",
+         call.=FALSE)
+  }
   .model <- str2lang(paste0(.model, collapse="\n"))
   .ini <- .def2ini(.mlxtran$MODEL$INDIVIDUAL$DEFINITION,
                    .mlxtran$PARAMETER$PARAMETER,
                    .mlxtran$MODEL$LONGITUDINAL$DEFINITION)
   .ret <- function() {}
-  body(.ret) <- as.call(c(list(quote(`{`)), .ini, .model))
+  if (gsub(" +", "", deparse1(.ini)) == "ini({})") {
+    body(.ret) <- as.call(c(list(quote(`{`)), .model))
+  } else {
+    body(.ret) <- as.call(c(list(quote(`{`)), .ini, .model))
+  }
   .ret <- eval(.ret, envir=envir)
   ini <- rxode2::ini
   model <- rxode2::model
