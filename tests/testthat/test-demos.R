@@ -24,7 +24,8 @@ unparsed <- function(x, ...) {
   .p <- .unparsedMlxtran(x, ...)
   .p <- .p[(.p %in% c("$MONOLIX$COMMENTS$COMMENTS", "$DATA_FORMATTING$OPERATIONS$TREATMENTS",
                       "$DATA_FORMATTING$OPERATIONS$OBSERVATIONS", "$DATA_FORMATTING$SETTINGS$LINES",
-                      "$DATA_FORMATTING$SETTINGS$LIES"))]
+                      "$DATA_FORMATTING$SETTINGS$LIES",
+                      "$MODEL$LONGITUDINAL$EQUATION"))]
 }
 
 for (f2 in models) {
@@ -32,6 +33,7 @@ for (f2 in models) {
     test_that(paste("mlxtran without equation", f2), {
       m <- mlxtran(f2)
       expect_true(inherits(m, "monolix2rxMlxtran"))
+      expect_equal(unparsed(m), character(0))
     })
     m <- try(mlxtran(f2, equation=TRUE), silent=TRUE)
     if (inherits(m, "try-error")) {
