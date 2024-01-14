@@ -101,17 +101,21 @@
     if (!is.null(.ret$MODEL$LONGITUDINAL)) {
       .ret$MODEL$LONGITUDINAL$LONGITUDINAL <- .longitudinal(.ret$MODEL$LONGITUDINAL$LONGITUDINAL)
       if (!is.null(.ret$MODEL$LONGITUDINAL$DEFINITION)) {
-        .ret$MODEL$LONGITUDINAL$DEFINITION <- .longDef(.ret$MODEL$LONGITUDINAL$DEFINITION)
+        .ld <- .longDef(.ret$MODEL$LONGITUDINAL$DEFINITION)
+        .monolix2rx$endpointPred <- .getMonolixPreds(.ld)
+        .ret$MODEL$LONGITUDINAL$DEFINITION <- .ld
+      } else {
+        .monolix2rx$endpointPred <- character(0)
       }
       if (!is.null(.ret$MODEL$LONGITUDINAL$PK)) {
         .ret$MODEL$LONGITUDINAL$PK <- .pk(.ret$MODEL$LONGITUDINAL$PK)
       }
+      if (!is.null(.ret$MODEL$LONGITUDINAL$OUTPUT)) {
+        .ret$MODEL$LONGITUDINAL$OUTPUT <- .longOut(.ret$MODEL$LONGITUDINAL$OUTPUT)
+      }
       if (equation && !is.null(.ret$MODEL$LONGITUDINAL$EQUATION)) {
         .ret$MODEL$LONGITUDINAL$EQUATION <- .equation(.ret$MODEL$LONGITUDINAL$EQUATION,
                                                       .ret$MODEL$LONGITUDINAL$PK)
-      }
-      if (!is.null(.ret$MODEL$LONGITUDINAL$OUTPUT)) {
-        .ret$MODEL$LONGITUDINAL$OUTPUT <- .longOut(.ret$MODEL$LONGITUDINAL$OUTPUT)
       }
     }
     if (!is.null(.ret$MODEL$POPULATION)) {
@@ -272,6 +276,7 @@ mlxtran <- function(file, equation=FALSE, update=FALSE) {
   checkmate::assertLogical(equation, any.missing=FALSE, len=1)
   checkmate::assertLogical(update, any.missing=FALSE, len=1)
   if (inherits(file, "monolix2rxMlxtran")) {
+    .monolix2rx$endpointPred <- .getMonolixPreds(file)
     if (equation && !is.null(file$MODEL$LONGITUDINAL$EQUATION)) {
       file$MODEL$LONGITUDINAL$EQUATION <- .equation(file$MODEL$LONGITUDINAL$EQUATION,
                                                     file$MODEL$LONGITUDINAL$PK)

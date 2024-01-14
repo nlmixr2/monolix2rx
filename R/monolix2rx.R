@@ -29,7 +29,6 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"), envir=
   }
   thetaMatType <- match.arg(thetaMatType)
   .mlxtran <- mlxtran(mlxtran, equation=TRUE, update=update)
-  .monolix2rx$endpointPred <- .getMonolixPreds(.mlxtran)
   if (is.null(.mlxtran$MODEL$LONGITUDINAL$EQUATION) &&
         !is.null(.mlxtran$MODEL$LONGITUDINAL$PK)) {
     .equation <- .equation("", .mlxtran$MODEL$LONGITUDINAL$PK)$rx
