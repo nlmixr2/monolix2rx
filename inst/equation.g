@@ -21,7 +21,7 @@ pkmodel2: '{' identifier ',' identifier '}' '=' 'pkmodel' '(' pkparsE (',' pkpar
 
 cmtOp: 'cmt' '=' decimalint;
 amtOp: 'amount' '=' identifier;
-vOp:   'volume' '=' (identifier | number);
+vOp:   'volume' '=' logical_or_expression;
 cpOp:  'concentration' '=' identifier;
 cmtOps: cmtOp | amtOp | vOp | cpOp;
 cmtLine: 'compartment'  '(' cmtOps (',' cmtOps)* ')';
