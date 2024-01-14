@@ -149,18 +149,19 @@
     .r <- .sd <- diag(1)
     .sd[1, 1] <- env$omega[[.w]]
     if (is.na(.sd[1, 1])) {
-      warning("cannot find estimate of ", names(env$omega), " assuming 1",
+      warning("cannot find estimate of ", names(env$omega), " assuming ",
+              .monolix2rx$iniSd,
               call. = FALSE)
-      .sd[1, 1] <- 1
+      .sd[1, 1] <- .monolix2rx$iniSd
     }
   } else {
     .omega <- env$omega[[.w]]
     .w2 <- which(is.na(.omega))
     if (length(.w2) > 0) {
       warning("cannot find estimate of ", paste(names(.omega)[.w2], collapse=", "),
-              " assuming 1",
+              " assuming ", .monolix2rx$iniSd,
               call. = FALSE)
-      .omega[.w2] <- 1
+      .omega[.w2] <- .monolix2rx$iniSd
     }
     .sd <- diag(.omega)
     .r <- diag(length(env$omega[[.w]]))
@@ -181,9 +182,9 @@
       env$extraFixed <- c(env$extraFixed, .v1, .v2)
     }
     if (is.na(.val)) {
-      warning("cannot find correlation estimate between ", .v1, " and ", .v2," assuming 0.00001",
-              call. = FALSE)
-      .val <- 0.00001
+      warning("cannot find correlation estimate between ", .v1, " and ", .v2," assuming ",
+              .monolix2rx$iniCor, call. = FALSE)
+      .val <- .monolix2rx$iniCor
     }
     env$r[.v1, .v2] <- .val
     env$r[.v2, .v1] <- .val
@@ -292,17 +293,24 @@
               .cur <- .var[[n]]
               if (!is.null(.cur$typical)) {
                 .var <- .cur$typical
-                .val <- .parsTransformValue(.parsGetValue(pars, .var), .cur$distribution,
+                .val <- .parsGetValue(pars, .var)
+                .inNaVal <- !is.na(.val)
+                .val <- .parsTransformValue(.val, .cur$distribution,
                                             min=.cur$min, max=.cur$max)
+                if (is.na(.val) && .inNaVal) {
+                  stop("transformed value of initial estimate for ", .var,
+                       " is not in correct range",
+                       call.=FALSE)
+                }
               } else if (!is.null(.cur$mean)) {
                 .var <- .cur$mean
                 .val <- .parsGetValue(pars, .var)
               }
               if (is.na(.val)) {
                 warning("cannot find estimate of ", .var,
-                        " assuming 2",
+                        " assuming ", .monolix2rx$iniTheta,
                         call. = FALSE)
-                .val <- 2
+                .val <- .monolix2rx$iniTheta
               }
               .def2iniSetupDiagSd(.cur, .env, pars, n)
               if (.parsGetFixed(pars, .var)) {
@@ -327,7 +335,6 @@
                        .def2iniRenameOcc(.env$vl))
     class(.omega) <- "lotriFix"
     .omega <- .def2iniFixOmega(.omega, .env$extraFixed)
-    assign("omega", .omega, globalenv())
     .omega <- as.expression(.omega)
     .omega <- .omega[[2]]
     .ini <- c(.pop,

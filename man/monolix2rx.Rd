@@ -8,6 +8,9 @@ monolix2rx(
   mlxtran,
   update = TRUE,
   thetaMatType = c("sa", "lin"),
+  sd = 1,
+  cor = 1e-05,
+  theta = 0.5,
   envir = parent.frame()
 )
 }
@@ -21,6 +24,13 @@ estimates should be used for the translation (when present)}
 covariance matrix.  By default it is \code{sa} for simulated
 annealing, though you could use \code{lin} for linearized covariance
 calculation. If only one is present, then use whatever is present}
+
+\item{sd}{Default standard deviation for between subject
+variability/inter-occasion variability that are missing.}
+
+\item{cor}{Default correlation for missing correlations estimate}
+
+\item{theta}{default population estimate}
 
 \item{envir}{represents the environment used for evaluating the
 corresponding rxode2 function}

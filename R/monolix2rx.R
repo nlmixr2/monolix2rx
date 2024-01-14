@@ -9,6 +9,10 @@
 #'   covariance matrix.  By default it is `sa` for simulated
 #'   annealing, though you could use `lin` for linearized covariance
 #'   calculation. If only one is present, then use whatever is present
+#' @param sd Default standard deviation for between subject
+#'   variability/inter-occasion variability that are missing.
+#' @param cor Default correlation for missing correlations estimate
+#' @param theta default population estimate
 #' @param envir represents the environment used for evaluating the
 #'   corresponding rxode2 function
 #' @return rxode2 model
@@ -21,12 +25,20 @@
 #' @importFrom utils read.csv
 #' @eval .monolix2rxBuildGram()
 #' @examples
-monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"), envir=parent.frame()){
+monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
+                       sd=1.0, cor=1e-5, theta=0.5,
+                       envir=parent.frame()){
   if (!requireNamespace("rxode2", quietly=FALSE) ||
         !requireNamespace("lotri", quietly=FALSE)) {
     stop("'monolix2rx' requires 'rxode2' and 'lotri'",
          call.=FALSE)
   }
+  checkmate::assertNumeric(sd, lower=0, finite=TRUE, any.missing = FALSE, len=1)
+  checkmate::assertNumeric(cor, lower= -1, upper=1, finite=TRUE, any.missing = FALSE, len=1)
+  checkmate::assertNumeric(theta, finite=TRUE, any.missing = FALSE, len=1)
+  .monolix2rx$iniSd <- sd
+  .monolix2rx$iniCor <- cor
+  .monolix2rx$iniTheta <- theta
   thetaMatType <- match.arg(thetaMatType)
   .mlxtran <- mlxtran(mlxtran, equation=TRUE, update=update)
   if (is.null(.mlxtran$MODEL$LONGITUDINAL$EQUATION) &&

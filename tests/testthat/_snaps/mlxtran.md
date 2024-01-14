@@ -51,7 +51,7 @@
       
       PK:
       ; parsed: $MODEL$LONGITUDINAL$PK
-      compartment(cmt = 1, amount = depot)
+      compartment(cmt = 1, amount = depot, volume = 1.0)
       
       depot(adm = 1, target = depot, Tlag = 0, p = 1)
       
