@@ -43,7 +43,8 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   .monolix2rx$iniCor <- cor
   .monolix2rx$iniTheta <- theta
   thetaMatType <- match.arg(thetaMatType)
-  if (grepl("[.]txt$", mlxtran, ignore.case = TRUE)) {
+  if (length(mlxtran) == 1L && is.character(mlxtran) &&
+        grepl("[.]txt$", mlxtran, ignore.case = TRUE)) {
     .mlxtran <- mlxTxt(mlxtran)
   } else {
     .mlxtran <- mlxtran(mlxtran, equation=TRUE, update=update)
