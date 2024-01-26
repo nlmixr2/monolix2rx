@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# monolix2rx
+# monolix2rx <img src="man/figures/logo.png" align="right" height="138" alt="" />
 
 <!-- badges: start -->
 
@@ -110,24 +110,22 @@ this:
         `nlmixr2lib`).
     
       - Please do not request direct translations of models from Monolix
-        to our tool `nlmixr2lib`; these requests will be rejected.
+        to our library `nlmixr2lib`; these requests will be rejected.
 
 If you want the model library as text files, you may be able to reach
-out to lixoft and ask if they will provide them to you.
+out to Lixoft and ask if they will provide them to you.
 
-My biggest concern with this a monolith model library is approach is
-submitting Monolix models from the model library to regulatory bodies
-including models with the model library. For the regulators to be able
-to truly see the models they have to have a working copy Monolix. If
-they do not, the model they are using is a black box. I believe that
-many regions this is true.
+My biggest concern with this a approach is submitting Monolix models
+from the model library to regulatory bodies. For the regulators to be
+able to truly see the models they have to have a working copy Monolix.
+If they do not, the model is a black box.
 
 For that reason, I believe best practice when submitting to a regulatory
 body is to make the model available by making some change to the model
 and saving it to a final location. That way the regulators can see the
 model.
 
-This approach also allows the model to be translated to rxode2.
+This approach also allows the model to be translated to `rxode2`.
 
 # Note on testing
 
