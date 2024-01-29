@@ -294,7 +294,10 @@ mlxtran <- function(file, equation=FALSE, update=FALSE) {
     .lines <- file
     .dirn <- getwd()
   } else {
-    checkmate::assertFileExists(file)
+    if (checkmate::testFileExists(file, access="r", extension="txt")) {
+      return(mlxTxt(file))
+    }
+    checkmate::assertFileExists(file, access="r", extension="mlxtran")
     .lines <- suppressWarnings(readLines(file))
     .dirn <- dirname(file)
   }

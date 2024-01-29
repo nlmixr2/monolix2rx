@@ -272,6 +272,7 @@
       .cmtNameC <- .cmtName
       .cmtName <- paste0(.cmtName, env$depotPostfix)
       if (.cmtName == paste0("central", env$depotPostfix)) .cmtName <- "depot" # align with linCmt
+      if (.cmtName == paste0("depot", env$depotPostfix)) .cmtName <- "depot"
       if (is.null(env$lhsDepot[[i]])) {
         env$lhsDepot[[i]] <- paste0("d/dt(", .cmtName, ")")
       }
