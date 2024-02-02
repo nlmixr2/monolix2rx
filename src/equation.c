@@ -79,6 +79,10 @@ extern sbuf curLine;
 void pushModel(void) {
   if (curLine.s == NULL) return;
   if (curLine.s[0] == 0) return;
+  if (!strcmp(curLine.s, " <- ")) {
+    sClear(&curLine);
+    return;
+  }
   monolix2rxDouble(curLine.s, curDdt, ".equationLine");
   // now check for X_0 = which will be followed by X(0) = X_0
   char *v2 = curLine.s;
