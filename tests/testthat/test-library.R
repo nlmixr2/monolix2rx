@@ -27,8 +27,11 @@ unparsed <- function(x, ...) {
                       "$DATA_FORMATTING$SETTINGS$LIES"))]
 }
 
+# ~/src/monolix/library/tmdd/oral0_1cpt_constRtot_TlagTk0VkintkonKDR0Cl_outputLtot.txt
+
 for (f2 in txt) {
   if (file.exists(f2)) {
+    message(f2)
     m <- try(mlxTxt(f2))
     test_that(paste("mlxtran without equation", f2), {
       expect_true(inherits(m, "monolix2rxMlxtran"))
