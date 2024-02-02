@@ -645,6 +645,6 @@
                      f=.env$f,
                      tlag=.env$tlag,
                      fDepot=.env$fDepot,
-                     tlagDepot=.env$fDepot,
+                     tlagDepot=.env$tlagDepot,
                      endLines=.env$endLines))
 }
