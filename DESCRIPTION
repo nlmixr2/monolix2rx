@@ -1,9 +1,25 @@
 Package: monolix2rx
-Title: What the Package Does (One Line, Title Case)
+Title: 'monolix2rx' Converts 'Monolix' Models to 'rxode2'
 Version: 0.0.0.9000
 Authors@R:
-   person("Matthew","Fidler", role = c("aut", "cre"), email = "matthew.fidler@gmail.com", comment=c(ORCID="0000-0001-8538-6691"))
-Description: What the package does (one paragraph).
+   c(person("Matthew","Fidler", role = c("aut", "cre"), email = "matthew.fidler@gmail.com", comment=c(ORCID="0000-0001-8538-6691")),
+     person("Justin", "Wilkins", role = "ctb", email = "justin.wilkins@occams.com", comment=c(ORCID="0000-0002-7099-9396")))
+Description: 'Monolix' is a tool for running mixed effects model using
+    'saem'. This tool allows you to convert 'Monolix' models to 'rxode2'
+    (Wang, Hallow and James (2016) <doi:10.1002/psp4.12052>) using the
+    form compatible with 'nlmixr2' (Fidler et al (2019) <doi:10.1002/psp4.12445>).
+    The 'nlmixr2' syntax requires the residual specification to be included and it
+    is not always translated. If available, the 'rxode2' model will
+    read in the 'Monolix' data and compare the simulation for the
+    population model individual model and residual
+    model to immediately show how well the translation is
+    performing. This saves the model development time for people who are
+    creating an 'rxode2' model manually.  Additionally, this package reads
+    in all the information to allow simulation with uncertainty (that is the
+    number of observations, the number of subjects, and the covariance
+    matrix) with a 'rxode2' model.  This is complementary to the
+    'babelmixr2' package that translates 'nlmixr2' models to 'NONMEM' and can
+    convert the objects converted from 'monolix2rx' to a full 'nlmixr2' fit.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
