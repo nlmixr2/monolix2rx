@@ -69,7 +69,13 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
     stop("there are not equations to translate in this mlxtran file",
          call.=FALSE)
   }
-  .model <- str2lang(paste0(.model, collapse="\n"))
+  .model0 <- try(str2lang(paste0(.model, collapse="\n")), silent=TRUE)
+  if (inherits(.model0, "try-error")) {
+    message("Bad Model:\n")
+    message(paste(.model, collapse="\n"))
+    stop("model translation did not parse into a rxode2/nlmixr2 model", call.=FALSE)
+  }
+  .model <- .model0
   .ini <- .def2ini(.mlxtran$MODEL$INDIVIDUAL$DEFINITION,
                    .mlxtran$PARAMETER$PARAMETER,
                    .mlxtran$MODEL$LONGITUDINAL$DEFINITION)
