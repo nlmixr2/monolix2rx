@@ -325,3 +325,12 @@ test_that("pkmodel translation", {
   .pkm <- .pk("{Cc,Ce} = pkmodel(Tlag, Tk0, k=Cl/Vol, V=Vol, ke0)")
   expect_error(.pk2rx(.pkm), NA)
 })
+
+test_that("pk model translation for dur needs to have a dur() statement", {
+
+  .pkm <- .pk("depot(target = L, Tk0, Tlag, p = 1/V)")
+
+  .pk2 <- .pk2rx(.pkm)
+  expect_equal(.pk2$equation$dur$L, "dur(L) <- Tk0")
+
+})

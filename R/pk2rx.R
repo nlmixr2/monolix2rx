@@ -504,7 +504,7 @@
              }
              if (!is.na(.depot$Tk0)) {
                .Tk0 <- .pk2rxGetVar(.depot, "Tk0")
-               if (is.null(env$tlag[[.target]])) {
+               if (is.null(env$dur[[.target]])) {
                  env$dur[[.target]] <- paste0("dur(",
                                               .target,
                                               ") <- ")
