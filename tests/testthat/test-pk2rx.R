@@ -334,3 +334,27 @@ test_that("pk model translation for dur needs to have a dur() statement", {
   expect_equal(.pk2$equation$dur$L, "dur(L) <- Tk0")
 
 })
+
+
+test_that("pk integration into equation line", {
+
+  equation <- c("kel <- Cl / V", "koff <- KD * kon", "L_0 <- 0", "L(0) <- L_0",
+                "P_0 <- 0", "P(0) <- P_0", "d/dt(P) <- kon * R0 * L - (kon * L + koff + kint) * P",
+                "d/dt(L) <-  - (kon * R0 + kel) * L + (kon * L + koff) * P",
+                "Ltot <- L + P", "Rtot <- R0", "R <- Rtot - P", "TO <- R / Rtot",
+                "RR <- R / R0")
+
+  pk <- list(pk = character(0), equation = list(lhsDepot = list(L = ""),
+                                          rhsDepot = list(L = " - ka*Ld"), extraDepot = list(L = " + ka*Ld"),
+                                          dur = list(), f = list(), tlag = list(), fDepot = list(L = "f(Ld) <- 1/V"),
+                                          tlagDepot = list(), endLines = character(0)))
+  state <- c("P", "L")
+
+  expect_equal(.updateDdtEq(state, equation, pk),
+               c("kel <- Cl / V", "koff <- KD * kon", "L_0 <- 0", "L(0) <- L_0",
+                 "P_0 <- 0", "P(0) <- P_0", "d/dt(P) <- kon * R0 * L - (kon * L + koff + kint) * P",
+                 "d/dt(Ld) <-  - ka*Ld", "f(Ld) <- 1/V", "d/dt(L) <-  - (kon * R0 + kel) * L + (kon * L + koff) * P + ka*Ld",
+                 "Ltot <- L + P", "Rtot <- R0", "R <- Rtot - P", "TO <- R / Rtot",
+                 "RR <- R / R0"))
+
+})

@@ -8,6 +8,7 @@
 .equation <- function(text, pk=NULL) {
   if (inherits(text, "monolix2rxEquation")) return(text)
   .monolix2rx$equationLine <- character(0)
+  .monolix2rx$state <- character(0)
   .monolix2rx$equationLhs <- character(0)
   .monolix2rx$equationRhs <- character(0)
   .monolix2rx$odeType <- "nonStiff"
@@ -72,6 +73,8 @@
   class(.ret) <- "monolix2rxEquation"
   .ret
 }
+
+
 #' Add an equation line
 #'
 #' @param line add a line in the current model equation
@@ -120,6 +123,16 @@
 #' @author Matthew L. Fidler
 .equationLhs <- function(v) {
   .monolix2rx$equationLhs <- c(.monolix2rx$equationLhs, v)
+}
+#' Add state information to the equation object
+#'
+#' @param v state to add
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+#' @examples
+.equationState <- function(v) {
+  .monolix2rx$state <- c(.monolix2rx$state, v)
 }
 #' Add to the rhs variables of the equation object
 #'

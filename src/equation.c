@@ -181,6 +181,7 @@ int equation_identifier_or_constant(char *name,  D_ParseNode *pn) {
         v2[0] == 'd' && v2++ &&
         v2[0] == 't' && v2++ &&
         v2[0] == '_') {
+      monolix2rxSingle(v2+1, ".equationState");
       sAppend(&curLine, "d/dt(%s)", v2+1);
       if (gIsAssignmentStart) {
         monolix2rxSingle(v2+1, ".equationLhs");

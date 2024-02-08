@@ -648,3 +648,90 @@
                      tlagDepot=.env$tlagDepot,
                      endLines=.env$endLines))
 }
+
+#' Gives which expression is d/dt()
+#'
+#' @param equationLine equation lines
+#' @param state state to look up
+#' @return which value matches d/dt(state) <-
+#' @export
+#' @author Matthew L. Fidler
+#' @noRd
+.whichDdt <- function(equationLine, state) {
+  .nc <- nchar(state)
+  .cmp <- paste0("d/dt(", state, ") <-")
+  which(substr(equationLine, 1, .nc + 9L) == .cmp)
+}
+#' This updates the ODEs based on the pk block
+#'
+#' @param states states to update
+#' @param equationLine equation lines
+#' @param pk parsed pk
+#' @param depotPostfix depot postfix
+#' @return updated lines
+#' @noRd
+#' @author Matthew L. Fidler
+.updateDdtEq <- function(states, equationLine, pk, depotPostfix="d") {
+  .ret <- equationLine
+  for (.s in states) {
+    .w <- .whichDdt(.ret, .s)
+    if (length(.w) == 1L) {
+      .cur <- .ret[.w]
+      # add ka addition if needed
+      .extra <- pk$equation$extraDepot[[.s]]
+      if (checkmate::testCharacter(.extra, min.chars=1, len=1)) {
+        .cur <- paste0(.cur, .extra)
+      }
+      if (!is.null(pk$equation$lhsDepot[[.s]])) {
+        if (!is.null(pk$equation$fDepot[[.s]])) {
+          .cur <- c(pk$equation$fDepot[[.s]],
+                    .cur)
+        }
+        if (!is.null(pk$equation$tlagDepot[[.s]])) {
+          .cur <- c(pk$equation$tlagDepot[[.s]],
+                    .cur)
+        }
+        if (pk$equation$rhsDepot[[.s]] != "") {
+          .cur <- c(paste0("d/dt(", .s, depotPostfix, ") <- ", pk$equation$rhsDepot[[.s]]),
+                    .cur)
+        }
+      }
+      if (!is.null(pk$equation$lhs[[.s]])) {
+        if (pk$equation$rhs[[.s]] != "" && pk$equation$lhs[[.s]] != "") {
+          .cur <- c(.cur,
+                    paste0(pk$equation$lhs[[.s]], " <- ", pk$equation$rhs[[.s]]))
+        }
+      }
+      if (!is.null(pk$equation$dur[[.s]])) {
+        .cur <- c(.cur,
+                  pk$equation$dur[[.s]])
+      }
+      if (!is.null(pk$equation$f[[.s]])) {
+        .cur <- c(.cur,
+                  pk$equation$f[[.s]])
+      }
+      if (!is.null(pk$equation$tlag[[.s]])) {
+        .cur <- c(.cur,
+                  pk$equation$tlag[[.s]])
+      }
+      if (!is.null(pk$equation$conc[[.s]])) {
+        .cur <- c(.cur,
+                  pk$equation$conc[[.s]])
+      }
+      if (!is.null(pk$equation$lhsEffect[[.s]])) {
+        .cur <- c(.cur,
+                  paste0(pk$equation$lhsEffect[[.s]], " <- ", pk$equation$rhsEffect[[.s]]))
+      }
+      .ret0 <- NULL
+      .ret3 <- NULL
+      if (.w > 1) {
+        .ret0 <- .ret[seq(1, .w - 1)]
+      }
+      if (.w + 1 < length(.ret)) {
+        .ret3 <- .ret[seq(.w + 1, length(.ret))]
+      }
+      .ret <- c(.ret0, .cur, .ret3)
+    }
+  }
+  .ret
+}
