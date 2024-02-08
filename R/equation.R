@@ -62,6 +62,8 @@
                                       " <- ",
                                       .monolix2rx$endpointPred[.w]))
   }
+  .monolix2rx$equationLine <- .updateDdtEq(.monolix2rx$state, .monolix2rx$equationLine, .monolix2rx$pk)
+  .monolix2rx$equationLine <- .updateDdtEq(.monolix2rx$state, .monolix2rx$equationLine, .pk3)
   .ret <- list(monolix=text,
                rx=c(.monolix2rx$equationLine,
                     .monolix2rx$pk$pk,
