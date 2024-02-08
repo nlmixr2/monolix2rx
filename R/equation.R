@@ -64,6 +64,10 @@
   }
   .monolix2rx$equationLine <- .updateDdtEq(.monolix2rx$state, .monolix2rx$equationLine, .monolix2rx$pk)
   .monolix2rx$equationLine <- .updateDdtEq(.monolix2rx$state, .monolix2rx$equationLine, .pk3)
+  .w <- which(grepl("^ *[<][-] *$", .monolix2rx$equationLine))
+  if (length(.w) > 0L) {
+    .monolix2rx$equationLine <- .monolix2rx$equationLine[-.w]
+  }
   .ret <- list(monolix=text,
                rx=c(.monolix2rx$equationLine,
                     .monolix2rx$pk$pk,
