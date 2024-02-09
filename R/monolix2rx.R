@@ -148,22 +148,22 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
     .add <- "probitNorm"
   }
   if (endpoint$err$errName == "constant") {
-    return(paste0(endpoint$pred, " ~ ",
+    return(paste0(endpoint$var, " <- ", endpoint$pred, "\n",
+                  endpoint$var, " ~ ",
                   .add,
                   "(",
                   endpoint$err$typical[1],
                   ifelse(endpoint$dist == "logitnormal",
                          paste0(", ", endpoint$min, ", ", endpoint$max),
                          ""),
-                  ") | ",
-                  endpoint$var))
+                  ")"))
   } else if (endpoint$err$errName == "proportional") {
-    return(paste0(endpoint$pred, " ~ ",
+    return(paste0(endpoint$var, " <- ", endpoint$pred, "\n",
+                  endpoint$var, " ~ ",
                   ifelse(.add == "add", "", paste0(.add, "(NA) + ")),
                   "prop(",
                   endpoint$err$typical[1],
-                  ") | ",
-                  endpoint$var))
+                  ")"))
   }
   if (endpoint$err$errName %in% c("combined1", "combined1c")) {
     .combined <- " + combined1()"
@@ -176,8 +176,8 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
     .prop <- paste0(" + pow(", endpoint$err$typical[2], ", ",
                     endpoint$err$typical[3], ")")
   }
-  return(paste0(endpoint$pred, " ~ ",
+  return(paste0(endpoint$var, " <- ", endpoint$pred, "\n",
+                endpoint$var, " ~ ",
                 .add, "(", endpoint$err$typical[1],
-                ")", .prop, .combined, " | ",
-                endpoint$var))
+                ")", .prop, .combined))
 }

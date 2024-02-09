@@ -28,6 +28,15 @@ unparsed <- function(x, ...) {
 }
 
 # ~/src/monolix/library/tmdd/oral0_1cpt_constRtot_TlagTk0VkintkonKDR0Cl_outputLtot.txt
+## cur <- "~/src/monolix/library/tmdd/oral0_1cpt_constRtot_TlagTk0VkintkonKDR0Cl_outputLtot.txt"
+## cur <- "~/src/monolix/library/tmdd/oral1_1cpt_constRtot_kaVkintkonKDR0Cl_outputLtot.txt"
+cur <- ""
+
+.w <- which(cur == txt)
+if (length(.w) == 1L) {
+  txt <- txt[seq(.w - 1, length(txt))]
+}
+
 
 for (f2 in txt) {
   if (file.exists(f2)) {
