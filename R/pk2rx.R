@@ -727,7 +727,7 @@
       if (.w > 1) {
         .ret0 <- .ret[seq(1, .w - 1)]
       }
-      if (.w + 1 < length(.ret)) {
+      if (.w + 1 <= length(.ret)) {
         .ret3 <- .ret[seq(.w + 1, length(.ret))]
       }
       .ret <- c(.ret0, .cur, .ret3)
