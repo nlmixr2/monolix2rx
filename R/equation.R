@@ -69,9 +69,9 @@
     .monolix2rx$equationLine <- .monolix2rx$equationLine[-.w]
   }
   .ret <- list(monolix=text,
-               rx=c(.monolix2rx$equationLine,
-                    .monolix2rx$pk$pk,
+               rx=c(.monolix2rx$pk$pk,
                     .pk3$pk,
+                    .monolix2rx$equationLine,
                     .monolix2rx$extraPred,
                     .monolix2rx$pk$equation$endLines),
                lhs=.monolix2rx$equationLhs,
