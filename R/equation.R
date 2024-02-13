@@ -45,11 +45,29 @@
   .monolix2rx$pk <- .pk2rx(pk)
   .admd <- .monolix2rx$pk$admd
   .monolix2rx$pk$admd <- NULL
+  .cmt0 <- .monolix2rx$pk$cmt
   .lhs <- c(.lhs, .monolix2rx$pkLhs)
   .monolix2rx$curLhs <- .lhs
   .pk3 <- .pk2rx(.pk2)
   .admd <- rbind(.admd, .pk3$admd)
   .pk3$admd <- NULL
+  .cmt3 <- .monolix2rx$pk$cmt
+  .env <- new.env(parent=emptyenv())
+  .env$extra <- character(0)
+  .cmtNum <- vapply(seq_len(max(length(.cmt0), length(.cmt3))),
+                    function(i) {
+                      if (is.character(.cmt0[[i]]) && is.character(.cmt3[[i]])) {
+                        if (.cmt0[[i]] == .cmt3[[i]]) {
+                          return(.cmt0[[i]])
+                        } else {
+                          return(.cmt3[[i]])
+                        }
+                      }
+                      if (is.character(.cmt0[[i]])) return(.cmt0[[i]])
+                      if (is.character(.cmt3[[i]])) return(.cmt3[[i]])
+                      NA_character_
+                    }, character(1), USE.NAMES = FALSE)
+  .cmtNum <- c(.cmtNum, .env$extra)
   .lhs <- unique(c(.lhs, .monolix2rx$pkLhs))
   .monolix2rx$extraPred <- character(0)
   .monolix2rx$equationLhs <- character(0)
@@ -74,9 +92,15 @@
   if (length(.w) > 0L) {
     .monolix2rx$equationLine <- .monolix2rx$equationLine[-.w]
   }
+  .cmtOther <- vapply(c(.monolix2rx$stateDepot, .monolix2rx$stateExtra, .monolix2rx$state),
+                      function(x) {
+                        if (x %in% .cmtNum) return(NA_character_)
+                        x
+                      }, character(1), USE.NAMES = FALSE)
+  .cmtNum <- c(.cmtNum, .cmtOther)
+  .cmtNum <- .cmtNum[!is.na(.cmtNum)]
   .ret <- list(monolix=text,
                rx=c(
-
                  .monolix2rx$pk$pk,
                  .pk3$pk,
                  .monolix2rx$equationLine,
@@ -85,9 +109,7 @@
                lhs=.monolix2rx$equationLhs,
                odeType=.monolix2rx$odeType,
                admd=.admd,
-               cmtPrefix=paste0(
-                 "cmt(", c(.monolix2rx$stateDepot, .monolix2rx$stateExtra, .monolix2rx$state), ")")
-)
+               cmtPrefix=paste0("cmt(", .cmtNum, ")"))
   class(.ret) <- "monolix2rxEquation"
   .ret
 }

@@ -643,6 +643,7 @@
   .env$fDepot    <- list()
   .env$tlagDepot <- list()
   .pk2rxDepot(.env, .pk)
+
   list(pk=.ret,
        equation=list(lhsDepot=.env$lhsDepot,
                      rhsDepot=.env$rhsDepot,
@@ -653,7 +654,8 @@
                      fDepot=.env$fDepot,
                      tlagDepot=.env$tlagDepot,
                      endLines=.env$endLines),
-       admd=.pk$admd)
+       admd=.pk$admd,
+       cmt=.env$name)
 }
 
 #' Gives which expression is d/dt()
