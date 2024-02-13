@@ -50,18 +50,22 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
     .mlxtran <- mlxtran(mlxtran, equation=TRUE, update=update)
   }
   .admd <- NULL
+  .cmt <- NULL
   if (is.null(.mlxtran$MODEL$LONGITUDINAL$EQUATION) &&
         !is.null(.mlxtran$MODEL$LONGITUDINAL$PK)) {
     .e <- .equation("", .mlxtran$MODEL$LONGITUDINAL$PK)
     .equation <- .e$rx
+    .cmt <- .e$cmtPrefix
     .admd <- .e$admd
   } else if (!is.null(.mlxtran$MODEL$LONGITUDINAL$EQUATION)) {
     .equation <- .mlxtran$MODEL$LONGITUDINAL$EQUATION$rx # includes PK: macro
+    .cmt <- .mlxtran$MODEL$LONGITUDINAL$EQUATION$cmtPrefix
     .admd <- .mlxtran$MODEL$LONGITUDINAL$EQUATION$admd
   } else {
     .equation <- character(0)
   }
   .model <- c("model({",
+              .cmt,
               .mlxtran$MODEL$INDIVIDUAL$DEFINITION$rx,
               .equation,
               vapply(seq_along(.mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint),
@@ -124,5 +128,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
     assign("description", attr(.mlxtran, "desc"), envir=.ui$meta)
   }
   assign("admd", .admd, envir=.ui)
-  rxode2::rxUiCompress(.ui)
+  .ui <- rxode2::rxUiCompress(.ui)
+  class(.ui) <- c("monolix2rx", class(.ui))
+  .ui
 }

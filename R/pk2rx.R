@@ -17,6 +17,7 @@
   }
   if (!is.na(amount)) {
     env$name[[i]] <- amount
+    .monolix2rx$stateExtra <- c(.monolix2rx$stateExtra, env$name[[i]])
     env$lhs[[i]] <- paste0("d/dt(", env$name[[i]], ")")
     env$rhs[[i]] <- ""
     env$extra[[i]] <- character(0)
@@ -27,6 +28,7 @@
     .amount <- pk$compartment[.w, "amount"]
     if (!is.na(.amount)) {
       env$name[[i]] <- .amount
+      .monolix2rx$stateExtra <- c(.monolix2rx$stateExtra, env$name[[i]])
       env$lhs[[i]] <- paste0("d/dt(", env$name[[i]], ")")
       env$rhs[[i]] <- ""
       env$extra[[i]] <- character(0)
@@ -35,6 +37,7 @@
   }
   env$name[[i]] <- paste0(env$cmtDefault, i)
   if (env$name[[i]] == "cmt1") env$name[[i]] <- "central" # align with linCmt()
+  .monolix2rx$stateExtra <- c(.monolix2rx$stateExtra, env$name[[i]])
   env$lhs[[i]] <- paste0("d/dt(", env$name[[i]], ")")
   env$rhs[[i]] <- ""
   env$extra[[i]] <- character(0)
@@ -272,6 +275,7 @@
       .cmtNameC <- .cmtName
       .cmtName <- paste0(.cmtName, env$depotPostfix)
       if (.cmtName == paste0("central", env$depotPostfix)) .cmtName <- "depot" # align with linCmt
+      .monolix2rx$stateDepot <- c(.monolix2rx$stateDepot, .cmtName)
       if (is.null(env$lhsDepot[[i]])) {
         env$lhsDepot[[i]] <- paste0("d/dt(", .cmtName, ")")
       }
@@ -339,6 +343,7 @@
     .cc <- attr(env$conc[[i]], "conc")
     .ke0 <- .pk2rxGetVar(.effect, "ke0")
     env$lhsEffect[[i]] <- paste0("d/dt(", .ce, ")")
+    .monolix2rx$stateExtra <- c(.monolix2rx$stateExtra, .ce)
     env$rhsEffect[[i]] <- paste0(.ke0, "*(", .cc, " - ", .ce, ")")
   }
 }
@@ -441,6 +446,7 @@
            if (!is.na(.depot$ka)) {
              .ka <- .pk2rxGetVar(.depot, "ka")
              if (is.null(env$lhsDepot[[.target]])) {
+               .monolix2rx$stateDepot <- c(.monolix2rx$stateDepot, paste0(.target, env$depotPostfix))
                env$lhsDepot[[.target]] <- paste0("d/dt(", .target, env$depotPostfix, ")")
                env$lhsDepot[[.target]] <- ""
              }
@@ -693,6 +699,7 @@
                     .cur)
         }
         if (pk$equation$rhsDepot[[.s]] != "") {
+          .monolix2rx$stateDepot <- c(.monolix2rx$stateDepot, paste0(.s, depotPostfix))
           .cur <- c(paste0("d/dt(", .s, depotPostfix, ") <- ", pk$equation$rhsDepot[[.s]]),
                     .cur)
         }

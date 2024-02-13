@@ -7,6 +7,8 @@
 #' @author Matthew L. Fidler
 .equation <- function(text, pk=NULL) {
   if (inherits(text, "monolix2rxEquation")) return(text)
+  .monolix2rx$stateDepot <- character(0)
+  .monolix2rx$stateExtra <- character(0)
   .monolix2rx$equationLine <- character(0)
   .monolix2rx$state <- character(0)
   .monolix2rx$equationLhs <- character(0)
@@ -73,14 +75,19 @@
     .monolix2rx$equationLine <- .monolix2rx$equationLine[-.w]
   }
   .ret <- list(monolix=text,
-               rx=c(.monolix2rx$pk$pk,
-                    .pk3$pk,
-                    .monolix2rx$equationLine,
-                    .monolix2rx$extraPred,
-                    .monolix2rx$pk$equation$endLines),
+               rx=c(
+
+                 .monolix2rx$pk$pk,
+                 .pk3$pk,
+                 .monolix2rx$equationLine,
+                 .monolix2rx$extraPred,
+                 .monolix2rx$pk$equation$endLines),
                lhs=.monolix2rx$equationLhs,
                odeType=.monolix2rx$odeType,
-               admd=.admd)
+               admd=.admd,
+               cmtPrefix=paste0(
+                 "cmt(", c(.monolix2rx$stateDepot, .monolix2rx$stateExtra, .monolix2rx$state), ")")
+)
   class(.ret) <- "monolix2rxEquation"
   .ret
 }
