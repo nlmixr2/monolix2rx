@@ -522,6 +522,41 @@
          })
   invisible()
 }
+#' This finalizes the ADMD database
+#'
+#'
+#' @param data admd database
+#' @param env pk2rx environment
+#' @return new admd database with cmt names filled in (if necessary)
+#' @noRd
+#' @author Matthew L. Fidler
+.finalizeAdmd <- function(data, env) {
+  .ret <- data
+  .ret$rxCmt <- vapply(seq_along(.ret$target),
+                       function(i) {
+                         .cur <- .ret$target[i]
+                         if (is.na(.cur)) {
+                           .cur <- env$name[[i]]
+                           if (.ret$depot[i]) {
+                             .cmtName <- paste0(.cur, env$depotPostfix)
+                             if (.cmtName == paste0("central", env$depotPostfix)) {
+                               .cmtName <- "depot" # align with linCmt
+                             }
+                             return(.cmtName)
+                           }
+                         } else if (.ret$depot[i]) {
+                           if (.ret$depot[i]) {
+                             .cmtName <- paste0(.cur, env$depotPostfix)
+                             if (.cmtName == paste0("central", env$depotPostfix)) {
+                               .cmtName <- "depot" # align with linCmt
+                             }
+                             return(.cmtName)
+                           }
+                         }
+                         .cur
+                       }, character(1), USE.NAMES=FALSE)
+  .ret
+}
 #' Convert Pk macro to ODEs for rxode2
 #'
 #' @param pk parsed pk
@@ -654,7 +689,7 @@
                      fDepot=.env$fDepot,
                      tlagDepot=.env$tlagDepot,
                      endLines=.env$endLines),
-       admd=.pk$admd,
+       admd=.finalizeAdmd(.pk$admd, .env),
        cmt=.env$name)
 }
 
