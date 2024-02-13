@@ -41,9 +41,13 @@
   .lhs <- .lhs[!is.na(.lhs)]
   .monolix2rx$curLhs <- .lhs
   .monolix2rx$pk <- .pk2rx(pk)
+  .admd <- .monolix2rx$pk$admd
+  .monolix2rx$pk$admd <- NULL
   .lhs <- c(.lhs, .monolix2rx$pkLhs)
   .monolix2rx$curLhs <- .lhs
   .pk3 <- .pk2rx(.pk2)
+  .admd <- rbind(.admd, .pk3$admd)
+  .pk3$admd <- NULL
   .lhs <- unique(c(.lhs, .monolix2rx$pkLhs))
   .monolix2rx$extraPred <- character(0)
   .monolix2rx$equationLhs <- character(0)
@@ -75,7 +79,8 @@
                     .monolix2rx$extraPred,
                     .monolix2rx$pk$equation$endLines),
                lhs=.monolix2rx$equationLhs,
-               odeType=.monolix2rx$odeType)
+               odeType=.monolix2rx$odeType,
+               admd=.admd)
   class(.ret) <- "monolix2rxEquation"
   .ret
 }

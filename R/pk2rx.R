@@ -646,7 +646,8 @@
                      tlag=.env$tlag,
                      fDepot=.env$fDepot,
                      tlagDepot=.env$tlagDepot,
-                     endLines=.env$endLines))
+                     endLines=.env$endLines),
+       admd=.pk$admd)
 }
 
 #' Gives which expression is d/dt()
