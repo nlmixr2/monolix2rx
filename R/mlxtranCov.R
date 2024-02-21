@@ -10,10 +10,12 @@
   if (!isTRUE(.try)) return(NULL)
   .covLin <- file.path(.exportPath, "FisherInformation", "covarianceEstimatesLin.txt")
   if (!file.exists(.covLin)) return(NULL)
+  .minfo("reading covariance from FisherInformation/covarianceEstimatesLin.txt")
   .c <- read.csv(.covLin, header=FALSE)
   .n <- .c[, 1]
   .c <- as.matrix(.c[, -1])
   dimnames(.c) <- list(.n, .n)
+  .minfo("done")
   .c
 }
 #' Get the raw Covariance (Simulated Annealing)
@@ -28,10 +30,12 @@
   if (!isTRUE(.try)) return(NULL)
   .covSA <- file.path(.exportPath, "FisherInformation", "covarianceEstimatesSA.txt")
   if (!file.exists(.covSA)) return(NULL)
+  .minfo("reading covariance from FisherInformation/covarianceEstimatesSA.txt")
   .c <- read.csv(.covSA, header=FALSE)
   .n <- .c[, 1]
   .c <- as.matrix(.c[, -1])
   dimnames(.c) <- list(.n, .n)
+  .minfo("done")
   .c
 }
 #' Determine if the covariance is untransformed
@@ -107,7 +111,18 @@
   dimnames(.cov) <- dimnames(mat)
   .cov
 }
-
+#' Get the covariance step from mlxtran information
+#'
+#' Note this needs the version information so it will give the right
+#' transformation to match the output of nlmixr2.
+#'
+#' @param mlx parsed mlxtran information
+#'
+#' @return mlxtran with covariance attached (if exists)
+#'
+#' @noRd
+#'
+#' @author Matthew L. Fidler
 .mlxtranCov <- function(mlx) {
   .mlx <- .mlxtranSumary(mlx)
   .ver <- attr(.mlx, "version")

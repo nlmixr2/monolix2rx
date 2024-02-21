@@ -24,7 +24,7 @@
   if (!file.exists(.summary)){
     return(mlxtran)
   }
-  .minfo("reading data information (# obs, doses, etc) from summary.txt")
+  .minfo("reading run info (# obs, doses, Monolix Version, etc) from summary.txt")
   .lines <- readLines(.summary)
   .env <- new.env(parent=emptyenv())
   .env$foundVersion <- FALSE
