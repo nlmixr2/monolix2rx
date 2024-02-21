@@ -1,3 +1,10 @@
+#' This looks for a summary.txt file to get information about Monolix
+#'
+#'
+#' @param mlxtran parsed mlxtran object
+#' @return updated mlxtran object
+#' @noRd
+#' @author Matthew L. Fidler
 .mlxtranSumary <- function(mlxtran) {
   .exportPath <- mlxtran$MONOLIX$SETTINGS$GLOBAL$exportpath
   .monolix2rx$dfSub <- 0L
@@ -62,17 +69,34 @@
   attr(mlxtran, "ndose") <- .monolix2rx$ndose
   mlxtran
 }
-
+#' This updates the `dfSub` using the summary data
+#'
+#'
+#' @param v number of IDs (or dfSub)
+#' @return nothing called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .summaryDataNid <- function(v) {
   .monolix2rx$dfSub <- as.integer(v)
 }
-
+#' Summary of the data number of observations
+#'
+#' @param type type of observation (for multiple endpoint models)
+#' @param v number of observations
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .summaryDataObs <- function(type, v) {
   .val <- as.integer(v)
   .monolix2rx$obsLst[[type]] <- .val
   .monolix2rx$dfObs <- .monolix2rx$dfObs + .val
 }
-
+#' Get the number of doses and save the information in the output
+#'
+#' @param v number of doses
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .summaryDataDose <- function(v) {
   .monolix2rx$ndose <- as.integer(v)
 }
