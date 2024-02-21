@@ -1,4 +1,15 @@
 .monolix2rx <- new.env(parent=emptyenv())
+#' Output the information
+#'
+#' @param text character vector of the text to echo
+#' @param ... other information sent to cli::cli_alert_info
+#' @param .envir environment where alert is processed
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.minfo <- function (text, ..., .envir = parent.frame()) {
+  cli::cli_alert_info(gettext(text), ..., .envir = .envir)
+}
 
 #' Translate a monolix file to rxode2
 #'

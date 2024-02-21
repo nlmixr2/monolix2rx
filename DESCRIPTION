@@ -31,6 +31,7 @@ LinkingTo:
 Imports:
     Rcpp,
     checkmate,
+    cli,
     dparser,
     withr,
     stringi

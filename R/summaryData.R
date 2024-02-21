@@ -24,6 +24,7 @@
   if (!file.exists(.summary)){
     return(mlxtran)
   }
+  .minfo("reading data information (# obs, doses, etc) from summary.txt")
   .lines <- readLines(.summary)
   .env <- new.env(parent=emptyenv())
   .env$foundVersion <- FALSE
@@ -67,6 +68,7 @@
   attr(mlxtran, "dfObs") <- .monolix2rx$dfObs
   attr(mlxtran, "obsLst") <- .monolix2rx$obsLst
   attr(mlxtran, "ndose") <- .monolix2rx$ndose
+  .minfo("done")
   mlxtran
 }
 #' This updates the `dfSub` using the summary data
