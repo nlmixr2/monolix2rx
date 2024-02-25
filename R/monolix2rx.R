@@ -139,6 +139,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
     assign("description", attr(.mlxtran, "desc"), envir=.ui$meta)
   }
   assign("admd", .admd, envir=.ui)
+  assign("mlxtran", .mlxtran, envir=.ui)
   .ui <- rxode2::rxUiCompress(.ui)
   class(.ui) <- c("monolix2rx", class(.ui))
   .ui
