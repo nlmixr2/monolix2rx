@@ -10,11 +10,17 @@ m#' Load data from a mlxtran defined dataset
     if (inherits(.try, "try-error")) .try <- FALSE
     if (.try) {
       .sep <- mlxtran$DATAFILE$FILEINFO$FILEINFO$delimiter
+      .sep <- switch(.sep,
+                     comma=",",
+                     tab="\t",
+                     space=" ",
+                     semicolon=";",
+                     semicolumn=";")
       .firstLine <- readLines(.file, n=1)
-      .head <- strsplit(.firstLine, .sep, fixed=TRUE)
+      .head <- strsplit(.firstLine, .sep, fixed=TRUE)[[1]]
       if (all(.head == mlxtran$DATAFILE$FILEINFO$FILEINFO$header)) {
         # has header (and it matches)
-        .data <- read.table(.file, header = TRUE, sep=.sep, row.names=FALSE,
+        .data <- read.table(.file, header = TRUE, sep=.sep, row.names=NULL,
                             na.strings=na.strings)
         return(.data)
       } else {
@@ -23,11 +29,11 @@ m#' Load data from a mlxtran defined dataset
                          .n <- suppressWarnings(as.numeric(v))
                          if (is.na(.n)) return(FALSE)
                          TRUE
-                       })
-        if (all(!num)) {
+                       }, logical(1), USE.NAMES=FALSE)
+        if (all(!.num)) {
           # different header (maybe case mis-match)
           warning("the header does not match what was specified in the mlxtran file, overwriting header with mlxtran specs")
-          .data <- read.table(.file, header = TRUE, sep=.sep, row.names=FALSE,
+          .data <- read.table(.file, header = TRUE, sep=.sep, row.names=NULL,
                               na.strings=na.strings)
           if (length(.data) != length(mlxtran$DATAFILE$FILEINFO$FILEINFO$header)) {
             stop("the length of the headers between the mlxtran specified model and data are different",
@@ -37,7 +43,7 @@ m#' Load data from a mlxtran defined dataset
           return(.data)
         } else {
           # missing header
-          .data <- read.table(.file, header = FALSE, sep=.sep, row.names=FALSE,
+          .data <- read.table(.file, header = FALSE, sep=.sep, row.names=NULL,
                               na.strings=na.strings)
           if (length(.data) != length(mlxtran$DATAFILE$FILEINFO$FILEINFO$header)) {
             stop("the length of the headers between the mlxtran specified model and data are different",
