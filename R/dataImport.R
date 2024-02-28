@@ -1,4 +1,4 @@
-m#' Load data from a mlxtran defined dataset
+#' Load data from a mlxtran defined dataset
 #'
 #' @param mlxtran mlxtran file where data input is specified
 #' @inheritParams read.table
@@ -88,7 +88,7 @@ m#' Load data from a mlxtran defined dataset
                                           interdoseinterval="ii",
                                           censored="cens",
                                           limit="limit",
-                                          observationtype="mDvid",
+                                          observationtype="rxMDvid",
                                           administration="adm",
                                           steadystate="ss",
                                           observation="dv",
@@ -113,6 +113,14 @@ m#' Load data from a mlxtran defined dataset
       data[[.n]] <- as.double(data[[.n]])
     }
   }
+  # Make sure the dvid matches what monolix specified
+  if (any(names(data) == "rxMDvid") &&
+        length(mlxtran$DATAFILE$CONTENT$CONTENT$yname) > 0L) {
+    .f <- try(factor(data[["rxMDvid"]], mlxtran$DATAFILE$CONTENT$CONTENT$yname))
+    if (!inherits(.f, "try-error")) {
+      data[["rxMDvid"]] <- as.integer(.f)
+    }
+  }
   return(data)
 }
 
@@ -124,14 +132,14 @@ m#' Load data from a mlxtran defined dataset
 #' @noRd
 #' @author Matthew L. Fidler
 .dataConvertEndpoints <- function(data, ui) {
-  #mDvid
-  .w <- which(names(data) == "rxDvid")
+  .w <- which(names(data) == "rxMDvid")
   if (length(.w) != 1L) return(data) # no observationtype in the dataset
   if (is.null(ui$predDf)) return(data[, -.w]) # single endpoint; no need to define
   # multiple endpoint
+  print(summary(factor(data$rxMDvid)))
   for (.i in seq_along(ui$predDf$cond)) {
     # only overwrite non-dosing events (ie make sure the cmt is NA)
-    data$cmt[which(is.na(data$cmt) & data$mDvid == .i)] <- ui$predDf$cond[i]
+    data$cmt[which(is.na(data$cmt) & data$rxMDvid == .i)] <- ui$predDf$var[.i]
   }
   data[, -.w]
 }
@@ -186,6 +194,7 @@ monolixDataImport <- function(ui, data, na.strings=c("NA", ".")) {
   if (missing(data)) {
     data <- .monolixDataLoad(ui$mlxtran, na.strings=na.strings)
   }
+  data <- .dataRenameFromMlxtran(data, ui$mlxtran)
   data <- .dataConvertAdm(data, ui$admd)
   data <- .dataConvertEndpoints(data, ui)
   data
