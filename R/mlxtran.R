@@ -302,7 +302,7 @@ mlxtran <- function(file, equation=FALSE, update=FALSE) {
     .dirn <- dirname(file)
   }
   .ret <- withr::with_dir(.dirn,
-                          .mlxtran(.lines, equation=equation))
+                          .mlxtran(.lines, equation=equation, update=update))
   attr(.ret, "dirn") <- .dirn
   .ret
 }
