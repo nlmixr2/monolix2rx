@@ -1,7 +1,7 @@
 #' Load data from a mlxtran defined dataset
 #'
 #' @param mlxtran mlxtran file where data input is specified
-#' @inheritParams read.table
+#' @inheritParams utils::read.table
 #' @noRd
 .monolixDataLoad <- function(mlxtran, na.strings=c("NA", ".")) {
   if (inherits(mlxtran, "rxUi")) mlxtran <- mlxtran$mlxtran
@@ -22,7 +22,7 @@
       .head <- strsplit(.firstLine, .sep, fixed=TRUE)[[1]]
       if (all(.head == mlxtran$DATAFILE$FILEINFO$FILEINFO$header)) {
         # has header (and it matches)
-        .data <- read.table(.file, header = TRUE, sep=.sep, row.names=NULL,
+        .data <- utils::read.table(.file, header = TRUE, sep=.sep, row.names=NULL,
                             na.strings=na.strings)
         return(.data)
       } else {
@@ -35,7 +35,7 @@
         if (all(!.num)) {
           # different header (maybe case mis-match)
           warning("the header does not match what was specified in the mlxtran file, overwriting header with mlxtran specs")
-          .data <- read.table(.file, header = TRUE, sep=.sep, row.names=NULL,
+          .data <- utils::read.table(.file, header = TRUE, sep=.sep, row.names=NULL,
                               na.strings=na.strings)
           if (length(.data) != length(mlxtran$DATAFILE$FILEINFO$FILEINFO$header)) {
             stop("the length of the headers between the mlxtran specified model and data are different",
@@ -45,7 +45,7 @@
           return(.data)
         } else {
           # missing header
-          .data <- read.table(.file, header = FALSE, sep=.sep, row.names=NULL,
+          .data <- utils::read.table(.file, header = FALSE, sep=.sep, row.names=NULL,
                               na.strings=na.strings)
           if (length(.data) != length(mlxtran$DATAFILE$FILEINFO$FILEINFO$header)) {
             stop("the length of the headers between the mlxtran specified model and data are different",
@@ -180,6 +180,7 @@
 #' @param ui A rxode2 ui model imported from monolix
 #' @param data dataset to convert to nlmixr2 format; if the dataset is
 #'   missing, load from the mlxtran specification
+#' @inheritParams utils::read.table
 #' @return Dataset appropriate for using with the rxode2 model for
 #'   simulations
 #' @export

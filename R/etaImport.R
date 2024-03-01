@@ -1,7 +1,7 @@
 #' Load data from a mlxtran defined dataset
 #'
 #' @param mlxtran mlxtran file where data input is specified
-#' @inheritParams read.table
+#' @inheritParams utils::read.table
 #' @author Matthew L Fidler
 #' @export
 monolixEtaImport <- function(mlxtran, na.strings=c("NA", ".")) {

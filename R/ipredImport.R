@@ -51,7 +51,7 @@
 #' Load ipred/pred from a monolix run
 #'
 #' @param mlxtran mlxtran file where data input is specified
-#' @inheritParams read.table
+#' @inheritParams utils::read.table
 #' @author Matthew L Fidler
 #' @export
 monolixPredIpred <- function(mlxtran, na.strings=c("NA", ".")) {
