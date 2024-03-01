@@ -1,3 +1,10 @@
+#' Get the Jacobian diagonal for transformation of covariances
+#'
+#' @param indDef individual definition list
+#' @param pars parameters
+#' @return return the jacobian transformation
+#' @noRd
+#' @author Matthew L. Fidler
 .mlxtranJacobianDiag <- function(indDef, pars) {
   .env <- new.env(parent=emptyenv())
   .env$jac <- NULL

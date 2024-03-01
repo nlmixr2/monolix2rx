@@ -1,3 +1,9 @@
+#' Parse the population definition section
+#'
+#' @param text text for parsing
+#' @return a monolix2rxPopDef object
+#' @noRd
+#' @author Matthew L. Fidler
 .popDef <- function(text) {
   .ret <- .indDef(text)
   class(.ret) <- "monolix2rxPopDef"

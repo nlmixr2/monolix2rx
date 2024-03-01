@@ -45,7 +45,6 @@
 }
 #' Add a concentration the the macro to rxode2 translation
 #'
-#'
 #' @param env rxode2 translation environment
 #' @param pk parsed pk object
 #' @param i compartment number
@@ -139,7 +138,6 @@
 }
 #' Process transfer macros from
 #'
-#'
 #' @param env rxode2 translation environment
 #' @param pk parsed pk macro
 #' @param i which compartment to translate
@@ -214,7 +212,6 @@
   stop("cannot figure out how to isolate dose in translation to rxode2", call.=FALSE)
 }
 #' Get the variable from a dataset or list
-#'
 #'
 #' @param input input dataset or varaible
 #' @param var variable name
@@ -523,7 +520,6 @@
   invisible()
 }
 #' This finalizes the ADMD database
-#'
 #'
 #' @param data admd database
 #' @param env pk2rx environment

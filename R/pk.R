@@ -1,6 +1,5 @@
 #' Initialize PK parsing
 #'
-#'
 #' @param full this is a boolean to do a full reset
 #' @return nothing, called for side effects
 #' @noRd

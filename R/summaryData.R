@@ -1,6 +1,5 @@
 #' This looks for a summary.txt file to get information about Monolix
 #'
-#'
 #' @param mlxtran parsed mlxtran object
 #' @return updated mlxtran object
 #' @noRd
@@ -72,7 +71,6 @@
   mlxtran
 }
 #' This updates the `dfSub` using the summary data
-#'
 #'
 #' @param v number of IDs (or dfSub)
 #' @return nothing called for side effects

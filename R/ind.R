@@ -50,7 +50,6 @@
 }
 #' Add input variable
 #'
-#'
 #' @param var variable to add to input list
 #' @return nothing, called for side effects
 #' @noRd

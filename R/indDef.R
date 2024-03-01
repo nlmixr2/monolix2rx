@@ -1,3 +1,9 @@
+#' Initialize the individual definition
+#'
+#' @param full boolean for a full initialization
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .indDefIni <- function(full=TRUE) {
   .monolix2rx$varName  <- NA_character_
   .monolix2rx$dist     <- NA_character_
@@ -434,7 +440,6 @@ as.list.monolix2rxIndDef <- function(x, ...) {
     .monolix2rx$sdVal <- c(.monolix2rx$sdVal, .var)
   }
 }
-
 #' Set variability component
 #'
 #' @param var variable name or constant

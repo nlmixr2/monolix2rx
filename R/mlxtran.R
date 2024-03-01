@@ -53,6 +53,14 @@
   .mlxtranLine(l)
   return(invisible())
 }
+#' Finalize monolix parsed object
+#'
+#' @param .ret object to finalize
+#' @param equation boolean indicating if the equation should be parsed
+#' @param update boolean indicating if the parameters should be updated.
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .mlxtranFinalize <- function(.ret, equation=FALSE, update=FALSE) {
   if (!is.null(.ret$DATA_FORMATTING)) {
     if (!is.null(.ret$DATA_FORMATTING$FILEINFO$FILEINFO)) {
@@ -380,7 +388,13 @@ as.character.monolix2rxMlxtran <- function(x, ...) {
   if (length(.up) > 0) .up <- c("", "; unparsed sections:", paste0(";  $", .up))
   c(.env$ret[!is.na(.env$ret)], .up)
 }
-
+#' This is a method to print out unparsed sections of the mlxtran object
+#'
+#' @param x character string
+#' @param ... other arguments
+#' @return unparsed character string
+#' @noRd
+#' @author Matthew L. Fidler
 .unparsedMlxtran <- function(x, ...) {
   .env <- new.env(parent=emptyenv())
   .desc <- attr(x, "desc")

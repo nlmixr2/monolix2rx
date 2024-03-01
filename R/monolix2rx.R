@@ -157,7 +157,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   if (inherits(.predIpredData, "try-error")) .predIpredData <- NULL
   if (!is.null(.predIpredData)) {
     .minfo("imported monolix pred/ipred data to compare ($predIpredData)")
-    .ui$predIpredData <- .etaData
+    .ui$predIpredData <- .predIpredData
   }
   .ui <- rxode2::rxUiCompress(.ui)
   class(.ui) <- c("monolix2rx", class(.ui))

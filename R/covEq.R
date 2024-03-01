@@ -1,3 +1,9 @@
+#' Covariate equation interface
+#'
+#' @param text text for paring the covariate equation block
+#' @return monolix2rxCovEq block
+#' @noRd
+#' @author Matthew L. Fidler
 .covEq <- function(text) {
   .monolix2rx$equationLine <- character(0)
   .monolix2rx$odeType <- "nonStiff"

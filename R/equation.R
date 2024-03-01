@@ -114,7 +114,6 @@
   .ret
 }
 
-
 #' Add an equation line
 #'
 #' @param line add a line in the current model equation

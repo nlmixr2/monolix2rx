@@ -1,10 +1,21 @@
+#' Initialize the fit information
+#'
+#'
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .fitIni <- function() {
   .monolix2rx$fitDat <- character(0)
   .monolix2rx$fitQuote <- logical(0)
   .monolix2rx$modelDat <- character(0)
   .monolix2rx$modelQuote <- logical(0)
 }
-
+#' Parse the <FIT> object
+#'
+#' @param text FIT text
+#' @return monolix2rxFit object
+#' @noRd
+#' @author Matthew L. Fidler
 .fit <- function(text) {
   .fitIni()
   .Call(`_monolix2rx_trans_fit`, text)
@@ -17,12 +28,24 @@
   class(.ret) <- c("monolix2rxFit", class(.ret))
   .ret
 }
-
+#' Fit data item handling
+#'
+#' @param datId data text for the `data = {item, item2}`
+#' @param quote integer to see if this is quoted
+#' @return noting, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .fitDatId <- function(datId, quote) {
   .monolix2rx$fitDat <- c(.monolix2rx$fitDat, datId)
   .monolix2rx$fitQuote <- c(.monolix2rx$fitQuote, as.logical(quote))
 }
-
+#' Add model id item
+#'
+#' @param modelId model id
+#' @param quote character vector representing if the id quoted
+#' @return nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
 .fitModelId <- function(modelId, quote) {
   .monolix2rx$modelDat <- c(.monolix2rx$modelDat, modelId)
   .monolix2rx$modelQuote <- c(.monolix2rx$modelQuote, as.logical(quote))

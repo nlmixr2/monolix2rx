@@ -1,6 +1,5 @@
 #' Get the pkmodel string
 #'
-#'
 #' @param pkmodel pkmodel character vector list
 #' @param var variable to query
 #' @param comma string for the prefixed comma
