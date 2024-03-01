@@ -4,7 +4,7 @@
 #' @inheritParams read.table
 #' @noRd
 .monolixDataLoad <- function(mlxtran, na.strings=c("NA", ".")) {
-  withr::with_dir(attr(m$mlxtran, "dirn"), {
+  withr::with_dir(attr(mlxtran, "dirn"), {
     .file <- mlxtran$DATAFILE$FILEINFO$FILEINFO$file
     .try <- try(file.exists(.file), silent=TRUE)
     if (inherits(.try, "try-error")) .try <- FALSE
@@ -136,7 +136,6 @@
   if (length(.w) != 1L) return(data) # no observationtype in the dataset
   if (is.null(ui$predDf)) return(data[, -.w]) # single endpoint; no need to define
   # multiple endpoint
-  print(summary(factor(data$rxMDvid)))
   for (.i in seq_along(ui$predDf$cond)) {
     # only overwrite non-dosing events (ie make sure the cmt is NA)
     data$cmt[which(is.na(data$cmt) & data$rxMDvid == .i)] <- ui$predDf$var[.i]
