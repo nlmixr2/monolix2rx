@@ -147,6 +147,12 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
     .ui$monolixData <- .monolixData
     .ui$sticky <- "monolixData"
   }
+  .etaData <- try(monolixEtaImport(.ui))
+  if (inherits(.etaData, "try-error")) .etaData <- NULL
+  if (!is.null(.etaData)) {
+    .minfo("imported monolix ETAS (_SAEM) imported to rxode2 compatible data ($etaData)")
+    .ui$etaData <- .etaData
+  }
   .ui <- rxode2::rxUiCompress(.ui)
   class(.ui) <- c("monolix2rx", class(.ui))
   .ui

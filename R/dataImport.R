@@ -4,7 +4,8 @@
 #' @inheritParams read.table
 #' @noRd
 .monolixDataLoad <- function(mlxtran, na.strings=c("NA", ".")) {
-  if (inherits(mlxtran, "monolix2rx")) mlxtran <- mlxtran$mlxtran
+  if (inherits(mlxtran, "rxUi")) mlxtran <- mlxtran$mlxtran
+  if (is.null(mlxtran)) return(NULL)
   withr::with_dir(attr(mlxtran, "dirn"), {
     .file <- mlxtran$DATAFILE$FILEINFO$FILEINFO$file
     .try <- try(file.exists(.file), silent=TRUE)

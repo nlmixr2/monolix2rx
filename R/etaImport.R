@@ -2,15 +2,18 @@
 #'
 #' @param mlxtran mlxtran file where data input is specified
 #' @inheritParams read.table
-#' @noRd
-.monolixImportEtas <- function(mlxtran, na.strings=c("NA", ".")) {
-  if (inherits(mlxtran, "monolix2rx")) mlxtran <- mlxtran$mlxtran
-  withr::with_dir(attr(m$mlxtran, "dirn"), {
+#' @author Matthew L Fidler
+#' @export
+monolixEtaImport <- function(mlxtran, na.strings=c("NA", ".")) {
+  if (inherits(mlxtran, "rxUi")) mlxtran <- mlxtran$mlxtran
+  if (is.null(mlxtran)) return(NULL)
+  withr::with_dir(attr(mlxtran, "dirn"), {
     .est <- file.path(mlxtran$MONOLIX$SETTINGS$GLOBAL$exportpath,
                       "IndividualParameters",
                       "estimatedRandomEffects.txt")
     .try <- try(file.exists(.est), silent=TRUE)
     if (inherits(.try, "try-error")) return(NULL)
+    if (length(.try) != 1L) return(NULL)
     if (!.try) return(NULL)
     .ret <- read.csv(.est, row.names=NULL, na.strings = na.strings)
     .ret <- .ret[, vapply(names(.ret),
