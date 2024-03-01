@@ -140,6 +140,13 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   }
   assign("admd", .admd, envir=.ui)
   assign("mlxtran", .mlxtran, envir=.ui)
+  .monolixData <- try(monolixDataImport(.ui))
+  if (inherits(.monolixData, "try-error")) .monolixData <- NULL
+  if (!is.null(.monolixData)) {
+    .minfo("imported monolix and translated to rxode2 compatible data ($monolixData)")
+    .ui$monolixData <- .monolixData
+    .ui$sticky <- "monolixData"
+  }
   .ui <- rxode2::rxUiCompress(.ui)
   class(.ui) <- c("monolix2rx", class(.ui))
   .ui

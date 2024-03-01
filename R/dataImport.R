@@ -184,7 +184,6 @@
 #' @export
 #' @author Matthew L. Fidler
 #' @examples
-#'
 monolixDataImport <- function(ui, data, na.strings=c("NA", ".")) {
   rxui <- rxode2::assertRxUi(ui)
   if (is.null(ui$admd)) {
@@ -194,6 +193,7 @@ monolixDataImport <- function(ui, data, na.strings=c("NA", ".")) {
   if (missing(data)) {
     data <- .monolixDataLoad(ui$mlxtran, na.strings=na.strings)
   }
+  if (is.null(data)) return(NULL)
   data <- .dataRenameFromMlxtran(data, ui$mlxtran)
   data <- .dataConvertAdm(data, ui$admd)
   data <- .dataConvertEndpoints(data, ui)
