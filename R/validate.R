@@ -82,15 +82,21 @@
 #' @return ui with updated validation information
 #' @noRd
 #' @author Matthew L. Fidler
-.validateModel <- function(ui) {
+.validateModel <- function(ui, ci=0.95, sigdig=3) {
   # default for Monolix: nbSSDoses=7
   .nss <- .getNbdoses(ui)
   .tol <- .getRtolAtol(ui)
   .method <- .getMethod(ui)
+  .method <- "liblsoda"
   .pop <- .parameterThetaEta(ui, pop=TRUE)
   .ind <- .parameterThetaEta(ui, pop=FALSE)
   .model <- ui$monolixModelIwres
   .data <- ui$monolixData
+  if (any(names(.data) == "cens")) {
+    .minfo("filtering out censored observations for validation")
+    .data <- .data[.data$cens == 0, names(.data) != "cens"]
+    .minfo("done")
+  }
   .minfo("solving ipred problem")
   .ipredSolve <- try(rxode2::rxSolve(.model, .ind, .data, returnType = "data.frame",
                                      covsInterpolation="locf",
@@ -114,7 +120,17 @@
                                      ssAtol=100, ssRtol=100, omega=NULL,
                                     addDosing = FALSE))
   .predSolve <- .subsetMonolix(ui, .predSolve)
-
   .both <- merge(.predSolve, .ipredSolve)
+  .monolix <- ui$predIpredData
+  names(.monolix) <- vapply(names(.monolix),
+                            function(n) {
+                              if (n == "pred") return("monolixPred")
+                              if (n %in% c("ipred", "iwres")) {
+                                return(paste0("monolixI", substr(n, 2, nchar(n))))
+                              }
+                              n
+                            }, character(1), USE.NAMES = FALSE)
+  .both <- merge(.monolix, .both)
+
   .minfo("done")
 }
