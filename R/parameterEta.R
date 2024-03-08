@@ -1,3 +1,17 @@
+#' Add zero rxerr.endpoint to the model
+#'
+#' @param ui rxode2 ui model
+#' @param theta model parameters
+#' @return theta with rxerr.endpoint added
+#' @noRd
+#' @author Matthew L. Fidler
+.addRxerr <- function(ui, theta) {
+  if (is.null(ui$predDf)) return(theta)
+  c(theta,
+    setNames(rep(0, length(ui$predDf$var)),
+             paste0("rxerr.", ui$predDf$var)))
+}
+
 #' This takes the theta and etas to get a data frame for rxode2 solving & validation
 #'
 #' @param ui rxode2 ui imported from monolix
@@ -8,7 +22,7 @@
 #' @author Matthew L. Fidler
 .parameterThetaEta <- function(ui, pop=FALSE) {
   .etaData <- ui$etaData
-  .theta <- ui$theta
+  .theta <- .addRxerr(ui, ui$theta)
   if (pop) {
     .n <- names(ui$etaData)
     .n <- .n[.n != "id"]
