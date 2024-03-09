@@ -143,22 +143,26 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   .monolixData <- try(monolixDataImport(.ui))
   if (inherits(.monolixData, "try-error")) .monolixData <- NULL
   if (!is.null(.monolixData)) {
-    .minfo("imported monolix and translated to rxode2 compatible data ($monolixData)")
+    .minfo(paste0("imported monolix and translated to rxode2 compatible data (",
+                  crayon::bold$blue("$monolixData"), ")"))
     .ui$monolixData <- .monolixData
     .ui$sticky <- "monolixData"
   }
   .etaData <- try(monolixEtaImport(.ui))
   if (inherits(.etaData, "try-error")) .etaData <- NULL
   if (!is.null(.etaData)) {
-    .minfo("imported monolix ETAS (_SAEM) imported to rxode2 compatible data ($etaData)")
+    .minfo(paste0("imported monolix ETAS (_SAEM) imported to rxode2 compatible data (",
+                  crayon::bold$blue("$etaData"), ")"))
     .ui$etaData <- .etaData
   }
   .predIpredData <- try(monolixPredIpred(.ui))
   if (inherits(.predIpredData, "try-error")) .predIpredData <- NULL
   if (!is.null(.predIpredData)) {
-    .minfo("imported monolix pred/ipred data to compare ($predIpredData)")
+    .minfo(paste0("imported monolix pred/ipred data to compare (",
+                  crayon::blue$bold("$predIpredData"), ")"))
     .ui$predIpredData <- .predIpredData
   }
+  .ui <- .validateModel(.ui)
   .ui <- rxode2::rxUiCompress(.ui)
   class(.ui) <- c("monolix2rx", class(.ui))
   .ui

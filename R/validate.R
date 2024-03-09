@@ -168,6 +168,7 @@
                    signif(.qaw[4], .sigdig), "); atol=",
                    signif(.qaw[3], .sigdig)))
   assign("validation", .msg, .ui$meta)
+  assign("predIpredData", .both, .ui)
   .minfo("done")
   .ui
 }
