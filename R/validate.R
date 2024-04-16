@@ -23,7 +23,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .getStiff <- function(x) {
-  if (inherits(x, "monolix2rx")){
+  if (inherits(x, "monolix2rx")) {
     x <- x$mlxtran
   }
   if (inherits(x, "mlxtran")) {

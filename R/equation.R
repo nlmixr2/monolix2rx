@@ -92,12 +92,17 @@
   if (length(.w) > 0L) {
     .monolix2rx$equationLine <- .monolix2rx$equationLine[-.w]
   }
-  .cmtOther <- vapply(c(.monolix2rx$stateDepot, .monolix2rx$stateExtra, .monolix2rx$state),
+  .cmtOther <- vapply(c(.monolix2rx$stateExtra, .monolix2rx$state),
                       function(x) {
                         if (x %in% .cmtNum) return(NA_character_)
                         x
                       }, character(1), USE.NAMES = FALSE)
-  .cmtNum <- c(.cmtNum, .cmtOther)
+  .cmtPre <- vapply(.monolix2rx$stateDepot,
+                    function(x) {
+                      if (x %in% .cmtNum) return(NA_character_)
+                      x
+                    }, character(1), USE.NAMES = FALSE)
+  .cmtNum <- c(.cmtPre, .cmtNum, .cmtOther)
   .cmtNum <- .cmtNum[!is.na(.cmtNum)]
   .ret <- list(monolix=text,
                rx=c(

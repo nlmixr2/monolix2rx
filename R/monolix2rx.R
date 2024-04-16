@@ -38,7 +38,7 @@
 #' @examples
 monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
                        sd=1.0, cor=1e-5, theta=0.5,
-                       envir=parent.frame()){
+                       envir=parent.frame()) {
   if (!requireNamespace("rxode2", quietly=FALSE) ||
         !requireNamespace("lotri", quietly=FALSE)) {
     stop("'monolix2rx' requires 'rxode2' and 'lotri'",
