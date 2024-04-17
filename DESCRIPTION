@@ -34,6 +34,8 @@ Imports:
     cli,
     dparser,
     withr,
+    ggplot2,
+    ggforce,
     stringi
 Suggests:
     devtools,

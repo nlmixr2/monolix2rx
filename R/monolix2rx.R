@@ -34,6 +34,7 @@
 #' @importFrom dparser dparse
 #' @importFrom stats setNames qnorm
 #' @importFrom utils read.csv
+#' @import ggplot2
 #' @eval .monolix2rxBuildGram()
 #' @examples
 monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
