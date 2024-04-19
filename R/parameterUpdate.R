@@ -5,11 +5,11 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .parameterUpdate <- function(mlx) {
-  if (inherits(mlx, "rxUi")) mlx <- mlx$mlxtran
-  if (is.null(mlx)) return(invisible())
-  .wd <- attr(mlx, "dirn")
+  if (inherits(mlx, "rxUi")) mlx <- .mlx$mlxtran
+  if (is.null(.mlx)) return(invisible())
+  .wd <- attr(.mlx, "dirn")
   if (!checkmate::testDirectoryExists(.wd)) {
-    .wd <- getwd()
+    return(invisible())
   }
   withr::with_dir(.wd, {
     .exportPath <- mlx$MONOLIX$SETTINGS$GLOBAL$exportpath
