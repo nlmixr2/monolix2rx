@@ -7,7 +7,8 @@
 monolixEtaImport <- function(mlxtran, na.strings=c("NA", ".")) {
   if (inherits(mlxtran, "rxUi")) mlxtran <- mlxtran$mlxtran
   if (is.null(mlxtran)) return(NULL)
-  withr::with_dir(attr(mlxtran, "dirn"), {
+  if (!inherits(mlxtran, "monolix2rxMlxtran")) return(NULL)
+  withr::with_dir(.monolixGetPwd(mlxtran), {
     .est <- file.path(mlxtran$MONOLIX$SETTINGS$GLOBAL$exportpath,
                       "IndividualParameters",
                       "estimatedRandomEffects.txt")

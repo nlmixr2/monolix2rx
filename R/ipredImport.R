@@ -57,7 +57,7 @@
 monolixPredIpred <- function(mlxtran, na.strings=c("NA", ".")) {
   if (inherits(mlxtran, "rxUi")) mlxtran <- mlxtran$mlxtran
   if (is.null(mlxtran)) return(NULL)
-  withr::with_dir(attr(mlxtran, "dirn"), {
+  withr::with_dir(.monolixGetPwd(mlxtran), {
     .end <- monolixEndpoints(mlxtran)
     if (length(.end) == 1) {
       .ret <- .monolixPredIpredFile(NULL, mlxtran=mlxtran, na.strings=na.strings)

@@ -1,3 +1,18 @@
+#' Get the monolix project working direcotry
+#'
+#' @param x monolix2rx object to get the working directory
+#' @return working directory for the current project
+#' @noRd
+#' @author Matthew L. Fidler
+.monolixGetPwd <- function(x) {
+  if (inherits(x, "monolix2rx")) x <- x$mlxtran
+  if (!inherits(x, "monolix2rxMlxtran")) return(getwd())
+  .wd <- attr(x, "dirn")
+  if (checkmate::testDirectoryExists(.wd)) return(.wd)
+  getwd()
+}
+
+
 #' Update the parameters based on final output
 #'
 #' @param mlx mlxtran object to update
@@ -7,10 +22,7 @@
 .parameterUpdate <- function(mlx) {
   if (inherits(mlx, "rxUi")) mlx <- mlx$mlxtran
   if (is.null(mlx)) return(invisible())
-  .wd <- attr(mlx, "dirn")
-  if (!checkmate::testDirectoryExists(.wd)) {
-    .wd <- getwd()
-  }
+  .wd <- .monolixGetPwd(mlx)
   withr::with_dir(.wd, {
     .exportPath <- mlx$MONOLIX$SETTINGS$GLOBAL$exportpath
     .popPar <- file.path(.exportPath, "populationParameters.txt")
