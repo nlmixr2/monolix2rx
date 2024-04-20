@@ -11,6 +11,21 @@
   if (checkmate::testDirectoryExists(.wd)) return(.wd)
   getwd()
 }
+#' Get the best mlxtran info or return NULL
+#'
+#' @param x item to try to extract mlxtran info
+#' @return mlxtran info
+#' @noRd
+#' @author Matthew L. Fidler
+.monolixGetMlxtran <- function(x) {
+  if (inherits(x, "raw")) x <- rxode2::rxUiDecompress(x)
+  if (inherits(x, "rxUi") && exists("mlxtran", x)) {
+    return(get("mlxtran", x))
+  }
+  if (inherits(x, "monolix2rxMlxtran")) return(x)
+  if (inherits(x, "character")) return(mlxtran(x))
+  x
+}
 
 
 #' Update the parameters based on final output
@@ -20,7 +35,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .parameterUpdate <- function(mlx) {
-  if (inherits(mlx, "rxUi")) mlx <- mlx$mlxtran
+  mlx <- .monolixGetMlxtran(mlx)
   if (is.null(mlx)) return(invisible())
   .wd <- .monolixGetPwd(mlx)
   withr::with_dir(.wd, {
