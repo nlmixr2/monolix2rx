@@ -55,8 +55,7 @@
 #' @author Matthew L Fidler
 #' @export
 monolixPredIpred <- function(mlxtran, na.strings=c("NA", ".")) {
-  if (inherits(mlxtran, "rxUi")) mlxtran <- mlxtran$mlxtran
-  if (is.null(mlxtran)) return(NULL)
+  mlxtran <- .monolixGetMlxtran(mlxtran)
   withr::with_dir(.monolixGetPwd(mlxtran), {
     .end <- monolixEndpoints(mlxtran)
     if (length(.end) == 1) {

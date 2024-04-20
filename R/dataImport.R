@@ -4,7 +4,7 @@
 #' @inheritParams utils::read.table
 #' @noRd
 .monolixDataLoad <- function(mlxtran, na.strings=c("NA", ".")) {
-  if (inherits(mlxtran, "rxUi")) mlxtran <- mlxtran$mlxtran
+  mlxtran <- .monolixGetMlxtran(mlxtran)
   if (is.null(mlxtran)) return(NULL)
   withr::with_dir(.monolixGetPwd(mlxtran), {
     .file <- mlxtran$DATAFILE$FILEINFO$FILEINFO$file
@@ -192,11 +192,15 @@ monolixDataImport <- function(ui, data, na.strings=c("NA", ".")) {
     stop("to convert dataset to an rxode2 compatible dataset the model needs to be imported from monolix",
          call.=FALSE)
   }
+  .mlxtran <- .monolixGetMlxtran(ui)
+  if (is.null(.mlxtran)) {
+    stop("monolixDataImport error found")
+  }
   if (missing(data)) {
-    data <- .monolixDataLoad(ui$mlxtran, na.strings=na.strings)
+    data <- .monolixDataLoad(.mlxtran, na.strings=na.strings)
   }
   if (is.null(data)) return(NULL)
-  data <- .dataRenameFromMlxtran(data, ui$mlxtran)
+  data <- .dataRenameFromMlxtran(data, .mlxtran)
   data <- .dataConvertAdm(data, ui$admd)
   data <- .dataConvertEndpoints(data, ui)
   data

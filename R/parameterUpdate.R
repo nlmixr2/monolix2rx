@@ -5,7 +5,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .monolixGetPwd <- function(x) {
-  if (inherits(x, "monolix2rx")) x <- x$mlxtran
+  x <- .monolixGetMlxtran(x)
   if (!inherits(x, "monolix2rxMlxtran")) return(getwd())
   .wd <- attr(x, "dirn")
   if (checkmate::testDirectoryExists(.wd)) return(.wd)

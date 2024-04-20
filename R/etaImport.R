@@ -5,7 +5,7 @@
 #' @author Matthew L Fidler
 #' @export
 monolixEtaImport <- function(mlxtran, na.strings=c("NA", ".")) {
-  if (inherits(mlxtran, "rxUi")) mlxtran <- mlxtran$mlxtran
+  mlxtran <- .monolixGetMlxtran(mlxtran)
   if (is.null(mlxtran)) return(NULL)
   if (!inherits(mlxtran, "monolix2rxMlxtran")) return(NULL)
   withr::with_dir(.monolixGetPwd(mlxtran), {

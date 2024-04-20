@@ -7,7 +7,7 @@
 #' @export
 #' @author Matthew L. Fidler
 monolixEndpoints <- function(mlxtran) {
-  if (inherits(mlxtran, "rxUi")) mlxtran <- mlxtran$mlxtran
+  mlxtran <- .monolixGetMlxtran(mlxtran)
   if (is.null(mlxtran)) return(NULL)
   .end <- mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint
   vapply(seq_along(.end),
