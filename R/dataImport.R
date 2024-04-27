@@ -166,10 +166,12 @@
     } else {
       # add an extra item
       .w <- which(data$adm == .cur$adm & data$admd == 1L)
-      .dE <- data[.w, ]
-      .dE$admd <- .cur$admd
-      .dE$cmt[.w] <- .cur$cmt
-      .extra <- rbind(.extra, .dE)
+      if (length(.w) == 1L) {
+        .dE <- data[.w, ]
+        .dE$admd <- .cur$admd
+        .dE$cmt[.w] <- .cur$cmt
+        .extra <- rbind(.extra, .dE)
+      }
     }
   }
   rbind(data, .extra)
