@@ -15,7 +15,8 @@
 #'
 #' @param x item to try to extract mlxtran info
 #' @return mlxtran info
-#' @noRd
+#' @export
+#' @keywords internal
 #' @author Matthew L. Fidler
 .monolixGetMlxtran <- function(x) {
   if (inherits(x, "raw")) x <- rxode2::rxUiDecompress(x)
