@@ -531,6 +531,9 @@
   .ret$rxCmt <- vapply(seq_along(.ret$target),
                        function(i) {
                          .cur <- .ret$target[i]
+                         if (length(env$name) < i) {
+                           return(.cur)
+                         }
                          if (is.na(.cur)) {
                            .cur <- env$name[[i]]
                            if (.ret$depot[i]) {
