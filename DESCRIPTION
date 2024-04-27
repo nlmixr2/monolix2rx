@@ -41,5 +41,6 @@ Suggests:
     devtools,
     rxode2 (> 2.0.13),
     lotri,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    xgxr
 Config/testthat/edition: 3
