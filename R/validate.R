@@ -20,7 +20,8 @@
 #'
 #' @param x monolix2rx object
 #' @return boolean indicating if the object is a stiff system (as indicated by monolix)
-#' @noRd
+#' @export
+#' @keywords internal
 #' @author Matthew L. Fidler
 .getStiff <- function(x) {
   if (inherits(x, "monolix2rx")) {
