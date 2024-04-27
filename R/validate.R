@@ -162,7 +162,7 @@
                    "%; ", .ci0 * 100,"% percentile: (",
                    round(.qw[2], 2), "%,", round(.qw[4], 2), "%); rtol=",
                    signif(.qw[3] / 100, digits=.sigdig)),
-            paste0("pred absolute difference compared to Monolix pred: ", .ci0 * 100,
+            paste0("iwres absolute difference compared to Monolix pred: ", .ci0 * 100,
                    "% percentile: (",
                    signif(.qaw[2], .sigdig), ", ",
                    signif(.qaw[4], .sigdig), "); atol=",
