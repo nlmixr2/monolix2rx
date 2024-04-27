@@ -76,6 +76,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   } else {
     .equation <- character(0)
   }
+  if (.cmt == "cmt()") .cmt <- NULL
   .model <- c("model({",
               .cmt,
               .mlxtran$MODEL$INDIVIDUAL$DEFINITION$rx,
