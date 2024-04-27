@@ -2,10 +2,11 @@
 #'
 #' @param x monolix2rx object
 #' @return Number of doses for monolix2rx object
-#' @noRd
+#' @export
+#' @keywords internal
 #' @author Matthew L. Fidler
 .getNbdoses <- function(x) {
-  if (inherits(x, "monolix2rx")){
+  if (inherits(x, "monolix2rx")) {
     x <- x$mlxtran
   }
   if (inherits(x, "mlxtran")) {
