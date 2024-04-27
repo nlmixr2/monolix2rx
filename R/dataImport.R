@@ -203,5 +203,11 @@ monolixDataImport <- function(ui, data, na.strings=c("NA", ".")) {
   data <- .dataRenameFromMlxtran(data, .mlxtran)
   data <- .dataConvertAdm(data, ui$admd)
   data <- .dataConvertEndpoints(data, ui)
+  .ld <- tolower(names(data))
+  .wt <- which(.ld == "time")
+  if (length(.wt) == 0) {
+    .minfo("added dummy time column")
+    data$time <- seq_along(data[, 1])
+  }
   data
 }

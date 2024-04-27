@@ -99,78 +99,82 @@
     .data <- .data[.data$cens == 0, names(.data) != "cens"]
     .minfo("done")
   }
-  .minfo("solving ipred problem")
-  .ipredSolve <- try(rxode2::rxSolve(.model, .ind, .data, returnType = "data.frame",
-                                     covsInterpolation="locf",
-                                     #addlKeepsCov=TRUE, addlDropSs=TRUE, ssAtDoseTime=TRUE,
-                                     #safeZero=TRUE, ss2cancelAllPending=TRUE,
-                                     maxSS=.nss + 1,
-                                     minSS=.nss,
-                                     atol=.tol, rtol=.tol,
-                                     ssAtol=100, ssRtol=100, omega=NULL,
-                                     addDosing = FALSE))
-  .ipredSolve <- .subsetMonolix(.ui, .ipredSolve, "iwres")
-  .minfo("done")
-  .minfo("solving pred problem")
-  .predSolve <- try(rxode2::rxSolve(.model, .pop, .data, returnType = "data.frame",
-                                     covsInterpolation="locf",
-                                     #addlKeepsCov=TRUE, addlDropSs=TRUE, ssAtDoseTime=TRUE,
-                                     #safeZero=TRUE, ss2cancelAllPending=TRUE,
-                                     maxSS=.nss + 1,
-                                     minSS=.nss,
-                                     atol=.tol, rtol=.tol,
-                                     ssAtol=100, ssRtol=100, omega=NULL,
-                                    addDosing = FALSE))
-  .predSolve <- .subsetMonolix(.ui, .predSolve)
-  .both <- merge(.predSolve, .ipredSolve)
-  .monolix <- ui$predIpredData
-  names(.monolix) <- vapply(names(.monolix),
-                            function(n) {
-                              if (n == "pred") return("monolixPred")
-                              if (n %in% c("ipred", "iwres")) {
-                                return(paste0("monolixI", substr(n, 2, nchar(n))))
-                              }
-                              n
-                            }, character(1), USE.NAMES = FALSE)
-  .both <- merge(.monolix, .both)
-  .ci0 <- .ci <- ci
-  .sigdig <- sigdig
-  .ci <- (1 - .ci) / 2
-  .q <- c(0, .ci, 0.5, 1 - .ci, 1)
-  .qi <- stats::quantile(with(.both, 100*abs((ipred-monolixIpred)/monolixIpred)), .q, na.rm=TRUE)
-  .qai <- stats::quantile(with(.both, abs(ipred-monolixIpred)), .q, na.rm=TRUE)
-  .qp <- stats::quantile(with(.both, 100*abs((pred-monolixPred)/monolixIpred)), .q, na.rm=TRUE)
-  .qap <- stats::quantile(with(.both, abs(pred-monolixPred)), .q, na.rm=TRUE)
-  .qw <- stats::quantile(with(.both, 100*abs((iwres-monolixIwres)/monolixIwres)), .q, na.rm=TRUE)
-  .qaw <- stats::quantile(with(.both, abs(iwres-monolixIwres)), .q, na.rm=TRUE)
+  if (length(.ind[, 1]) > 0) {
+    .minfo("solving ipred problem")
+    .ipredSolve <- try(rxode2::rxSolve(.model, .ind, .data, returnType = "data.frame",
+                                       covsInterpolation="locf",
+                                       #addlKeepsCov=TRUE, addlDropSs=TRUE, ssAtDoseTime=TRUE,
+                                       #safeZero=TRUE, ss2cancelAllPending=TRUE,
+                                       maxSS=.nss + 1,
+                                       minSS=.nss,
+                                       atol=.tol, rtol=.tol,
+                                       ssAtol=100, ssRtol=100, omega=NULL,
+                                       addDosing = FALSE))
+    .ipredSolve <- .subsetMonolix(.ui, .ipredSolve, "iwres")
+    .minfo("done")
+    .minfo("solving pred problem")
+    .predSolve <- try(rxode2::rxSolve(.model, .pop, .data, returnType = "data.frame",
+                                      covsInterpolation="locf",
+                                      #addlKeepsCov=TRUE, addlDropSs=TRUE, ssAtDoseTime=TRUE,
+                                      #safeZero=TRUE, ss2cancelAllPending=TRUE,
+                                      maxSS=.nss + 1,
+                                      minSS=.nss,
+                                      atol=.tol, rtol=.tol,
+                                      ssAtol=100, ssRtol=100, omega=NULL,
+                                      addDosing = FALSE))
+    .predSolve <- .subsetMonolix(.ui, .predSolve)
+    .both <- merge(.predSolve, .ipredSolve)
+    .monolix <- ui$predIpredData
+    names(.monolix) <- vapply(names(.monolix),
+                              function(n) {
+                                if (n == "pred") return("monolixPred")
+                                if (n %in% c("ipred", "iwres")) {
+                                  return(paste0("monolixI", substr(n, 2, nchar(n))))
+                                }
+                                n
+                              }, character(1), USE.NAMES = FALSE)
+    .both <- merge(.monolix, .both)
+    .ci0 <- .ci <- ci
+    .sigdig <- sigdig
+    .ci <- (1 - .ci) / 2
+    .q <- c(0, .ci, 0.5, 1 - .ci, 1)
+    .qi <- stats::quantile(with(.both, 100*abs((ipred-monolixIpred)/monolixIpred)), .q, na.rm=TRUE)
+    .qai <- stats::quantile(with(.both, abs(ipred-monolixIpred)), .q, na.rm=TRUE)
+    .qp <- stats::quantile(with(.both, 100*abs((pred-monolixPred)/monolixIpred)), .q, na.rm=TRUE)
+    .qap <- stats::quantile(with(.both, abs(pred-monolixPred)), .q, na.rm=TRUE)
+    .qw <- stats::quantile(with(.both, 100*abs((iwres-monolixIwres)/monolixIwres)), .q, na.rm=TRUE)
+    .qaw <- stats::quantile(with(.both, abs(iwres-monolixIwres)), .q, na.rm=TRUE)
 
-  .msg <- c(paste0("ipred relative difference compared to Monolix ipred: ", round(.qi[3], 2),
-                   "%; ", .ci0 * 100,"% percentile: (",
-                   round(.qi[2], 2), "%,", round(.qi[4], 2), "%); rtol=",
-                   signif(.qi[3] / 100, digits=.sigdig)),
-            paste0("ipred absolute difference compared to Monolix ipred: ", .ci0 * 100,"% percentile: (",
-                   signif(.qai[2], .sigdig), ", ", signif(.qai[4], .sigdig), "); atol=",
-                   signif(.qai[3], .sigdig)),
-            paste0("pred relative difference compared to Monolix pred: ", round(.qp[3], 2),
-                   "%; ", .ci0 * 100,"% percentile: (",
-                   round(.qp[2], 2), "%,", round(.qp[4], 2), "%); rtol=",
-                   signif(.qp[3] / 100, digits=.sigdig)),
-            paste0("pred absolute difference compared to Monolix pred: ", .ci0 * 100,
-                   "% percentile: (",
-                   signif(.qap[2], .sigdig), ", ",
-                   signif(.qap[4], .sigdig), "); atol=",
-                   signif(.qap[3], .sigdig)),
-            paste0("iwres relative difference compared to Monolix iwres: ", round(.qp[3], 2),
-                   "%; ", .ci0 * 100,"% percentile: (",
-                   round(.qw[2], 2), "%,", round(.qw[4], 2), "%); rtol=",
-                   signif(.qw[3] / 100, digits=.sigdig)),
-            paste0("iwres absolute difference compared to Monolix pred: ", .ci0 * 100,
-                   "% percentile: (",
-                   signif(.qaw[2], .sigdig), ", ",
-                   signif(.qaw[4], .sigdig), "); atol=",
-                   signif(.qaw[3], .sigdig)))
-  assign("validation", .msg, .ui$meta)
-  assign("predIpredData", .both, .ui)
-  .minfo("done")
+    .msg <- c(paste0("ipred relative difference compared to Monolix ipred: ", round(.qi[3], 2),
+                     "%; ", .ci0 * 100,"% percentile: (",
+                     round(.qi[2], 2), "%,", round(.qi[4], 2), "%); rtol=",
+                     signif(.qi[3] / 100, digits=.sigdig)),
+              paste0("ipred absolute difference compared to Monolix ipred: ", .ci0 * 100,"% percentile: (",
+                     signif(.qai[2], .sigdig), ", ", signif(.qai[4], .sigdig), "); atol=",
+                     signif(.qai[3], .sigdig)),
+              paste0("pred relative difference compared to Monolix pred: ", round(.qp[3], 2),
+                     "%; ", .ci0 * 100,"% percentile: (",
+                     round(.qp[2], 2), "%,", round(.qp[4], 2), "%); rtol=",
+                     signif(.qp[3] / 100, digits=.sigdig)),
+              paste0("pred absolute difference compared to Monolix pred: ", .ci0 * 100,
+                     "% percentile: (",
+                     signif(.qap[2], .sigdig), ", ",
+                     signif(.qap[4], .sigdig), "); atol=",
+                     signif(.qap[3], .sigdig)),
+              paste0("iwres relative difference compared to Monolix iwres: ", round(.qp[3], 2),
+                     "%; ", .ci0 * 100,"% percentile: (",
+                     round(.qw[2], 2), "%,", round(.qw[4], 2), "%); rtol=",
+                     signif(.qw[3] / 100, digits=.sigdig)),
+              paste0("iwres absolute difference compared to Monolix pred: ", .ci0 * 100,
+                     "% percentile: (",
+                     signif(.qaw[2], .sigdig), ", ",
+                     signif(.qaw[4], .sigdig), "); atol=",
+                     signif(.qaw[3], .sigdig)))
+    assign("validation", .msg, .ui$meta)
+    assign("predIpredData", .both, .ui)
+    .minfo("done")
+  } else  {
+    .minfo("cannot find individual parameter estimates")
+  }
   .ui
 }
