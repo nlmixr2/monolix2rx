@@ -60,5 +60,6 @@ for (f2 in models) {
         }
       }
     }
+    rxode2::rxUnloadAll()
   }
 }

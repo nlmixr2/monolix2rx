@@ -58,5 +58,6 @@ for (f2 in txt) {
         })
       }
     }
+    rxode2::rxUnloadAll()
   }
 }
