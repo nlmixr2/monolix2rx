@@ -99,7 +99,11 @@
     .data <- .data[.data$cens == 0, names(.data) != "cens"]
     .minfo("done")
   }
-  if (length(.ind) > 0 && length(.ind[, 1]) > 0) {
+  if (!is.null(.data) &&
+      length(.data) > 0 &&
+      length(.data[, 1]) > 0 &&
+      length(.ind) > 0 &&
+      length(.ind[, 1]) > 0) {
     .minfo("solving ipred problem")
     .ipredSolve <- try(rxode2::rxSolve(.model, .ind, .data, returnType = "data.frame",
                                        covsInterpolation="locf",
