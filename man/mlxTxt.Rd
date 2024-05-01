@@ -19,6 +19,22 @@ parsed equation or file name
 \description{
 Get equation block from a Monolix model txt file
 }
+\examples{
+
+# First load in the model; in this case the theo model
+# This is modified from the Monolix demos by saving the model
+# File as a text file (hence you can access without model library)
+# setup.
+#
+# This example is also included in the monolix2rx package, so
+# you refer to the location with `system.file()`:
+
+pkgTheo <- system.file("theo", package="monolix2rx")
+
+mod <- mlxTxt(file.path(pkgTheo, "oral1_1cpt_kaVCl.txt"))
+
+mod
+}
 \author{
 Matthew L. Fidler
 }
