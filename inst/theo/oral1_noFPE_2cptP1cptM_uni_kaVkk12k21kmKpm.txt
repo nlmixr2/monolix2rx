@@ -1,0 +1,26 @@
+DESCRIPTION:
+The administration is extravascular with a first order absorption (rate constant ka).
+The PK model for Parent has a central compartment (volume V), a peripheral compartment 
+(rate of transfer to and from k12 and k21), and a linear elimination (elimination rate k).
+The PK model for Metabolite has one compartment (volume V) and a linear elimination (elimination rate km).
+The transfer between parent and metabolite is uni-directional  (transfer rate Kpm).
+
+
+[LONGITUDINAL]
+input = {ka, V, k, k12, k21, km, Kpm}
+
+PK:
+
+; PK model definition for Parent
+compartment(cmt = 1, volume = V, concentration = Cp)
+oral(cmt = 1, ka)
+peripheral(k12, k21)
+elimination(cmt = 1, k)
+
+; PK model definition for Metabolite
+compartment(cmt = 3, volume = V, concentration = Cm)
+elimination(cmt = 3, k = km)
+transfer(from = 1, to = 3, kt = Kpm)
+
+OUTPUT:
+output = {Cp, Cm}

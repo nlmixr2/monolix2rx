@@ -1,0 +1,77 @@
+<DATAFILE>
+
+[FILEINFO]
+file='data/parent_metabolite_data.csv'
+delimiter = comma
+header = {ID, TIME, OBS, OBSID, AMOUNT, CENS, LIMIT}
+
+[CONTENT]
+ID = {use=identifier}
+TIME = {use=time}
+OBS = {use=observation, name={y1_Cp, y2_Cm}, yname={'1_Cp', '2_Cm'}, type={continuous, continuous}}
+OBSID = {use=observationtype}
+AMOUNT = {use=amount}
+CENS = {use=censored}
+LIMIT = {use=limit}
+
+<MODEL>
+
+[INDIVIDUAL]
+input = {Kpm_pop, omega_Kpm, V_pop, omega_V, k_pop, omega_k, k12_pop, omega_k12, k21_pop, omega_k21, ka_pop, omega_ka, km_pop, omega_km}
+
+DEFINITION:
+Kpm = {distribution=logNormal, typical=Kpm_pop, sd=omega_Kpm}
+V = {distribution=logNormal, typical=V_pop, sd=omega_V}
+k = {distribution=logNormal, typical=k_pop, sd=omega_k}
+k12 = {distribution=logNormal, typical=k12_pop, sd=omega_k12}
+k21 = {distribution=logNormal, typical=k21_pop, sd=omega_k21}
+ka = {distribution=logNormal, typical=ka_pop, sd=omega_ka}
+km = {distribution=logNormal, typical=km_pop, sd=omega_km}
+
+[LONGITUDINAL]
+input = {a1_Cp, b1_Cp, a2_Cm, b2_Cm}
+
+file = 'oral1_noFPE_2cptP1cptM_uni_kaVkk12k21kmKpm.txt'
+
+DEFINITION:
+y1_Cp = {distribution=normal, prediction=Cp, errorModel=combined1(a1_Cp, b1_Cp)}
+y2_Cm = {distribution=normal, prediction=Cm, errorModel=combined1(a2_Cm, b2_Cm)}
+
+<FIT>
+data = {y1_Cp, y2_Cm}
+model = {y1_Cp, y2_Cm}
+
+<PARAMETER>
+Kpm_pop = {value=0.1, method=MLE}
+V_pop = {value=9.664, method=MLE}
+a1_Cp = {value=1, method=MLE}
+a2_Cm = {value=1, method=MLE}
+b1_Cp = {value=0.3, method=MLE}
+b2_Cm = {value=0.3, method=MLE}
+c1_Cp = {value=1, method=FIXED}
+c2_Cm = {value=1, method=FIXED}
+k12_pop = {value=0.0402, method=MLE}
+k21_pop = {value=0.0437, method=MLE}
+k_pop = {value=0.139, method=MLE}
+ka_pop = {value=0.158, method=MLE}
+km_pop = {value=0.0302, method=MLE}
+omega_Kpm = {value=1, method=MLE}
+omega_V = {value=1, method=MLE}
+omega_k = {value=1, method=MLE}
+omega_k12 = {value=1, method=MLE}
+omega_k21 = {value=1, method=MLE}
+omega_ka = {value=1, method=MLE}
+omega_km = {value=1, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+individualParameters(method = {conditionalMean, conditionalMode })
+fim(method = StochasticApproximation)
+logLikelihood(method = ImportanceSampling)
+plotResult(method = {indfits, parameterdistribution, covariancemodeldiagnosis, covariatemodeldiagnosis, obspred, vpc, residualsscatter, residualsdistribution, randomeffects, saemresults })
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'parent_metabolite_project'
