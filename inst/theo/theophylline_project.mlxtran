@@ -56,5 +56,4 @@ plotResult(method = {indfits, obspred, vpc, residualsscatter, residualsdistribut
 
 [SETTINGS]
 GLOBAL:
-exportpath = 'theophylline_project'
-
+exportpath = 'tp'

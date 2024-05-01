@@ -74,4 +74,4 @@ plotResult(method = {indfits, parameterdistribution, covariancemodeldiagnosis, c
 
 [SETTINGS]
 GLOBAL:
-exportpath = 'parent_metabolite_project'
+exportpath = 'pm'
