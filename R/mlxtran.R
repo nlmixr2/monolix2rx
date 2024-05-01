@@ -280,6 +280,19 @@
 #' @export
 #' @author Matthew L. Fidler
 #' @examples
+#' # First load in the model; in this case the theo model
+#' # This is modified from the Monolix demos by saving the model
+#' # File as a text file (hence you can access without model library)
+#' # setup.
+#' #
+#' # This example is also included in the monolix2rx package, so
+#' # you refer to the location with `system.file()`:
+#'
+#' pkgTheo <- system.file("theo", package="monolix2rx")
+#'
+#' mlx <- mlxtran(file.path(pkgTheo, "theophylline_project.mlxtran"))
+#'
+#' mlx
 mlxtran <- function(file, equation=FALSE, update=FALSE) {
   checkmate::assertLogical(equation, any.missing=FALSE, len=1)
   checkmate::assertLogical(update, any.missing=FALSE, len=1)

@@ -37,6 +37,19 @@
 #' @import ggplot2
 #' @eval .monolix2rxBuildGram()
 #' @examples
+#' # First load in the model; in this case the theo model
+#' # This is modified from the Monolix demos by saving the model
+#' # File as a text file (hence you can access without model library)
+#' # setup.
+#' #
+#' # This example is also included in the monolix2rx package, so
+#' # you refer to the location with `system.file()`:
+#'
+#' pkgTheo <- system.file("theo", package="monolix2rx")
+#'
+#' rx <- monolix2rx(file.path(pkgTheo, "theophylline_project.mlxtran"))
+#'
+#' rx
 monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
                        sd=1.0, cor=1e-5, theta=0.5,
                        envir=parent.frame()) {

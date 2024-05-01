@@ -174,7 +174,6 @@
 #' @return nothing, called for side effects
 #' @noRd
 #' @author Matthew L. Fidler
-#' @examples
 .equationState <- function(v) {
   .monolix2rx$state <- c(.monolix2rx$state, v)
 }
