@@ -16,6 +16,17 @@ knitr::opts_chunk$set(
 # monolix2rx <img src="man/figures/logo.png" align="right" height="138" alt="" />
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/nlmixr2/monolix2rx/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/nlmixr2/monolix2rx/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/nlmixr2/monolix2rx/branch/main/graph/badge.svg)](https://app.codecov.io/gh/nlmixr2/monolix2rx?branch=main)
+[![CRAN
+version](http://www.r-pkg.org/badges/version/monolix2rx)](https://cran.r-project.org/package=monolix2rx)
+[![CRAN total
+downloads](https://cranlogs.r-pkg.org/badges/grand-total/monolix2rx)](https://cran.r-project.org/package=monolix2rx)
+[![CRAN total
+downloads](https://cranlogs.r-pkg.org/badges/monolix2rx)](https://cran.r-project.org/package=monolix2rx)
+[![CodeFactor](https://www.codefactor.io/repository/github/nlmixr2/monolix2rx/badge)](https://www.codefactor.io/repository/github/nlmixr2/monolix2rx)
+![r-universe](https://nlmixr2.r-universe.dev/badges/monolix2rx)
 <!-- badges: end -->
 
 The goal of monolix2rx is to convert `Monolix` to `rxode2` to use for
@@ -33,11 +44,33 @@ devtools::install_github("nlmixr2/monolix2rx")
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+If you are trying to convert a Monolix to a rxode2 model you simply
+need the path to the `mlxtran` file.  For example, the classic demo of
+theophylline is included in `monolix2rx` and can be imported below:
 
 ```{r example}
 library(monolix2rx)
-## basic example code
+# First load in the model; in this case the theo model
+# This is modified from the Monolix demos by saving the model
+# file as a text file (hence you can access without model library).
+# Additionally some of the file paths were shortened so they could
+# be included with monolix2rx
+
+pkgTheo <- system.file("theo", package="monolix2rx")
+mlxtranFile <- file.path(pkgTheo, "theophylline_project.mlxtran")
+
+rx <- monolix2rx(mlxtranFile)
+
+rx
+
+# If you are only interseted in the parsing you can use `mlxtran`
+
+mlx <- mlxtran(mlxtranFile)
+
+mlx
+
+# this can be converted to a list
+head(as.list(mlx))
 ```
 
 ## Translating models from the Monolix model library
