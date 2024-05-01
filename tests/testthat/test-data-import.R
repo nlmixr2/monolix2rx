@@ -9,6 +9,8 @@ test_that("single endpoint import", {
                               plot(rx))
   vdiffr::expect_doppelganger("single-endpoint-theo-p1",
                               plot(rx, page=1))
+  vdiffr::expect_doppelganger("single-endpoint-theo-pall",
+                              plot(rx, page=TRUE))
 })
 
 test_that("multiple endpoint import", {
@@ -18,4 +20,6 @@ test_that("multiple endpoint import", {
                               plot(rx))
   vdiffr::expect_doppelganger("multiple-endpoint-theo-p1",
                               plot(rx, page=1))
+  vdiffr::expect_doppelganger("multiple-endpoint-theo-pall",
+                              plot(rx, page=TRUE))
 })
