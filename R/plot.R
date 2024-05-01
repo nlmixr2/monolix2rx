@@ -38,12 +38,17 @@ autoplot.monolix2rx <- function(object, ...,
   .useLogY <- nchar(log) == 2 | log == "y"
   .data <- .cmpDataOverall(object)
   if (is.logical(page) && !page) {
-    return(ggplot(data=.data, aes(.data$rxode2, .data$monolix)) +
-             geom_point() +
-             facet_wrap(cmt~type, scales="free") +
-             rxode2::rxTheme() +
-             ylab("Monolix") +
-             xlab("rxode2"))
+    .g <- ggplot(data=.data, aes(.data$rxode2, .data$monolix)) +
+      geom_point()
+    if (length(object$predDf$cond) == 1) {
+      .g <- .g + facet_wrap(~type, scales="free")
+    } else {
+      .g <- .g + facet_wrap(cmt~type, scales="free")
+    }
+    .g <- .g + rxode2::rxTheme() +
+      ylab("Monolix") +
+      xlab("rxode2")
+    return(.g)
   }
 
   .ids <- unique(.data$id)
@@ -81,10 +86,19 @@ autoplot.monolix2rx <- function(object, ...,
   .ret <- lapply(.pages,
                  function(p) {
                    .ret <- ggplot(data=.data, aes(.data$time, .data$rxode2, col=.data$type)) +
-                     geom_point() +
-                     ggforce::facet_wrap_paginate(.data$cmt ~ .data$id,
-                                                  ncol=ncol, nrow=nrow, page=p) +
-                     geom_line(aes(.data$time, .data$monolix)) +
+                     geom_point()
+                   if (length(object$predDf$cond) == 1) {
+                     .ret <- .ret +
+                       ggforce::facet_wrap_paginate( ~ .data$id,
+                                                    ncol=ncol, nrow=nrow, page=p)
+                   } else {
+                     .ret <- .ret +
+                       ggforce::facet_wrap_paginate(.data$cmt ~ .data$id,
+                                                    ncol=ncol, nrow=nrow, page=p)
+
+
+                   }
+                   .ret <- .ret + geom_line(aes(.data$time, .data$monolix)) +
                      ylab(ylab) +
                      xlab(xlab) +
                      rxode2::rxTheme() +

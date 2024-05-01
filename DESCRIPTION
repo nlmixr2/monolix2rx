@@ -37,7 +37,8 @@ Imports:
     ggplot2,
     ggforce,
     stringi,
-    crayon
+    crayon,
+    vdiffr
 Suggests:
     devtools,
     rxode2 (> 2.0.13),
