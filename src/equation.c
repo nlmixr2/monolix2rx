@@ -297,7 +297,7 @@ int mlxtran_pk_process_pkmodel1(const char* name, D_ParseNode *pn, int i) {
       monolix2rxSingle(v, ".pkSetCc");
       monolix2rxSingle("pkmodel", ".pkSetStatement");
       return 1;
-    } else if (i == 1 && i == 2) {
+    } else if (i == 1 || i == 2) {
       return 1;
     }
   }
@@ -315,7 +315,7 @@ int mlxtran_pk_process_pkmodel2(const char* name, D_ParseNode *pn, int i) {
       monolix2rxSingle(v, ".pkSetCe");
       monolix2rxSingle("pkmodel", ".pkSetStatement");
       return 1;
-    } else if (i == 1 && i == 2 && i == 3 && i == 4 && i == 5 && i == 6) {
+    } else if (i == 1 || i == 2 || i == 3 || i == 4 || i == 5 || i == 6) {
       return 1;
     }
   }
