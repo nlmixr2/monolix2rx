@@ -91,7 +91,7 @@
 
 #' Validate the imported model
 #'
-#' @param ui
+#' @param ui rxode2 ui that is used to validate the model
 #' @return ui with updated validation information
 #' @noRd
 #' @author Matthew L. Fidler
