@@ -59,6 +59,15 @@ rx <- monolix2rx(mlxtranFile)
 #> ℹ imported monolix and translated to rxode2 compatible data ($monolixData)
 #> ℹ imported monolix ETAS (_SAEM) imported to rxode2 compatible data ($etaData)
 #> ℹ imported monolix pred/ipred data to compare ($predIpredData)
+#> using C compiler: ‘gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0’
+#> In file included from /usr/share/R/include/R.h:71,
+#>                  from /home/matt/R/x86_64-pc-linux-gnu-library/4.4/rxode2parse/include/rxode2parse.h:33,
+#>                  from /home/matt/R/x86_64-pc-linux-gnu-library/4.4/rxode2/include/rxode2.h:9,
+#>                  from /home/matt/R/x86_64-pc-linux-gnu-library/4.4/rxode2parse/include/rxode2_model_shared.h:3,
+#>                  from rx_3eaac9dbb7c8e82fd82febcc413da174_.c:117:
+#> /usr/share/R/include/R_ext/Complex.h:80:6: warning: ISO C99 doesn’t support unnamed structs/unions [-Wpedantic]
+#>    80 |     };
+#>       |      ^
 #> ℹ solving ipred problem
 #> ℹ done
 #> ℹ solving pred problem
@@ -218,310 +227,17 @@ mlx
 #> ;  $MODEL$LONGITUDINAL$EQUATION
 
 # this can be converted to a list
-head(as.list(mlx))
-#> $mlxtran
-#> [1] ""
-#> 
-#> $DATAFILE
-#> $DATAFILE$DATAFILE
-#> list()
-#> 
-#> $DATAFILE$FILEINFO
-#> $DATAFILE$FILEINFO$FILEINFO
-#> $DATAFILE$FILEINFO$FILEINFO$file
+mlx <- as.list(mlx)
+
+mlx$DATAFILE$FILEINFO$FILEINFO
+#> $file
 #> [1] "data/theophylline_data.txt"
 #> 
-#> $DATAFILE$FILEINFO$FILEINFO$header
+#> $header
 #> [1] "ID"     "AMT"    "TIME"   "CONC"   "WEIGHT" "SEX"   
 #> 
-#> $DATAFILE$FILEINFO$FILEINFO$delimiter
+#> $delimiter
 #> [1] "tab"
-#> 
-#> 
-#> 
-#> $DATAFILE$CONTENT
-#> $DATAFILE$CONTENT$CONTENT
-#> $DATAFILE$CONTENT$CONTENT$use1
-#>               identifier                     time          eventidentifier 
-#>                     "ID"                   "TIME"                       NA 
-#>                   amount        interdoseinterval                 censored 
-#>                    "AMT"                       NA                       NA 
-#>                    limit          observationtype           administration 
-#>                       NA                       NA                       NA 
-#>              steadystate              observation                 occasion 
-#>                       NA                   "CONC"                       NA 
-#>                     rate           additionaldose missingdependentvariable 
-#>                       NA                       NA                       NA 
-#> 
-#> $DATAFILE$CONTENT$CONTENT$cont
-#> [1] "WEIGHT"
-#> 
-#> $DATAFILE$CONTENT$CONTENT$cat
-#> $DATAFILE$CONTENT$CONTENT$cat$SEX
-#> $DATAFILE$CONTENT$CONTENT$cat$SEX$cat
-#> character(0)
-#> 
-#> $DATAFILE$CONTENT$CONTENT$cat$SEX$quote
-#> logical(0)
-#> 
-#> 
-#> 
-#> $DATAFILE$CONTENT$CONTENT$reg
-#> character(0)
-#> 
-#> $DATAFILE$CONTENT$CONTENT$nbdoses
-#> [1] 7
-#> 
-#> $DATAFILE$CONTENT$CONTENT$yname
-#> character(0)
-#> 
-#> $DATAFILE$CONTENT$CONTENT$ynameQuote
-#> logical(0)
-#> 
-#> $DATAFILE$CONTENT$CONTENT$ytype
-#> character(0)
-#> 
-#> $DATAFILE$CONTENT$CONTENT$ytypeQuote
-#> logical(0)
-#> 
-#> $DATAFILE$CONTENT$CONTENT$name
-#> [1] "CONC"
-#> 
-#> $DATAFILE$CONTENT$CONTENT$type
-#> [1] "continuous"
-#> 
-#> 
-#> 
-#> 
-#> $MODEL
-#> $MODEL$MODEL
-#> list()
-#> 
-#> $MODEL$INDIVIDUAL
-#> $MODEL$INDIVIDUAL$INDIVIDUAL
-#> $MODEL$INDIVIDUAL$INDIVIDUAL$input
-#> [1] "ka_pop"   "omega_ka" "V_pop"    "omega_V"  "Cl_pop"   "omega_Cl"
-#> 
-#> $MODEL$INDIVIDUAL$INDIVIDUAL$cat
-#> NULL
-#> 
-#> $MODEL$INDIVIDUAL$INDIVIDUAL$reg
-#> character(0)
-#> 
-#> $MODEL$INDIVIDUAL$INDIVIDUAL$file
-#> character(0)
-#> 
-#> 
-#> $MODEL$INDIVIDUAL$DEFINITION
-#> $MODEL$INDIVIDUAL$DEFINITION$vars
-#> $MODEL$INDIVIDUAL$DEFINITION$vars$ka
-#> $MODEL$INDIVIDUAL$DEFINITION$vars$ka$distribution
-#> [1] "lognormal"
-#> 
-#> $MODEL$INDIVIDUAL$DEFINITION$vars$ka$typical
-#> [1] "ka_pop"
-#> 
-#> $MODEL$INDIVIDUAL$DEFINITION$vars$ka$sd
-#> [1] "omega_ka"
-#> 
-#> 
-#> $MODEL$INDIVIDUAL$DEFINITION$vars$V
-#> $MODEL$INDIVIDUAL$DEFINITION$vars$V$distribution
-#> [1] "lognormal"
-#> 
-#> $MODEL$INDIVIDUAL$DEFINITION$vars$V$typical
-#> [1] "V_pop"
-#> 
-#> $MODEL$INDIVIDUAL$DEFINITION$vars$V$sd
-#> [1] "omega_V"
-#> 
-#> 
-#> $MODEL$INDIVIDUAL$DEFINITION$vars$Cl
-#> $MODEL$INDIVIDUAL$DEFINITION$vars$Cl$distribution
-#> [1] "lognormal"
-#> 
-#> $MODEL$INDIVIDUAL$DEFINITION$vars$Cl$typical
-#> [1] "Cl_pop"
-#> 
-#> $MODEL$INDIVIDUAL$DEFINITION$vars$Cl$sd
-#> [1] "omega_Cl"
-#> 
-#> 
-#> 
-#> $MODEL$INDIVIDUAL$DEFINITION$fixed
-#> numeric(0)
-#> 
-#> $MODEL$INDIVIDUAL$DEFINITION$cor
-#> [1] level v1    v2    est  
-#> <0 rows> (or 0-length row.names)
-#> 
-#> $MODEL$INDIVIDUAL$DEFINITION$est
-#>      type     name fixed level
-#> 1 typical   ka_pop FALSE   pop
-#> 2      sd omega_ka FALSE    id
-#> 3 typical    V_pop FALSE   pop
-#> 4      sd  omega_V FALSE    id
-#> 5 typical   Cl_pop FALSE   pop
-#> 6      sd omega_Cl FALSE    id
-#> 
-#> $MODEL$INDIVIDUAL$DEFINITION$rx
-#> [1] "ka <- exp(ka_pop + omega_ka)" "V <- exp(V_pop + omega_V)"   
-#> [3] "Cl <- exp(Cl_pop + omega_Cl)"
-#> 
-#> 
-#> 
-#> $MODEL$LONGITUDINAL
-#> $MODEL$LONGITUDINAL$LONGITUDINAL
-#> $MODEL$LONGITUDINAL$LONGITUDINAL$input
-#> [1] "a"  "b"  "ka" "V"  "Cl"
-#> 
-#> $MODEL$LONGITUDINAL$LONGITUDINAL$cat
-#> NULL
-#> 
-#> $MODEL$LONGITUDINAL$LONGITUDINAL$reg
-#> character(0)
-#> 
-#> $MODEL$LONGITUDINAL$LONGITUDINAL$file
-#> [1] "oral1_1cpt_kaVCl.txt"
-#> 
-#> 
-#> $MODEL$LONGITUDINAL$DEFINITION
-#> $MODEL$LONGITUDINAL$DEFINITION$endpoint
-#> $MODEL$LONGITUDINAL$DEFINITION$endpoint[[1]]
-#> $MODEL$LONGITUDINAL$DEFINITION$endpoint[[1]]$var
-#> [1] "CONC"
-#> 
-#> $MODEL$LONGITUDINAL$DEFINITION$endpoint[[1]]$dist
-#> [1] "normal"
-#> 
-#> $MODEL$LONGITUDINAL$DEFINITION$endpoint[[1]]$pred
-#> [1] "Cc"
-#> 
-#> $MODEL$LONGITUDINAL$DEFINITION$endpoint[[1]]$err
-#> $MODEL$LONGITUDINAL$DEFINITION$endpoint[[1]]$err$errName
-#> [1] "combined1"
-#> 
-#> $MODEL$LONGITUDINAL$DEFINITION$endpoint[[1]]$err$typical
-#> [1] "a" "b"
-#> 
-#> 
-#> $MODEL$LONGITUDINAL$DEFINITION$endpoint[[1]]$autocor
-#> character(0)
-#> 
-#> 
-#> 
-#> $MODEL$LONGITUDINAL$DEFINITION$fixed
-#> numeric(0)
-#> 
-#> 
-#> $MODEL$LONGITUDINAL$EQUATION
-#> $MODEL$LONGITUDINAL$EQUATION[[1]]
-#> [1] "; PK model definition\nCc = pkmodel(ka, V, Cl)"
-#> 
-#> 
-#> $MODEL$LONGITUDINAL$OUTPUT
-#> $MODEL$LONGITUDINAL$OUTPUT$output
-#> [1] "Cc"
-#> 
-#> $MODEL$LONGITUDINAL$OUTPUT$table
-#> character(0)
-#> 
-#> 
-#> 
-#> 
-#> $FIT
-#> $FIT$FIT
-#>   data dataQuote model modelQuote
-#> 1 CONC     FALSE  CONC      FALSE
-#> 
-#> 
-#> $PARAMETER
-#> $PARAMETER$PARAMETER
-#>       name value method
-#> 1   Cl_pop   0.1    MLE
-#> 2    V_pop   0.5    MLE
-#> 3        a   1.0    MLE
-#> 4        b   0.3    MLE
-#> 5   ka_pop   1.0    MLE
-#> 6 omega_Cl   1.0    MLE
-#> 7  omega_V   1.0    MLE
-#> 8 omega_ka   1.0    MLE
-#> 
-#> 
-#> $MONOLIX
-#> $MONOLIX$MONOLIX
-#> list()
-#> 
-#> $MONOLIX$TASKS
-#> $MONOLIX$TASKS$TASKS
-#> $MONOLIX$TASKS$TASKS$populationParameters
-#> list()
-#> 
-#> $MONOLIX$TASKS$TASKS$individualParameters
-#> $MONOLIX$TASKS$TASKS$individualParameters$method
-#> $MONOLIX$TASKS$TASKS$individualParameters$method[[1]]
-#> [1] "conditionalMean"
-#> 
-#> $MONOLIX$TASKS$TASKS$individualParameters$method[[2]]
-#> [1] "conditionalMode"
-#> 
-#> 
-#> 
-#> $MONOLIX$TASKS$TASKS$fim
-#> $MONOLIX$TASKS$TASKS$fim$method
-#> [1] "Linearization"
-#> 
-#> 
-#> $MONOLIX$TASKS$TASKS$logLikelihood
-#> $MONOLIX$TASKS$TASKS$logLikelihood$method
-#> [1] "Linearization"
-#> 
-#> 
-#> $MONOLIX$TASKS$TASKS$plotResult
-#> $MONOLIX$TASKS$TASKS$plotResult$method
-#> $MONOLIX$TASKS$TASKS$plotResult$method[[1]]
-#> [1] "indfits"
-#> 
-#> $MONOLIX$TASKS$TASKS$plotResult$method[[2]]
-#> [1] "obspred"
-#> 
-#> $MONOLIX$TASKS$TASKS$plotResult$method[[3]]
-#> [1] "vpc"
-#> 
-#> $MONOLIX$TASKS$TASKS$plotResult$method[[4]]
-#> [1] "residualsscatter"
-#> 
-#> $MONOLIX$TASKS$TASKS$plotResult$method[[5]]
-#> [1] "residualsdistribution"
-#> 
-#> $MONOLIX$TASKS$TASKS$plotResult$method[[6]]
-#> [1] "parameterdistribution"
-#> 
-#> $MONOLIX$TASKS$TASKS$plotResult$method[[7]]
-#> [1] "covariatemodeldiagnosis"
-#> 
-#> $MONOLIX$TASKS$TASKS$plotResult$method[[8]]
-#> [1] "randomeffects"
-#> 
-#> $MONOLIX$TASKS$TASKS$plotResult$method[[9]]
-#> [1] "covariancemodeldiagnosis"
-#> 
-#> $MONOLIX$TASKS$TASKS$plotResult$method[[10]]
-#> [1] "saemresults"
-#> 
-#> 
-#> 
-#> 
-#> 
-#> $MONOLIX$SETTINGS
-#> $MONOLIX$SETTINGS$SETTINGS
-#> $MONOLIX$SETTINGS$SETTINGS[[1]]
-#> [1] ""
-#> 
-#> 
-#> $MONOLIX$SETTINGS$GLOBAL
-#> $MONOLIX$SETTINGS$GLOBAL$exportpath
-#> [1] "tp"
 ```
 
 ## Translating models from the Monolix model library
@@ -554,6 +270,15 @@ to `rxode2`:
 
 ``` r
 monolix2rx("lib:bolus_1cpt_TlagVCl.txt")
+#> using C compiler: ‘gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0’
+#> In file included from /usr/share/R/include/R.h:71,
+#>                  from /home/matt/R/x86_64-pc-linux-gnu-library/4.4/rxode2parse/include/rxode2parse.h:33,
+#>                  from /home/matt/R/x86_64-pc-linux-gnu-library/4.4/rxode2/include/rxode2.h:9,
+#>                  from /home/matt/R/x86_64-pc-linux-gnu-library/4.4/rxode2parse/include/rxode2_model_shared.h:3,
+#>                  from rx_006529352ac819b40b322c71010f90c5_.c:117:
+#> /usr/share/R/include/R_ext/Complex.h:80:6: warning: ISO C99 doesn’t support unnamed structs/unions [-Wpedantic]
+#>    80 |     };
+#>       |      ^
 #> ℹ cannot find individual parameter estimates
 #>  ── rxode2-based free-form 1-cmt ODE model ────────────────────────────────────── 
 #> 

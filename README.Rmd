@@ -70,7 +70,9 @@ mlx <- mlxtran(mlxtranFile)
 mlx
 
 # this can be converted to a list
-head(as.list(mlx))
+mlx <- as.list(mlx)
+
+mlx$DATAFILE$FILEINFO$FILEINFO
 ```
 
 ## Translating models from the Monolix model library
