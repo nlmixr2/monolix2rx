@@ -1,0 +1,7 @@
+eta,covariate,statistics,p-value,test
+eta_ka,SEX,2.45193,0.148449,Fisher
+eta_ka,WEIGHT,2.2544,0.047821,Pearson
+eta_V,SEX,0.919719,0.360161,Fisher
+eta_V,WEIGHT,-1.368,0.201264,Pearson
+eta_Cl,SEX,1.52092,0.245683,Fisher
+eta_Cl,WEIGHT,-1.17978,0.265392,Pearson

@@ -1,0 +1,98 @@
+********************************************************************************
+*                         theophylline_project.mlxtran                         *
+*                         May 01, 2024 at 17:45:37                             *
+*                         Monolix version : 5.1.1                              *
+********************************************************************************
+
+
+POPULATION PARAMETERS ESTIMATION _______________________________________________
+
+Fixed Effects ----------------------------    se_lin    rse(%)
+ka_pop                         :      1.53     0.313      20.4
+V_pop                          :     0.456    0.0205       4.5
+Cl_pop                         :    0.0402   0.00336      8.37
+
+Standard Deviation of the Random Effects -
+omega_ka                       :     0.671     0.149      22.2
+omega_V                        :     0.126    0.0382      30.2
+omega_Cl                       :     0.271    0.0629      23.2
+
+Error Model Parameters -------------------
+a                              :     0.433     0.124      28.6
+b                              :    0.0543    0.0237      43.7
+
+Elapsed time (seconds) :      3.8
+CPU time     (seconds) :        5
+
+ _______________________________________________________________________________
+
+
+
+CORRELATION MATRIX OF THE ESTIMATES ____________________________________________
+
+
+Fisher by Linearization --------------------------------------------------------
+Correlation Matrix :
+  ka_pop         1
+   V_pop   0.12895         1
+  Cl_pop -0.040703  -0.09864         1
+omega_ka         0         0         0         1
+ omega_V         0         0         0  -0.01342         1
+omega_Cl         0         0         00.00032623-0.0053757         1
+       a         0         0         0-0.0066416 -0.013942 -0.052881         1
+       b         0         0         0 -0.003925 -0.034355  0.035396  -0.90107         1
+                               min       max   max/min
+Eigen values           :     0.097       1.9        20
+
+Elapsed time (seconds) :   0.002
+CPU time     (seconds) :       0
+
+ -------------------------------------------------------------------------------
+
+ _______________________________________________________________________________
+
+
+
+INDIVIDUAL PARAMETERS ESTIMATION _______________________________________________
+
+
+Individual Parameters Estimation by Conditional Mean ---------------------------
+           min        Q1    median        Q3       max
+ka :     0.656         1      1.38      2.16      7.08
+V  :     0.379     0.431     0.463     0.499      0.55
+Cl :    0.0213    0.0355    0.0424    0.0479    0.0562
+
+Elapsed time (seconds) :    0.74
+CPU time     (seconds) :       0
+
+ -------------------------------------------------------------------------------
+
+
+Individual Parameters Estimation by Conditional Mode ---------------------------
+           min        Q1    median        Q3       max
+ka :     0.657     0.966      1.34      2.07      6.34
+V  :     0.378     0.427      0.46     0.497     0.544
+Cl :    0.0212    0.0355    0.0424    0.0482    0.0571
+
+Elapsed time (seconds) :   0.006
+CPU time     (seconds) :       0
+
+ -------------------------------------------------------------------------------
+
+ _______________________________________________________________________________
+
+
+
+LOG-LIKELIHOOD ESTIMATION ______________________________________________________
+                                                           (lin)
+
+-2 x log-likelihood                             :         339.48
+Akaike Information Criteria               (AIC) :         355.48
+Corrected Bayesian Information Criteria  (BICc) :         370.87
+Bayesian Information Criteria             (BIC) :         359.36
+
+Elapsed time                          (seconds) :           0.00
+CPU time                              (seconds) :           0.00
+
+ _______________________________________________________________________________
+

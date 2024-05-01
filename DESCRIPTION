@@ -36,7 +36,8 @@ Imports:
     withr,
     ggplot2,
     ggforce,
-    stringi
+    stringi,
+    crayon
 Suggests:
     devtools,
     rxode2 (> 2.0.13),
