@@ -59,7 +59,18 @@
 .subsetMonolix <- function(ui, data, iwres=NULL) {
   if (is.null(ui$predDf)) {
 
+  } else if (length(ui$predDf$cond) == 1L) {
+    # single endpoint
+    .ret <- data[, c("id", "time", "ipredSim", iwres)]
+    if (!is.null(iwres)) {
+      names(.ret) <- c("id", "time", "ipred", iwres)
+    } else {
+      names(.ret) <- c("id", "time", "pred")
+    }
+    .ret$cmt <- ui$predDf$var[1]
+    .ret
   } else {
+    # multiple endpoint
     .ret <- do.call("rbind",
                     lapply(seq_along(ui$predDf$cond),
                            function(i) {

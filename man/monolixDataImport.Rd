@@ -26,6 +26,27 @@ simulations
 \description{
 Import a dataset from monolix (based on an imported model)
 }
+\examples{
+
+# First load in the model; in this case the theo model
+# This is modified from the Monolix demos by saving the model
+# File as a text file (hence you can access without model library)
+# setup.
+#
+# This example is also included in the monolix2rx package, so
+# you refer to the location with `system.file()`:
+
+pkgTheo <- system.file("theo", package="monolix2rx")
+
+mod <- monolix2rx(file.path(pkgTheo, "theophylline_project.mlxtran"))
+
+# read in monolix dataset
+
+dat <- read.table(file.path(pkgTheo, "data", "theophylline_data.txt"),na=".", header=TRUE)
+
+monolixDataImport(mod, dat)
+
+}
 \author{
 Matthew L. Fidler
 }

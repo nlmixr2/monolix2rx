@@ -188,7 +188,29 @@
 #' @export
 #' @author Matthew L. Fidler
 #' @examples
+#'
+#' # First load in the model; in this case the theo model
+#' # This is modified from the Monolix demos by saving the model
+#' # File as a text file (hence you can access without model library)
+#' # setup.
+#' #
+#' # This example is also included in the monolix2rx package, so
+#' # you refer to the location with `system.file()`:
+#'
+#' pkgTheo <- system.file("theo", package="monolix2rx")
+#'
+#' mod <- monolix2rx(file.path(pkgTheo, "theophylline_project.mlxtran"))
+#'
+#' # read in monolix dataset
+#'
+#' dat <- read.table(file.path(pkgTheo, "data", "theophylline_data.txt"),na=".", header=TRUE)
+#'
+#' monolixDataImport(mod, dat)
+#'
 monolixDataImport <- function(ui, data, na.strings=c("NA", ".")) {
+  if (!missing(data)) {
+    checkmate::assertDataFrame(data)
+  }
   rxui <- rxode2::assertRxUi(ui)
   if (is.null(ui$admd)) {
     stop("to convert dataset to an rxode2 compatible dataset the model needs to be imported from monolix",
