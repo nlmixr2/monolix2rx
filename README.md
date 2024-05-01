@@ -325,16 +325,17 @@ this:
     to take and put into another system (They have at least 31,558
     models).
     
-      - Note I believe that would be dishonest in general and think a
-        model library should only be imported from a open-source library
-        or it should be created on its own (as we are doing in
-        `nlmixr2lib`).
+      - While this now allows a complete import of the Monolix library,
+        I believe our `nlmixr2lib` should only be built from imported
+        from a open-source library or be created on its own (as we are
+        doing in `nlmixr2lib`).
     
       - Please do not request direct translations of models from Monolix
         to our library `nlmixr2lib`; these requests will be rejected.
 
 If you want the model library as text files, you may be able to reach
-out to Lixoft and ask if they will provide them to you.
+out to Lixoft and ask if they will provide them to you (or point to the
+last version that used these text files.)
 
 My biggest concern with this a approach is submitting Monolix models
 from the model library to regulatory bodies. For the regulators to be
