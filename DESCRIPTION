@@ -37,10 +37,10 @@ Imports:
     ggplot2,
     ggforce,
     stringi,
-    crayon
+    crayon,
+    rxode2 (> 2.0.13),
 Suggests:
     devtools,
-    rxode2 (> 2.0.13),
     lotri,
     testthat (>= 3.0.0),
     xgxr,

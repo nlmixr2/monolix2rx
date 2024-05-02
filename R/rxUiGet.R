@@ -1,3 +1,4 @@
+#' @export
 rxUiGet.monolixModelIwres <- function(x, ...) {
   .ui <- x[[1]]
   if (is.null(.ui$predDf)) {
