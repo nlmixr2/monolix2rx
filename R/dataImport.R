@@ -1,3 +1,28 @@
+#' Monolix data import can include spaces in NAs, look for these cases
+#'
+#' @param data input data
+#' @param na.strings na strings
+#' @return converted dataset with na
+#' @noRd
+#' @author Matthew L. Fidler
+.monolixNaApply <- function(data, na.strings) {
+  .dat <- data
+  for (v in names(.dat)) {
+    if (is.character(.dat[[v]])) {
+      .n <- suppressWarnings(as.numeric(.dat[[v]]))
+      .w <- which(is.na(.n))
+      if (length(.w) == 0) {
+        .dat[[v]] <- .n
+      } else if (all(grepl(paste0("^ *(",
+                           paste(na.strings, collapse="|"),
+                           ") *$"), .dat[[v]][.w]))) {
+        .dat[[v]] <- .n
+      }
+    }
+  }
+  .dat
+}
+
 #' Load data from a mlxtran defined dataset
 #'
 #' @param mlxtran mlxtran file where data input is specified
@@ -24,7 +49,7 @@
         # has header (and it matches)
         .data <- utils::read.table(.file, header = TRUE, sep=.sep, row.names=NULL,
                             na.strings=na.strings)
-        return(.data)
+        return(.monolixNaApply(.data, na.strings))
       } else {
         .num <- vapply(.head,
                        function(v) {
@@ -42,7 +67,7 @@
                  call.=FALSE)
           }
           names(.data) <- mlxtran$DATAFILE$FILEINFO$FILEINFO$header
-          return(.data)
+          return(.monolixNaApply(.data, na.strings))
         } else {
           # missing header
           .data <- utils::read.table(.file, header = FALSE, sep=.sep, row.names=NULL,
@@ -52,7 +77,7 @@
                  call.=FALSE)
           }
           names(.data) <- mlxtran$DATAFILE$FILEINFO$FILEINFO$header
-          return(.data)
+          return(.monolixNaApply(.data, na.strings))
         }
       }
     } else {
@@ -232,6 +257,12 @@ monolixDataImport <- function(ui, data, na.strings=c("NA", ".")) {
   if (length(.wt) == 0) {
     .minfo("added dummy time column")
     data$time <- seq_along(data[, 1])
+  } else {
+    .wt0 <- which(is.na(data[, .wt]))
+    if (length(.wt0) > 0) {
+      .minfo("replaced na time with zero")
+      data[.wt0, .wt] <- 0
+    }
   }
   data
 }

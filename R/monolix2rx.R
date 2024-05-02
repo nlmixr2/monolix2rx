@@ -162,6 +162,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
                   crayon::bold$blue("$monolixData"), ")"))
     .ui$monolixData <- .monolixData
     .ui$sticky <- "monolixData"
+
   }
   .etaData <- try(monolixEtaImport(.ui))
   if (inherits(.etaData, "try-error")) .etaData <- NULL
@@ -177,7 +178,18 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
                   crayon::blue$bold("$predIpredData"), ")"))
     .ui$predIpredData <- .predIpredData
   }
-  .ui <- .validateModel(.ui)
+  if (!is.null(.ui$monolixData) && (.dfObs <= 0L || .dfSub <= 0L)) {
+    .trans <- rxode2::etTrans(.ui$monolixData, .ui)
+    .lst <- attr(class(.trans), ".rxode2.lst")
+    if (.dfObs <= 0L) {
+      assign("dfObs", as.double(.lst$nobs), envir=.ui$meta)
+    }
+    .dfSub <- attr(.mlxtran, "dfSub")
+    if (.dfSub <= 0L) {
+      assign("dfSub", as.double(.lst$nid), envir=.ui$meta)
+    }
+  }
+
   .ui <- rxode2::rxUiCompress(.ui)
   class(.ui) <- c("monolix2rx", class(.ui))
   .ui

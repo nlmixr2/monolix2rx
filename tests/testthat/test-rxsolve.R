@@ -18,8 +18,8 @@ test_that("solving makes sense", {
 
   s <- .rxSolve(f, nStud=1)
 
-  ## expect_equal(s$env$.args$dfObs, 2280)
-  ## expect_equal(s$env$.args$dfSub, 120)
+  expect_equal(s$env$.args$dfObs, 120)
+  expect_equal(s$env$.args$dfSub, 12)
 
   expect_equal(s$env$.args$thetaMat, f$thetaMat)
   expect_equal(s$env$.args$omega, f$omega)
@@ -28,6 +28,4 @@ test_that("solving makes sense", {
     expect_true(all(s$params[[v]] == f$theta[v]))
   }
 
-  # now test model that does not translate the error
-  # force rik's model
 })
