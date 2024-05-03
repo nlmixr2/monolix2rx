@@ -66,9 +66,13 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   checkmate::assertNumeric(sd, lower=0, finite=TRUE, any.missing = FALSE, len=1)
   checkmate::assertNumeric(cor, lower= -1, upper=1, finite=TRUE, any.missing = FALSE, len=1)
   checkmate::assertNumeric(theta, finite=TRUE, any.missing = FALSE, len=1)
+  checkmate::assertNumeric(ci, lower=0, upper=1, finite=TRUE, any.missing=FALSE, len=1)
+  checkmate::assertIntegerish(sigdig, lower=1, any.missing=FALSE, len=1)
   .monolix2rx$iniSd <- sd
   .monolix2rx$iniCor <- cor
   .monolix2rx$iniTheta <- theta
+  .monolix2rx$iniCi <- ci
+  .monolix2rx$iniSigdig <- sigdig
   thetaMatType <- match.arg(thetaMatType)
   if (length(mlxtran) == 1L && is.character(mlxtran) &&
         grepl("[.]txt$", mlxtran, ignore.case = TRUE)) {
