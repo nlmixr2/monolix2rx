@@ -43,7 +43,6 @@ Imports:
     rxode2 (> 2.0.13),
 Suggests:
     devtools,
-    lotri,
     testthat (>= 3.0.0),
     xgxr,
     vdiffr
