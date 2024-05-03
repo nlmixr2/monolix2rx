@@ -38,6 +38,8 @@ Imports:
     ggforce,
     stringi,
     crayon,
+    lotri,
+    magrittr,
     rxode2 (> 2.0.13),
 Suggests:
     devtools,

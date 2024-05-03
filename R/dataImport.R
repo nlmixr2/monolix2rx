@@ -8,7 +8,8 @@
 .monolixNaApply <- function(data, na.strings) {
   .dat <- data
   for (v in names(.dat)) {
-    if (is.character(.dat[[v]])) {
+    if (tolower(v) %in% c("amt", "time", "dv") &&
+        is.character(.dat[[v]])) {
       .n <- suppressWarnings(as.numeric(.dat[[v]]))
       .w <- which(is.na(.n))
       if (length(.w) == 0) {

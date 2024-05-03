@@ -11,6 +11,8 @@ monolix2rx(
   sd = 1,
   cor = 1e-05,
   theta = 0.5,
+  ci = 0.95,
+  sigdig = 3,
   envir = parent.frame()
 )
 }
@@ -31,6 +33,10 @@ variability/inter-occasion variability that are missing.}
 \item{cor}{Default correlation for missing correlations estimate}
 
 \item{theta}{default population estimate}
+
+\item{ci}{confidence interval for validation, by default 0.95}
+
+\item{sigdig}{number of significant digits for validation, by default 3}
 
 \item{envir}{represents the environment used for evaluating the
 corresponding rxode2 function}

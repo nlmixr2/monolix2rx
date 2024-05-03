@@ -24,6 +24,8 @@
 #'   variability/inter-occasion variability that are missing.
 #' @param cor Default correlation for missing correlations estimate
 #' @param theta default population estimate
+#' @param ci confidence interval for validation, by default 0.95
+#' @param sigdig number of significant digits for validation, by default 3
 #' @param envir represents the environment used for evaluating the
 #'   corresponding rxode2 function
 #' @return rxode2 model
@@ -51,7 +53,7 @@
 #'
 #' rx
 monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
-                       sd=1.0, cor=1e-5, theta=0.5,
+                       sd=1.0, cor=1e-5, theta=0.5, ci=0.95, sigdig=3,
                        envir=parent.frame()) {
   if (!requireNamespace("rxode2", quietly=FALSE) ||
         !requireNamespace("lotri", quietly=FALSE)) {
@@ -189,7 +191,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
       assign("dfSub", as.double(.lst$nid), envir=.ui$meta)
     }
   }
-
+  .validateModel(.ui, ci=ci, sigdig=sigdig)
   .ui <- rxode2::rxUiCompress(.ui)
   class(.ui) <- c("monolix2rx", class(.ui))
   .ui

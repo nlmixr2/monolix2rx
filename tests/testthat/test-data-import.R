@@ -16,6 +16,7 @@ test_that("single endpoint import", {
 })
 
 test_that("multiple endpoint import", {
+
   rx <- monolix2rx(file.path(pkgTheo, "parent_metabolite_project.mlxtran"))
   expect_true(inherits(rx, "rxUi"))
   if (requireNamespace("vdiffr", quietly=TRUE)) {
