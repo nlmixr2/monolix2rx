@@ -107,7 +107,7 @@
 }
 
 .monolix2rxBuildRxSolve <- function() {
-  message("build options for rxSolve to match NONMEM")
+  message("build options for rxSolve to match Monolix")
   .args <- deparse(eval(str2lang(paste0("args(rxode2::rxSolve)"))))
   .args[1] <- paste0("rxSolve.monolix2rx <-", .args[1])
   .args <- .args[-length(.args)]
