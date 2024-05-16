@@ -43,7 +43,7 @@ k = {distribution=logNormal, typical=k_pop, sd=omega_k}
 [LONGITUDINAL]
 input = {b}
 
-file = 'lib:bolus_1cpt_Vk.txt'
+file = 'bolus_1cpt_Vk.txt'
 
 DEFINITION:
 CONC = {distribution=normal, prediction=Cc, errorModel=proportional(b)}

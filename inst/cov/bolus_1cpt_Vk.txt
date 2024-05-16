@@ -1,0 +1,14 @@
+DESCRIPTION:
+The administration is via a bolus.
+The PK model has one compartment (volume V) and a linear elimination (elimination rate k).
+
+
+[LONGITUDINAL]
+input = {V, k}
+
+PK:
+; PK model definition
+Cc = pkmodel(V, k)
+
+OUTPUT:
+output = Cc

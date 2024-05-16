@@ -39,7 +39,7 @@ Cl = {distribution=logNormal, typical=Cl_pop, covariate=lw70, coefficient=beta_C
 [LONGITUDINAL]
 input = {a, b}
 
-file = 'lib:oral1_1cpt_TlagkaVCl.txt'
+file = 'oral1_1cpt_TlagkaVCl.txt'
 
 DEFINITION:
 concentration = {distribution=normal, prediction=Cc, errorModel=combined1(a, b)}
