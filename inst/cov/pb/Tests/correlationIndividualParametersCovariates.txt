@@ -1,0 +1,3 @@
+parameter,covariate,statistics,p-value,test
+V,beta_V_tAPGAR_High,2.14297,0.0364754,t-Test
+V,beta_V_tAPGAR_Low,0.621568,0.536748,t-Test

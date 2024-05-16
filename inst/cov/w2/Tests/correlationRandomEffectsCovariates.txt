@@ -1,0 +1,13 @@
+eta,covariate,statistics,p-value,test
+eta_Tlag,sex,0.453562,0.505804,Anova
+eta_Tlag,lw70,-0.242794,0.809817,Pearson
+eta_Tlag,wt,-0.391216,0.698402,Pearson
+eta_ka,sex,0.0280049,0.86822,Anova
+eta_ka,lw70,0.87679,0.387568,Pearson
+eta_ka,wt,1.08569,0.286264,Pearson
+eta_V,sex,0.401503,0.531116,Anova
+eta_V,lw70,0.178538,0.859501,Pearson
+eta_V,wt,0.196944,0.8452,Pearson
+eta_Cl,sex,0.634432,0.431993,Anova
+eta_Cl,lw70,0.0323859,0.974379,Pearson
+eta_Cl,wt,-0.0465223,0.963202,Pearson

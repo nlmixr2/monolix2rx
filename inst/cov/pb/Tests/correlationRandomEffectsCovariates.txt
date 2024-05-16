@@ -1,0 +1,7 @@
+eta,covariate,statistics,p-value,test
+eta_V,APGAR,1.65527,0.125934,Anova
+eta_V,tAPGAR,0.0184744,0.981701,Anova
+eta_V,WEIGHT,12.0595,<2.2e-16,Pearson
+eta_k,APGAR,0.992395,0.458555,Anova
+eta_k,tAPGAR,0.912807,0.407284,Anova
+eta_k,WEIGHT,3.18816,0.00232602,Pearson

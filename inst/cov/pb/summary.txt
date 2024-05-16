@@ -1,0 +1,110 @@
+********************************************************************************
+*                        phenobarbital_project.mlxtran                         *
+*                        May 09, 2024 at 20:48:29                              *
+*                        Monolix version : 2023R1                              *
+********************************************************************************
+
+
+ESTIMATION OF THE POPULATION PARAMETERS ________________________________________
+
+Fixed Effects ----------------------------     se_sa    rse(%)
+V_pop              :                  1.25    0.0937      7.51
+beta_V_tAPGAR_High :                 0.261     0.115      44.1
+beta_V_tAPGAR_Low  :                 0.128     0.172       134
+k_pop              :                0.0048  0.000244      5.08
+
+Standard Deviation of the Random Effects -
+omega_V            :                 0.401    0.0391      9.73
+omega_k            :                 0.187     0.069        37
+
+Error Model Parameters -------------------
+b                  :                 0.109   0.00846      7.77
+
+Elapsed time (seconds):      2.5
+CPU time     (seconds):        2
+Exploratory phase iterations:      194 (Autostop)
+Smoothing phase iterations:         89 (Autostop)
+
+ _______________________________________________________________________________
+
+
+
+ESTIMATION OF THE INDIVIDUAL PARAMETERS ________________________________________
+
+
+Estimation of the individual parameters by Conditional Distribution ------------
+          min        Q1    median        Q3       max
+V :     0.695      1.07      1.37       1.7      4.88
+k :   0.00344   0.00466   0.00485   0.00505    0.0063
+
+Elapsed time (seconds):     0.67
+CPU time     (seconds):     0.82
+Iterations:       78 (Autostop)
+
+ -------------------------------------------------------------------------------
+
+
+Estimation of the individual parameters by Conditional Mode --------------------
+          min        Q1    median        Q3       max
+V :     0.692      1.06      1.37      1.68      4.94
+k :   0.00364   0.00464    0.0048   0.00498   0.00629
+
+Elapsed time (seconds):     0.06
+CPU time     (seconds):        0
+
+ -------------------------------------------------------------------------------
+
+ _______________________________________________________________________________
+
+
+
+ESTIMATION OF THE FISHER INFORMATION MATRIX ____________________________________
+
+
+Estimation of the Fisher information matrix by Stochastic Approximation --------
+
+Correlation Matrix :
+             V_pop         1
+beta_V_tAPGAR_High  -0.64791         1
+ beta_V_tAPGAR_Low  -0.43591   0.28245         1
+             k_pop -0.099287 0.0079791  0.032804         1
+           omega_V -0.012152  0.013185  0.016219  0.022327         1
+           omega_k  0.031777  0.020461  -0.03771  -0.43918 -0.075066         1
+                 b 0.0023841 -0.013771  0.018361   0.08753 -0.014211  -0.16785         1
+
+                               min       max   max/min
+Eigen values           :      0.32       1.9         6
+
+Elapsed time (seconds):     0.37
+CPU time     (seconds):      0.4
+Iterations:       50 (Autostop)
+
+ -------------------------------------------------------------------------------
+
+ _______________________________________________________________________________
+
+
+
+ESTIMATION OF THE LOG-LIKELIHOOD _______________________________________________
+
+                                                            (is)
+-2 x log-likelihood                       (OFV) :         971.43
+Akaike Information Criteria               (AIC) :         985.43
+Corrected Bayesian Information Criteria  (BICc) :        1002.87
+Bayesian Information Criteria             (BIC) :         999.97
+
+Elapsed time                          (seconds) :           7.56
+CPU time                              (seconds) :          10.00
+MonteCarlo size (is):    10000 (Fixed number of iterations)
+
+
+[Importance Sampling] Standard error        : 0.070
+                      Sampling distribution : T-distribution with 5 degrees of freedom
+
+ _______________________________________________________________________________
+
+DATASET INFORMATION
+Number of individuals: 59
+Number of observations (CONC): 155
+Number of doses: 589
+

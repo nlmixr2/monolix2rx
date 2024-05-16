@@ -1,0 +1,75 @@
+<DATAFILE>
+
+[FILEINFO]
+file='data/phenobarbital_data.csv'
+delimiter = semicolon
+header = {ID, TIME, DOSE, WEIGHT, APGAR, CONC}
+
+[CONTENT]
+ID = {use=identifier}
+TIME = {use=time}
+DOSE = {use=amount}
+WEIGHT = {use=covariate, type=continuous}
+APGAR = {use=covariate, type=categorical}
+CONC = {use=observation, name=CONC, type=continuous}
+
+<MODEL>
+
+[COVARIATE]
+input = APGAR
+
+APGAR = {type=categorical, categories={1, 10, 2, 3, 4, 5, 6, 7, 8, 9}}
+
+DEFINITION:
+tAPGAR =
+{
+  transform = APGAR,
+  categories = {
+  High = {10, 8, 9},
+  Low = {1, 2, 3},
+  Med = {4, 5, 6, 7}  },
+  reference = Med
+}
+
+[INDIVIDUAL]
+input = {V_pop, omega_V, k_pop, omega_k, tAPGAR, beta_V_tAPGAR_High, beta_V_tAPGAR_Low}
+
+tAPGAR = {type=categorical, categories={High, Low, Med}}
+
+DEFINITION:
+V = {distribution=logNormal, typical=V_pop, covariate=tAPGAR, coefficient={beta_V_tAPGAR_High, beta_V_tAPGAR_Low, 0}, sd=omega_V}
+k = {distribution=logNormal, typical=k_pop, sd=omega_k}
+
+[LONGITUDINAL]
+input = {b}
+
+file = 'lib:bolus_1cpt_Vk.txt'
+
+DEFINITION:
+CONC = {distribution=normal, prediction=Cc, errorModel=proportional(b)}
+
+<FIT>
+data = CONC
+model = CONC
+
+<PARAMETER>
+V_pop = {value=1, method=MLE}
+b = {value=0.3, method=MLE}
+beta_V_tAPGAR_High = {value=0, method=MLE}
+beta_V_tAPGAR_Low = {value=0, method=MLE}
+k_pop = {value=0.01, method=MLE}
+omega_V = {value=1, method=MLE}
+omega_k = {value=1, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+individualParameters(method = {conditionalMean, conditionalMode })
+fim(method = StochasticApproximation)
+logLikelihood(run = false,method = ImportanceSampling)
+plotResult(method = {indfits, parameterdistribution, covariancemodeldiagnosis, covariatemodeldiagnosis, obspred, vpc, residualsscatter, residualsdistribution, randomeffects, saemresults })
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'pb'

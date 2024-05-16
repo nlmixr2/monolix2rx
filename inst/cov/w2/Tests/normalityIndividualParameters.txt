@@ -1,0 +1,5 @@
+parameter,statistics,p-value,test
+Tlag,0.977027,0.959754,Shapiro-Wilk
+ka,0.977932,0.998599,Shapiro-Wilk
+V,0.0936126,0.0795308,Kolmogorov-Smirnov
+Cl,0.0998117,0.319972,Kolmogorov-Smirnov

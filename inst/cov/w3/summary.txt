@@ -1,0 +1,125 @@
+********************************************************************************
+*                     warfarin_covariate3_project.mlxtran                      *
+*                     May 09, 2024 at 20:57:01                                 *
+*                     Monolix version : 2023R1                                 *
+********************************************************************************
+
+
+ESTIMATION OF THE POPULATION PARAMETERS ________________________________________
+
+Fixed Effects ----------------------------     se_sa    rse(%)
+Tlag_pop       :                     0.771     0.264      34.2
+ka_pop         :                      1.43     0.442      30.9
+V_pop          :                      8.47     0.299      3.53
+beta_V_tSex_F  :                    -0.382    0.0851      22.3
+Cl_pop         :                     0.134   0.00753       5.6
+beta_Cl_tSex_F :                   -0.0938     0.141       150
+
+Standard Deviation of the Random Effects -
+omega_Tlag     :                     0.619     0.342      55.2
+omega_ka       :                     0.993     0.264      26.5
+omega_V        :                     0.167    0.0256      15.4
+omega_Cl       :                     0.285    0.0365      12.8
+
+Error Model Parameters -------------------
+a              :                     0.248    0.0382      15.4
+b              :                    0.0509   0.00753      14.8
+
+Elapsed time (seconds):      3.9
+CPU time     (seconds):        5
+Exploratory phase iterations:      194 (Autostop)
+Smoothing phase iterations:         94 (Autostop)
+
+ _______________________________________________________________________________
+
+
+
+ESTIMATION OF THE INDIVIDUAL PARAMETERS ________________________________________
+
+
+Estimation of the individual parameters by Conditional Distribution ------------
+             min        Q1    median        Q3       max
+Tlag :     0.457     0.785     0.897     0.999      2.77
+ka   :     0.313      1.82      2.28      2.57      5.48
+V    :      5.07      7.16      8.05         9      12.5
+Cl   :     0.072     0.108     0.127     0.164     0.287
+
+Elapsed time (seconds):      0.7
+CPU time     (seconds):     0.89
+Iterations:       78 (Autostop)
+
+ -------------------------------------------------------------------------------
+
+
+Estimation of the individual parameters by Conditional Mode --------------------
+             min        Q1    median        Q3       max
+Tlag :     0.549     0.741     0.772     0.807      2.75
+ka   :     0.293      1.28      1.42      1.55      3.51
+V    :      5.05      7.09      7.97         9      12.4
+Cl   :    0.0724     0.108     0.127     0.164     0.287
+
+Elapsed time (seconds):    0.061
+CPU time     (seconds):        0
+
+ -------------------------------------------------------------------------------
+
+ _______________________________________________________________________________
+
+
+
+ESTIMATION OF THE FISHER INFORMATION MATRIX ____________________________________
+
+
+Estimation of the Fisher information matrix by Stochastic Approximation --------
+
+Correlation Matrix :
+      Tlag_pop         1
+        ka_pop  0.036075         1
+         V_pop-0.0002485 -0.069908         1
+ beta_V_tSex_F   0.02999  0.038878  -0.41616         1
+        Cl_pop  0.016787 -0.059607 0.0072968-0.0039429         1
+beta_Cl_tSex_F 0.0013373  0.018762-0.0030083-0.00010772   -0.3965         1
+    omega_Tlag  -0.74399  0.037801  0.029266 -0.0410960.00078992-0.0071501         1
+      omega_ka  -0.19191   0.14806  0.021783 -0.019724  0.037242 -0.019504    0.1552         1
+       omega_V -0.022833  0.026579 0.0061017-0.00079107  -0.01383 0.0058449  0.033849 -0.037583         1
+      omega_Cl -0.021677  0.012646-0.0038896 0.0032525-0.0015535-0.0060485  0.015255 -0.020322 0.0033293         1
+             a  0.045628 -0.023819 -0.031269-0.00017444  0.017127 0.0096107 -0.058708 -0.039965 -0.036416  0.041383         1
+             b -0.022281  0.020284  0.045416-0.0075666 -0.013832-0.0043765   0.02204  0.020516 -0.022802 -0.047834  -0.74609         1
+
+                               min       max   max/min
+Eigen values           :      0.24       1.9       7.8
+
+Elapsed time (seconds):     0.66
+CPU time     (seconds):     0.85
+Iterations:       50 (Autostop)
+
+ -------------------------------------------------------------------------------
+
+ _______________________________________________________________________________
+
+
+
+ESTIMATION OF THE LOG-LIKELIHOOD _______________________________________________
+
+                                                            (is)
+-2 x log-likelihood                       (OFV) :         641.68
+Akaike Information Criteria               (AIC) :         665.68
+Corrected Bayesian Information Criteria  (BICc) :         695.53
+Bayesian Information Criteria             (BIC) :         683.27
+
+Elapsed time                          (seconds) :           4.67
+CPU time                              (seconds) :           7.00
+MonteCarlo size (is):    10000 (Fixed number of iterations)
+
+
+[Importance Sampling] Standard error        : 0.097
+                      Sampling distribution : T-distribution with 5 degrees of freedom
+
+ _______________________________________________________________________________
+
+DATASET INFORMATION
+Number of individuals: 32
+Number of observations (obsid 1): 247
+Number of observations (obsid 2): 232
+Number of doses: 32
+

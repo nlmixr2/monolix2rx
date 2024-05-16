@@ -1,0 +1,4 @@
+residuals,statistics,p-value,test
+IWRES_concentration,-0.206632,0.836297,Symmetry
+PWRES_concentration,-0.510315,0.609831,Symmetry
+NPDE_concentration,-2.2896,0.0220443,Symmetry

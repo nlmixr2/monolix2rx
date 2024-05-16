@@ -1,0 +1,3 @@
+parameter,statistics(sa),p-value(sa)
+beta_V_tSex_F,4.49263,7.03e-06
+beta_Cl_tSex_F,0.664779,0.506

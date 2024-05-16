@@ -1,0 +1,4 @@
+residuals,statistics,p-value,test
+IWRES_concentration,0.992359,0.103604,Shapiro-Wilk
+PWRES_concentration,0.99082,0.122869,Shapiro-Wilk
+NPDE_concentration,0.994731,0.551884,Shapiro-Wilk

@@ -1,0 +1,3 @@
+parameter,statistics(sa),p-value(sa)
+beta_V_tAPGAR_High,2.26508,0.0235
+beta_V_tAPGAR_Low,0.744812,0.456

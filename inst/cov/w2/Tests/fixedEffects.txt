@@ -1,0 +1,3 @@
+parameter,statistics(lin),p-value(lin)
+beta_V_lw70,6.40734,1.48e-10
+beta_Cl_lw70,2.35281,0.0186
