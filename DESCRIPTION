@@ -47,3 +47,4 @@ Suggests:
     xgxr,
     vdiffr
 Config/testthat/edition: 3
+Config/Needs/website: rmarkdown

@@ -3,3 +3,4 @@
 ^bad-library.md$
 ^pkgdown$
 ^.github$
+^vignettes/articles$

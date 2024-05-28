@@ -1,0 +1,58 @@
+---
+title: "Converting Monolix fit to nlmixr2 fit"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(monolix2rx)
+```
+### Creating a nlmixr2 compatible model
+
+Unlike `nonmem2rx`, the residuals specification can be converted more
+efficiently to the nlmixr2 residual syntax.
+
+## Example
+
+```{r asNonmem2Rx}
+library(monolix2rx)
+library(babelmixr2)
+
+# You use the path to the monolix mlxtran file
+
+# In this case we will us the theophylline project included in monolix2rx
+pkgTheo <- system.file("theo/theophylline_project.mlxtran", package="monolix2rx")
+
+# Note you have to setup monolix2rx to use the model library or save the model as a separate file
+mod <- monolix2rx(pkgTheo)
+
+print(mod)
+```
+
+### Converting the model to a nlmixr2 fit
+
+Once you have a `rxode2()` model that:
+
+- Qualifies against the NONMEM model,
+
+- Has `nlmixr2` compatible residuals
+
+You can then convert it to a `nlmixr2` fit object with `babelmixr2`:
+
+```{r convertNlmixr2object}
+library(babelmixr2)
+
+fit <- as.nlmixr2(mod)
+
+# If you want you can use nlmixr2, to add cwres to this fit:
+fit <- addCwres(fit)
+
+library(ggplot2)
+ggplot(fit, aes(PRED, CWRES)) +
+  geom_point() + rxode2::rxTheme()
+```

@@ -284,10 +284,36 @@
   lapply(seq_along(longDef$endpoint), function(i) {
     .env$err <- c(.env$err, longDef$endpoint[[i]]$err$typical)
   })
+
   .env$omega <- list()
   .env$vl <- character(0)
   .env$omegaDf <- data.frame(level=character(0), name=character(0), var=character(0))
   .env$extraFixed <- character(0)
+
+  .coef <- lapply(.n, function(n) {
+    .cur <- .var[[n]]
+    if (!is.null(.cur$coef)) {
+      .coef <- .cur$coef[[1]]
+              lapply(.coef, function(var) {
+                .val <- .parsGetValue(pars, var)
+                if (.parsGetFixed(pars, var)) {
+                  bquote(.(str2lang(var)) <- fixed(.(.val)))
+                } else {
+                  bquote(.(str2lang(var)) <- .(.val))
+                }
+              })
+    } else {
+      NULL
+    }
+  })
+  .coef <- do.call(`c`, .coef)
+  .in <- which(vapply(seq_along(.coef),
+                      function(i) {
+                        as.character(.coef[[i]][[2]]) %in% .monolix2rx$ignoredCoef
+                      }, logical(1), USE.NAMES = FALSE))
+  if (length(.in) > 0L) {
+    .coef <- .coef[-.in]
+  }
   .pop <- c(list(quote(`{`)),
             lapply(.n, function(n) {
               .cur <- .var[[n]]
@@ -319,6 +345,7 @@
                 bquote(.(str2lang(.var)) <- .(.val))
               }
             }),
+            .coef,
             lapply(.env$err,
                    function(e) {
                      if (.parsGetFixed(pars, e)) {

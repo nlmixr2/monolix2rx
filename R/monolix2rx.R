@@ -68,6 +68,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   checkmate::assertNumeric(theta, finite=TRUE, any.missing = FALSE, len=1)
   checkmate::assertNumeric(ci, lower=0, upper=1, finite=TRUE, any.missing=FALSE, len=1)
   checkmate::assertIntegerish(sigdig, lower=1, any.missing=FALSE, len=1)
+  .monolix2rx$ignoredCoef <- character(0)
   .monolix2rx$iniSd <- sd
   .monolix2rx$iniCor <- cor
   .monolix2rx$iniTheta <- theta

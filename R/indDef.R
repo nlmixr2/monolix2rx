@@ -160,6 +160,27 @@
       .rx <- paste0(.rx, " + ",
                     paste(vapply(seq_along(.ret$coef),
                                  function(i) {
+                                   .coef <- .ret$coef[[i]]
+                                   .cov <- .ret$cov[i]
+                                   if (length(.coef) > 1) {
+                                     .ref <- vapply(strsplit(.coef, paste0(.cov,"_"), fixed = TRUE),
+                                                    function(l) {
+                                                      if (length(l) != 2) return("")
+                                                      .ret <- l[[2]]
+                                                      .num <- suppressWarnings(as.numeric(.ret))
+                                                      if (!is.na(.num)) return("")
+                                                      return(.ret)
+                                                    },
+                                                    character(1), USE.NAMES = FALSE)
+                                     .w <- which(.ref == "")
+                                     if (length(.w) == 1) {
+                                       .monolix2rx$ignoredCoef <- c(.monolix2rx$ignoredCoef,
+                                                                    .coef[.w])
+                                       .coef <- .coef[-.w]
+                                       .ref <- .ref[-.w]
+                                       return(paste(paste0(.coef, " * (", .cov, " == '", .ref, "')"), collapse=" + "))
+                                     }
+                                    }
                                    paste(paste0(.ret$coef[[i]], "*", .ret$cov[i]), collapse=" + ")
                                  }, character(1), USE.NAMES=FALSE),
                           collapse=" + "))
