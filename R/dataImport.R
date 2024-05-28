@@ -2,10 +2,11 @@
 #'
 #' @param data input data
 #' @param na.strings na strings
-#' @return converted dataset with na
+#' @param mlxtran mlxtran information
+#' @return converted dataset with na AND mutated values
 #' @noRd
 #' @author Matthew L. Fidler
-.monolixNaApply <- function(data, na.strings) {
+.monolixNaApply <- function(data, na.strings, mlxtran) {
   .dat <- data
   for (v in names(.dat)) {
     if (tolower(v) %in% c("amt", "time", "dv") &&
@@ -20,6 +21,14 @@
         .dat[[v]] <- .n
       }
     }
+  }
+  browser()
+  .mutate <- mlxtranGetMutate(mlxtran)
+  if (!is.null(.mutate)) {
+    .minfo("modifying input data to match monolix transformations")
+    message("\tdata |> ")
+    message(.mutate)
+    .dat <- eval(str2lang(paste0(".dat |> ", .mutate)))
   }
   .dat
 }
@@ -50,7 +59,7 @@
         # has header (and it matches)
         .data <- utils::read.table(.file, header = TRUE, sep=.sep, row.names=NULL,
                             na.strings=na.strings)
-        return(.monolixNaApply(.data, na.strings))
+        return(.monolixNaApply(.data, na.strings, mlxtran))
       } else {
         .num <- vapply(.head,
                        function(v) {
@@ -68,7 +77,7 @@
                  call.=FALSE)
           }
           names(.data) <- mlxtran$DATAFILE$FILEINFO$FILEINFO$header
-          return(.monolixNaApply(.data, na.strings))
+          return(.monolixNaApply(.data, na.strings, mlxtran))
         } else {
           # missing header
           .data <- utils::read.table(.file, header = FALSE, sep=.sep, row.names=NULL,
@@ -78,7 +87,7 @@
                  call.=FALSE)
           }
           names(.data) <- mlxtran$DATAFILE$FILEINFO$FILEINFO$header
-          return(.monolixNaApply(.data, na.strings))
+          return(.monolixNaApply(.data, na.strings, mlxtran))
         }
       }
     } else {

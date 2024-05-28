@@ -296,6 +296,13 @@
       .coef <- .cur$coef[[1]]
               lapply(.coef, function(var) {
                 .val <- .parsGetValue(pars, var)
+                ## .val <- .parsTransformValue(.val, .cur$distribution,
+                ##                             min=.cur$min, max=.cur$max)
+                ## if (is.na(.val) && .inNaVal) {
+                ##   stop("transformed value of initial estimate for ", .var,
+                ##        " is not in correct range",
+                ##        call.=FALSE)
+                ## }
                 if (.parsGetFixed(pars, var)) {
                   bquote(.(str2lang(var)) <- fixed(.(.val)))
                 } else {
