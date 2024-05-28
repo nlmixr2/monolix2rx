@@ -22,7 +22,6 @@
       }
     }
   }
-  browser()
   .mutate <- mlxtranGetMutate(mlxtran)
   if (!is.null(.mutate)) {
     .minfo("modifying input data to match monolix transformations")

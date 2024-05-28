@@ -46,6 +46,13 @@ mlxtranGetMutate <- function(mlxtran) {
                         }, character(1),
                         USE.NAMES=FALSE))
   }
+  .cov <- mlxtran$MODEL$COVARIATE$EQUATION
+  if (!is.null(.cov)) {
+    .mutate <- c(.mutate,
+                 paste0("dplyr::mutate(",
+                        paste(.cov$dplyr, collapse=",\n\t\t"),
+                       ")"))
+  }
   if (length(.mutate) == 0) return(NULL)
   # Add equations
   paste(.mutate, collapse=" |> \n\t")
