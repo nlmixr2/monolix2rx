@@ -39,7 +39,6 @@ theophylline is included in `monolix2rx` and can be imported below:
 
 ``` r
 library(monolix2rx)
-#> Loading required namespace: rxode2
 # First load in the model; in this case the theo model
 # This is modified from the Monolix demos by saving the model
 # file as a text file (hence you can access without model library).
@@ -60,14 +59,6 @@ rx <- monolix2rx(mlxtranFile)
 #> ℹ imported monolix ETAS (_SAEM) imported to rxode2 compatible data ($etaData)
 #> ℹ imported monolix pred/ipred data to compare ($predIpredData)
 #> using C compiler: ‘gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0’
-#> In file included from /usr/share/R/include/R.h:71,
-#>                  from /home/matt/R/x86_64-pc-linux-gnu-library/4.4/rxode2parse/include/rxode2parse.h:33,
-#>                  from /home/matt/R/x86_64-pc-linux-gnu-library/4.4/rxode2/include/rxode2.h:9,
-#>                  from /home/matt/R/x86_64-pc-linux-gnu-library/4.4/rxode2parse/include/rxode2_model_shared.h:3,
-#>                  from rx_3eaac9dbb7c8e82fd82febcc413da174_.c:117:
-#> /usr/share/R/include/R_ext/Complex.h:80:6: warning: ISO C99 doesn’t support unnamed structs/unions [-Wpedantic]
-#>    80 |     };
-#>       |      ^
 #> ℹ solving ipred problem
 #> ℹ done
 #> ℹ solving pred problem
@@ -99,6 +90,8 @@ rx
 #>  ── Model (Normalized Syntax): ── 
 #> function() {
 #>     description <- "The administration is extravascular with a first order absorption (rate constant ka).\nThe PK model has one compartment (volume V) and a linear elimination (clearance Cl).\nThis has been modified so that it will run without the model library"
+#>     dfObs <- 120
+#>     dfSub <- 12
 #>     thetaMat <- lotri({
 #>         ka_pop + V_pop + Cl_pop ~ c(0.09785, 0.00082606, 0.00041937, 
 #>             -4.2833e-05, -6.7957e-06, 1.1318e-05)
@@ -271,14 +264,6 @@ to `rxode2`:
 ``` r
 monolix2rx("lib:bolus_1cpt_TlagVCl.txt")
 #> using C compiler: ‘gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0’
-#> In file included from /usr/share/R/include/R.h:71,
-#>                  from /home/matt/R/x86_64-pc-linux-gnu-library/4.4/rxode2parse/include/rxode2parse.h:33,
-#>                  from /home/matt/R/x86_64-pc-linux-gnu-library/4.4/rxode2/include/rxode2.h:9,
-#>                  from /home/matt/R/x86_64-pc-linux-gnu-library/4.4/rxode2parse/include/rxode2_model_shared.h:3,
-#>                  from rx_006529352ac819b40b322c71010f90c5_.c:117:
-#> /usr/share/R/include/R_ext/Complex.h:80:6: warning: ISO C99 doesn’t support unnamed structs/unions [-Wpedantic]
-#>    80 |     };
-#>       |      ^
 #> ℹ cannot find individual parameter estimates
 #>  ── rxode2-based free-form 1-cmt ODE model ────────────────────────────────────── 
 #> 
@@ -313,41 +298,27 @@ try(monolix2rx("lib:notThere.txt"))
 ```
 
 In newer versions of Monolix, the model library was turned into a binary
-database that is accessed by the GUI. To me there are advantages of
-this:
+database that is accessed by the GUI and `lixoftConnectors`. If you have
+`lixoftConnectors` on your system and it can successfully load the model
+with `lixoftConnectors::getLibraryModelContent()` then `monolix2rx` will
+also load the model correctly (and will use this version over the text
+files when both are setup)
 
-  - A binary database would be much faster in loading models
+This means you will need to import models into `rxode2` you need to:
 
-  - With a model library, you don’t have to put common model files all
-    over the place (saving space on your system)
-
-  - It would make their hard work on the excellent model library harder
-    to take and put into another system (They have at least 31,558
-    models).
+  - For a model built from the model library you will need:
     
-      - While this now allows a complete import of the Monolix library,
-        I believe our `nlmixr2lib` should only be built from imported
-        from a open-source library or be created on its own (as we are
-        doing in `nlmixr2lib`).
+      - have a path to the text file Monolix Library and setup the
+        `monolix2rx.library` with
+        `options(monolix2rx.library="~/src/monolix/library/")`
     
-      - Please do not request direct translations of models from Monolix
-        to our library `nlmixr2lib`; these requests will be rejected.
-
-If you want the model library as text files, you may be able to reach
-out to Lixoft and ask if they will provide them to you (or point to the
-last version that used these text files.)
-
-My biggest concern with this a approach is submitting Monolix models
-from the model library to regulatory bodies. For the regulators to be
-able to truly see the models they have to have a working copy Monolix.
-If they do not, the model is a black box.
-
-For that reason, I believe best practice when submitting to a regulatory
-body is to make the model available by making some change to the model
-and saving it to a final location. That way the regulators can see the
-model.
-
-This approach also allows the model to be translated to `rxode2`.
+      - have `lixoftConnectors` installed and connected to a newer (and
+        licensed) version of Monolix that can get the model library
+        content by `lixoftConnectors::getLibraryModelContent()`
+    
+      - or without these options, you will need to save the model to a
+        text file outside of the model library so you can import the
+        model.
 
 # Note on testing
 
