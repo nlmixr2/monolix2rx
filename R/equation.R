@@ -258,6 +258,29 @@ mlxTxt <- function(file, retFile=FALSE) {
     .lines <- file
     .dirn <- getwd()
   } else {
+    if (requireNamespace("lixoftConnectors", quietly = TRUE)) {
+      if (!checkmate::testCharacter(file, min.chars = 5, len=1)) {
+        .pre <- substr(file, 1, 4)
+      }
+      if (.pre == "lib:") {
+        if (is.na(.monolix2rx$lixoftConnectors)) {
+          x <- try(lixoftConnectors::initializeLixoftConnectors(software = "monolix", force=TRUE), silent=TRUE)
+          if (inherits(x, "try-error")) {
+            warning("lixoftConnectors cannot be initialized",
+                    call.=FALSE)
+            .monolix2rx$lixoftConnectors <- FALSE
+          } else {
+            .monolix2rx$lixoftConnectors <- TRUE
+          }
+        }
+        if (.monolix2rx$lixoftConnectors) {
+          .ret <- try(lixoftConnectors::getLibraryModelContent(, print=FALSE), silent=TRUE)
+          if (!inherits(.ret, "try-error")) {
+            return(as.character(.ret))
+          }
+        }
+      }
+    }
     .f <- .mlxtranLib(file)
     if (checkmate::testFileExists(.f, "r")) {
       .lines <- suppressWarnings(readLines(.f))

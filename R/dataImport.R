@@ -172,9 +172,15 @@
   if (length(.w) != 1L) return(data) # no observationtype in the dataset
   if (is.null(ui$predDf)) return(data[, -.w]) # single endpoint; no need to define
   # multiple endpoint
+  .dvid <- unique(data$rxMDvid)
+  .dvid <- .dvid[!is.na(.dvid)]
+  .dvid <- .dvid[!(.dvid %in% seq_along(ui$predDf$cond))]
   for (.i in seq_along(ui$predDf$cond)) {
     # only overwrite non-dosing events (ie make sure the cmt is NA)
     data$cmt[which(is.na(data$cmt) & data$rxMDvid == .i)] <- ui$predDf$var[.i]
+  }
+  for(.i in .dvid) {
+    data <- data[-which(is.na(data$cmt) & data$rxMDvid == .i), ]
   }
   data[, -.w]
 }

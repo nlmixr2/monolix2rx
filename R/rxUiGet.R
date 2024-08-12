@@ -12,6 +12,8 @@ rxUiGet.monolixModelIwres <- function(x, ...) {
     if (length(.ui$predDf$cond) == 1) {
       .ret <- suppressMessages(rxode2::model(.ui, iwres <- (DV-rx_pred_)/sqrt(rx_r_),
                                              append=sim, auto=FALSE))
+      .ret <- suppressMessages(rxode2::model(.ret, ires <- DV-rx_pred_,
+                                             append=sim, auto=FALSE))
     } else {
       .ret <- suppressMessages(rxode2::as.rxUi(.ui))
       .lstExpr <- .ret$lstExpr
@@ -20,7 +22,8 @@ rxUiGet.monolixModelIwres <- function(x, ...) {
               identical(.lstExpr[[.l]][[1]], quote(`cmt`))) .l <- .l - 1
       .lstOut <- c(list(quote(`{`)),
                    lapply(seq_len(.l), function(i) .lstExpr[[i]]),
-                   list(quote(iwres <- (DV-rx_pred_)/sqrt(rx_r_))),
+                   list(quote(iwres <- (DV-rx_pred_)/sqrt(rx_r_)),
+                        quote(ires <- DV-rx_pred_)),
                    lapply(seq(.l+1, length(.lstExpr)), function(i) .lstExpr[[i]]))
       .lstOut <- as.call(list(quote(`model`), as.call(.lstOut)))
       rxode2::model(.ret) <- .lstOut

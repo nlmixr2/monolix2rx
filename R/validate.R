@@ -88,7 +88,6 @@
     return(.ret)
   }
 }
-
 #' Validate the imported model
 #'
 #' @param ui rxode2 ui that is used to validate the model
@@ -125,7 +124,8 @@
                                        atol=.tol, rtol=.tol,
                                        ssAtol=100, ssRtol=100, omega=NULL,
                                        addDosing = FALSE))
-    .ipredSolve <- .subsetMonolix(.ui, .ipredSolve, "iwres")
+
+    .ipredSolve <- .subsetMonolix(.ui, .ipredSolve, c("iwres", "ires"))
     .minfo("done")
     .minfo("solving pred problem")
     .predSolve <- try(rxode2::rxSolve(.model, .pop, .data, returnType = "data.frame",
@@ -138,7 +138,19 @@
                                       ssAtol=100, ssRtol=100, omega=NULL,
                                       addDosing = FALSE))
     .predSolve <- .subsetMonolix(.ui, .predSolve)
-    .both <- merge(.predSolve, .ipredSolve)
+    .nPredSolve <- length(.predSolve[, 1])
+    .nIpredSolve <- length(.ipredSolve[, 1])
+    if (.nPredSolve == .nIpredSolve &&
+          all(.ipredSolve$id == .predSolve$id) &&
+          all(.ipredSolve$time == .predSolve$time) &&
+          all(.ipredSolve$cmt == .predSolve$cmt)) {
+      .both <- .ipredSolve
+      .both$pred <-.predSolve$pred
+      .nBoth <- length(.both[, 1])
+    } else {
+      .minfo("ipred and pred rxode2 solves do not match for id, time and cmt")
+      return(invisible())
+    }
     .monolix <- ui$predIpredData
     names(.monolix) <- vapply(names(.monolix),
                               function(n) {
@@ -148,6 +160,11 @@
                                 }
                                 n
                               }, character(1), USE.NAMES = FALSE)
+    .nMonolix <- length(.monolix[, 1])
+    if (.nMonolix != .nBoth) {
+      .minfo("monolix and rxode2 solves have different number of rows")
+      return(invisible())
+    }
     .both <- merge(.monolix, .both)
     .ci0 <- .ci <- ci
     .sigdig <- sigdig
