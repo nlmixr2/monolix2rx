@@ -147,8 +147,24 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   }
   for (.tt in .thetaMatType) {
     if (inherits(attr(.mlxtran, .tt), "matrix")) {
-      .thetaMat <- names(.ui$theta)
-      .thetaMat <- attr(.mlxtran, .tt)[.thetaMat, .thetaMat]
+      .iniDf <- .ui$iniDf
+      .thetaMatNames <- .iniDf[is.na(.iniDf$neta1) & !.iniDf$fix,"name"]
+      .thetaMat <- attr(.mlxtran, .tt)
+      .sharedNames <- intersect(.thetaMatNames, dimnames(.thetaMat)[[1]])
+      if (length(.sharedNames) != length(.thetaMatNames)) {
+        .diff <- setdiff(.thetaMatNames, .sharedNames)
+        warning(paste("The following parameters are missing from the thetaMat covariance matrix:.",
+                      paste(.diff, collapse=", ")),
+                      call.=FALSE)
+      }
+      .d <- diag(.thetaMat)
+      .w <- which(is.nan(.d) | is.na(.d))
+      if (length(.w) > 0L) {
+        warning(paste("The following parameters are missing from the thetaMat covariance matrix because they were NaN/NA:",
+                      paste(dimnames(.thetaMat)[[1]][.w], collapse=", ")),
+                call.=FALSE)
+        .thetaMat <- .thetaMat[-.w, -.w]
+      }
       .thetaMatType <- .tt
       break
     }
