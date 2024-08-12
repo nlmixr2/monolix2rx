@@ -1,4 +1,5 @@
 .monolix2rx <- new.env(parent=emptyenv())
+.monolix2rx$lixoftConnectors <- NA
 #' Output the information
 #'
 #' @param text character vector of the text to echo
