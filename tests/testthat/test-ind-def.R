@@ -77,6 +77,7 @@ correlation = {level=id*occ, r(ka, Tlag)=corr2_ka_Tlag}")
 })
 
 test_that("mu referenced covariate description", {
+
   tmp <- .indDef("F = {distribution=logitnormal, typical=F_pop,sd=omega_F, min=0, max=1}
 ka = {distribution=lognormal,typical=ka_pop, covariate={Race, Wt}, coefficient={{0, beta_ka_Race_Black, beta_ka_Race_Latin},beta_ka_Wt}, no-variability}
 V = {distribution=lognormal, covariate=Race, coefficient={0, beta_V_Race_Black, beta_V_Race_Latin},typical=V_pop, sd=omega_V }
@@ -86,9 +87,11 @@ correlation = {level=id, r(V, Cl)=corr1_V_Cl}
 
   expect_equal(tmp$rx,
                c("F <- expit(F_pop + omega_F, 0, 1)",
-                 "ka <- exp(ka_pop + rxCov_ka_Race_1*Race + beta_ka_Race_Black*Race + beta_ka_Race_Latin*Race + beta_ka_Wt*Wt)",
-                 "V <- exp(V_pop + rxCov_V_Race_1*Race + beta_V_Race_Black*Race + beta_V_Race_Latin*Race + omega_V)",
+                 "ka <- exp(ka_pop + beta_ka_Race_Black * (Race == 'Black') + beta_ka_Race_Latin * (Race == 'Latin') + beta_ka_Wt*Wt)",
+                 "V <- exp(V_pop + beta_V_Race_Black * (Race == 'Black') + beta_V_Race_Latin * (Race == 'Latin') + omega_V)",
                  "Cl <- exp(Cl_pop + beta_Cl_Wt*Wt + omega_Cl)"))
+
+
 })
 
 
