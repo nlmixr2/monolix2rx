@@ -10,8 +10,11 @@
 
 #include "util.h"
 
+SEXP _monolix2rx_iniDparserPtr(SEXP);
+
 void R_init_monolix2rx(DllInfo *info) {
   R_CallMethodDef callMethods[]  = {
+    {"_monolix2rx_iniDparserPtr", (DL_FUNC) &_monolix2rx_iniDparserPtr, 1},
     {"_monolix2rx_r_parseIni", (DL_FUNC) &_monolix2rx_r_parseIni, 0},
     {"_monolix2rx_r_parseFree", (DL_FUNC) &_monolix2rx_r_parseFree, 0},
     {"_monolix2rx_trans_data_settings", (DL_FUNC) &_monolix2rx_trans_data_settings, 1},
