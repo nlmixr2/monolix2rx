@@ -13,7 +13,14 @@
 #'   transformations are defined.
 #'
 #' @noRd
+#'
 #' @author Matthew L. Fidler
+#'
+#' @examples
+#'
+#' m <- mlxtran(file.path(system.file("cov", package="monolix2rx"), "warfarin_covariate3_project.mlxtran"))
+#' mlxtranTransformGetRxCode(m)
+#'
 mlxtranTransformGetRxCode <- function(mlxtran) {
   .cov <- mlxtran$MODEL$COVARIATE$COVARIATE
   if (is.null(.cov)) return(NULL)
