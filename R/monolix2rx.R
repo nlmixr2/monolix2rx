@@ -52,7 +52,7 @@
 #'
 #' rx <- monolix2rx(file.path(pkgTheo, "theophylline_project.mlxtran"))
 #'
-#' rx <- monolix2rx(file.path(system.file("cov", package="monolix2rx"), "warfarin_covariate3_project.mlxtran"))s
+#' rx <- monolix2rx(file.path(system.file("cov", package="monolix2rx"), "warfarin_covariate3_project.mlxtran"))
 #'
 #' rx
 monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
