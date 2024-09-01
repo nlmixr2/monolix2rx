@@ -52,6 +52,8 @@
 #'
 #' rx <- monolix2rx(file.path(pkgTheo, "theophylline_project.mlxtran"))
 #'
+#' rx <- monolix2rx(file.path(system.file("cov", package="monolix2rx"), "warfarin_covariate3_project.mlxtran"))s
+#'
 #' rx
 monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
                        sd=1.0, cor=1e-5, theta=0.5, ci=0.95, sigdig=3,
@@ -100,6 +102,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   if (length(.cmt) == 1L && .cmt == "cmt()") .cmt <- NULL
   .model <- c("model({",
               .cmt,
+              mlxtranTransformGetRxCode(.mlxtran),
               .mlxtran$MODEL$INDIVIDUAL$DEFINITION$rx,
               .equation,
               vapply(seq_along(.mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint),

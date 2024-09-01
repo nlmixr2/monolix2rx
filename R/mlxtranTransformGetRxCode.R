@@ -27,7 +27,9 @@ mlxtranTransformGetRxCode <- function(mlxtran) {
   .cov <- mlxtran$MODEL$COVARIATE$DEFINITION
   if (is.null(.cov)) return(NULL)
   .transform <- .cov$transform
-  vapply(names(.transform),
+  if (length(.transform) == 0) return(NULL)
+  paste(
+    vapply(names(.transform),
          function(n) {
            .t <- .transform[[n]]
            .v <- .t$transform
@@ -53,5 +55,6 @@ mlxtranTransformGetRxCode <- function(mlxtran) {
            }
            .cw
          }, character(1),
-         USE.NAMES=FALSE)
+         USE.NAMES=FALSE),
+    collapse="\n")
 }
