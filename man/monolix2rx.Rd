@@ -60,6 +60,8 @@ pkgTheo <- system.file("theo", package="monolix2rx")
 
 rx <- monolix2rx(file.path(pkgTheo, "theophylline_project.mlxtran"))
 
+rx <- monolix2rx(file.path(system.file("cov", package="monolix2rx"), "warfarin_covariate3_project.mlxtran"))
+
 rx
 }
 \author{

@@ -23,7 +23,7 @@ Description: 'Monolix' is a tool for running mixed effects model using
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 LinkingTo:
     dparser,
     rxode2parse,
