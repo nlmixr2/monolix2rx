@@ -120,7 +120,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
     message(paste(.model, collapse="\n"))
     stop("model translation did not parse into a rxode2/nlmixr2 model", call.=FALSE)
   }
-  .model <- .model0
+  .model <- .mlxtranChangeVal(.model0, .mlxtran)
   .ini <- .def2ini(.mlxtran$MODEL$INDIVIDUAL$DEFINITION,
                    .mlxtran$PARAMETER$PARAMETER,
                    .mlxtran$MODEL$LONGITUDINAL$DEFINITION)
