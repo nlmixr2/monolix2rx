@@ -189,7 +189,6 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
                   crayon::bold$blue("$monolixData"), ")"))
     .ui$monolixData <- .monolixData
     .ui$sticky <- "monolixData"
-
   }
   .etaData <- try(monolixEtaImport(.ui))
   if (inherits(.etaData, "try-error")) .etaData <- NULL
