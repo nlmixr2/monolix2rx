@@ -32,6 +32,8 @@ jobs:
         with:
           extra-packages: |
             any::pkgdown
+            nlmixr2/n1qn1
+            nlmixr2/lbfgsb3c
             nlmixr2/PreciseSums
             nlmixr2/babelmixr2
             nlmixr2/dparser-R
