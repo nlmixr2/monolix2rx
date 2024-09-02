@@ -45,6 +45,7 @@ Suggests:
     devtools,
     testthat (>= 3.0.0),
     xgxr,
-    vdiffr
+    vdiffr,
+    lixoftConnectors
 Config/testthat/edition: 3
 Config/Needs/website: rmarkdown
