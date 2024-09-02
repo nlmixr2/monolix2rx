@@ -1,4 +1,4 @@
-# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
+ # Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 on:
   push:
@@ -53,13 +53,11 @@ jobs:
           pak-version: devel
           extra-packages: |
             any::rcmdcheck
-            nlmixr2/lotri
             nlmixr2/dparser-R
+            nlmixr2/lotri
             nlmixr2/rxode2ll
-            nlmixr2/rxode2parse
-            nlmixr2/rxode2random
-            nlmixr2/rxode2et
             nlmixr2/rxode2
+            nlmixr2/PreciseSums
           needs: check
       - uses: r-lib/actions/check-r-package@v2
         with:
