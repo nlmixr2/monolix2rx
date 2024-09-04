@@ -14,8 +14,15 @@
   .monolix2rx$equationLhs <- character(0)
   .monolix2rx$equationRhs <- character(0)
   .monolix2rx$odeType <- "nonStiff"
+  .start <- .end <- character(0)
   if (is.null(pk)) pk <- .pk("")
   if (is.character(pk)) pk <- .pk(pk)
+  if (length(pk$preEq) > 0) {
+    .start <- pk$preEq
+  }
+  if (length(pk$postEq) > 0) {
+    .end <- pk$postEq
+  }
   # Apparently pk macros can also be in the EQUATION: block
   .pkIni(TRUE)
   if (text!="") {
@@ -42,7 +49,7 @@
   .rhs <- .monolix2rx$equationRhs
   .lhs <- .lhs[!is.na(.lhs)]
   .monolix2rx$curLhs <- .lhs
-  .monolix2rx$pk <- .pk2rx(pk)
+  .monolix2rx$pk <- c(.start, .pk2rx(pk), .end)
   .admd <- .monolix2rx$pk$admd
   .monolix2rx$pk$admd <- NULL
   .cmt0 <- .monolix2rx$pk$cmt
