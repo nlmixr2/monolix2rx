@@ -358,3 +358,13 @@ test_that("pk integration into equation line", {
                  "RR <- R / R0"))
 
 })
+
+test_that("pk with equations", {
+
+  .pkm <- .pk("eq_pre=1\ncompartment(cmt=1, amount=Ac, concentration=Cc, volume=V)\neq_post=1")
+
+  expect_equal(as.character(.pkm),
+               c("eq_pre <- 1",
+                 "compartment(cmt = 1, amount = Ac, volume = V, concentration = Cc)",
+                 "eq_post <- 1"))
+})
