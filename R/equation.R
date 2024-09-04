@@ -49,7 +49,7 @@
   .rhs <- .monolix2rx$equationRhs
   .lhs <- .lhs[!is.na(.lhs)]
   .monolix2rx$curLhs <- .lhs
-  .monolix2rx$pk <- c(.start, .pk2rx(pk), .end)
+  .monolix2rx$pk <- .pk2rx(pk)
   .admd <- .monolix2rx$pk$admd
   .monolix2rx$pk$admd <- NULL
   .cmt0 <- .monolix2rx$pk$cmt
@@ -93,6 +93,7 @@
                                       " <- ",
                                       .monolix2rx$endpointPred[.w]))
   }
+  .monolix2rx$equationLine <- c(.start, .monolix2rx$equationLine, .end)
   .monolix2rx$equationLine <- .updateDdtEq(.monolix2rx$state, .monolix2rx$equationLine, .monolix2rx$pk)
   .monolix2rx$equationLine <- .updateDdtEq(.monolix2rx$state, .monolix2rx$equationLine, .pk3)
   .w <- which(grepl("^ *[<][-] *$", .monolix2rx$equationLine))
