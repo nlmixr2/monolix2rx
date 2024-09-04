@@ -154,18 +154,7 @@
     .reset <- TRUE
   }
   if (length(.monolix2rx$transformTo) == 1L && length(.monolix2rx$transformFrom) == 1L) {
-    .val <- list(transform = .monolix2rx$transformFrom,
-                 transformQ=.monolix2rx$transformQ,
-                 catLabel=.monolix2rx$transformCatLabel,
-                 catLabelQ=.monolix2rx$transformCatLabelQ,
-                 catValue=.monolix2rx$transformCatValue,
-                 catValueQ=.monolix2rx$transformCatValueQ,
-                 catB=.monolix2rx$transformCatB,
-                 reference = .monolix2rx$transformReference,
-                 referenceQ = .monolix2rx$transformReferenceQ)
-    .val <- list(.val)
-    names(.val) <- .monolix2rx$transformTo
-    .monolix2rx$longDefTransform <- c(.monolix2rx$longDefTransform, .val)
+    .pushTransform()
     .reset <- TRUE
   }
   if (.reset) .longDefIni(FALSE)
@@ -306,7 +295,40 @@
 .longDefSetMax <- function(var) {
   .monolix2rx$max <- as.numeric(var)
 }
+#' Push transform on the transformation list
+#'
+#' @return  nothing, called for side effects
+#' @noRd
+#' @author Matthew L. Fidler
+.pushTransform <- function() {
+  .val <- list(transform = .monolix2rx$transformFrom,
+               transformQ=.monolix2rx$transformQ,
+               catLabel=.monolix2rx$transformCatLabel,
+               catLabelQ=.monolix2rx$transformCatLabelQ,
+               catValue=.monolix2rx$transformCatValue,
+               catValueQ=.monolix2rx$transformCatValueQ,
+               catB=.monolix2rx$transformCatB,
+               reference = .monolix2rx$transformReference,
+               referenceQ = .monolix2rx$transformReferenceQ)
+  .val <- list(.val)
+  names(.val) <- .monolix2rx$transformTo
+  .monolix2rx$longDefTransform <- c(.monolix2rx$longDefTransform, .val)
+  .monolix2rx$transformTo <- character(0)
+  .monolix2rx$transformFrom <- character(0)
+  .monolix2rx$transformQ <- character(0)
+  .monolix2rx$transformCatB <- logical(0)
+  .monolix2rx$transformCatLabel <- character(0)
+  .monolix2rx$transformCatLabelQ <- logical(0)
+  .monolix2rx$transformCatValue <- NULL
+  .monolix2rx$transformCatValueQ <- NULL
+  .monolix2rx$transformReference <- character(0)
+  .monolix2rx$transformReferenceQ <- logical(0)
+}
+
 .longDefSetTransformTo <- function(var) {
+  if (length(.monolix2rx$transformTo) == 1L) {
+    .pushTransform()
+  }
   .monolix2rx$transformTo <- var
 }
 .longDefSetTransformFrom <- function(var, q) {
