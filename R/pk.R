@@ -6,6 +6,7 @@
 #' @author Matthew L. Fidler
 .pkIni <- function(full=TRUE) {
   if (full) {
+    .monolix2rx$preEq <- character(0)
     .monolix2rx$pkCc <- NA_character_
     .monolix2rx$pkCe <- NA_character_
     .monolix2rx$pkPars <- c(V=NA_character_,
@@ -218,6 +219,12 @@
   df
 }
 
+.pkPushPre <- function() {
+  if(.monolix2rx$pkLong && length(.monolix2rx$equationLine) > 0) {
+    .monolix2rx$preEq <- .monolix2rx$equationLine
+    .monolix2rx$equationLine <- character(0)
+  }
+}
 #' Pushes the Pk information based on current statement
 #'
 #' @return nothing, called for side effect
@@ -339,7 +346,12 @@
 #' @return nothing, called for side effects
 #' @noRd
 #' @author Matthew L. Fidler
-.pk <- function(text) {
+.pk <- function(text, long=FALSE) {
+  .monolix2rx$pkLong <- long
+  if (.monolix2rx$pkLong) {
+    .monolix2rx$saveEq <- .monolix2rx$equationLine
+    .monolix2rx$equationLine <- character(0)
+  }
   .pkIni(TRUE)
   if (text != "") .Call(`_monolix2rx_trans_equation`, text, "[LONGITUDINAL] EQUATION:")
   .pkPushStatement()
@@ -358,6 +370,12 @@
                reset=.monolix2rx$pkReset,
                elimination=.monolix2rx$pkElimination,
                admd=.monolix2rx$admd)
+  if (.monolix2rx$pkLong) {
+    .ret <- c(.ret,
+              list(preEq=.monolix2rx$preEq,
+                   postEq=.monolix2rx$equationLine))
+    .monolix2rx$equationLine <- .monolix2rx$saveEq
+  }
   class(.ret) <- "monolix2rxPk"
   .ret
 }
@@ -397,6 +415,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .pkSetCc <- function(cc) {
+  .pkPushPre()
   .pkPushStatement()
   .monolix2rx$pkCc <- cc
   .monolix2rx$pkStatement <- "pkmodel"
@@ -408,6 +427,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .pkSetCe <- function(ce) {
+  .pkPushPre()
   .pkPushStatement()
   .monolix2rx$pkCe <- ce
   .monolix2rx$pkStatement <- "pkmodel"
@@ -546,6 +566,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .pkSetStatement <- function(type) {
+  .pkPushPre()
   .pkPushStatement()
   if (type == "absorption") type <- "oral"
   .monolix2rx$pkStatement <- type
@@ -712,7 +733,7 @@ as.character.monolix2rxPk <- function(x, ...) {
     }
     .prnAdm <- TRUE
   }
-  .retf
+  c(x$preEq, .retf, x$postEq)
 }
 #' @export
 print.monolix2rxPk <- function(x, ...) {

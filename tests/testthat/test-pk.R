@@ -602,3 +602,11 @@ empty(adm=3, target=Ap)")
 
   expect_error(.pk("peripheral(k2_13, k13_2, k14_4)"))
 })
+
+test_that("pk in long pk captures equations", {
+
+  tmp <- .pk("before =1\nCc = pkmodel(ka, Cl, V)\nafter=1", TRUE)
+
+  expect_equal(as.character(tmp),
+               c("before <- 1", "Cc = pkmodel(V, ka, Cl)", "after <- 1"))
+})
