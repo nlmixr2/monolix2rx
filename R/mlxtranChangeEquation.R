@@ -22,7 +22,7 @@
   if (is.null(.cov$dplyr)) {
     return(NULL)
   }
-  .e <- str2lang(paste0("{", .cov$dplyr, "}"))
+  .e <- str2lang(paste0("{", paste(.cov$dplyr, collapse="\n"), "}"))
   .ret <- lapply(seq_along(.e)[-1],
                  function(i) {
                    .e[[i]][[3]]
