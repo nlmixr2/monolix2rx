@@ -6,7 +6,6 @@
 #' @author Matthew L. Fidler
 .pkIni <- function(full=TRUE) {
   if (full) {
-    .monolix2rx$pkEqPre <- character(0)
     .monolix2rx$pkCc <- NA_character_
     .monolix2rx$pkCe <- NA_character_
     .monolix2rx$pkPars <- c(V=NA_character_,
@@ -89,7 +88,6 @@
                                             Cl=character(0),
                                             Vm=character(0),
                                             Km=character(0))
-    .monolix2rx$equationLine <- character(0)
   }
   .monolix2rx$pkStatement <- NA_character_
   .monolix2rx$curPkPar <- NA_character_
@@ -220,32 +218,6 @@
   df
 }
 
-#' @title Push PK Equations before any PK macro declarations
-#'
-#' @description
-#'
-#' This function checks if the `.monolix2rx$pkEqPre` list is empty.
-#' If it is, pushes any equations that are present (in the value
-#' `.monolix2rx$equationLine`) and then resets
-#' `.monolix2rx$equationLine` to an empty character vector to track
-#' equations after pk macro lines
-#'
-#' @details
-#'
-#' The function is used to manage the state of pharmacokinetic (PK)
-#' equations within the `.monolix2rx` environment. It ensures that if
-#' no pre-existing PK equations are present, the current equations are
-#' stored and the equation line is reset.
-#'
-#' @author Matthew L. Fidler
-#' @noRd
-.pkEqPrePush <- function() {
-  if (length(.monolix2rx$pkEqPre) == 0L) {
-    .monolix2rx$pkEqPre <- .monolix2rx$equationLine
-    .monolix2rx$equationLine <- character(0)
-  }
-}
-
 #' Pushes the Pk information based on current statement
 #'
 #' @return nothing, called for side effect
@@ -276,7 +248,7 @@
   }
   if (.monolix2rx$pkStatement == "transfer") {
     .monolix2rx$pkTransfer <- rbind(.monolix2rx$pkTransfer,
-                                    .monolix2rx$curTransfer)
+                                     .monolix2rx$curTransfer)
     .pkIni(FALSE)
     return(invisible())
   }
@@ -385,11 +357,8 @@
                empty=.monolix2rx$pkEmpty,
                reset=.monolix2rx$pkReset,
                elimination=.monolix2rx$pkElimination,
-               admd=.monolix2rx$admd,
-                 eqPre=.monolix2rx$pkEqPre,
-                 eqPost=.monolix2rx$equationLine)
+               admd=.monolix2rx$admd)
   class(.ret) <- "monolix2rxPk"
-  .monolix2rx$equationLine <- character(0)
   .ret
 }
 #' This sets the k## or k#_# for periphal macro
@@ -429,7 +398,6 @@
 #' @author Matthew L. Fidler
 .pkSetCc <- function(cc) {
   .pkPushStatement()
-  .pkEqPrePush()
   .monolix2rx$pkCc <- cc
   .monolix2rx$pkStatement <- "pkmodel"
 }
@@ -441,7 +409,6 @@
 #' @author Matthew L. Fidler
 .pkSetCe <- function(ce) {
   .pkPushStatement()
-  .pkEqPrePush()
   .monolix2rx$pkCe <- ce
   .monolix2rx$pkStatement <- "pkmodel"
 }
@@ -580,7 +547,6 @@
 #' @author Matthew L. Fidler
 .pkSetStatement <- function(type) {
   .pkPushStatement()
-  .pkEqPrePush()
   if (type == "absorption") type <- "oral"
   .monolix2rx$pkStatement <- type
 }
@@ -746,11 +712,8 @@ as.character.monolix2rxPk <- function(x, ...) {
     }
     .prnAdm <- TRUE
   }
-  .retf <- c(x$eqPre, .retf, x$eqPost)
   .retf
 }
-
-
 #' @export
 print.monolix2rxPk <- function(x, ...) {
   cat(paste(as.character.monolix2rxPk(x, ...), collapse="\n"), "\n", sep="")
