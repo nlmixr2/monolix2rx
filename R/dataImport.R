@@ -22,13 +22,6 @@
       }
     }
   }
-  .mutate <- mlxtranGetMutate(mlxtran)
-  if (!is.null(.mutate)) {
-    .minfo("modifying input data to match monolix transformations")
-    message("\tdata |> ")
-    message(.mutate)
-    .dat <- eval(str2lang(paste0(".dat |> ", .mutate)))
-  }
   .dat
 }
 
@@ -135,13 +128,6 @@
                           }
                           n
                         }, character(1), USE.NAMES = FALSE)
-  # Make sure factors match what monolix defined
-  for (.i in seq_along(.content$cat)) {
-    .n <- names(.content$cat)[.i]
-    if (!is.na(.n) && any(names(data) == .n)) {
-      data[[.n]] <- factor(paste(data[[.n]]), levels=.content$cat[[.i]]$cat)
-    }
-  }
   # Make sure continuous are double
   for (.i in seq_along(.content$cont)) {
     .n <- names(.content$cat)[.i]

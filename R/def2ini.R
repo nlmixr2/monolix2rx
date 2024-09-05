@@ -293,22 +293,26 @@
   .coef <- lapply(.n, function(n) {
     .cur <- .var[[n]]
     if (!is.null(.cur$coef)) {
-      .coef <- .cur$coef[[1]]
-              lapply(.coef, function(var) {
-                .val <- .parsGetValue(pars, var)
-                ## .val <- .parsTransformValue(.val, .cur$distribution,
-                ##                             min=.cur$min, max=.cur$max)
-                ## if (is.na(.val) && .inNaVal) {
-                ##   stop("transformed value of initial estimate for ", .var,
-                ##        " is not in correct range",
-                ##        call.=FALSE)
-                ## }
-                if (.parsGetFixed(pars, var)) {
-                  bquote(.(str2lang(var)) <- fixed(.(.val)))
-                } else {
-                  bquote(.(str2lang(var)) <- .(.val))
-                }
-              })
+      .v <- lapply(seq_along(.cur$coef), function(i) {
+        .coef <- .cur$coef[[i]]
+        lapply(.coef, function(var) {
+          .val <- .parsGetValue(pars, var)
+          ## .val <- .parsTransformValue(.val, .cur$distribution,
+          ##                             min=.cur$min, max=.cur$max)
+          ## if (is.na(.val) && .inNaVal) {
+          ##   stop("transformed value of initial estimate for ", .var,
+          ##        " is not in correct range",
+          ##        call.=FALSE)
+          ## }
+          if (.parsGetFixed(pars, var)) {
+            bquote(.(str2lang(var)) <- fixed(.(.val)))
+          } else {
+            bquote(.(str2lang(var)) <- .(.val))
+          }
+        })
+      })
+      .v <- do.call(`c`, .v)
+      .v
     } else {
       NULL
     }

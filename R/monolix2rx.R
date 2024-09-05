@@ -52,6 +52,10 @@
 #'
 #' rx <- monolix2rx(file.path(pkgTheo, "theophylline_project.mlxtran"))
 #'
+#' pkgCov <- system.file("cov", package="monolix2rx")
+#'
+#' rx <- monolix2rx(file.path(pkgCov, "warfarin_covariate3_project.mlxtran"))
+#'
 #' rx
 monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
                        sd=1.0, cor=1e-5, theta=0.5, ci=0.95, sigdig=3,
@@ -100,6 +104,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   if (length(.cmt) == 1L && .cmt == "cmt()") .cmt <- NULL
   .model <- c("model({",
               .cmt,
+              mlxtranTransformGetRxCode(.mlxtran),
               .mlxtran$MODEL$INDIVIDUAL$DEFINITION$rx,
               .equation,
               vapply(seq_along(.mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint),
@@ -117,7 +122,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
     message(paste(.model, collapse="\n"))
     stop("model translation did not parse into a rxode2/nlmixr2 model", call.=FALSE)
   }
-  .model <- .model0
+  .model <- .mlxtranChangeVal(.model0, .mlxtran)
   .ini <- .def2ini(.mlxtran$MODEL$INDIVIDUAL$DEFINITION,
                    .mlxtran$PARAMETER$PARAMETER,
                    .mlxtran$MODEL$LONGITUDINAL$DEFINITION)
@@ -186,7 +191,6 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
                   crayon::bold$blue("$monolixData"), ")"))
     .ui$monolixData <- .monolixData
     .ui$sticky <- "monolixData"
-
   }
   .etaData <- try(monolixEtaImport(.ui))
   if (inherits(.etaData, "try-error")) .etaData <- NULL
@@ -213,7 +217,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
       assign("dfSub", as.double(.lst$nid), envir=.ui$meta)
     }
   }
-  .validateModel(.ui, ci=ci, sigdig=sigdig)
+  try(.validateModel(.ui, ci=ci, sigdig=sigdig))
   .ui <- rxode2::rxUiCompress(.ui)
   class(.ui) <- c("monolix2rx", class(.ui))
   .ui

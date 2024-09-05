@@ -235,6 +235,31 @@ log(P(Event=k)) = lpk
 
 test_that("covariate transform", {
 
+  tmp <- .longDef("tSex = {
+     transform = 'sex',
+     categories = {
+        'F' = {'0'},
+         'M' = {'1'}  },
+    reference = 'M'}
+
+tSTUDYIDN =
+{
+  transform = STUDYID,
+  categories = {
+  S1 = 1,
+  S2_3 = {2, 3},
+  S4 = S4,
+  S5 = S5
+  },
+  reference = S2_3
+}
+")
+
+  expect_equal(as.character(tmp),
+               c("tSex = {transform='sex', categories={'F'={'0'}, 'M'={'1'}}, reference='M'}",
+                 "tSTUDYIDN = {transform=STUDYID, categories={S1=1, S2_3={2, 3}, S4=S4, S5=S5}, reference=S2_3}"
+                 ))
+
   tmp <- .longDef(" tSex = {
      transform = 'sex',
      categories = {

@@ -116,7 +116,7 @@
         .monolix2rx$endpointPred <- character(0)
       }
       if (!is.null(.ret$MODEL$LONGITUDINAL$PK)) {
-        .ret$MODEL$LONGITUDINAL$PK <- .pk(.ret$MODEL$LONGITUDINAL$PK)
+        .ret$MODEL$LONGITUDINAL$PK <- .pk(.ret$MODEL$LONGITUDINAL$PK, TRUE)
       }
       if (!is.null(.ret$MODEL$LONGITUDINAL$OUTPUT)) {
         .ret$MODEL$LONGITUDINAL$OUTPUT <- .longOut(.ret$MODEL$LONGITUDINAL$OUTPUT)

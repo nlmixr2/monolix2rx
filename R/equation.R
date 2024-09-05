@@ -14,8 +14,15 @@
   .monolix2rx$equationLhs <- character(0)
   .monolix2rx$equationRhs <- character(0)
   .monolix2rx$odeType <- "nonStiff"
+  .start <- .end <- character(0)
   if (is.null(pk)) pk <- .pk("")
   if (is.character(pk)) pk <- .pk(pk)
+  if (length(pk$preEq) > 0) {
+    .start <- pk$preEq
+  }
+  if (length(pk$postEq) > 0) {
+    .end <- pk$postEq
+  }
   # Apparently pk macros can also be in the EQUATION: block
   .pkIni(TRUE)
   if (text!="") {
@@ -86,6 +93,7 @@
                                       " <- ",
                                       .monolix2rx$endpointPred[.w]))
   }
+  .monolix2rx$equationLine <- c(.start, .monolix2rx$equationLine, .end)
   .monolix2rx$equationLine <- .updateDdtEq(.monolix2rx$state, .monolix2rx$equationLine, .monolix2rx$pk)
   .monolix2rx$equationLine <- .updateDdtEq(.monolix2rx$state, .monolix2rx$equationLine, .pk3)
   .w <- which(grepl("^ *[<][-] *$", .monolix2rx$equationLine))

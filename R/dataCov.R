@@ -20,32 +20,6 @@ mlxtranGetMutate <- function(mlxtran) {
       paste0(x, "=factor(as.character(", x, "), labels=", deparse1(.cat[[x]]$cat), ")")
     }, character(1), USE.NAMES=TRUE), collapse=", "), ")")
   }
-  .cov <- mlxtran$MODEL$COVARIATE$DEFINITION
-  if (!is.null(.cov)) {
-    .transform <- .cov$transform
-    .mutate <- c(.mutate,
-                 vapply(names(.transform),
-                        function(n) {
-                          .t <- .transform[[n]]
-                          .v <- .t$transform
-                          .cw <- vapply(seq_along(.t$catLabel),
-                                        function(i) {
-                                          paste0(.v, " %in% c(",
-                                                 paste(paste0("'", .t$catValue[[i]], "'"),
-                                                       collapse=", "),
-                                                 ") ~ '", .t$catLabel[i], "'")
-                                        }, character(1), USE.NAMES = TRUE)
-                          if (checkmate::testCharacter(.t$reference, min.chars = 1)) {
-                            .cw <- c(.cw, paste0("TRUE ~ '", .t$reference, "'"))
-                          } else {
-                            .cw <- c(.cw, paste0("TRUE ~ NA_character_"))
-                          }
-                          paste0("dplyr::mutate(", n, "= dplyr::case_when(",
-                                paste(.cw, collapse=",\n\t\t"),
-                                 "))")
-                        }, character(1),
-                        USE.NAMES=FALSE))
-  }
   .cov <- mlxtran$MODEL$COVARIATE$EQUATION
   if (!is.null(.cov)) {
     .mutate <- c(.mutate,

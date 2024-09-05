@@ -32,23 +32,22 @@ jobs:
         with:
           extra-packages: |
             any::pkgdown
-            nlmixr2/lotri
+            nlmixr2/n1qn1c
+            nlmixr2/lbfgsb3c
+            nlmixr2/PreciseSums
+            nlmixr2/babelmixr2
             nlmixr2/dparser-R
-            nlmixr2/rxode2ll
-            nlmixr2/rxode2parse
-            nlmixr2/rxode2random
-            nlmixr2/rxode2et
-            nlmixr2/rxode2
+            nlmixr2/lotri
+            nlmixr2/nlmixr2
             nlmixr2/nlmixr2est
             nlmixr2/nlmixr2extra
             nlmixr2/nlmixr2plot
-            nlmixr2/nlmixr2
-            nlmixr2/babelmixr2
             nlmixr2/nlmixr2rpt
+            nlmixr2/rxode2
+            nlmixr2/rxode2ll
             lixoftConnectors=?ignore
             local::.
           needs: website
-
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}

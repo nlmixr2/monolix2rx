@@ -161,11 +161,17 @@
                                 n
                               }, character(1), USE.NAMES = FALSE)
     .nMonolix <- length(.monolix[, 1])
-    if (.nMonolix != .nBoth) {
-      .minfo("monolix and rxode2 solves have different number of rows")
-      return(invisible())
-    }
+
+    .monolix$rxMonolixRowN <- seq_along(.monolix[,1])
     .both <- merge(.monolix, .both)
+    .monolixNot <- .monolix[!(.monolix$rxMonolixRowN %in% .both$rxMonolixRowN), ,drop=FALSE]
+    if (length(.monolixNot$rxMonolixRowN) != 0L) {
+      .minfo(paste0("monolix and rxode2 solves have different number of rows (",
+                    crayon::blue$bold("$monolixNotMatched"),")"))
+      .monolixNot <- .monolixNot[,names(.monolixNot) != "rxMonolixRowN"]
+      assign("monolixNotMatched", .monolixNot, .ui)
+    }
+    .both <- .both[, names(.both) != "rxMonolixRowN"]
     .ci0 <- .ci <- ci
     .sigdig <- sigdig
     .ci <- (1 - .ci) / 2
