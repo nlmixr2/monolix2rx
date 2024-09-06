@@ -156,7 +156,13 @@
                         return(.c)
                       })
       .ret$cov <- .monolix2rx$cov
-      .ret$coef <- .coef
+      .ret$coef <- lapply(seq_along(.coef),
+                          function(i) {
+                            .cur <- .coef[[i]]
+                            .w <- which(grepl("^rxCov_", .cur))
+                            if (length(.w) >= 1) .cur <- .cur[-.w]
+                            .cur
+                          })
       .rx <- paste0(.rx, " + ",
                     paste(vapply(seq_along(.ret$coef),
                                  function(i) {
