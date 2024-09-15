@@ -20,8 +20,7 @@ efficiently to the nlmixr2 residual syntax.
 ## Example
 
 ```{r asNonmem2Rx}
-library(monolix2rx)
-library(babelmixr2)
+library(babelmixr2) # will re-export much of monolix2rx
 
 # You use the path to the monolix mlxtran file
 
