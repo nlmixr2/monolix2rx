@@ -15,9 +15,7 @@ navbar:
   left:
   - text: Converting
     icon: fa-arrow-right
-    menu:
-        - text: "Converting Monolix to nlmixr2 object"
-          href: articles/convert-nlmixr2.html
+    href: articles/convert-nlmixr2.html
   - text: "Qualify"
     icon: fa-check
     href: articles/rxode2-validate.html
