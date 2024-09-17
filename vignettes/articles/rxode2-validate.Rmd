@@ -1,0 +1,140 @@
+---
+title: "Qualify rxode2 model against Monolix"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Qualify rxode2 model against Monolix}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(rxode2)
+setRxThreads(1L)
+library(data.table)
+setDTthreads(1L)
+```
+
+
+```{r setup}
+
+library(monolix2rx)
+# You use the path to the monolix mlxtran file
+
+# In this case we will us the theophylline project included in monolix2rx
+pkgTheo <- system.file("theo/theophylline_project.mlxtran", package="monolix2rx")
+
+# Note you have to setup monolix2rx to use the model library or save the model as a separate file
+mod <- monolix2rx(pkgTheo)
+
+print(mod)
+
+```
+
+### Comparing differences between `Monolix` and `rxode2`
+
+You may wish to see where the differences in predictions are between
+Monolix and rxode2.
+
+The `rxode2` generated outputs are compared with the `Monolix`
+generated outputs for the following items:
+
+- **Population Predictions:** this shows if the model translation is
+  adequate to simulate general trends; This will validate structural
+  model's population parameters coupled with the model structure.
+
+- **Individual Predictions:** this shows if the model translation is
+  able to replicate the same values over all the subjects within the
+  modeling data-set.  This validates the model can reproduce the
+  between subject variability observed in the study.
+
+- **Individual Weighted Residuals:** this is one step further than the
+  individual parameter validation, it couples the individual
+  predictions, the observations and the residual specification to
+  generate the individual weighted residuals. This is included to be
+  consistent with the `nonmem2rx` residuals.  However, since this is
+  not needed to manually adjust the residual errors, this simply looks
+  at if the errors were converted correctly.
+
+**Note:** the only part that is not validated with these three metrics
+is the between subject covariance matrix, `omega`. We assume this is
+correct as long as it is read in correctly.
+
+## Comparing numerically
+
+If you want numerical differences, you can also get these from the
+modified returned `ui` object.  For the rtol, atol as follows you have:
+
+```{r tol}
+mod$iwresAtol
+mod$iwresRtol
+mod$ipredAtol
+mod$ipredRtol
+mod$predAtol
+mod$predAtol
+```
+
+You can see they do not exactly match but are very close (I would say
+they validate). However you can explore these difference further if you wish
+by looking at the `ipredCompare` and `predCompare` datasets:
+
+```{r compare}
+head(mod$iwresCompare)
+
+head(mod$ipredCompare)
+
+head(mod$predCompare)
+```
+
+In these cases you can see that Monolix seems to round the values to 5
+digits, while `rxode2` keeps everything since it is solved in R
+directly.
+
+Note this is the **observation data only** that is compared.  Dosing
+predictions are excluded from these comparisons.
+
+You can also explore the Monolix translated input dataset that was
+used to make the validation predictions (dosing and observations) by
+the `$monolixData` item:
+
+```{r monolixData}
+head(mod$monolixData) # with nlme loaded you can also use getData(mod)
+```
+
+## Comparing visually
+
+The easiest way to visually compare the differences is by the plot method:
+
+```{r plot}
+
+plot(mod) # for general plot
+
+# you can also see individual comparisons
+plot(mod, log="y", ncol=2, nrow=2,
+     xlab="Time (hr)", ylab="Concentrations",
+     page=1)
+
+# If you want all pages you could use:
+#
+plot(mod, log="y", ncol=2, nrow=2,
+     xlab="Time (hr)", ylab="Concentrations",
+     page=TRUE)
+```
+
+
+## Notes on validation
+
+The validation of the model uses the best data available for Monolix
+estimates.  This is:
+
+- `theta` or population parameters
+- `eta` or individual parameters
+
+The `omega` and `sigma` matrices are captured. When the nlmixr2 model
+is fully qualified, the `IWRES` validation ensures the residual errors
+are specified correctly. Otherwise `omega` and `sigma` values do not contribute to
+the validation.  Also the overall covariance is captured, but not used
+in the validation.

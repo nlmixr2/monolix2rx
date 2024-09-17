@@ -180,8 +180,21 @@
     .qai <- stats::quantile(with(.both, abs(ipred-monolixIpred)), .q, na.rm=TRUE)
     .qp <- stats::quantile(with(.both, 100*abs((pred-monolixPred)/monolixIpred)), .q, na.rm=TRUE)
     .qap <- stats::quantile(with(.both, abs(pred-monolixPred)), .q, na.rm=TRUE)
+
     .qw <- stats::quantile(with(.both, 100*abs((iwres-monolixIwres)/monolixIwres)), .q, na.rm=TRUE)
     .qaw <- stats::quantile(with(.both, abs(iwres-monolixIwres)), .q, na.rm=TRUE)
+
+    .ui$ipredAtol <- .qai[3]
+    .ui$ipredRtol <- .qi[3]/100
+    .ui$ipredCompare <- .both[,grepl("(id|time|monolixIpred|ipred|cmt)", names(.both), ignore.case=TRUE)]
+
+    .ui$predAtol <- .qap[3]
+    .ui$predRtol <- .qp[3]/100
+    .ui$predCompare <- .both[,grepl("^(id|time|monolixPred|pred|cmt)$", names(.both), ignore.case=TRUE)]
+
+    .ui$iwresAtol <- .qaw[3]
+    .ui$iwresRtol <- .qw[3]/100
+    .ui$iwresCompare <- .both[,grepl("(id|time|monolixIwres|iwres|cmt)", names(.both), ignore.case=TRUE)]
 
     .msg <- c(paste0("ipred relative difference compared to Monolix ipred: ", round(.qi[3], 2),
                      "%; ", .ci0 * 100,"% percentile: (",
