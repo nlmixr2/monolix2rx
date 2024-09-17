@@ -3,7 +3,7 @@
 #'
 #' @param mlxtran input mlxtran file
 #' @return mlxtran string that can be applied to a model (by evaluating it)
-#' @export
+#' @noRd
 #' @author Matthew L. Fidler
 #' @examples
 #'
