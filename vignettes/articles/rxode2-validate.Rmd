@@ -27,7 +27,8 @@ library(monolix2rx)
 # In this case we will us the theophylline project included in monolix2rx
 pkgTheo <- system.file("theo/theophylline_project.mlxtran", package="monolix2rx")
 
-# Note you have to setup monolix2rx to use the model library or save the model as a separate file
+# Note you have to setup monolix2rx to use the model library or save
+# the model as a separate file
 mod <- monolix2rx(pkgTheo)
 
 print(mod)
