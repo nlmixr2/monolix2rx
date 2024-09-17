@@ -1,0 +1,98 @@
+---
+title: "Simulate using Parameter Uncertainty"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Simulate using Parameter Uncertainty}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(rxode2)
+setRxThreads(1L)
+library(data.table)
+setDTthreads(1L)
+```
+
+This page shows a simple work-flow for directly simulating a different
+dosing paradigm than what was modeled taking into account the modeled
+uncertainty. This workflow is very similar to simply [simulating
+without uncertainty](simulate-new-dosing.html) in the parameters
+themselves.
+
+## Step 1: Import the model
+
+```{r setup}
+
+library(monolix2rx)
+library(rxode2)
+# its best practice to set the seed for the simulations
+set.seed(42)
+rxSetSeed(42)
+
+
+# You use the path to the monolix mlxtran file
+
+# In this case we will us the theophylline project included in monolix2rx
+pkgTheo <- system.file("theo/theophylline_project.mlxtran", package="monolix2rx")
+
+# Note you have to setup monolix2rx to use the model library or save
+# the model as a separate file
+mod <- monolix2rx(pkgTheo)
+
+print(mod)
+```
+## Step 2: Look at a different dosing paradigm
+
+Lets say that in this case instead of a single dose, we want to see
+what the concentration profile is with a single day of BID dosing.  In
+this case is done by creating a [quick event
+table](https://nlmixr2.github.io/rxode2/articles/rxode2-event-table.html).
+
+```{r eventTable}
+ev <- et(amt=4, ii=12, until=24) %>%
+  et(c(1:6, seq(8, 24, by=2))) %>%
+  et(id=1:100)
+```
+
+
+
+## Step 3: Solve using the uncertainty in the NONMEM model
+
+To use the uncertainty in the model, it is a simple matter of telling
+how many times `rxode2()` should sample with `nStud=X`.  In this case
+we will use `100`.
+
+```{r rxSolve}
+s <- rxSolve(mod, ev, nStud=100)
+
+s
+```
+
+
+## Step 4: Summarize and plot
+
+Since there is a bunch of data, a confidence band of the simulation with uncertainty would be helpful.
+
+One way to do that is to select the interesting components, create a confidence interval and then plot the confidence bands:
+
+
+
+```{r confint}
+sci <- confint(s, parm=c("CONC", "sim"))
+
+sci
+
+p1 <- plot(sci)
+
+p2 <- plot(sci, log="y")
+
+library(patchwork)
+
+p1/p2
+
+ ```

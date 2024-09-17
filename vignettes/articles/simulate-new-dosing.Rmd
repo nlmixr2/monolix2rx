@@ -28,10 +28,6 @@ dosing paradigm than what was modeled.
 library(monolix2rx)
 library(rxode2)
 
-library(monolix2rx)
-# You use the path to the monolix mlxtran file
-
-library(monolix2rx)
 # You use the path to the monolix mlxtran file
 
 # In this case we will us the theophylline project included in monolix2rx
