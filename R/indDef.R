@@ -156,13 +156,7 @@
                         return(.c)
                       })
       .ret$cov <- .monolix2rx$cov
-      .ret$coef <- lapply(seq_along(.coef),
-                          function(i) {
-                            .cur <- .coef[[i]]
-                            .w <- which(grepl("^rxCov_", .cur))
-                            if (length(.w) >= 1) .cur <- .cur[-.w]
-                            .cur
-                          })
+      .ret$coef <- .coef
       .rx <- paste0(.rx, " + ",
                     paste(vapply(seq_along(.ret$coef),
                                  function(i) {
@@ -184,10 +178,20 @@
                                                                     .coef[.w])
                                        .coef <- .coef[-.w]
                                        .ref <- .ref[-.w]
+                                       .w <- which(grepl("^rxCov_", .coef))
+                                       if (length(.w) > 0) {
+                                         .coef <- .coef[-.w]
+                                         .ref <- .ref[-.w]
+                                       }
                                        return(paste(paste0(.coef, " * (", .cov, " == '", .ref, "')"), collapse=" + "))
                                      }
-                                    }
-                                   paste(paste0(.ret$coef[[i]], "*", .ret$cov[i]), collapse=" + ")
+                                   }
+                                   .coef <- .ret$coef[[i]]
+                                   .w <- which(grepl("^rxCov_", .coef))
+                                   if (length(.w) > 0) {
+                                     .coef <- .coef[-.w]
+                                   }
+                                   paste(paste0(.coef, "*", .ret$cov[i]), collapse=" + ")
                                  }, character(1), USE.NAMES=FALSE),
                           collapse=" + "))
     }
