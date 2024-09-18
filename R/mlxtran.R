@@ -11,6 +11,7 @@
   .mlxEnv$lst <- list(mlxtran="")
   .mlxEnv$isDesc <- FALSE
   .mlxEnv$desc <- ""
+  .mlxEnv$parsedFile <- FALSE
 }
 
 #' This parses a single line from something like readLines
@@ -107,7 +108,11 @@
       }
     }
     if (!is.null(.ret$MODEL$LONGITUDINAL)) {
-      .ret$MODEL$LONGITUDINAL$LONGITUDINAL <- .longitudinal(.ret$MODEL$LONGITUDINAL$LONGITUDINAL)
+      .long <- .longitudinal(.ret$MODEL$LONGITUDINAL$LONGITUDINAL)
+      if (.mlxEnv$parsedFile) {
+        .long$file <- NULL
+      }
+      .ret$MODEL$LONGITUDINAL$LONGITUDINAL <- .long
       if (!is.null(.ret$MODEL$LONGITUDINAL$DEFINITION)) {
         .ld <- .longDef(.ret$MODEL$LONGITUDINAL$DEFINITION)
         .monolix2rx$endpointPred <- .getMonolixPreds(.ld)
@@ -178,7 +183,11 @@
   if (!is.null(.mlxEnv$lst$MODEL$LONGITUDINAL)) {
     .long <- .longitudinal(.mlxEnv$lst$MODEL$LONGITUDINAL$LONGITUDINAL)
     .file <- .long$file
+    .mlxEnv$parsedFile <- FALSE
     mlxTxt(.long$file,  retFile=TRUE)
+    if (.mlxEnv$parsedFile) {
+      .minfo(paste0("integrated model file '", .file ,"' into mlxtran object"))
+    }
   }
   .mlxtranFinalize(.mlxEnv$lst, equation=equation, update=update)
 }

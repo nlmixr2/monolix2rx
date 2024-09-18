@@ -301,6 +301,7 @@ mlxTxt <- function(file, retFile=FALSE) {
     .m2 <- c("<MODEL>",
              .lines)
     lapply(.m2, .mlxtranParseItem)
+    .mlxEnv$parsedFile <- TRUE
     if (retFile) return(file)
     .ret <- .mlxtranFinalize(.mlxEnv$lst, equation=TRUE, update=FALSE)
     attr(.ret, "dirn") <- .dirn
