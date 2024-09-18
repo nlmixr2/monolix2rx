@@ -1,6 +1,6 @@
 Package: monolix2rx
 Title: 'monolix2rx' Converts 'Monolix' Models to 'rxode2'
-Version: 0.0.0.9000
+Version: 0.0.1
 Authors@R:
    c(person("Matthew","Fidler", role = c("aut", "cre"), email = "matthew.fidler@gmail.com", comment=c(ORCID="0000-0001-8538-6691")),
      person("Justin", "Wilkins", role = "ctb", email = "justin.wilkins@occams.com", comment=c(ORCID="0000-0002-7099-9396")))
@@ -40,7 +40,7 @@ Imports:
     crayon,
     lotri,
     magrittr,
-    rxode2 (> 2.0.13),
+    rxode2 (> 3.0.0),
 Suggests:
     devtools,
     testthat (>= 3.0.0),
