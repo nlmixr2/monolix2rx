@@ -88,6 +88,12 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   }
   .admd <- NULL
   .cmt <- NULL
+  if (!is.null(.mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$file)) {
+    if (!file.exists(.mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$file)) {
+      stop("the model file '", .mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$file, "' does not exist\nyou may need to setup the model library to complete translation",
+           call.=FALSE)
+    }
+  }
   if (is.null(.mlxtran$MODEL$LONGITUDINAL$EQUATION) &&
         !is.null(.mlxtran$MODEL$LONGITUDINAL$PK)) {
     .e <- .equation("", .mlxtran$MODEL$LONGITUDINAL$PK)
