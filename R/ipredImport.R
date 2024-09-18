@@ -53,7 +53,7 @@
 #' @param mlxtran mlxtran file where data input is specified
 #' @inheritParams utils::read.table
 #' @author Matthew L Fidler
-#' @export
+#' @noRd
 monolixPredIpred <- function(mlxtran, na.strings=c("NA", ".")) {
   mlxtran <- .monolixGetMlxtran(mlxtran)
   withr::with_dir(.monolixGetPwd(mlxtran), {

@@ -1,0 +1,44 @@
+url: ~
+template:
+  bootstrap: 5
+  params:
+    bootswatch: flatly
+reference:
+  - title: Importing Monolix to rxode2
+    contents:
+      - monolix2rx
+  - title: Reading in `mlxtran`
+    contents:
+      - mlxtran
+      - mlxTxt
+navbar:
+  left:
+  - text: Converting
+    icon: fa-arrow-right
+    href: articles/convert-nlmixr2.html
+  - text: "Qualify"
+    icon: fa-check
+    href: articles/rxode2-validate.html
+  - text: "Simulation"
+    icon: fa-dice
+    menu:
+      - text: "New Dosing Scenarios"
+        href: articles/simulate-new-dosing.html
+      - text: "Simulating with Uncertainty"
+        href: articles/simulate-uncertainty.html
+      - text: "Simulating with Derived Variables"
+        href: articles/simulate-extra-items.html
+  - text: "Reporting"
+    menu:
+      - text: "Creating word and powerpoint documents"
+        href: articles/create-office.html
+      - text: "Easily create VPC plots"
+        href: articles/create-vpc.html
+      - text: "Create enriched Individual plots"
+        href: articles/create-augPred.html
+  - text: "Functions"
+    icon: fa-file-code-o
+    href: reference/index.html
+  - text: "News"
+    icon: fas fa-rss
+    href: news/index.html

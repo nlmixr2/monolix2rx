@@ -211,7 +211,7 @@
 #' @inheritParams utils::read.table
 #' @return Dataset appropriate for using with the rxode2 model for
 #'   simulations
-#' @export
+#' @noRd
 #' @author Matthew L. Fidler
 #' @examples
 #'

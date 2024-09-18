@@ -2,5 +2,7 @@
 ^README\.Rmd$
 ^bad-library.md$
 ^pkgdown$
+^_pkgdown.yml$
 ^.github$
 ^vignettes/articles$
+^cran-comments\.md$

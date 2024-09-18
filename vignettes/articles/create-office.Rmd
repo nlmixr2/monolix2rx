@@ -1,0 +1,88 @@
+---
+title: "Create PowerPoint and Word documents using monolix2rx"
+resource_files:
+  - mod-PowerPoint.pptx
+  - mod-Word.docx
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Step 1: import the model into `monolix2rx`
+
+```{r setup}
+
+library(monolix2rx)
+library(babelmixr2)
+library(nlmixr2rpt)
+library(onbrand)
+
+library(nonmem2rx)
+
+# First we need the location of the monolix mlxtran file. Since we are
+# running an example, we will use one of the built-in examples in
+# `monolix2rx`
+pkgTheo <- system.file("theo/theophylline_project.mlxtran", package="monolix2rx")
+# You can use a control stream or other file. With the development
+# version of `babelmixr2`, you can simply point to the listing file
+
+mod <- monolix2rx(pkgTheo)
+
+```
+
+
+
+# Step 2: convert the `rxode2` model to `nlmixr2`
+
+You can convert the model, `mod`, to a nlmixr2 fit object:
+
+```{r toNlmixr2}
+fit <- as.nlmixr2(mod)
+
+fit
+```
+
+# Step 3: Create a PowerPoint file
+
+A PowerPoint can be created from your own [custom powerpoint
+templates](https://nlmixr2.github.io/nlmixr2rpt/articles/Reporting_nlmixr_Fit_Results.html#customizing-reports-for-your-organization),
+but in this example we will use the ones that come from `nlmixr2rpt`
+directly:
+
+```{r toPptx}
+obnd_pptx = read_template(
+  template = system.file(package="nlmixr2rpt", "templates","nlmixr_obnd_template.pptx"),
+  mapping  = system.file(package="nlmixr2rpt", "templates","nlmixr_obnd_template.yaml"))
+
+obnd_pptx = report_fit(
+  fit     = fit,
+  obnd    = obnd_pptx)
+
+save_report(obnd_pptx, "mod-PowerPoint.pptx")
+```
+
+Which gives the powerpoint [here](mod-PowerPoint.pptx)
+
+
+# Step 4: Create a Word file
+
+Just like in PowerPoint, you can customizeown [custom word templates](https://nlmixr2.github.io/nlmixr2rpt/articles/Reporting_nlmixr_Fit_Results.html#customizing-reports-for-your-organization), but in this example we will use the ones that come from `nlmixr2rpt` directly:
+
+
+```{r}
+obnd_docx = read_template(
+  template = system.file(package="nlmixr2rpt", "templates","nlmixr_obnd_template.docx"),
+  mapping  = system.file(package="nlmixr2rpt", "templates","nlmixr_obnd_template.yaml"))
+
+obnd_docx = report_fit(
+  fit     = fit,
+  obnd    = obnd_docx)
+
+save_report(obnd_docx, "mod-Word.docx")
+```
+
+Which gives the word document [here](mod-Word.docx)

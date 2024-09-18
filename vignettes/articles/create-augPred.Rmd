@@ -1,0 +1,55 @@
+---
+title: "Created Augmented pred/ipred plots with `augPred()`"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This is a simple process to create individual predictions augmented
+with more observations than was modeled.  This allows smoother plots
+and a better examination of the observed concentrations for an
+individual and population.
+
+# Step 1: Convert the `Monolix` model to `rxode2`:
+
+```{r setup}
+
+library(monolix2rx)
+
+# First we need the location of the monolix mlxtran file. Since we are
+# running an example, we will use one of the built-in examples in
+# `monolix2rx`
+pkgTheo <- system.file("theo/theophylline_project.mlxtran", package="monolix2rx")
+# You can use a control stream or other file. With the development
+# version of `babelmixr2`, you can simply point to the listing file
+
+mod <- monolix2rx(pkgTheo)
+
+```
+
+
+# Step 2: convert the `rxode2` model to `nlmixr2`
+
+You can convert the model, `mod`, to a nlmixr2 fit object:
+
+```{r toNlmixr2}
+library(babelmixr2) # provides as.nlmixr2
+fit <- as.nlmixr2(mod)
+
+fit
+```
+
+# Step 3: Create and plot an augmented prediction
+
+```{r augPred}
+ap <- augPred(fit)
+
+head(ap)
+
+# This augpred looks odd:
+plot(ap)
+```

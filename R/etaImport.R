@@ -3,7 +3,7 @@
 #' @param mlxtran mlxtran file where data input is specified
 #' @inheritParams utils::read.table
 #' @author Matthew L Fidler
-#' @export
+#' @noRd
 monolixEtaImport <- function(mlxtran, na.strings=c("NA", ".")) {
   mlxtran <- .monolixGetMlxtran(mlxtran)
   if (is.null(mlxtran)) return(NULL)

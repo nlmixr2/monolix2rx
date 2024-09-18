@@ -1,0 +1,71 @@
+---
+title: "Easily Create a VPC using monolix2rx"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+This shows an easy work-flow to create a VPC using a Monolix model:
+
+# Step 1: Convert the `Monolix` model to `rxode2`:
+
+```{r setup}
+library(babelmixr2)
+library(monolix2rx)
+
+# First we need the location of the monolix mlxtran file. Since we are
+# running an example, we will use one of the built-in examples in
+# `monolix2rx`
+pkgTheo <- system.file("theo/theophylline_project.mlxtran", package="monolix2rx")
+# You can use a control stream or other file. With the development
+# version of `babelmixr2`, you can simply point to the listing file
+
+mod <- monolix2rx(pkgTheo)
+
+```
+
+
+# Step 2: convert the `rxode2` model to `nlmixr2`
+
+You can convert the model, `mod`, to a nlmixr2 fit object:
+
+```{r toNlmixr2}
+fit <- as.nlmixr2(mod)
+
+fit
+```
+
+# Step 3: Perform the VPC
+
+From here we simply use `vpcPlot()` in conjunction with the `vpc`
+package to get the regular and prediction-corrected VPCs and arrange
+them on a single plot:
+
+```{r vpc}
+
+library(ggplot2)
+p1 <- vpcPlot(fit, show=list(obs_dv=TRUE))
+
+p1 <- p1 + ylab("Concentrations") +
+  rxode2::rxTheme() +
+  xlab("Time (hr)") +
+  xgxr::xgx_scale_x_time_units("hour", "hour")
+
+p1a <- p1 + xgxr::xgx_scale_y_log10()
+
+## A prediction-corrected VPC
+p2 <- vpcPlot(fit, pred_corr = TRUE, show=list(obs_dv=TRUE))
+p2 <- p2 + ylab("Prediction-Corrected Concentrations") +
+  rxode2::rxTheme() +
+  xlab("Time (hr)") +
+  xgxr::xgx_scale_x_time_units("hour", "hour")
+
+p2a <- p2 + xgxr::xgx_scale_y_log10()
+
+
+library(patchwork)
+(p1 * p1a) / (p2 * p2a)
+```

@@ -4,7 +4,7 @@
 #' @param mlxtran This is the parsed mlxtran or imported rxode2 model from monolix
 #'
 #' @return nothing, called for side effects
-#' @export
+#' @noRd
 #' @author Matthew L. Fidler
 monolixEndpoints <- function(mlxtran) {
   mlxtran <- .monolixGetMlxtran(mlxtran)
