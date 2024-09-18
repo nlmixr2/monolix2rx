@@ -33,7 +33,7 @@ test_that("mlxtran initial list", {
                     "",
                     "OUTPUT:",
                     "output={rx_pred_cp, rx_pred_effect}",
-                    "")
+                   "")
 
     writeLines(modelLines, "pk.turnover.emax3-monolix.txt")
 
@@ -351,7 +351,11 @@ test_that("mlxtran initial list", {
       expect_equal(rx$dfObs, 176)
       expect_equal(rx$description,
                    "model translated from `babelmixr2` and `nlmixr2` function pk.turnover.emax3 to pk.turnover.emax3-monolix.txt")
+
+      v <- .mlxtran(lines)
+      expect_error(monolix2rx(v, update=FALSE)) # no file to read
     }
+
 
   })
 
