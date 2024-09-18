@@ -40,7 +40,7 @@ Imports:
     crayon,
     lotri,
     magrittr,
-    rxode2 (> 3.0.0),
+    rxode2 (>= 3.0.0),
 Suggests:
     devtools,
     testthat (>= 3.0.0),
