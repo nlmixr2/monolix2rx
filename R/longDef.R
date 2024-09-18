@@ -271,7 +271,6 @@
 #'
 #' @param var proportional error variable
 #' @return nothing, called for side effects
-#' @export
 #' @author Matthew L. Fidler
 #' @noRd
 .setProp <- function(var) {

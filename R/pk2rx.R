@@ -697,7 +697,6 @@
 #' @param equationLine equation lines
 #' @param state state to look up
 #' @return which value matches d/dt(state) <-
-#' @export
 #' @author Matthew L. Fidler
 #' @noRd
 .whichDdt <- function(equationLine, state) {
