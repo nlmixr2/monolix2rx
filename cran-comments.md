@@ -1,5 +1,6 @@
 
-This adds monolix import to the nlmixr2 ecosystem
+This adds monolix import to the nlmixr2 ecosystem, and is used in the
+next release of babelmixr2.
 
 ## R CMD check results
 
