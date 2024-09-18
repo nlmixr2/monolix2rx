@@ -42,7 +42,6 @@
       [LONGITUDINAL]
       ; parsed: $MODEL$LONGITUDINAL$LONGITUDINAL
       input = {pkadd__err, prop__err, pdadd__err, ktr, ka, cl, v, emax, ec50, kout, e0}
-      file = 'pk.turnover.emax3-monolix.txt'
       
       DEFINITION:
       ; parsed: $MODEL$LONGITUDINAL$DEFINITION
