@@ -1,5 +1,5 @@
 Package: monolix2rx
-Title: 'monolix2rx' Converts 'Monolix' Models to 'rxode2'
+Title: Converts 'Monolix' Models to 'rxode2'
 Version: 0.0.1
 Authors@R:
    c(person("Matthew","Fidler", role = c("aut", "cre"), email = "matthew.fidler@gmail.com", comment=c(ORCID="0000-0001-8538-6691")),
@@ -25,7 +25,6 @@ Description: 'Monolix' is a tool for running mixed effects model using
   'lixoftConnectors' is available, 'Monolix' can be used to load its model library
   instead manually setting up text files (which only works with old versions of
   'Monolix').
-  command line usage.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

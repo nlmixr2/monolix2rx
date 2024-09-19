@@ -1,6 +1,18 @@
+- Please do not start the title with the package name.
 
-This adds monolix import to the nlmixr2 ecosystem, and is used in the
-next release of babelmixr2.
+  - Fixed; removed package name from the title since it is redundant
+
+- Please proofread your DESCRIPTION.
+
+  - It currently reads: "...to load its model library instead manually setting up text
+   files (...). command line usage."
+
+   - I believe it should be: "...to load its model library instead of
+     manually setting up text files (...)."
+
+ - Fixed.
+
+Please fix and resubmit.
 
 ## R CMD check results
 
