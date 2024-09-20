@@ -8,8 +8,7 @@ Description: 'Monolix' is a tool for running mixed effects model using
     'saem'. This tool allows you to convert 'Monolix' models to 'rxode2'
     (Wang, Hallow and James (2016) <doi:10.1002/psp4.12052>) using the
     form compatible with 'nlmixr2' (Fidler et al (2019) <doi:10.1002/psp4.12445>).
-    The 'nlmixr2' syntax requires the residual specification to be included and it
-    is not always translated. If available, the 'rxode2' model will
+    If available, the 'rxode2' model will
     read in the 'Monolix' data and compare the simulation for the
     population model individual model and residual
     model to immediately show how well the translation is
