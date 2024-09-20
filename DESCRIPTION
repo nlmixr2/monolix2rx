@@ -31,7 +31,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 LinkingTo:
     dparser,
-    rxode2parse,
+    rxode2,
     Rcpp
 Imports:
     Rcpp,
