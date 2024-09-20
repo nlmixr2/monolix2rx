@@ -25,6 +25,7 @@ Description: 'Monolix' is a tool for running mixed effects model using
   instead manually setting up text files (which only works with old versions of
   'Monolix').
 License: MIT + file LICENSE
+URL: https://nlmixr2.github.io/monolix2rx/, https://github.com/nlmixr2/monolix2rx/
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
