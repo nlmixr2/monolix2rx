@@ -318,15 +318,6 @@
           }
         })
       })
-      .l <- which(vapply(seq_along(.v),
-                         function(i) {
-                           .x <- .v[[i]]
-                           if (length(.x) <= 1) return(FALSE)
-                           !identical(.x[[2]], quote(rxRmVar))
-                         }, logical(1), USE.NAMES = FALSE))
-      .v <- lapply(.l, function(i) {
-        .v[[i]]
-      })
       .v <- do.call(`c`, .v)
       .v
     } else {
@@ -341,6 +332,7 @@
   if (length(.in) > 0L) {
     .coef <- .coef[-.in]
   }
+  browser()
   .pop <- c(list(quote(`{`)),
             lapply(.n, function(n) {
               .cur <- .var[[n]]
