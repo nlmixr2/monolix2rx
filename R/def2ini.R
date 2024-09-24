@@ -294,9 +294,9 @@
     .cur <- .var[[n]]
     if (!is.null(.cur$coef)) {
       .v <- lapply(seq_along(.cur$coef), function(i) {
-        browser()
         .coef <- .cur$coef[[i]]
         lapply(.coef, function(var) {
+          browser()
           .val <- .parsGetValue(pars, var)
           ## .val <- .parsTransformValue(.val, .cur$distribution,
           ##                             min=.cur$min, max=.cur$max)
