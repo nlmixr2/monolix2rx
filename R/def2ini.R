@@ -295,7 +295,7 @@
     if (!is.null(.cur$coef)) {
       .v <- lapply(seq_along(.cur$coef), function(i) {
         .coef <- .cur$coef[[i]]
-        lapply(.coef, function(var) {
+        .v <-lapply(.coef, function(var) {
           if (nchar(var) >= 6 &&
                 substr(var, 1, 6) == "rxCov_") {
             return(NULL)
@@ -314,6 +314,7 @@
             bquote(.(str2lang(var)) <- .(.val))
           }
         })
+        do.call(`c`, .v)
       })
       .v <- do.call(`c`, .v)
       .v
