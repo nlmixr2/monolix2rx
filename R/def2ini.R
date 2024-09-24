@@ -318,8 +318,9 @@
           }
         })
       })
-      .l <- which(vapply(.v,
+      .l <- which(vapply(seq_along(.v),
                          function(x) {
+                           .x <- .v[[i]]
                            !identical(x[[2]], quote(rxRmVar))
                          }, logical(1), USE.NAMES = FALSE))
       .v <- lapply(.l, function(i) {
