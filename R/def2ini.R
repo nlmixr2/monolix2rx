@@ -296,7 +296,10 @@
       .v <- lapply(seq_along(.cur$coef), function(i) {
         .coef <- .cur$coef[[i]]
         lapply(.coef, function(var) {
-          browser()
+          if (nchar(var) >= 6 &&
+                substr(var, 1, 6) == "rxCov_") {
+            return(NULL)
+          }
           .val <- .parsGetValue(pars, var)
           ## .val <- .parsTransformValue(.val, .cur$distribution,
           ##                             min=.cur$min, max=.cur$max)
