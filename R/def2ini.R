@@ -269,21 +269,13 @@
   .env$pars <- pars
   lapply(names(longDef$fixed),
          function(v) {
-           if (nchar(v) >= 6 &&
-                 substr(v, 1, 6) == "rxCov_") {
-           } else {
-             .env$pars <- rbind(.env$pars,
-                                data.frame(name=v, value=longDef$fixed[v], method="FIXED"))
-           }
+           .env$pars <- rbind(.env$pars,
+                              data.frame(name=v, value=longDef$fixed[v], method="FIXED"))
          })
   lapply(names(def$fixed),
          function(v) {
-           if (nchar(v) >= 6 &&
-                 substr(v, 1, 6) == "rxCov_") {
-           } else {
-             .env$pars <- rbind(.env$pars,
-                                data.frame(name=v, value=def$fixed[v], method="FIXED"))
-           }
+           .env$pars <- rbind(.env$pars,
+                              data.frame(name=v, value=def$fixed[v], method="FIXED"))
          })
   pars <- .env$pars
   .var <- def$var
@@ -302,6 +294,7 @@
     .cur <- .var[[n]]
     if (!is.null(.cur$coef)) {
       .v <- lapply(seq_along(.cur$coef), function(i) {
+        browser()
         .coef <- .cur$coef[[i]]
         lapply(.coef, function(var) {
           .val <- .parsGetValue(pars, var)
