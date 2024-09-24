@@ -269,13 +269,21 @@
   .env$pars <- pars
   lapply(names(longDef$fixed),
          function(v) {
-           .env$pars <- rbind(.env$pars,
-                              data.frame(name=v, value=longDef$fixed[v], method="FIXED"))
+           if (nchar(v) >= 6 &&
+                 substr(v, 1, 6) == "rxCov_") {
+           } else {
+             .env$pars <- rbind(.env$pars,
+                                data.frame(name=v, value=longDef$fixed[v], method="FIXED"))
+           }
          })
   lapply(names(def$fixed),
          function(v) {
-           .env$pars <- rbind(.env$pars,
-                              data.frame(name=v, value=def$fixed[v], method="FIXED"))
+           if (nchar(v) >= 6 &&
+                 substr(v, 1, 6) == "rxCov_") {
+           } else {
+             .env$pars <- rbind(.env$pars,
+                                data.frame(name=v, value=def$fixed[v], method="FIXED"))
+           }
          })
   pars <- .env$pars
   .var <- def$var
