@@ -332,7 +332,6 @@
   if (length(.in) > 0L) {
     .coef <- .coef[-.in]
   }
-  browser()
   .pop <- c(list(quote(`{`)),
             lapply(.n, function(n) {
               .cur <- .var[[n]]
@@ -388,5 +387,13 @@
   } else {
     .ini <- .pop
   }
+  .l <- which(vapply(seq_along(.ini),
+                     function(i) {
+                       .x <- .ini[[i]]
+                       if (identical(.x, quote(`{`))) return(TRUE)
+                       if (length(.x) <= 1) return(FALSE)
+                       !identical(.x[[2]], quote(`rxRmVar`))
+                     }, logical(1), USE.NAMES=FALSE))
+  .ini <- lapply(.l, function(i){.ini[[i]]})
   as.call(c(list(quote(`ini`)), as.call(.ini)))
 }
