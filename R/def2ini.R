@@ -321,7 +321,8 @@
       .l <- which(vapply(seq_along(.v),
                          function(x) {
                            .x <- .v[[i]]
-                           !identical(x[[2]], quote(rxRmVar))
+                           if (length(.x) <= 1) return(FALSE)
+                           !identical(.x[[2]], quote(rxRmVar))
                          }, logical(1), USE.NAMES = FALSE))
       .v <- lapply(.l, function(i) {
         .v[[i]]
