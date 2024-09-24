@@ -269,21 +269,14 @@
   .env$pars <- pars
   lapply(names(longDef$fixed),
          function(v) {
-           if (nchar(v) >= 6 &&
-                 substr(v, 1, 6) == "rxCov_") {
-           } else {
-             .env$pars <- rbind(.env$pars,
-                                data.frame(name=v, value=longDef$fixed[v], method="FIXED"))
-           }
+           .env$pars <- rbind(.env$pars,
+                              data.frame(name=v, value=longDef$fixed[v], method="FIXED"))
+
          })
   lapply(names(def$fixed),
          function(v) {
-           if (nchar(v) >= 6 &&
-                 substr(v, 1, 6) == "rxCov_") {
-           } else {
-             .env$pars <- rbind(.env$pars,
-                                data.frame(name=v, value=def$fixed[v], method="FIXED"))
-           }
+           .env$pars <- rbind(.env$pars,
+                              data.frame(name=v, value=def$fixed[v], method="FIXED"))
          })
   pars <- .env$pars
   .var <- def$var
@@ -313,7 +306,13 @@
           ##        call.=FALSE)
           ## }
           if (.parsGetFixed(pars, var)) {
-            bquote(.(str2lang(var)) <- fixed(.(.val)))
+            if (nchar(var) >= 6 &&
+                  substr(var, 1, 6) == "rxCov_" &&
+                  .val == 0) {
+              bquote(rxRmVar <- 0)
+            } else {
+              bquote(.(str2lang(var)) <- fixed(.(.val)))
+            }
           } else {
             bquote(.(str2lang(var)) <- .(.val))
           }
@@ -388,5 +387,13 @@
   } else {
     .ini <- .pop
   }
+  .l <- which(vapply(seq_along(.ini),
+                     function(i) {
+                       .x <- .ini[[i]]
+                       if (identical(.x, quote(`{`))) return(TRUE)
+                       if (length(.x) <= 1) return(FALSE)
+                       !identical(.x[[2]], quote(`rxRmVar`))
+                     }, logical(1), USE.NAMES=FALSE))
+  .ini <- lapply(.l, function(i){.ini[[i]]})
   as.call(c(list(quote(`ini`)), as.call(.ini)))
 }
