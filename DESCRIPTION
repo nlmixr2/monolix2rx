@@ -1,6 +1,6 @@
 Package: monolix2rx
 Title: Converts 'Monolix' Models to 'rxode2'
-Version: 0.0.1
+Version: 0.0.2.9000
 Authors@R:
    c(person("Matthew","Fidler", role = c("aut", "cre"), email = "matthew.fidler@gmail.com", comment=c(ORCID="0000-0001-8538-6691")),
      person("Justin", "Wilkins", role = "ctb", email = "justin.wilkins@occams.com", comment=c(ORCID="0000-0002-7099-9396")))
@@ -8,8 +8,7 @@ Description: 'Monolix' is a tool for running mixed effects model using
     'saem'. This tool allows you to convert 'Monolix' models to 'rxode2'
     (Wang, Hallow and James (2016) <doi:10.1002/psp4.12052>) using the
     form compatible with 'nlmixr2' (Fidler et al (2019) <doi:10.1002/psp4.12445>).
-    The 'nlmixr2' syntax requires the residual specification to be included and it
-    is not always translated. If available, the 'rxode2' model will
+    If available, the 'rxode2' model will
     read in the 'Monolix' data and compare the simulation for the
     population model individual model and residual
     model to immediately show how well the translation is
@@ -26,12 +25,13 @@ Description: 'Monolix' is a tool for running mixed effects model using
   instead manually setting up text files (which only works with old versions of
   'Monolix').
 License: MIT + file LICENSE
+URL: https://nlmixr2.github.io/monolix2rx/, https://github.com/nlmixr2/monolix2rx/
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 LinkingTo:
     dparser,
-    rxode2parse,
+    rxode2,
     Rcpp
 Imports:
     Rcpp,
