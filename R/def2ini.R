@@ -319,7 +319,7 @@
         })
       })
       .l <- which(vapply(seq_along(.v),
-                         function(x) {
+                         function(i) {
                            .x <- .v[[i]]
                            if (length(.x) <= 1) return(FALSE)
                            !identical(.x[[2]], quote(rxRmVar))
