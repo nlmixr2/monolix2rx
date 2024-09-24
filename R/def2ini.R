@@ -271,6 +271,7 @@
          function(v) {
            .env$pars <- rbind(.env$pars,
                               data.frame(name=v, value=longDef$fixed[v], method="FIXED"))
+
          })
   lapply(names(def$fixed),
          function(v) {
@@ -295,11 +296,7 @@
     if (!is.null(.cur$coef)) {
       .v <- lapply(seq_along(.cur$coef), function(i) {
         .coef <- .cur$coef[[i]]
-        .v <-lapply(.coef, function(var) {
-          if (nchar(var) >= 6 &&
-                substr(var, 1, 6) == "rxCov_") {
-            return(NULL)
-          }
+        lapply(.coef, function(var) {
           .val <- .parsGetValue(pars, var)
           ## .val <- .parsTransformValue(.val, .cur$distribution,
           ##                             min=.cur$min, max=.cur$max)
@@ -309,12 +306,24 @@
           ##        call.=FALSE)
           ## }
           if (.parsGetFixed(pars, var)) {
-            bquote(.(str2lang(var)) <- fixed(.(.val)))
+            if (nchar(var) >= 6 &&
+                  substr(var, 1, 6) == "rxCov_" &&
+                  .val == 0) {
+              bquote(rxRmVar <- 0)
+            } else {
+              bquote(.(str2lang(var)) <- fixed(.(.val)))
+            }
           } else {
             bquote(.(str2lang(var)) <- .(.val))
           }
         })
-        do.call(`c`, .v)
+      })
+      .l <- which(vapply(.v,
+                         function(x) {
+                           !identical(x[[2]], quote(rxRmVar))
+                         }, logical(1), USE.NAMES = FALSE))
+      .v <- lapply(.l, function(i) {
+        .v[[i]]
       })
       .v <- do.call(`c`, .v)
       .v
