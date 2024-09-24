@@ -17,8 +17,8 @@
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Converts Monolix Models to rxode2">
-<meta name="description" content="Monolix is a tool for running mixed effects model using saem. This tool allows you to convert Monolix models to rxode2 (Wang, Hallow and James (2016) &lt;doi:10.1002/psp4.12052&gt;) using the form compatible with nlmixr2 (Fidler et al (2019) &lt;doi:10.1002/psp4.12445&gt;). The nlmixr2 syntax requires the residual specification to be included and it is not always translated. If available, the rxode2 model will read in the Monolix data and compare the simulation for the population model individual model and residual model to immediately show how well the translation is performing. This saves the model development time for people who are creating an rxode2 model manually. Additionally, this package reads in all the information to allow simulation with uncertainty (that is the number of observations, the number of subjects, and the covariance matrix) with a rxode2 model. This is complementary to the babelmixr2 package that translates nlmixr2 models to Monolix and can convert the objects converted from monolix2rx to a full nlmixr2 fit. While not required, you can get/install the lixoftConnectors package in the Monolix installation, as described at the following url &lt;https://monolixsuite.slp-software.com/r-functions/2024R1/installation-and-initialization&gt;. When lixoftConnectors is available, Monolix can be used to load its model library instead manually setting up text files (which only works with old versions of Monolix).">
-<meta property="og:description" content="Monolix is a tool for running mixed effects model using saem. This tool allows you to convert Monolix models to rxode2 (Wang, Hallow and James (2016) &lt;doi:10.1002/psp4.12052&gt;) using the form compatible with nlmixr2 (Fidler et al (2019) &lt;doi:10.1002/psp4.12445&gt;). The nlmixr2 syntax requires the residual specification to be included and it is not always translated. If available, the rxode2 model will read in the Monolix data and compare the simulation for the population model individual model and residual model to immediately show how well the translation is performing. This saves the model development time for people who are creating an rxode2 model manually. Additionally, this package reads in all the information to allow simulation with uncertainty (that is the number of observations, the number of subjects, and the covariance matrix) with a rxode2 model. This is complementary to the babelmixr2 package that translates nlmixr2 models to Monolix and can convert the objects converted from monolix2rx to a full nlmixr2 fit. While not required, you can get/install the lixoftConnectors package in the Monolix installation, as described at the following url &lt;https://monolixsuite.slp-software.com/r-functions/2024R1/installation-and-initialization&gt;. When lixoftConnectors is available, Monolix can be used to load its model library instead manually setting up text files (which only works with old versions of Monolix).">
+<meta name="description" content="Monolix is a tool for running mixed effects model using saem. This tool allows you to convert Monolix models to rxode2 (Wang, Hallow and James (2016) &lt;doi:10.1002/psp4.12052&gt;) using the form compatible with nlmixr2 (Fidler et al (2019) &lt;doi:10.1002/psp4.12445&gt;). If available, the rxode2 model will read in the Monolix data and compare the simulation for the population model individual model and residual model to immediately show how well the translation is performing. This saves the model development time for people who are creating an rxode2 model manually. Additionally, this package reads in all the information to allow simulation with uncertainty (that is the number of observations, the number of subjects, and the covariance matrix) with a rxode2 model. This is complementary to the babelmixr2 package that translates nlmixr2 models to Monolix and can convert the objects converted from monolix2rx to a full nlmixr2 fit. While not required, you can get/install the lixoftConnectors package in the Monolix installation, as described at the following url &lt;https://monolixsuite.slp-software.com/r-functions/2024R1/installation-and-initialization&gt;. When lixoftConnectors is available, Monolix can be used to load its model library instead manually setting up text files (which only works with old versions of Monolix).">
+<meta property="og:description" content="Monolix is a tool for running mixed effects model using saem. This tool allows you to convert Monolix models to rxode2 (Wang, Hallow and James (2016) &lt;doi:10.1002/psp4.12052&gt;) using the form compatible with nlmixr2 (Fidler et al (2019) &lt;doi:10.1002/psp4.12445&gt;). If available, the rxode2 model will read in the Monolix data and compare the simulation for the population model individual model and residual model to immediately show how well the translation is performing. This saves the model development time for people who are creating an rxode2 model manually. Additionally, this package reads in all the information to allow simulation with uncertainty (that is the number of observations, the number of subjects, and the covariance matrix) with a rxode2 model. This is complementary to the babelmixr2 package that translates nlmixr2 models to Monolix and can convert the objects converted from monolix2rx to a full nlmixr2 fit. While not required, you can get/install the lixoftConnectors package in the Monolix installation, as described at the following url &lt;https://monolixsuite.slp-software.com/r-functions/2024R1/installation-and-initialization&gt;. When lixoftConnectors is available, Monolix can be used to load its model library instead manually setting up text files (which only works with old versions of Monolix).">
 <meta property="og:image" content="/logo.png">
 </head>
 <body>
@@ -29,7 +29,7 @@
 
     <a class="navbar-brand me-2" href="index.html">monolix2rx</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,6 +63,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/nlmixr2/monolix2rx/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -91,7 +92,7 @@
 </h2>
 <p>If you are trying to convert a Monolix to a rxode2 model you simply need the path to the <code>mlxtran</code> file. For example, the classic demo of theophylline is included in <code>monolix2rx</code> and can be imported below:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">monolix2rx</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://nlmixr2.github.io/monolix2rx/" class="external-link">monolix2rx</a></span><span class="op">)</span></span>
 <span><span class="co"># First load in the model; in this case the theo model</span></span>
 <span><span class="co"># This is modified from the Monolix demos by saving the model</span></span>
 <span><span class="co"># file as a text file (hence you can access without model library).</span></span>
@@ -349,7 +350,15 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>monolix2rx.demo<span class="op">=</span><span class="st">"~/src/monolix/demos/"</span><span class="op">)</span></span></code></pre></div>
 </div>
 
-  </main><aside class="col-md-3"><div class="license">
+  </main><aside class="col-md-3"><div class="links">
+<h2 data-toc-skip>Links</h2>
+<ul class="list-unstyled">
+<li><a href="https://cloud.r-project.org/package=monolix2rx" class="external-link">View on CRAN</a></li>
+<li><a href="https://github.com/nlmixr2/monolix2rx/" class="external-link">Browse source code</a></li>
+</ul>
+</div>
+
+<div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li><a href="LICENSE.html">Full license</a></li>
