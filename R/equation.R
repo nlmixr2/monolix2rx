@@ -269,6 +269,8 @@ mlxTxt <- function(file, retFile=FALSE) {
     if (requireNamespace("lixoftConnectors", quietly = TRUE)) {
       if (!checkmate::testCharacter(file, min.chars = 5, len=1)) {
         .pre <- substr(file, 1, 4)
+      } else {
+        .pre <- ""
       }
       if (.pre == "lib:") {
         if (is.na(.monolix2rx$lixoftConnectors)) {
