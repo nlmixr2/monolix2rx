@@ -130,8 +130,7 @@
     .ipredSolve <- .subsetMonolix(.ui, .ipredSolve, c("iwres", "ires"))
     .minfo("done")
     .minfo("solving pred problem")
-    .dataPop <- .data[.data$id %in% .pop$id, ]
-    .predSolve <- try(rxode2::rxSolve(.model, .pop, .dataPop, returnType = "data.frame",
+    .predSolve <- try(rxode2::rxSolve(.model, .pop, .data, returnType = "data.frame",
                                       covsInterpolation="locf",
                                       #addlKeepsCov=TRUE, addlDropSs=TRUE, ssAtDoseTime=TRUE,
                                       #safeZero=TRUE, ss2cancelAllPending=TRUE,
