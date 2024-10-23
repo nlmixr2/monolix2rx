@@ -115,7 +115,9 @@
       length(.ind) > 0 &&
       length(.ind[, 1]) > 0) {
     .minfo("solving ipred problem")
-    .ipredSolve <- try(rxode2::rxSolve(.model, .ind, .data, returnType = "data.frame",
+    .dataInd <- .data[.data$id %in% .ind$id, ]
+    .ipredSolve <- try(rxode2::rxSolve(.model, .ind, .dataInd,
+                                       returnType = "data.frame",
                                        covsInterpolation="locf",
                                        #addlKeepsCov=TRUE, addlDropSs=TRUE, ssAtDoseTime=TRUE,
                                        #safeZero=TRUE, ss2cancelAllPending=TRUE,
@@ -128,7 +130,8 @@
     .ipredSolve <- .subsetMonolix(.ui, .ipredSolve, c("iwres", "ires"))
     .minfo("done")
     .minfo("solving pred problem")
-    .predSolve <- try(rxode2::rxSolve(.model, .pop, .data, returnType = "data.frame",
+    .dataPop <- .data[.data$id %in% .pop$id, ]
+    .predSolve <- try(rxode2::rxSolve(.model, .pop, .dataPop, returnType = "data.frame",
                                       covsInterpolation="locf",
                                       #addlKeepsCov=TRUE, addlDropSs=TRUE, ssAtDoseTime=TRUE,
                                       #safeZero=TRUE, ss2cancelAllPending=TRUE,
