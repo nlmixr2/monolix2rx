@@ -14,6 +14,7 @@ ytypeLine: identifier '=' '{' 'use' '=' ('observationtype' | 'observationType') 
 admLine: identifier '=' '{' 'use' '=' 'administration' '}';
 occLine: identifier '=' '{' 'use' '=' 'occasion' '}';
 rateLine: identifier '=' '{' 'use' '=' 'rate' '}';
+durLine: identifier '=' '{' 'use' '=' 'infusiontime' '}';
 mdvLine: identifier '=' '{' 'use' '=' ('missingdependentvariable' | 'missingDependentVariable' ) '}';
 nbd: decimalint;
 ssLine: identifier '=' '{' 'use' '=' ('steadystate' | 'steadyState' ) (',' 'nbdoses' '=' nbd)? '}';
@@ -65,6 +66,7 @@ statement: idLine singleLineComment?
     | admLine singleLineComment?
     | occLine singleLineComment?
     | rateLine singleLineComment?
+    | durLine singleLineComment?
     | mdvLine singleLineComment?
     | ssLine singleLineComment?
     | regressorLine singleLineComment?
