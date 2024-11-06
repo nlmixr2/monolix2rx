@@ -161,5 +161,5 @@ test_that("mdv", {
 
 test_that("dur", {
   expect_equal(as.character(.content("dur = {use=infusiontime}")),
-               " = {use=infusiontime}")
+               "dur = {use=infusiontime}")
 })
