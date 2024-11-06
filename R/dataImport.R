@@ -124,7 +124,8 @@
                                           occasion="occ",
                                           rate="rate",
                                           additionaldose="addl",
-                                          missingdependentvariable="mdv"))
+                                          missingdependentvariable="mdv",
+                                          infusiontime="dur"))
                           }
                           n
                         }, character(1), USE.NAMES = FALSE)

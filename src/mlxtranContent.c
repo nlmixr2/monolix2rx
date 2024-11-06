@@ -184,6 +184,16 @@ int content_process_rate(const char *name, D_ParseNode *pn) {
   return 0;
 }
 
+int content_process_dur(const char *name, D_ParseNode *pn) {
+  if (!strcmp(name, "durLine")) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxContentSetUse1("infusiontime", v);
+    return 1;
+  }
+  return 0;
+}
+
 int content_process_adm(const char *name, D_ParseNode *pn) {
   if (!strcmp(name, "admLine")) {
     D_ParseNode *xpn = d_get_child(pn, 0);
@@ -325,6 +335,7 @@ void wprint_parsetree_content(D_ParserTables pt, D_ParseNode *pn, int depth, pri
       content_process_cat(name, pn) ||
       content_process_occ(name, pn) ||
       content_process_rate(name, pn) ||
+      content_process_dur(name, pn) ||
       content_process_ytypeObs(name, pn) ||
       content_process_addl(name, pn) ||
       content_process_mdv(name, pn)
