@@ -34,7 +34,7 @@ Sex = {type=categorical, categories={M, F}}")
   tmp2 <- list(use1 = c(identifier = "ID", time = "TIME", eventidentifier = "EVID",
                         amount = "AMT", interdoseinterval = NA, censored = NA, limit = NA,
                         observationtype = "YTYPE", administration = "ADM", steadystate = NA,
-                        observation = "DV", occasion=NA, rate=NA, additionaldose=NA, missingdependentvariable=NA),
+                        observation = "DV", occasion=NA, rate=NA, additionaldose=NA, missingdependentvariable=NA, infusiontime=NA),
                cont = c("WT", "CRCL"),
                cat = list(Race = list(cat = c("Caucasian", "Black", "Latin"),
                                       quote = c(FALSE, FALSE, FALSE)),
@@ -73,7 +73,7 @@ limit = {use=limit}")
   tmp2 <- list(use1 = c(identifier = "ID", time = "TIME", eventidentifier = "EVID",
                         amount = "AMT", interdoseinterval = "II", censored = "cens", limit = "limit",
                         observationtype = "YTYPE", administration = "ADM", steadystate = "SS", observation = "DV",
-                        occasion=NA, rate=NA, additionaldose=NA, missingdependentvariable=NA),
+                        occasion=NA, rate=NA, additionaldose=NA, missingdependentvariable=NA, infusiontime=NA),
                cont = c("WT", "CRCL"),
                cat = list(Race = list(cat = c("Caucasian", "Black", "Latin"),
                                      quote = c(FALSE, FALSE, FALSE)),
@@ -157,4 +157,9 @@ test_that("discrete", {
 test_that("mdv", {
   expect_equal(as.character(.content("mdv = {use=missingdependentvariable}")),
                 "mdv = {use=missingdependentvariable}")
+})
+
+test_that("dur", {
+  expect_equal(as.character(.content("dur = {use=infusiontime}")),
+               " = {use=infusiontime}")
 })
