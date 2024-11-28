@@ -140,6 +140,7 @@
 #' @param x line to ignore
 #' @return character vector representing ignored variables
 #' @author Matthew L. Fidler
+#' @noRd
 .asCharacterIgnore <- function(x) {
   if (length(x$ignore) == 0L) return(character(0))
   vapply(x$ignore,
