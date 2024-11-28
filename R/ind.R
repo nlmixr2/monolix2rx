@@ -119,7 +119,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .indIgnore <- function(ignore) {
-  .monolix2rx$ignoreLst <- c(.monolix2rx$ignoreLst, reg)
+  .monolix2rx$ignoreLst <- c(.monolix2rx$ignoreLst, ignore)
 }
 
 #' As.character for regressor items
@@ -141,8 +141,8 @@
 #' @return character vector representing ignored variables
 #' @author Matthew L. Fidler
 .asCharacterIgnore <- function(x) {
-  if (length(x$ignoreLst) == 0L) return(character(0))
-  vapply(x$ignoreLst,
+  if (length(x$ignore) == 0L) return(character(0))
+  vapply(x$ignore,
          function(n) {
            paste0(n, " = {use = ignoredline}")
          }, character(1), USE.NAMES = FALSE)

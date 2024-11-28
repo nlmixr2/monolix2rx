@@ -141,7 +141,8 @@ void wprint_parsetree_individual(D_ParserTables pt, D_ParseNode *pn, int depth, 
     return;
   } else if (individual_process_catId(name, pn) ||
              individual_process_inpId(name, pn) ||
-             individual_process_regressor(name, pn)) {
+             individual_process_regressor(name, pn) ||
+             individual_process_ignore(name, pn)) {
     // return early; no need to process more
     return;
   }
