@@ -1,3 +1,3 @@
-# monolix2rx 0.0.3
+# monolix2rx 0.0.4
 
-* For initial conditions starting with `rxCov_` don't add to ini
+* Added `ignoreline` support #22

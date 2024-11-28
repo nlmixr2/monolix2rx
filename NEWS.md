@@ -1,4 +1,6 @@
-# monolix2rx (development version)
+# monolix2rx 0.0.4
+
+* Added `ignoreline` support #22
 
 # monolix2rx 0.0.3
 
