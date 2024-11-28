@@ -12,6 +12,7 @@
     .fileinfoIni()
     .monolix2rx$inpLst <- character(0)
     .monolix2rx$regLst <- character(0)
+    .monolix2rx$ignoreLst <- character(0)
     .monolix2rx$catLst2 <- NULL
     .monolix2rx$ind <- NULL
   }
@@ -90,6 +91,7 @@
   .ind <- list(input=.monolix2rx$inpLst,
                cat=.monolix2rx$catLst2,
                reg=.monolix2rx$regLst,
+               ignore=.monolix2rx$ignoreLst,
                file=.monolix2rx$file)
   class(.ind) <- "monolix2rxInd"
   .indIni(full=TRUE)
@@ -110,6 +112,15 @@
   # What does that mean?
   .monolix2rx$regLst <- c(.monolix2rx$regLst, reg)
 }
+#' Flag a column as ignored
+#'
+#' @param ignore column to ignore
+#' @return nothing, called for side effect
+#' @noRd
+#' @author Matthew L. Fidler
+.indIgnore <- function(ignore) {
+  .monolix2rx$ignoreLst <- c(.monolix2rx$ignoreLst, reg)
+}
 
 #' As.character for regressor items
 #'
@@ -122,6 +133,18 @@
   vapply(x$reg,
          function(n) {
            paste0(n, " = {use = regressor}")
+         }, character(1), USE.NAMES = FALSE)
+}
+#' Change expression to ignored line
+#'
+#' @param x line to ignore
+#' @return character vector representing ignored variables
+#' @author Matthew L. Fidler
+.asCharacterIgnore <- function(x) {
+  if (length(x$ignoreLst) == 0L) return(character(0))
+  vapply(x$ignoreLst,
+         function(n) {
+           paste0(n, " = {use = ignoredline}")
          }, character(1), USE.NAMES = FALSE)
 }
 
@@ -173,6 +196,7 @@ as.character.monolix2rxInd <- function(x, ...) {
   }
   .ret <- c(.ret, .asCharacterReg(x))
   .ret <- c(.ret, .asCharacterCat(x))
+  .ret <- c(.ret, .asCharacterIgnore(x))
   c(.ret, .asCharacterFile(x))
 }
 
