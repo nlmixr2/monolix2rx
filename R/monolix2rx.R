@@ -225,7 +225,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
       assign("dfSub", as.double(.lst$nid), envir=.ui$meta)
     }
   }
-  try(.validateModel(.ui, ci=ci, sigdig=sigdig))
+  try(.validateModel(.ui, ci=ci, sigdig=sigdig), silent=TRUE)
   .ui <- rxode2::rxUiCompress(.ui)
   class(.ui) <- c("monolix2rx", class(.ui))
   .ui

@@ -61,7 +61,11 @@
 
   } else if (length(ui$predDf$cond) == 1L) {
     # single endpoint
-    .ret <- data[, c("id", "time", "ipredSim", iwres)]
+    .ret <- try(data[, c("id", "time", "ipredSim", iwres)], silent=TRUE)
+    if (inherits(.ret, "try-error")) {
+      assign("predDf", NULL, envir=ui)
+      return(NULL)
+    }
     if (!is.null(iwres)) {
       names(.ret) <- c("id", "time", "ipred", iwres)
     } else {
@@ -136,7 +140,7 @@
                                       minSS=.nss,
                                       atol=.tol, rtol=.tol,
                                       ssAtol=100, ssRtol=100, omega=NULL,
-                                      addDosing = FALSE))
+                                      addDosing = FALSE), silent=TRUE)
     .predSolve <- .subsetMonolix(.ui, .predSolve)
     .nPredSolve <- length(.predSolve[, 1])
     .nIpredSolve <- length(.ipredSolve[, 1])
