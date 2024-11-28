@@ -112,6 +112,17 @@ int individual_process_regressor(const char *name, D_ParseNode *pn) {
   return 0;
 }
 
+int individual_process_ignore(const char *name, D_ParseNode *pn) {
+  if (!strcmp("ignoreLine", name)) {
+    D_ParseNode *xpn = d_get_child(pn, 0);
+    char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+    monolix2rxSingle(v, ".indIgnore");
+    return 1;
+  }
+  return 0;
+}
+
+
 void wprint_parsetree_individual(D_ParserTables pt, D_ParseNode *pn, int depth, print_node_fn_t fn, void *client_data) {
   char *name = (char*)pt.symbols[pn->symbol].name;
   int nch = d_get_number_of_children(pn);
@@ -130,7 +141,8 @@ void wprint_parsetree_individual(D_ParserTables pt, D_ParseNode *pn, int depth, 
     return;
   } else if (individual_process_catId(name, pn) ||
              individual_process_inpId(name, pn) ||
-             individual_process_regressor(name, pn)) {
+             individual_process_regressor(name, pn) ||
+             individual_process_ignore(name, pn)) {
     // return early; no need to process more
     return;
   }

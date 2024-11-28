@@ -41,6 +41,7 @@ Sex = {type=categorical, categories={M, F}}")
                           Sex = list(cat = c("M", "F"),
                                      quote = c(FALSE, FALSE))),
                reg = c("E0", "Emax"),
+               ignore = character(0),
                nbdoses = 7L,
                yname = c("1", "2"),
                ynameQuote=c(TRUE, TRUE),
@@ -80,6 +81,7 @@ limit = {use=limit}")
                           Sex = list(cat = c("M", "F"),
                                      quote = c(FALSE, FALSE))),
                reg = c("E0", "Emax"),
+               ignore=character(0),
                nbdoses = 10L,
                yname = c("1", "2"),
                ynameQuote=c(TRUE, TRUE),
@@ -162,4 +164,48 @@ test_that("mdv", {
 test_that("dur", {
   expect_equal(as.character(.content("dur = {use=infusiontime}")),
                "dur = {use=infusiontime}")
+})
+
+test_that("content ignore", {
+
+    tmp <- .content("ID = {use=identifier}
+TIME = {use=time}
+EVID = {use=eventidentifier}
+AMT = {use=amount}
+DV = {use=observation, name={y1, y2}, yname={'1', '2'}, type={continuous, event}}
+ADM = {use=administration}
+YTYPE = {use=observationtype}
+WT={use=covariate, type=continuous}
+CRCL={use=covariate, type=continuous}
+E0 = {use = regressor}
+Emax = {use = regressor}
+Race = {type=categorical, categories={Caucasian, Black, Latin}}
+Sex = {type=categorical, categories={M, F}}
+FLAG = {use=ignoredline}")
+
+
+    tmp2 <- list(use1 = c(identifier = "ID", time = "TIME", eventidentifier = "EVID",
+                          amount = "AMT", interdoseinterval = NA, censored = NA,
+                          limit = NA, observationtype = "YTYPE", administration = "ADM",
+                          steadystate = NA, observation = "DV", occasion = NA,
+                          rate = NA, additionaldose = NA, missingdependentvariable = NA,
+                          infusiontime = NA),
+                 cont = c("WT", "CRCL"),
+                 cat = list(Race = list(cat = c("Caucasian", "Black", "Latin"),
+                                        quote = c(FALSE, FALSE, FALSE)),
+                            Sex = list(cat = c("M", "F"),
+                                       quote = c(FALSE, FALSE))),
+                 reg = c("E0", "Emax"),
+                 ignore = "FLAG",
+                 nbdoses = 7L,
+                 yname = c("1", "2"),
+                 ynameQuote = c(TRUE, TRUE),
+                 ytype = character(0),
+                 ytypeQuote = logical(0),
+                 name = c("y1", "y2"),
+                 type = c("continuous", "event"))
+
+    class(tmp2) <- "monolix2rxContent"
+
+    expect_equal(tmp, tmp2)
 })

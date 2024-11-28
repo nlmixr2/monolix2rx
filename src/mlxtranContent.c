@@ -73,6 +73,7 @@ extern sbuf curLine;
 int individual_process_catCov(const char *name, D_ParseNode *pn, int i);
 int individual_process_catId(const char *name, D_ParseNode *pn);
 int individual_process_regressor(const char *name, D_ParseNode *pn);
+int individual_process_ignore(const char *name, D_ParseNode *pn);
 
 int content_process_identifier(const char *name, D_ParseNode *pn) {
   if (!strcmp(name, "idLine")) {
@@ -318,6 +319,7 @@ void wprint_parsetree_content(D_ParserTables pt, D_ParseNode *pn, int depth, pri
   int nch = d_get_number_of_children(pn);
   if (individual_process_catId(name, pn) ||
       individual_process_regressor(name, pn) ||
+      individual_process_ignore(name, pn) ||
       content_process_identifier(name, pn) ||
       content_process_time(name, pn) ||
       content_process_evid(name, pn) ||

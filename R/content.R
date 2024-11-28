@@ -48,6 +48,7 @@
                cont=.monolix2rx$contLst,
                cat=.monolix2rx$catLst2,
                reg=.monolix2rx$regLst,
+               ignore=.monolix2rx$ignoreLst,
                nbdoses=.monolix2rx$ssNbdoses,
                yname=.monolix2rx$yname,
                ynameQuote=.monolix2rx$ynameQuote,
@@ -186,6 +187,7 @@ as.character.monolix2rxContent <- function(x, ...) {
   }, character(1), USE.NAMES = FALSE)
   c(.cur[!is.na(.cur)],
     .asCharacterReg(x),
+    .asCharacterIgnore(x),
     vapply(x$cont, function(n) {
       paste0(n, " = {use=covariate, type=continuous}")
     }, character(1), USE.NAMES = FALSE),
