@@ -45,7 +45,7 @@ Imports:
     crayon,
     lotri,
     magrittr,
-    rxode2 (>= 4.0.0),
+    rxode2 (>= 3.0.4)
 Suggests:
     devtools,
     testthat (>= 3.0.0),

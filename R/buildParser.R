@@ -108,7 +108,23 @@
 
 .monolix2rxBuildRxSolve <- function() {
   message("build options for rxSolve to match Monolix")
-  .args <- deparse(eval(str2lang(paste0("args(rxode2::rxSolve)"))))
+  .args <- deparse1(eval(str2lang(paste0("args(rxode2::rxSolve)"))))
+  .first <- c(strsplit(.args, "[.][.][.]"))[[1]][1]
+  .first <- paste(.first,
+                  "..., ",
+                  "cores,",
+                  'covsInterpolation = c("locf", "linear", "nocb", "midpoint"), ',
+                  "nStud = 1L, ",
+                  "dfSub = 0, ",
+                  "dfObs = 0, ",
+                  "thetaMat = NULL, ",
+                  "ssAtol = 1e-08, ",
+                  "ssRtol = 1e-06, ",
+                  "minSS = 10L, ",
+                  "maxSS = 10000L, ",
+                  "envir = parent.frame()) NULL", collapse="")
+  .args <- deparse(eval(str2lang(.first)))
+
   .args[1] <- paste0("rxSolve.monolix2rx <-", .args[1])
   .args <- .args[-length(.args)]
   .extra <- quote({
@@ -200,8 +216,21 @@
     .formalArgs[.w] <- "..."
     .has3 <- TRUE
   }
-  .formalArgs <- paste(.formalArgs, collapse=", ")
-  .formalArgs <- paste0("rxode2::rxSolve(", .formalArgs, ")")
+  .formalArgs <- c(paste(.formalArgs[seq(1, .w-1)], ", "),
+                   "..., ",
+                   "cores=cores,",
+                   "covsInterpolation = covsInterpolation, ",
+                   "nStud = nStud, ",
+                   "dfSub = dfSub, ",
+                   "dfObs = dfObs, ",
+                   "thetaMat = thetaMat, ",
+                   "ssAtol = ssAtol, ",
+                   "ssRtol = ssRtol, ",
+                   "minSS = minSS, ",
+                   "maxSS = 10000L, ",
+                   "envir = envir")
+
+  .formalArgs <- paste0("rxode2::rxSolve(", paste(.formalArgs, collapse=""), ")")
   .args <- c(.args, .formalArgs, "}")
   .args <- paste(.args, collapse="\n")
   .args <- c("# This is built from buildParser.R, edit there",
