@@ -15,13 +15,7 @@ dparserPtrIni
 #include <Rinternals.h>
 #include <R_ext/Rdynload.h>
 #include <Rmath.h>
-#ifdef ENABLE_NLS
-#include <libintl.h>
-#define _(String) dgettext ("monolix2rx", String)
-/* replace pkg as appropriate */
-#else
 #define _(String) (String)
-#endif
 #include "parseSyntaxErrors.h"
 
 // These are the shared variables

@@ -11,13 +11,7 @@
 #include <Rinternals.h>
 #include <R_ext/Rdynload.h>
 #include <Rmath.h>
-#ifdef ENABLE_NLS
-#include <libintl.h>
-#define _(String) dgettext ("monolix2rx", String)
-/* replace pkg as appropriate */
-#else
 #define _(String) (String)
-#endif
 
 void monolix2rx_indDef_parseFree(int last);
 void monolix2rx_content_parseFree(int last);
