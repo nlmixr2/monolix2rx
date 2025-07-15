@@ -262,6 +262,7 @@ mlxTxt <- function(file, retFile=FALSE) {
   })
   if (!retFile) .mlxtranIni()
   .exit <- FALSE
+  .monolixLib <- NULL
   if (length(file) > 1L) {
     .lines <- file
     .dirn <- getwd()
@@ -286,17 +287,22 @@ mlxTxt <- function(file, retFile=FALSE) {
         if (.monolix2rx$lixoftConnectors) {
           .ret <- try(monolix2rxGetLibraryModelContent(file), silent=TRUE)
           if (!inherits(.ret, "try-error")) {
-            return(as.character(.ret))
+            .monolixLib <- strsplit(as.character(.ret), "\n")[[1]]
           }
         }
       }
     }
-    .f <- .mlxtranLib(file)
-    if (checkmate::testFileExists(.f, "r")) {
-      .lines <- suppressWarnings(readLines(.f))
-      .dirn <- dirname(.f)
+    if (!is.null(.monolixLib)) {
+      .lines <- .monolixLib
+      .dirn <- NULL
     } else {
-      .exit <- TRUE
+      .f <- .mlxtranLib(file)
+      if (checkmate::testFileExists(.f, "r")) {
+        .lines <- suppressWarnings(readLines(.f))
+        .dirn <- dirname(.f)
+      } else {
+        .exit <- TRUE
+      }
     }
   }
   if (!.exit) {
