@@ -266,7 +266,7 @@ mlxTxt <- function(file, retFile=FALSE) {
     .lines <- file
     .dirn <- getwd()
   } else {
-    if (requireNamespace("lixoftConnectors", quietly = TRUE)) {
+    if (monolix2rxlixoftConnectors()) {
       if (!checkmate::testCharacter(file, min.chars = 5, len=1)) {
         .pre <- substr(file, 1, 4)
       } else {
@@ -274,7 +274,7 @@ mlxTxt <- function(file, retFile=FALSE) {
       }
       if (.pre == "lib:") {
         if (is.na(.monolix2rx$lixoftConnectors)) {
-          x <- try(lixoftConnectors::initializeLixoftConnectors(software = "monolix", force=TRUE), silent=TRUE)
+          x <- try(monolix2rxInitializeLixoftConnectors(software = "monolix", force=TRUE), silent=TRUE)
           if (inherits(x, "try-error")) {
             warning("lixoftConnectors cannot be initialized",
                     call.=FALSE)
@@ -284,7 +284,7 @@ mlxTxt <- function(file, retFile=FALSE) {
           }
         }
         if (.monolix2rx$lixoftConnectors) {
-          .ret <- try(lixoftConnectors::getLibraryModelContent(, print=FALSE), silent=TRUE)
+          .ret <- try(monolix2rxGetLibraryModelContent(file), silent=TRUE)
           if (!inherits(.ret, "try-error")) {
             return(as.character(.ret))
           }

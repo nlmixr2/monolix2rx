@@ -10,10 +10,16 @@
 
 #include "util.h"
 
+SEXP _monolix2rxlixoftConnectors(void);
 SEXP _monolix2rx_iniDparserPtr(SEXP);
+SEXP _monolix2rxInitializeLixoftConnectors(SEXP software, SEXP force);
+SEXP _monolix2rxGetLibraryModelContent(SEXP filename);
 
 void R_init_monolix2rx(DllInfo *info) {
   R_CallMethodDef callMethods[]  = {
+    {"_monolix2rxGetLibraryModelContent", (DL_FUNC) &_monolix2rxGetLibraryModelContent, 1},
+    {"_monolix2rxInitializeLixoftConnectors", (DL_FUNC) &_monolix2rxInitializeLixoftConnectors, 2},
+    {"_monolix2rxlixoftConnectors", (DL_FUNC) &_monolix2rxlixoftConnectors, 0},
     {"_monolix2rx_iniDparserPtr", (DL_FUNC) &_monolix2rx_iniDparserPtr, 1},
     {"_monolix2rx_r_parseIni", (DL_FUNC) &_monolix2rx_r_parseIni, 0},
     {"_monolix2rx_r_parseFree", (DL_FUNC) &_monolix2rx_r_parseFree, 0},
