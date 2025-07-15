@@ -267,7 +267,7 @@ mlxTxt <- function(file, retFile=FALSE) {
     .dirn <- getwd()
   } else {
     if (monolix2rxlixoftConnectors()) {
-      if (!checkmate::testCharacter(file, min.chars = 5, len=1)) {
+      if (checkmate::testCharacter(file, min.chars = 5, len=1)) {
         .pre <- substr(file, 1, 4)
       } else {
         .pre <- ""
