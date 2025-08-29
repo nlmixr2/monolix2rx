@@ -34,3 +34,5 @@ rxUiGet.monolixModelIwres <- function(x, ...) {
     .ret
   }
 }
+# Default is list
+#attr(rxUiGet.monolixModelIwres, "rstudio") <- list()

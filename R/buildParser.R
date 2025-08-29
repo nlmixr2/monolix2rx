@@ -103,6 +103,7 @@
   file.rename(devtools::package_file("src/dataSettings.g.d_parser.c"),
               devtools::package_file("src/dataSettings.g.d_parser.h"))
   .monolix2rxBuildRxSolve()
+  .monolix2rxRxUiGetMethods()
   invisible("")
 }
 
@@ -241,6 +242,24 @@
 
 .monolix2rxRxUiGetMethods <- function() {
   message("build rxUiGet options to allow str() and dollar completion")
+  .rstudio <-list(
+    ## "nonmemData", for now, list
+    ## "etaData",
+    "ipredAtol"=0.1,
+    "ipredRtol"=0.1,
+    ## "ipredCompare",
+    "predAtol"=0.1,
+    "predRtol"=0.1,
+    ## "predCompare",
+    "sigma"=matrix(c(1,0,0,1),2,2),
+    "thetaMat"=matrix(c(1,0,0,1),2,2),
+    "dfSub"=10L,
+    "dfObs"=100L,
+    "atol"=1e-08,
+    "rtol"=1e-06,
+    "ssRtol"=1e-06,
+    "ssAtol"=1e-08
+  )
   .meth <- c("nonmemData"="NONMEM input data from nonmem2rx",
              "etaData"="NONMEM etas input from nonmem2rx",
              "ipredAtol"="50th percentile of the IPRED atol comparison between rxode2 and model import",
@@ -271,6 +290,11 @@
                               sprintf("  get(\"%s\", envir=x[[1]])", .name),
                               "}",
                               sprintf("attr(rxUiGet.%s, \"desc\") <- %s", .name, deparse1(.desc)))
+                    if (.name %in% names(.rstudio)) {
+                      .ret <- c(.ret,
+                                sprintf("attr(rxUiGet.%s, \"rstudio\") <- %s", .name,
+                                        deparse1(.rstudio[[.name]])))
+                    }
                     .ret <- paste(.ret, collapse="\n")
                   }, character(1), USE.NAMES=TRUE),
                   ".rxUiGetRegister <- function() {",

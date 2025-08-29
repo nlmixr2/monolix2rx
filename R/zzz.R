@@ -11,7 +11,7 @@
   ## }
   ## rxode2::.s3register("ggplot2::autoplot", "nonmem2rx")
   ## rxode2::.s3register("base::plot", "nonmem2rx")
-  ##.rxUiGetRegister()
+  .rxUiGetRegister()
   if (requireNamespace("rxode2", quietly=FALSE)) {
     rxode2::.s3register("rxode2::rxUiGet", "monolixModelIwres")
   }
