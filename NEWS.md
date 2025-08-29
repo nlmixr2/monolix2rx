@@ -1,3 +1,7 @@
+# monolix2rx 0.0.6
+
+* Updated to add types for rstudio completion
+
 # monolix2rx 0.0.5
 
 * Updated for new solving option in rxode2 4.0 (and depend on the packages)
