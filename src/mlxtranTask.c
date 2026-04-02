@@ -142,7 +142,13 @@ void trans_mlxtrantask(const char* parse){
   errP = curP;
   eBufLast = 0;
   gBufFree=0;
-  _pn= dparse(curP, gBuf, (int)strlen(gBuf));
+  {
+    size_t _gBuf_len = strlen(gBuf);
+    if (_gBuf_len > (size_t)INT_MAX) {
+      Rf_error(_("input too large to parse (exceeds INT_MAX bytes)"));
+    }
+    _pn= dparse(curP, gBuf, (int)_gBuf_len);
+  }
   if (!_pn || curP->syntax_errors) {
   } else {
     wprint_parsetree_mlxtrantask(parser_tables_mlxtranTask , _pn, 0, wprint_node_mlxtrantask, NULL);

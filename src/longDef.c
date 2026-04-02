@@ -549,7 +549,13 @@ void trans_longdef(const char* parse){
   errP = curP;
   eBufLast = 0;
   gBufFree=0;
-  _pn= dparse(curP, gBuf, (int)strlen(gBuf));
+  {
+    size_t _gBuf_len = strlen(gBuf);
+    if (_gBuf_len > (size_t)INT_MAX) {
+      Rf_error(_("input too large to parse (exceeds INT_MAX bytes)"));
+    }
+    _pn= dparse(curP, gBuf, (int)_gBuf_len);
+  }
   if (!_pn || curP->syntax_errors) {
   } else {
     wprint_parsetree_longdef(parser_tables_longDef , _pn, 0, wprint_node_longdef, NULL);
