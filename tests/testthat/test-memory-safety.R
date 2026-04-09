@@ -15,7 +15,7 @@
 
 test_that("rc_dup_str handles normal strings without error", {
   # Regression: short strings must work correctly after the overflow guards
-  .ret <- .equation("x_0 = V\nddt_x = -k*x", monolix2rx:::.pk(""))
+  .ret <- .equation("x_0 = V\nddt_x = -k*x", .pk(""))
   expect_type(.ret$rx, "character")
   expect_true(length(.ret$rx) > 0)
 })
