@@ -15,16 +15,16 @@
 
 test_that("rc_dup_str handles normal strings without error", {
   # Regression: short strings must work correctly after the overflow guards
-  .ret <- monolix2rx:::.equation("x_0 = V\nddt_x = -k*x", monolix2rx:::.pk(""))
+  .ret <- .equation("x_0 = V\nddt_x = -k*x", monolix2rx:::.pk(""))
   expect_type(.ret$rx, "character")
   expect_true(length(.ret$rx) > 0)
 })
 
 test_that("equation parser handles multi-statement input correctly", {
   # Regression: multi-statement equations still parse cleanly after all guards
-  .ret <- monolix2rx:::.equation(
+  .ret <- .equation(
     "x_0 = V\ny_0 = 1\nddt_x = -k*x\nddt_y = k*x - k2*y",
-    monolix2rx:::.pk("")
+    .pk("")
   )
   expect_type(.ret$rx, "character")
   expect_true(any(grepl("d/dt", .ret$rx)))
@@ -46,7 +46,7 @@ test_that("integer overflow protection: dparse input approaching INT_MAX bytes",
   # the test confirms no crash or corruption occurs near the boundary.
   huge_str <- strrep("a = b\n", 357913941L)
   expect_no_error(
-    monolix2rx:::.equation(huge_str, monolix2rx:::.pk(""))
+    .equation(huge_str, .pk(""))
   )
 })
 
@@ -65,7 +65,7 @@ test_that("integer overflow protection: sbuf size arithmetic near INT_MAX", {
   # The equation parser processes all lines; cumulative rc_dup_str calls
   # grow _dupStrs toward INT_MAX. The guard prevents heap corruption.
   expect_no_error(
-    monolix2rx:::.equation(huge_eq, monolix2rx:::.pk(""))
+    .equation(huge_eq, .pk(""))
   )
 })
 
@@ -83,7 +83,7 @@ test_that("integer overflow protection: getLine col accumulation near INT_MAX", 
   # 200,000,000 x 10 bytes = 2,000,000,000 bytes (~2GB, under INT_MAX).
   giant_line <- strrep("x_var_abc", 200000000L)
   expect_error(
-    monolix2rx:::.equation(paste0(giant_line, " = !!!bad"),
-                           monolix2rx:::.pk(""))
+    .equation(paste0(giant_line, " = !!!bad"),
+                           .pk(""))
   )
 })
