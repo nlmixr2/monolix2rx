@@ -526,7 +526,7 @@ void trans_equation(const char* parse){
   errP = curP;
   eBufLast = 0;
   gBufFree=0;
-  _pn= dparse(curP, gBuf, (int)strlen(gBuf));
+  _pn= udparse(curP, gBuf, (unsigned int)strlen(gBuf));
   if (!_pn || curP->syntax_errors) {
   } else {
     wprint_parsetree_equation(parser_tables_equation , _pn, 0, wprint_node_equation, NULL);

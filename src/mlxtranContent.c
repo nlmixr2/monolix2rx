@@ -369,7 +369,7 @@ void trans_content(const char* parse){
   errP = curP;
   eBufLast = 0;
   gBufFree=0;
-  _pn= dparse(curP, gBuf, (int)strlen(gBuf));
+  _pn= udparse(curP, gBuf, (unsigned int)strlen(gBuf));
   if (!_pn || curP->syntax_errors) {
   } else {
     wprint_parsetree_content(parser_tables_mlxtranContent , _pn, 0, wprint_node_content, NULL);

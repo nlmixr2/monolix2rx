@@ -141,7 +141,7 @@ void trans_fit(const char* parse){
   errP = curP;
   eBufLast = 0;
   gBufFree=0;
-  _pn= dparse(curP, gBuf, (int)strlen(gBuf));
+  _pn= udparse(curP, gBuf, (unsigned int)strlen(gBuf));
   if (!_pn || curP->syntax_errors) {
   } else {
     wprint_parsetree_fit(parser_tables_mlxtranFit , _pn, 0, wprint_node_fit, NULL);
