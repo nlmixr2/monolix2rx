@@ -75,7 +75,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Create PowerPoint and Word documents using monolix2rx</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/nlmixr2/monolix2rx/blob/v0.0.6/vignettes/articles/create-office.Rmd" class="external-link"><code>vignettes/articles/create-office.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/nlmixr2/monolix2rx/blob/main/vignettes/articles/create-office.Rmd" class="external-link"><code>vignettes/articles/create-office.Rmd</code></a></small>
       <div class="d-none name"><code>create-office.Rmd</code></div>
     </div>
 
@@ -134,15 +134,14 @@ object:</p>
 <span><span class="co">#&gt; [====|====|====|====|====|====|====|====|====|====] 0:00:00</span></span>
 <span><span class="co">#&gt; → compiling EBE model...</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> done</span></span>
-<span><span class="co">#&gt; rxode2 4.1.0 using 2 threads (see ?getRxThreads)</span></span>
+<span><span class="co">#&gt; rxode2 5.0.2 using 2 threads (see ?getRxThreads)</span></span>
 <span><span class="co">#&gt;   no cache: create with `rxCreateCache()`</span></span>
 <span><span class="co">#&gt; → Calculating residuals/tables</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> done</span></span>
-<span><span class="co">#&gt; → compress origData in nlmixr2 object, save 7168</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> monolix parameter history integrated into fit object</span></span>
 <span></span>
 <span><span class="va">fit</span></span></code></pre></div>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>c</mi><mi>m</mi><mi>t</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>d</mi><mi>e</mi><mi>p</mi><mi>o</mi><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>c</mi><mi>m</mi><mi>t</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>c</mi><mi>e</mi><mi>n</mi><mi>t</mi><mi>r</mi><mi>a</mi><mi>l</mi><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>k</mi><mi>a</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi>k</mi><mi>a</mi><mi>_</mi><mi>p</mi><mi>o</mi><mi>p</mi></mrow><mo>+</mo><mrow><mi>o</mi><mi>m</mi><mi>e</mi><mi>g</mi><mi>a</mi><mi>_</mi><mi>k</mi><mi>a</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>V</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi>V</mi><mi>_</mi><mi>p</mi><mi>o</mi><mi>p</mi></mrow><mo>+</mo><mrow><mi>o</mi><mi>m</mi><mi>e</mi><mi>g</mi><mi>a</mi><mi>_</mi><mi>V</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>C</mi><mi>l</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi>C</mi><mi>l</mi><mi>_</mi><mi>p</mi><mi>o</mi><mi>p</mi></mrow><mo>+</mo><mrow><mi>o</mi><mi>m</mi><mi>e</mi><mi>g</mi><mi>a</mi><mi>_</mi><mi>C</mi><mi>l</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mfrac><mrow><mi>d</mi><mspace width="0.222em"></mspace><mi>d</mi><mi>e</mi><mi>p</mi><mi>o</mi><mi>t</mi></mrow><mrow><mi>d</mi><mi>t</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mo>−</mo><mrow><mi>k</mi><mi>a</mi></mrow><mo>×</mo><mrow><mi>d</mi><mi>e</mi><mi>p</mi><mi>o</mi><mi>t</mi></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mfrac><mrow><mi>d</mi><mspace width="0.222em"></mspace><mi>c</mi><mi>e</mi><mi>n</mi><mi>t</mi><mi>r</mi><mi>a</mi><mi>l</mi></mrow><mrow><mi>d</mi><mi>t</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mo>+</mo><mrow><mi>k</mi><mi>a</mi></mrow><mo>×</mo><mrow><mi>d</mi><mi>e</mi><mi>p</mi><mi>o</mi><mi>t</mi></mrow><mo>−</mo><mfrac><mrow><mi>C</mi><mi>l</mi></mrow><mi>V</mi></mfrac><mo>×</mo><mrow><mi>c</mi><mi>e</mi><mi>n</mi><mi>t</mi><mi>r</mi><mi>a</mi><mi>l</mi></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>C</mi><mi>c</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><mrow><mi>c</mi><mi>e</mi><mi>n</mi><mi>t</mi><mi>r</mi><mi>a</mi><mi>l</mi></mrow><mi>V</mi></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>C</mi><mi>O</mi><mi>N</mi><mi>C</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mrow><mi>C</mi><mi>c</mi></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>C</mi><mi>O</mi><mi>N</mi><mi>C</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>∼</mo><mi>a</mi><mi>d</mi><mi>d</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>a</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mi>p</mi><mi>r</mi><mi>o</mi><mi>p</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>b</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mi>c</mi><mi>o</mi><mi>m</mi><mi>b</mi><mi>i</mi><mi>n</mi><mi>e</mi><mi>d</mi><mn>1</mn><mrow><mo stretchy="true" form="prefix">(</mo><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mi>c</mi><mi>m</mi><mi>t</mi><mo stretchy="false" form="prefix">(</mo><mrow><mi>d</mi><mi>e</mi><mi>p</mi><mi>o</mi><mi>t</mi></mrow><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mi>c</mi><mi>m</mi><mi>t</mi><mo stretchy="false" form="prefix">(</mo><mrow><mi>c</mi><mi>e</mi><mi>n</mi><mi>t</mi><mi>r</mi><mi>a</mi><mi>l</mi></mrow><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mi>k</mi><mi>a</mi></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi>k</mi><mi>a</mi><mi>_</mi><mi>p</mi><mi>o</mi><mi>p</mi></mrow><mo>+</mo><mrow><mi>o</mi><mi>m</mi><mi>e</mi><mi>g</mi><mi>a</mi><mi>_</mi><mi>k</mi><mi>a</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mi>V</mi></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi>V</mi><mi>_</mi><mi>p</mi><mi>o</mi><mi>p</mi></mrow><mo>+</mo><mrow><mi>o</mi><mi>m</mi><mi>e</mi><mi>g</mi><mi>a</mi><mi>_</mi><mi>V</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mi>C</mi><mi>l</mi></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi>C</mi><mi>l</mi><mi>_</mi><mi>p</mi><mi>o</mi><mi>p</mi></mrow><mo>+</mo><mrow><mi>o</mi><mi>m</mi><mi>e</mi><mi>g</mi><mi>a</mi><mi>_</mi><mi>C</mi><mi>l</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><mi>d</mi><mspace width="0.222em"></mspace><mi>d</mi><mi>e</mi><mi>p</mi><mi>o</mi><mi>t</mi></mrow><mrow><mi>d</mi><mi>t</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>−</mi><mrow><mi>k</mi><mi>a</mi></mrow><mo>×</mo><mrow><mi>d</mi><mi>e</mi><mi>p</mi><mi>o</mi><mi>t</mi></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mfrac><mrow><mi>d</mi><mspace width="0.222em"></mspace><mi>c</mi><mi>e</mi><mi>n</mi><mi>t</mi><mi>r</mi><mi>a</mi><mi>l</mi></mrow><mrow><mi>d</mi><mi>t</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>+</mi><mrow><mi>k</mi><mi>a</mi></mrow><mo>×</mo><mrow><mi>d</mi><mi>e</mi><mi>p</mi><mi>o</mi><mi>t</mi></mrow><mo>−</mo><mfrac><mrow><mi>C</mi><mi>l</mi></mrow><mi>V</mi></mfrac><mo>×</mo><mrow><mi>c</mi><mi>e</mi><mi>n</mi><mi>t</mi><mi>r</mi><mi>a</mi><mi>l</mi></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mi>C</mi><mi>c</mi></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mfrac><mrow><mi>c</mi><mi>e</mi><mi>n</mi><mi>t</mi><mi>r</mi><mi>a</mi><mi>l</mi></mrow><mi>V</mi></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mi>C</mi><mi>O</mi><mi>N</mi><mi>C</mi></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mrow><mi>C</mi><mi>c</mi></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mi>C</mi><mi>O</mi><mi>N</mi><mi>C</mi></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mi>a</mi><mi>d</mi><mi>d</mi><mo stretchy="false" form="prefix">(</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mi>p</mi><mi>r</mi><mi>o</mi><mi>p</mi><mo stretchy="false" form="prefix">(</mo><mi>b</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mi>c</mi><mi>o</mi><mi>m</mi><mi>b</mi><mi>i</mi><mi>n</mi><mi>e</mi><mi>d</mi><mn>1</mn><mo stretchy="false" form="prefix">(</mo><mo stretchy="false" form="postfix">)</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
 cmt({depot}) \\
 cmt({central}) \\
 {ka} &amp; = \exp\left({ka\_pop}+{omega\_ka}\right) \\
@@ -183,6 +182,19 @@ come from <code>nlmixr2rpt</code> directly:</p>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> done</span></span>
 <span><span class="co">#&gt; Warning in xpose.nlmixr2::xpose_data_nlmixr(fit): Added CWRES to fit (using</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">nlmixr2est::</span><span style="color: #BBBB00;">addCwres</span>)...</span></span>
+<span><span class="co">#&gt; Warning in is.na(p_res): is.na() applied to non-(list or vector) of type</span></span>
+<span><span class="co">#&gt; 'object'</span></span>
+<span><span class="co">#&gt; Warning in is.na(p_res): is.na() applied to non-(list or vector) of type</span></span>
+<span><span class="co">#&gt; 'object'</span></span>
+<span><span class="co">#&gt; Warning in is.na(p_res): is.na() applied to non-(list or vector) of type</span></span>
+<span><span class="co">#&gt; 'object'</span></span>
+<span><span class="co">#&gt; Warning in melt.data.table(dx.cats, measure.vars = cats): id.vars and</span></span>
+<span><span class="co">#&gt; measure.vars are internally guessed when both are 'NULL'. All</span></span>
+<span><span class="co">#&gt; non-numeric/integer/logical type columns are considered id.vars, which in this</span></span>
+<span><span class="co">#&gt; case are columns [EFFECT]. Consider providing at least one of 'id' or 'measure'</span></span>
+<span><span class="co">#&gt; vars in future.</span></span>
+<span><span class="co">#&gt; Warning in is.na(p_res): is.na() applied to non-(list or vector) of type</span></span>
+<span><span class="co">#&gt; 'object'</span></span>
 <span><span class="co">#&gt; Skipping table: skip_table (NA found, not generated)</span></span>
 <span><span class="co">#&gt; Skipping figure: res_vs_pred_idv (NA found, not generated)</span></span>
 <span><span class="co">#&gt; Skipping figure: eta_cont (NA found, not generated)</span></span>
@@ -215,6 +227,19 @@ from <code>nlmixr2rpt</code> directly:</p>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> done</span></span>
 <span><span class="co">#&gt; Warning in xpose.nlmixr2::xpose_data_nlmixr(fit): Added CWRES to fit (using</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">nlmixr2est::</span><span style="color: #BBBB00;">addCwres</span>)...</span></span>
+<span><span class="co">#&gt; Warning in is.na(p_res): is.na() applied to non-(list or vector) of type</span></span>
+<span><span class="co">#&gt; 'object'</span></span>
+<span><span class="co">#&gt; Warning in is.na(p_res): is.na() applied to non-(list or vector) of type</span></span>
+<span><span class="co">#&gt; 'object'</span></span>
+<span><span class="co">#&gt; Warning in is.na(p_res): is.na() applied to non-(list or vector) of type</span></span>
+<span><span class="co">#&gt; 'object'</span></span>
+<span><span class="co">#&gt; Warning in melt.data.table(dx.cats, measure.vars = cats): id.vars and</span></span>
+<span><span class="co">#&gt; measure.vars are internally guessed when both are 'NULL'. All</span></span>
+<span><span class="co">#&gt; non-numeric/integer/logical type columns are considered id.vars, which in this</span></span>
+<span><span class="co">#&gt; case are columns [EFFECT]. Consider providing at least one of 'id' or 'measure'</span></span>
+<span><span class="co">#&gt; vars in future.</span></span>
+<span><span class="co">#&gt; Warning in is.na(p_res): is.na() applied to non-(list or vector) of type</span></span>
+<span><span class="co">#&gt; 'object'</span></span>
 <span><span class="co">#&gt; Skipping figure: res_vs_pred_idv (NA found, not generated)</span></span>
 <span><span class="co">#&gt; Skipping figure: skip_figure (NA found, not generated)</span></span>
 <span><span class="co">#&gt; Skipping figure: eta_cont (NA found, not generated)</span></span>
@@ -239,7 +264,7 @@ from <code>nlmixr2rpt</code> directly:</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>
