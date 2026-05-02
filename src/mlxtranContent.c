@@ -369,7 +369,11 @@ void trans_content(const char* parse){
   errP = curP;
   eBufLast = 0;
   gBufFree=0;
-  _pn= udparse(curP, gBuf, (unsigned int)strlen(gBuf));
+  /* TODO(long-term): switch to udparse() once dparser-R ships that symbol
+   * to CRAN.  udparse() accepts an unsigned int for buf_len, eliminating
+   * the silent (int)strlen truncation on inputs >= INT_MAX bytes.
+   * Track at https://github.com/nlmixr2/dparser-R */
+  _pn= dparse(curP, gBuf, (int)strlen(gBuf));
   if (!_pn || curP->syntax_errors) {
   } else {
     wprint_parsetree_content(parser_tables_mlxtranContent , _pn, 0, wprint_node_content, NULL);

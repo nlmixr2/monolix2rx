@@ -1,12 +1,9 @@
 # monolix2rx 0.0.7
 
-* Switch all 13 `trans_*` parser entry-points to use the new
-  `udparse(curP, gBuf, (unsigned int)strlen(gBuf))` API
-  (dparser >= 1.3.2) instead of the previous
-  `dparse(curP, gBuf, (int)strlen(gBuf))`.  The unsigned-int parameter
-  removes the silent truncation that the `(int)` cast caused on inputs
-  near or above `INT_MAX` bytes; no per-call-site length guard is
-  needed in monolix2rx itself.
+* Document known `(int)strlen(gBuf)` cast in all 13 `trans_*` parser
+  entry-points.  Inputs at or above `INT_MAX` bytes cause silent length
+  truncation in the `dparse()` call.  A long-term fix will switch each
+  call site to `udparse()` once dparser-R ships that symbol to CRAN.
 
 # monolix2rx 0.0.6
 
