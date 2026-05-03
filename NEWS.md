@@ -1,3 +1,10 @@
+# monolix2rx 0.0.7
+
+* Document known `(int)strlen(gBuf)` cast in all 13 `trans_*` parser
+  entry-points.  Inputs at or above `INT_MAX` bytes cause silent length
+  truncation in the `dparse()` call.  A long-term fix will switch each
+  call site to `udparse()` once dparser-R ships that symbol to CRAN.
+
 # monolix2rx 0.0.6
 
 * Updated to add types for rstudio completion
