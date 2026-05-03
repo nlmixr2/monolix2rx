@@ -27,6 +27,10 @@ void sFreeIni(sbuf *sbb) {
 
 void sAppendN(sbuf *sbb, const char *what, int n) {
   if (sbb->sN == 0) sIni(sbb);
+  if (n < 0) Rf_error(_("invalid negative length in sAppendN"));
+  if (sbb->o > INT_MAX - 2 - n - SBUF_MXBUF) {
+    Rf_error(_("buffer size overflow in sAppendN"));
+  }
   if (sbb->sN <= 2 + n + sbb->o){
     int mx = sbb->o + 2 + n + SBUF_MXBUF;
     sbb->s = R_Realloc(sbb->s, mx, char);
@@ -51,6 +55,9 @@ void sAppend(sbuf *sbb, const char *format, ...) {
   n = vsnprintf(zero, 0, format, copy) + 1;
 #endif
   va_end(copy);
+  if (n > 0 && sbb->o > INT_MAX - n - 1 - SBUF_MXBUF) {
+    Rf_error(_("buffer size overflow in sAppend"));
+  }
   if (sbb->sN <= sbb->o + n + 1) {
     int mx = sbb->o + n + 1 + SBUF_MXBUF;
     sbb->s = R_Realloc(sbb->s, mx, char);
@@ -109,6 +116,9 @@ void addLine(vLines *sbb, const char *format, ...) {
     Rf_errorcall(R_NilValue, _("encoding error in 'addLine' format: '%s' n: %d; errno: %d"), format, n, errno);
   }
   va_end(copy);
+  if (sbb->sN > INT_MAX - n - 2 - SBUF_MXBUF) {
+    Rf_error(_("buffer size overflow in addLine (string buffer)"));
+  }
   if (sbb->sN <= sbb->o + n){
     int mx = sbb->sN + n + 2 + SBUF_MXBUF;
     sbb->s = R_Realloc(sbb->s, mx, char);
@@ -121,6 +131,9 @@ void addLine(vLines *sbb, const char *format, ...) {
   }
   vsnprintf(sbb->s + sbb->o, sbb->sN - sbb->o, format, argptr);
   va_end(argptr);
+  if (sbb->nL > INT_MAX - n - 2 - SBUF_MXLINE) {
+    Rf_error(_("line array size overflow in addLine"));
+  }
   if (sbb->n + 2 >= sbb->nL){
     int mx = sbb->nL + n + 2 + SBUF_MXLINE;
     sbb->lProp = R_Realloc(sbb->lProp, mx, int);

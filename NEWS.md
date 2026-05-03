@@ -1,3 +1,23 @@
+# monolix2rx 0.0.7
+
+* Fixed implicit `ptrdiff_t` to `int` truncation in `rc_dup_str` (`src/shared.c`);
+  pointer differences are now range-checked before conversion to `int`.
+
+* Fixed potential integer overflow in all 13 `trans_*` parser entry-points: the
+  `strlen(gBuf)` result is now checked against `INT_MAX` before being cast to
+  `int` for the `dparse()` call.
+
+* Fixed signed integer overflow in `sbuf` size arithmetic (`src/sbuf.c`):
+  `sAppendN`, `sAppend`, and `addLine` now guard against overflow before
+  computing reallocation sizes.
+
+* Fixed `int col` overflow in `getLine` (`src/parseSyntaxErrors.h`): the column
+  accumulator is now `size_t` with an explicit bounds check before use.
+
+* Added thread-safety comment to `src/shared.c` documenting that the global
+  parser state is intentionally not mutex-protected, consistent with R's
+  single-threaded execution model.
+
 # monolix2rx 0.0.6
 
 * Updated to add types for rstudio completion
