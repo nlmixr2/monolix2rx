@@ -1,3 +1,13 @@
+# monolix2rx 0.0.7
+
+* Add integer overflow guards in the C-level string buffer
+  (`src/sbuf.c`).  `sAppendN`, `sAppend`, and `addLine` previously
+  computed the new allocation size as `sbb->o + 2 + n + SBUF_MXBUF`
+  (or analogous expression).  When the user-controlled `n` was large
+  enough this expression overflowed `int` to a negative value, which
+  `R_Realloc` then converted to a huge unsigned size and crashed.  The
+  guard converts this into a clean R error.
+
 # monolix2rx 0.0.6
 
 * Updated to add types for rstudio completion
