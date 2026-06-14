@@ -177,7 +177,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
         warning(paste("The following parameters are missing from the thetaMat covariance matrix because they were NaN/NA:",
                       paste(dimnames(.thetaMat)[[1]][.w], collapse=", ")),
                 call.=FALSE)
-        .thetaMat <- .thetaMat[-.w, -.w]
+        .thetaMat <- .thetaMat[-.w, -.w, drop = FALSE]
       }
       .thetaMatType <- .tt
       break
