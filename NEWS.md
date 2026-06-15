@@ -31,6 +31,8 @@
   `R_Realloc` then converted to a huge unsigned size and crashed.  The
   guard converts this into a clean R error.
 
+* Add regression tests covering the C parser memory-safety guards above.
+
 # monolix2rx 0.0.6
 
 * Updated to add types for rstudio completion

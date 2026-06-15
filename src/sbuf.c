@@ -28,6 +28,7 @@ void sFreeIni(sbuf *sbb) {
 
 void sAppendN(sbuf *sbb, const char *what, int n) {
   if (sbb->sN == 0) sIni(sbb);
+  if (n < 0) Rf_error(_("invalid negative length in sAppendN"));
   if (sbb->sN <= 2 + n + sbb->o){
     if (n > INT_MAX - sbb->o - 2 - SBUF_MXBUF) {
       (Rf_error)("string buffer size overflow: input too large");
