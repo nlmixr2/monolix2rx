@@ -1,3 +1,14 @@
+# monolix2rx 0.0.7
+
+* Fix implicit `ptrdiff_t` to `int` truncation in `rc_dup_str`
+  (`src/shared.c`).  When the parser passes a string segment longer than
+  `INT_MAX` bytes (or a NUL-terminated string of that length), the
+  pointer difference / `strlen` result was silently cast to `int`,
+  truncating the length to a wrong (often negative) value.  The new
+  guard rejects such inputs with an informative R error.  Also adds a
+  thread-safety comment documenting that the parser globals are
+  intentionally not mutex-protected (R is single-threaded).
+
 # monolix2rx 0.0.6
 
 * Updated to add types for rstudio completion
