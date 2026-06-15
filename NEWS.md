@@ -2,6 +2,8 @@
 
 * Updated to add types for rstudio completion
 
+- Defensive `drop = FALSE` on the imported `thetaMat` covariance subset so a single surviving parameter is not collapsed to a scalar.
+
 # monolix2rx 0.0.5
 
 * Updated for new solving option in rxode2 4.0 (and depend on the packages)
