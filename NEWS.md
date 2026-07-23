@@ -4,6 +4,12 @@
 
 - Defensive `drop = FALSE` on the imported `thetaMat` covariance subset so a single surviving parameter is not collapsed to a scalar.
 
+- Parameters whose off-diagonal covariances are `NaN`/`NA` are now also dropped from the imported `thetaMat` (previously only the diagonal was checked, so `NaN` covariances could silently propagate into simulations).
+
+- When every parameter is dropped from the imported `thetaMat`, the covariance information is now ignored with a warning instead of storing a `0x0` matrix that would break `rxSolve()` simulations.
+
+- Fixed `rxSolve()` fallbacks that read `dfObs`/`thetaMat` from the wrong location when the values were stored on the model instead of its `meta` environment.
+
 # monolix2rx 0.0.5
 
 * Updated for new solving option in rxode2 4.0 (and depend on the packages)

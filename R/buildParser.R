@@ -152,7 +152,6 @@
           .minfo(paste0("using dfObs=", dfObs, " from Monolix"))
         } else if (!is.null(object$dfObs)) {
           dfObs <- object$dfObs
-          dfObs <- object$meta$dfObs
           .minfo(paste0("using dfObs=", dfObs, " from Monolix"))
         }
       }
@@ -161,7 +160,7 @@
           thetaMat <- object$meta$thetaMat
           .minfo(paste0("using thetaMat from Monolix"))
         } else if (!is.null(object$thetaMat)) {
-          thetaMat <- object$meta$thetaMat
+          thetaMat <- object$thetaMat
           .minfo(paste0("using thetaMat from Monolix"))
         }
       }
