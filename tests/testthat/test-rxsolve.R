@@ -24,6 +24,10 @@ test_that("solving makes sense", {
   expect_equal(s$env$.args$thetaMat, f$thetaMat)
   expect_equal(s$env$.args$omega, f$omega)
 
+  # the Monolix-style steady state limits are forwarded to the solve
+  expect_equal(s$env$.args$maxSS, .getNbdoses(f) + 1)
+  expect_equal(s$env$.args$minSS, .getNbdoses(f))
+
   for (v in names(f$theta)) {
     expect_true(all(s$params[[v]] == f$theta[v]))
   }

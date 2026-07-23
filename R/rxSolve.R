@@ -72,7 +72,7 @@ rxSolve.monolix2rx <- function(object, params = NULL, events = NULL,
             ssAtol))
     }
     .nss <- .getNbdoses(object)
-    if (missing(maxSS) && missing(maxSS)) {
+    if (missing(maxSS) && missing(minSS)) {
         maxSS <- .nss + 1
         minSS <- .nss
         .minfo(paste0("Since Monolix uses a set number of doses for steady state use maxSS=", 
@@ -86,6 +86,6 @@ rxSolve.monolix2rx <- function(object, params = NULL, events = NULL,
         hmax = hmax, hmaxSd = hmaxSd, hini = hini, maxordn = maxordn, 
         maxords = maxords, ..., cores = cores, covsInterpolation = covsInterpolation, 
         nStud = nStud, dfSub = dfSub, dfObs = dfObs, thetaMat = thetaMat, 
-        ssAtol = ssAtol, ssRtol = ssRtol, minSS = minSS, maxSS = 10000L, 
+        ssAtol = ssAtol, ssRtol = ssRtol, minSS = minSS, maxSS = maxSS,
         envir = envir)
 }
