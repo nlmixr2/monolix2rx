@@ -25,6 +25,34 @@ test_that("thetaMat pruning drops parameters with NaN/NA off-diagonal covariance
 
 })
 
+test_that("thetaMat off-diagonal pruning keeps a 1x1 matrix", {
+
+  .m <- matrix(c(1, NaN, NaN, 2), 2, 2,
+               dimnames=list(c("a", "b"), c("a", "b")))
+
+  expect_warning(.p <- .thetaMatPrune(.m), "is dropped")
+  expect_true(is.matrix(.p))
+  expect_equal(dim(.p), c(1L, 1L))
+  expect_equal(dimnames(.p), list("b", "b"))
+  expect_equal(.p[1, 1], 2)
+
+})
+
+test_that("thetaMat pruning handles column-only NaN patterns", {
+
+  # NaN only below the diagonal: 'a' participates in both NaN pairs, so
+  # dropping it keeps the clean {b, c} block
+  .m <- matrix(c(1,  0, 0,
+                 NA, 1, 0,
+                 NA, 0, 1), 3, 3, byrow=TRUE,
+               dimnames=list(c("a", "b", "c"), c("a", "b", "c")))
+
+  expect_warning(.p <- .thetaMatPrune(.m), "'a'")
+  expect_equal(dimnames(.p), list(c("b", "c"), c("b", "c")))
+  expect_false(anyNA(.p))
+
+})
+
 test_that("thetaMat pruning of an all-NaN matrix gives a 0x0 matrix", {
 
   .m <- matrix(NaN, 2, 2, dimnames=list(c("a", "b"), c("a", "b")))
@@ -54,6 +82,7 @@ test_that("monolix2rx imports a 1x1 thetaMat when all but one parameter is NaN",
 
   .cov <- attr(.v, "covSaUntransformed")
   skip_if(is.null(.cov))
+  .cov0 <- .cov
 
   # make every diagonal element but the first NaN
   .n <- dim(.cov)[1]
@@ -79,5 +108,19 @@ test_that("monolix2rx imports a 1x1 thetaMat when all but one parameter is NaN",
   .ws <- capture_warnings(.rx <- suppressMessages(monolix2rx(.v, update=FALSE)))
   expect_true(any(grepl("ignoring the Monolix covariance step", .ws)))
   expect_true(is.null(.rx$thetaMat))
+
+  # a clean diagonal with NaN off-diagonal covariances drops the parameter
+  .cov <- .cov0
+  .cov[1, 2] <- .cov[2, 1] <- NaN
+  attr(.v, "covSaUntransformed") <- .cov
+  if (!is.null(attr(.v, "covLinUntransformed"))) {
+    attr(.v, "covLinUntransformed") <- .cov
+  }
+
+  .ws <- capture_warnings(.rx <- suppressMessages(monolix2rx(.v, update=FALSE)))
+  expect_true(any(grepl("is dropped from the thetaMat covariance matrix", .ws)))
+  expect_true(inherits(.rx$thetaMat, "matrix"))
+  expect_equal(dim(.rx$thetaMat), dim(.cov) - 1L)
+  expect_false(anyNA(.rx$thetaMat))
 
 })

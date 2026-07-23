@@ -29,3 +29,30 @@ test_that("solving makes sense", {
   }
 
 })
+
+test_that("rxSolve falls back to model-level dfObs/thetaMat when meta lacks them", {
+  skip_on_cran()
+
+  f <- .monolix2rx(system.file("theo/theophylline_project.mlxtran", package="monolix2rx"))
+  f <- rxode2::rxUiDecompress(f)
+  # rxUiDecompress() drops the monolix2rx class; restore it for dispatch
+  class(f) <- c("monolix2rx", class(f))
+
+  # move dfObs off the meta environment onto the model environment
+  .dfObs <- f$meta$dfObs
+  rm("dfObs", envir=f$meta)
+  assign("dfObs", .dfObs + 1, envir=f)
+
+  # move thetaMat off the meta environment onto the model environment
+  if (exists("thetaMat", envir=f$meta)) rm("thetaMat", envir=f$meta)
+  .iniDf <- f$iniDf
+  .nm <- .iniDf$name[is.na(.iniDf$neta1) & !.iniDf$fix]
+  .tm <- diag(1e-4, length(.nm))
+  dimnames(.tm) <- list(.nm, .nm)
+  assign("thetaMat", .tm, envir=f)
+
+  s <- .rxSolve(f, nStud=1)
+
+  expect_equal(s$env$.args$dfObs, .dfObs + 1)
+  expect_equal(s$env$.args$thetaMat, .tm)
+})

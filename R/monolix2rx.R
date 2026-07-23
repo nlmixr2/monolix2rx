@@ -249,9 +249,13 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
             call.=FALSE)
     thetaMat <- thetaMat[-.w, -.w, drop = FALSE]
   }
-  # is.na() is TRUE for NaN as well
+  # is.na() is TRUE for NaN as well; score rows and columns together so
+  # asymmetric NaN patterns are handled.  On ties the first parameter is
+  # dropped, which may prune more than strictly needed, but each drop
+  # warns and NaN never reaches the simulation
   while (nrow(thetaMat) > 0L && anyNA(thetaMat)) {
-    .w <- which.max(rowSums(is.na(thetaMat)))
+    .bad <- is.na(thetaMat)
+    .w <- which.max(rowSums(.bad) + colSums(.bad))
     warning(paste0("the parameter '", dimnames(thetaMat)[[1]][.w],
                    "' is dropped from the thetaMat covariance matrix because its covariances were NaN/NA"),
             call.=FALSE)
