@@ -137,7 +137,7 @@ fit <- as.nlmixr2(mod)
 #> [====|====|====|====|====|====|====|====|====|====] 0:00:00
 #> → compiling EBE model...
 #> ✔ done
-#> rxode2 5.0.2 using 2 threads (see ?getRxThreads)
+#> rxode2 5.1.4 using 2 threads (see ?getRxThreads)
 #>   no cache: create with `rxCreateCache()`
 #> → Calculating residuals/tables
 #> ✔ done
@@ -148,7 +148,6 @@ fit <- addCwres(fit)
 #> → loading into symengine environment...
 #> → pruning branches (`if`/`else`) of full model...
 #> ✔ done
-#> → calculate jacobian
 #> [====|====|====|====|====|====|====|====|====|====] 0:00:00
 #> → calculate sensitivities
 #> [====|====|====|====|====|====|====|====|====|====] 0:00:00
