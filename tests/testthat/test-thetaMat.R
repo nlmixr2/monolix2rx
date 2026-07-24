@@ -63,6 +63,38 @@ test_that("thetaMat pruning of an all-NaN matrix gives a 0x0 matrix", {
 
 })
 
+test_that("thetaMat pruning drops non-model parameters first on ties", {
+
+  # the bad covariance pairs 'ka' with 'unused'; without a keep
+  # preference the tie would drop the real model parameter 'ka'
+  .m <- matrix(c(1,  0, NA,
+                 0,  4, 0,
+                 NA, 0, 9), 3, 3, byrow=TRUE,
+               dimnames=list(c("ka", "cl", "unused"), c("ka", "cl", "unused")))
+
+  expect_warning(.p <- .thetaMatPrune(.m, keep=c("ka", "cl")), "'unused'")
+  expect_equal(dimnames(.p), list(c("ka", "cl"), c("ka", "cl")))
+  expect_true(all(is.finite(.p)))
+
+})
+
+test_that("thetaMat pruning also drops Inf (co)variances", {
+
+  .m <- matrix(c(Inf, 0.1, 0.1, 2), 2, 2,
+               dimnames=list(c("a", "b"), c("a", "b")))
+
+  expect_warning(.p <- .thetaMatPrune(.m), "NaN/NA/Inf")
+  expect_equal(dimnames(.p), list("b", "b"))
+
+  .m <- matrix(c(1, Inf, Inf, 2), 2, 2,
+               dimnames=list(c("a", "b"), c("a", "b")))
+
+  expect_warning(.p <- .thetaMatPrune(.m), "is dropped")
+  expect_equal(dim(.p), c(1L, 1L))
+  expect_true(all(is.finite(.p)))
+
+})
+
 test_that("thetaMat pruning leaves a clean matrix untouched", {
 
   .m <- matrix(c(1, 0.1, 0.1, 2), 2, 2,

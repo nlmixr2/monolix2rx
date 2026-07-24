@@ -168,6 +168,9 @@
         } else if (!is.null(object$thetaMat)) {
           thetaMat <- object$thetaMat
           .minfo(paste0("using thetaMat from Monolix"))
+        } else if (nStud > 1L) {
+          warning("no thetaMat covariance is available from the Monolix import; simulating without parameter uncertainty",
+                  call.=FALSE)
         }
       }
     }

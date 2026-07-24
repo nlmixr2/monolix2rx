@@ -28,6 +28,11 @@ test_that("solving makes sense", {
   expect_equal(s$env$.args$maxSS, .getNbdoses(f) + 1)
   expect_equal(s$env$.args$minSS, .getNbdoses(f))
 
+  # user-specified steady state limits are honored, not overwritten
+  s <- .rxSolve(f, nStud=1, minSS=7L, maxSS=20L)
+  expect_equal(s$env$.args$maxSS, 20L)
+  expect_equal(s$env$.args$minSS, 7L)
+
   for (v in names(f$theta)) {
     expect_true(all(s$params[[v]] == f$theta[v]))
   }
@@ -59,4 +64,12 @@ test_that("rxSolve falls back to model-level dfObs/thetaMat when meta lacks them
 
   expect_equal(s$env$.args$dfObs, .dfObs + 1)
   expect_equal(s$env$.args$thetaMat, .tm)
+
+  # without any thetaMat, nStud > 1 warns that uncertainty is missing
+  # (rxSolve() strips the monolix2rx class by reference on environment
+  #  uis, so restore it before dispatching again)
+  class(f) <- c("monolix2rx", class(f))
+  rm("thetaMat", envir=f)
+  expect_warning(try(suppressMessages(rxSolve(f, nStud=2)), silent=TRUE),
+                 "simulating without parameter uncertainty")
 })
