@@ -31,7 +31,10 @@ void sAppendN(sbuf *sbb, const char *what, int n) {
   // The guard has to run before the resize test below: `2 + n + sbb->o` itself
   // overflows for large `n` and wraps negative, which makes the test false and
   // would skip both the reallocation and the guard.
-  if (n < 0 || n > INT_MAX - sbb->o - 2 - SBUF_MXBUF) {
+  if (n < 0) {
+    (Rf_error)("negative length passed to 'sAppendN'");
+  }
+  if (n > INT_MAX - sbb->o - 2 - SBUF_MXBUF) {
     (Rf_error)("string buffer size overflow: input too large");
   }
   if (sbb->sN <= 2 + n + sbb->o){
@@ -51,6 +54,7 @@ void sAppend(sbuf *sbb, const char *format, ...) {
   va_list argptr, copy;
   va_start(argptr, format);
   va_copy(copy, argptr);
+  errno = 0;
 #if defined(_WIN32) || defined(WIN32)
   n = vsnprintf(NULL, 0, format, copy) + 1;
 #else
@@ -60,8 +64,14 @@ void sAppend(sbuf *sbb, const char *format, ...) {
   va_end(copy);
   // Guard before the resize test: `sbb->o + n + 1` overflows for large `n`.
   // `n` is the vsnprintf() length plus one, so it is <= 0 only when vsnprintf()
-  // failed or its own return value overflowed.
-  if (n <= 0 || n > INT_MAX - sbb->o - 1 - SBUF_MXBUF) {
+  // failed (-1) or its own return value overflowed; `addLine` reports the same
+  // condition separately, so keep the two diagnostics distinguishable here too.
+  if (n <= 0) {
+    va_end(argptr);
+    Rf_errorcall(R_NilValue, _("encoding error in 'sAppend' format: '%s' n: %d; errno: %d"),
+                 format, n, errno);
+  }
+  if (n > INT_MAX - sbb->o - 1 - SBUF_MXBUF) {
     va_end(argptr);
     (Rf_error)("string buffer size overflow: input too large");
   }
