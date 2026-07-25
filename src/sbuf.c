@@ -28,12 +28,12 @@ void sFreeIni(sbuf *sbb) {
 
 void sAppendN(sbuf *sbb, const char *what, int n) {
   if (sbb->sN == 0) sIni(sbb);
-  // The guard has to run before the resize test below: `2 + n + sbb->o` itself
-  // overflows for large `n` and wraps negative, which makes the test false and
-  // would skip both the reallocation and the guard.
   if (n < 0) {
     (Rf_error)("negative length passed to 'sAppendN'");
   }
+  // The guard has to run before the resize test below: `2 + n + sbb->o` itself
+  // overflows for large `n` and wraps negative, which makes the test false and
+  // would skip both the reallocation and the guard.
   if (n > INT_MAX - sbb->o - 2 - SBUF_MXBUF) {
     (Rf_error)("string buffer size overflow: input too large");
   }
@@ -130,6 +130,8 @@ void addLine(vLines *sbb, const char *format, ...) {
   n = vsnprintf(zero, 0, format, copy);
 #endif
   if (n < 0){
+    va_end(copy);
+    va_end(argptr);
     Rf_errorcall(R_NilValue, _("encoding error in 'addLine' format: '%s' n: %d; errno: %d"), format, n, errno);
   }
   va_end(copy);
