@@ -32,7 +32,6 @@ rxSolve.monolix2rx <- function(object, params = NULL, events = NULL,
             }
             else if (!is.null(object$dfObs)) {
                 dfObs <- object$dfObs
-                dfObs <- object$meta$dfObs
                 .minfo(paste0("using dfObs=", dfObs, " from Monolix"))
             }
         }
@@ -42,8 +41,12 @@ rxSolve.monolix2rx <- function(object, params = NULL, events = NULL,
                 .minfo(paste0("using thetaMat from Monolix"))
             }
             else if (!is.null(object$thetaMat)) {
-                thetaMat <- object$meta$thetaMat
+                thetaMat <- object$thetaMat
                 .minfo(paste0("using thetaMat from Monolix"))
+            }
+            else if (nStud > 1L) {
+                warning("no thetaMat covariance is available from the Monolix import; simulating without parameter uncertainty",
+                  call. = FALSE)
             }
         }
     }
@@ -73,7 +76,7 @@ rxSolve.monolix2rx <- function(object, params = NULL, events = NULL,
             ssAtol))
     }
     .nss <- .getNbdoses(object)
-    if (missing(maxSS) && missing(maxSS)) {
+    if (missing(maxSS) && missing(minSS)) {
         maxSS <- .nss + 1
         minSS <- .nss
         .minfo(paste0("Since Monolix uses a set number of doses for steady state use maxSS=", 
@@ -87,6 +90,6 @@ rxSolve.monolix2rx <- function(object, params = NULL, events = NULL,
         hmax = hmax, hmaxSd = hmaxSd, hini = hini, maxordn = maxordn, 
         maxords = maxords, ..., cores = cores, covsInterpolation = covsInterpolation, 
         nStud = nStud, dfSub = dfSub, dfObs = dfObs, thetaMat = thetaMat, 
-        ssAtol = ssAtol, ssRtol = ssRtol, minSS = minSS, maxSS = 10000L, 
+        ssAtol = ssAtol, ssRtol = ssRtol, minSS = minSS, maxSS = maxSS,
         envir = envir)
 }

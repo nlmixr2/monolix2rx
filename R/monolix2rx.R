@@ -171,20 +171,18 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
                       paste(.diff, collapse=", ")),
                       call.=FALSE)
       }
-      .d <- diag(.thetaMat)
-      .w <- which(is.nan(.d) | is.na(.d))
-      if (length(.w) > 0L) {
-        warning(paste("The following parameters are missing from the thetaMat covariance matrix because they were NaN/NA:",
-                      paste(dimnames(.thetaMat)[[1]][.w], collapse=", ")),
-                call.=FALSE)
-        .thetaMat <- .thetaMat[-.w, -.w]
-      }
+      .thetaMat <- .thetaMatPrune(.thetaMat, .thetaMatNames)
       .thetaMatType <- .tt
       break
     }
   }
   if (length(.thetaMatType) == 1L) {
-    assign("thetaMat", .thetaMat, envir=.ui$meta)
+    if (nrow(.thetaMat) == 0L) {
+      warning("all parameters were dropped from the thetaMat covariance matrix because they were NaN/NA; ignoring the Monolix covariance step",
+              call.=FALSE)
+    } else {
+      assign("thetaMat", .thetaMat, envir=.ui$meta)
+    }
   }
   if (!is.null(attr(.mlxtran, "desc")) &&
         attr(.mlxtran, "desc") != "") {
@@ -229,4 +227,46 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   .ui <- rxode2::rxUiCompress(.ui)
   class(.ui) <- c("monolix2rx", class(.ui))
   .ui
+}
+
+#' Drop parameters with NaN/NA (co)variances from an imported covariance matrix
+#'
+#' First drops parameters whose diagonal variance is NaN/NA, then drops
+#' parameters with NaN/NA off-diagonal covariances (most NaN/NA first) so a
+#' matrix containing NaN/NA is never used for simulation.  `drop=FALSE`
+#' keeps a single surviving parameter as a named 1x1 matrix.
+#'
+#' @param thetaMat named square covariance matrix imported from Monolix
+#' @param keep parameter names the model estimates; on tied scores a
+#'   parameter not in `keep` is dropped first so a bad covariance on an
+#'   extraneous row does not delete a real model parameter
+#' @return pruned covariance matrix (possibly 0x0) with dimnames preserved
+#' @noRd
+#' @author Matthew L. Fidler
+.thetaMatPrune <- function(thetaMat, keep=character(0)) {
+  .d <- diag(thetaMat)
+  .w <- which(!is.finite(.d))
+  if (length(.w) > 0L) {
+    warning(paste("The following parameters are missing from the thetaMat covariance matrix because they were NaN/NA/Inf:",
+                  paste(dimnames(thetaMat)[[1]][.w], collapse=", ")),
+            call.=FALSE)
+    thetaMat <- thetaMat[-.w, -.w, drop = FALSE]
+  }
+  # is.finite() is FALSE for NaN/NA/Inf; score rows and columns together
+  # so asymmetric patterns are handled.  On ties the first parameter is
+  # dropped, which may prune more than strictly needed, but each drop
+  # warns and a non-finite value never reaches the simulation
+  while (nrow(thetaMat) > 0L && !all(is.finite(thetaMat))) {
+    .bad <- !is.finite(thetaMat)
+    # the 0.5 boost only breaks integer-score ties in favor of dropping
+    # parameters the model does not estimate
+    .score <- rowSums(.bad) + colSums(.bad) +
+      0.5 * !(dimnames(thetaMat)[[1]] %in% keep)
+    .w <- which.max(.score)
+    warning(paste0("the parameter '", dimnames(thetaMat)[[1]][.w],
+                   "' is dropped from the thetaMat covariance matrix because its covariances were NaN/NA/Inf"),
+            call.=FALSE)
+    thetaMat <- thetaMat[-.w, -.w, drop = FALSE]
+  }
+  thetaMat
 }
