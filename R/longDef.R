@@ -356,9 +356,6 @@
   .monolix2rx$transformCatB <- c(.monolix2rx$transformCatB, as.logical(q))
 }
 
-.longDefSetTransformB <- function(q) {
-  .monolix2rx$transformCatB <- c(.monolix2rx$transformCatB, as.logical(q))
-}
 .longDefSetTransformRef <- function(var, q) {
   .monolix2rx$transformReference <- var
   .monolix2rx$transformReferenceQ <- as.logical(q)

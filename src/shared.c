@@ -19,6 +19,10 @@ dparserPtrIni
 #include "parseSyntaxErrors.h"
 
 // These are the shared variables
+// NOTE: These globals are intentionally not mutex-protected.
+// R's interpreter is single-threaded; its memory allocator (R_Calloc, R_Free)
+// and error handling (Rf_error) are not safe to call from multiple threads.
+// All parse operations must occur on the R main thread.
 
 const char *record;
 int _rxode2_reallyHasAfter = 0;
@@ -41,8 +45,20 @@ int lastStrLoc=0;
 vLines _dupStrs;
 char * rc_dup_str(const char *s, const char *e) {
   lastStr=s;
-  int l = e ? e-s : (int)strlen(s);
-  //syntaxErrorExtra=min(l-1, 40);
+  int l;
+  if (e) {
+    ptrdiff_t diff = e - s;
+    if (diff < 0 || diff > (ptrdiff_t)INT_MAX) {
+      Rf_error(_("string segment too long in rc_dup_str"));
+    }
+    l = (int)diff;
+  } else {
+    size_t sLen = strlen(s);
+    if (sLen > (size_t)INT_MAX) {
+      Rf_error(_("string too long in rc_dup_str"));
+    }
+    l = (int)sLen;
+  }
   addLine(&_dupStrs, "%.*s", l, s);
   return _dupStrs.line[_dupStrs.n-1];
 }
