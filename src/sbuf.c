@@ -50,31 +50,32 @@ void sAppendN(sbuf *sbb, const char *what, int n) {
 void sAppend(sbuf *sbb, const char *format, ...) {
   if (sbb->sN == 0) sIni(sbb);
   if (format == NULL) return;
-  int n = 0;
+  int n = 0, nRaw = 0;
   va_list argptr, copy;
   va_start(argptr, format);
   va_copy(copy, argptr);
   errno = 0;
+  // Keep the raw vsnprintf() length: the `+ 1` below is itself an int overflow
+  // when vsnprintf() reports INT_MAX, so it has to happen after the guards.
 #if defined(_WIN32) || defined(WIN32)
-  n = vsnprintf(NULL, 0, format, copy) + 1;
+  nRaw = vsnprintf(NULL, 0, format, copy);
 #else
   char zero[2];
-  n = vsnprintf(zero, 0, format, copy) + 1;
+  nRaw = vsnprintf(zero, 0, format, copy);
 #endif
   va_end(copy);
-  // Guard before the resize test: `sbb->o + n + 1` overflows for large `n`.
-  // `n` is the vsnprintf() length plus one, so it is <= 0 only when vsnprintf()
-  // failed (-1) or its own return value overflowed; `addLine` reports the same
-  // condition separately, so keep the two diagnostics distinguishable here too.
-  if (n <= 0) {
+  if (nRaw < 0) {
     va_end(argptr);
     Rf_errorcall(R_NilValue, _("encoding error in 'sAppend' format: '%s' n: %d; errno: %d"),
-                 format, n, errno);
+                 format, nRaw, errno);
   }
-  if (n > INT_MAX - sbb->o - 1 - SBUF_MXBUF) {
+  // Bound `nRaw` so that `n = nRaw + 1`, the resize test `sbb->o + n + 1`, the
+  // `mx` below and the trailing `sbb->o += n - 1` all stay within int.
+  if (nRaw > INT_MAX - sbb->o - 2 - SBUF_MXBUF) {
     va_end(argptr);
     (Rf_error)("string buffer size overflow: input too large");
   }
+  n = nRaw + 1;
   if (sbb->sN <= sbb->o + n + 1) {
     int mx = sbb->o + n + 1 + SBUF_MXBUF;
     sbb->s = R_Realloc(sbb->s, mx, char);
