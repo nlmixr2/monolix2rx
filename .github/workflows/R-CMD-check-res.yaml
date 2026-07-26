@@ -51,8 +51,16 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           pak-version: devel
+          # CRAN's macOS arm64 binary of stringfish is linked against the old
+          # TBB ABI and fails to load against RcppParallel 6.1.0's oneTBB
+          # (missing tbb::internal::NFS_Allocate).  Build it from source on
+          # macOS so it links against whatever RcppParallel is installed.
+          # Only this workflow needs it: it resolves CRAN rxode2, which still
+          # pulls qs -> stringfish, whereas R-CMD-check uses the GitHub rxode2
+          # that has dropped that dependency.
           extra-packages: |
             any::rcmdcheck
+            ${{ matrix.config.os == 'macos-latest' && 'cran::stringfish?source' || '' }}
             lixoftConnectors=?ignore
           needs: check
       - uses: r-lib/actions/check-r-package@v2
