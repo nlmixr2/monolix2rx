@@ -51,11 +51,6 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           pak-version: devel
-          # Bump the macOS cache alongside the source request below: the old
-          # cache already holds the broken stringfish binary, and pak skips
-          # reinstalling a package it finds at the required version, so
-          # ?source has no effect until that cache is evicted.
-          cache-version: ${{ matrix.config.os == 'macos-latest' && 2 || 1 }}
           # CRAN's macOS arm64 binary of stringfish is linked against the old
           # TBB ABI and fails to load against RcppParallel 6.1.0's oneTBB
           # (missing tbb::internal::NFS_Allocate).  Build it from source on
