@@ -14,12 +14,12 @@ Source:
 [`DESCRIPTION`](https://github.com/nlmixr2/monolix2rx/blob/main/DESCRIPTION)
 
 Fidler M (2026). *monolix2rx: Converts 'Monolix' Models to 'rxode2'*. R
-package version 0.0.6, <https://nlmixr2.github.io/monolix2rx/>.
+package version 0.0.7, <https://nlmixr2.github.io/monolix2rx/>.
 
     @Manual{,
       title = {monolix2rx: Converts 'Monolix' Models to 'rxode2'},
       author = {Matthew Fidler},
       year = {2026},
-      note = {R package version 0.0.6},
+      note = {R package version 0.0.7},
       url = {https://nlmixr2.github.io/monolix2rx/},
     }
