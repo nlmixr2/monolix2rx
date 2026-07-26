@@ -51,11 +51,6 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           pak-version: devel
-          # The macOS cache held a stringfish built against the old TBB ABI
-          # while RcppParallel supplied a libtbb.dylib without
-          # tbb::internal::NFS_Allocate, so loading stringfish.so failed.
-          # Bump only the macOS cache to force a coherent reinstall.
-          cache-version: ${{ matrix.config.os == 'macos-latest' && 2 || 1 }}
           extra-packages: |
             any::rcmdcheck
             lixoftConnectors=?ignore
