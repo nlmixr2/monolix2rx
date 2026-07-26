@@ -1,9 +1,11 @@
 # monolix2rx 0.0.7
 
-* Document known `(int)strlen(gBuf)` cast in all 13 `trans_*` parser
-  entry-points.  Inputs at or above `INT_MAX` bytes cause silent length
-  truncation in the `dparse()` call.  A long-term fix will switch each
-  call site to `udparse()` once dparser-R ships that symbol to CRAN.
+* Range-check the input length in all 13 `trans_*` parser entry-points
+  before narrowing it for `dparse()`'s `int` buffer length.  A buffer of
+  `INT_MAX` bytes or more now raises a clean R error instead of handing
+  the parser a truncated (possibly negative) length.  This is defensive:
+  every current caller passes an R string, which R already caps at
+  `INT_MAX` bytes.
 
 # monolix2rx 0.0.6
 
