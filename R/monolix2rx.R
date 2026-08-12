@@ -26,9 +26,12 @@
 #' @param cor Default correlation for missing correlations estimate
 #' @param theta default population estimate
 #' @param ci confidence interval for validation, by default 0.95
-#' @param sigdig number of significant digits for validation, by default 3
+#' @param sigdig number of significant digits for validation, by
+#'   default 3
 #' @param envir represents the environment used for evaluating the
 #'   corresponding rxode2 function
+#' @param dirn directory of the Monolix project, by default it is the
+#'   current working directory
 #' @return rxode2 model
 #' @export
 #' @author Matthew L. Fidler
@@ -57,9 +60,18 @@
 #' rx <- monolix2rx(file.path(pkgCov, "warfarin_covariate3_project.mlxtran"))
 #'
 #' rx
+#'
+#' # If the mlxtran lines are edited it can't detect the directory so
+#' # give it with `dirn`:
+#'
+#' lines <- readLines(file.path(pkgTheo, "theophylline_project.mlxtran"))
+#'
+#' rx <- monolix2rx(lines, dirn=pkgTheo)
+#'
+#' rx
 monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
                        sd=1.0, cor=1e-5, theta=0.5, ci=0.95, sigdig=3,
-                       envir=parent.frame()) {
+                       envir=parent.frame(), dirn=NULL) {
   if (!requireNamespace("rxode2", quietly=FALSE) ||
         !requireNamespace("lotri", quietly=FALSE)) {
     stop("'monolix2rx' requires 'rxode2' and 'lotri'",
@@ -80,18 +92,22 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   .monolix2rx$iniCi <- ci
   .monolix2rx$iniSigdig <- sigdig
   thetaMatType <- match.arg(thetaMatType)
+  dirn <- .monolixDirn(dirn)
   if (length(mlxtran) == 1L && is.character(mlxtran) &&
         grepl("[.]txt$", mlxtran, ignore.case = TRUE)) {
-    .mlxtran <- mlxTxt(mlxtran)
+    .mlxtran <- mlxTxt(mlxtran, dirn=dirn)
   } else {
-    .mlxtran <- mlxtran(mlxtran, equation=TRUE, update=update)
+    .mlxtran <- mlxtran(mlxtran, equation=TRUE, update=update, dirn=dirn)
   }
   .admd <- NULL
   .cmt <- NULL
   if (!is.null(.mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$file)) {
     withr::with_dir(.monolixGetPwd(.mlxtran), {
       if (!file.exists(.mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$file)) {
-        stop("the model file '", .mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$file, "' does not exist\nyou may need to setup the model library to complete translation",
+        stop("the model file '", .mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$file,
+             "' does not exist in '", .monolixGetPwd(.mlxtran),
+             "'\nif it is in another directory, use 'dirn='",
+             "\nyou may also need to setup the model library to complete translation",
              call.=FALSE)
       }
     })

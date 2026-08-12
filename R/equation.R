@@ -238,6 +238,10 @@ as.list.monolix2rxCovEq <- as.list.monolix2rxEquation
 #' @param retFile boolean that tells `mlxTxt()` to return the file
 #'   name instead of error if the file does not exist
 #'
+#' @param dirn directory the model text file.  default (`NULL`) `file`
+#'   (working directory); only needed when the model file
+#'   lives in a different directory than the R session.
+#'
 #' @return parsed equation or file name
 #' @export
 #' @author Matthew L. Fidler
@@ -256,16 +260,17 @@ as.list.monolix2rxCovEq <- as.list.monolix2rxEquation
 #' mod <- mlxTxt(file.path(pkgTheo, "oral1_1cpt_kaVCl.txt"))
 #'
 #' mod
-mlxTxt <- function(file, retFile=FALSE) {
+mlxTxt <- function(file, retFile=FALSE, dirn=NULL) {
   on.exit({
     .Call(`_monolix2rx_r_parseFree`)
   })
+  dirn <- .monolixDirn(dirn)
   if (!retFile) .mlxtranIni()
   .exit <- FALSE
   .monolixLib <- NULL
   if (length(file) > 1L) {
     .lines <- file
-    .dirn <- getwd()
+    .dirn <- if (is.null(dirn)) .monolixDirn(getwd()) else dirn
   } else {
     if (monolix2rxlixoftConnectors()) {
       if (checkmate::testCharacter(file, min.chars = 5, len=1)) {
@@ -294,12 +299,14 @@ mlxTxt <- function(file, retFile=FALSE) {
     }
     if (!is.null(.monolixLib)) {
       .lines <- .monolixLib
-      .dirn <- NULL
+      # a model read from the model library has no directory of its own,
+      # so keep the project directory when one was given
+      .dirn <- dirn
     } else {
-      .f <- .mlxtranLib(file)
+      .f <- .monolixInDirn(.mlxtranLib(file), dirn)
       if (checkmate::testFileExists(.f, "r")) {
         .lines <- suppressWarnings(readLines(.f))
-        .dirn <- dirname(.f)
+        .dirn <- .monolixDirn(dirname(.f))
       } else {
         .exit <- TRUE
       }
@@ -316,5 +323,7 @@ mlxTxt <- function(file, retFile=FALSE) {
     return(.ret)
   }
   if (retFile) return(file)
-  stop("could not find the model file", call.=FALSE)
+  stop("could not find the model file '", file,
+       "'\nif it is in another directory, give that directory with 'dirn='",
+       call.=FALSE)
 }

@@ -4,7 +4,7 @@
 \alias{mlxtran}
 \title{Read and parse mlxtran lines}
 \usage{
-mlxtran(file, equation = FALSE, update = FALSE)
+mlxtran(file, equation = FALSE, update = FALSE, dirn = NULL)
 }
 \arguments{
 \item{file}{mlxtran file to process}
@@ -12,6 +12,8 @@ mlxtran(file, equation = FALSE, update = FALSE)
 \item{equation}{parse the equation block to rxode2 (some models cannot be translated)}
 
 \item{update}{when true, try to update the parameter block to the final parameter estimates}
+
+\item{dirn}{directory of the Monolix project}
 }
 \value{
 mlxtran object
@@ -20,10 +22,8 @@ mlxtran object
 Read and parse mlxtran lines
 }
 \examples{
+
 # First load in the model; in this case the theo model
-# This is modified from the Monolix demos by saving the model
-# File as a text file (hence you can access without model library)
-# setup.
 #
 # This example is also included in the monolix2rx package, so
 # you refer to the location with `system.file()`:
@@ -31,6 +31,15 @@ Read and parse mlxtran lines
 pkgTheo <- system.file("theo", package="monolix2rx")
 
 mlx <- mlxtran(file.path(pkgTheo, "theophylline_project.mlxtran"))
+
+mlx
+
+# Sometimes the project directory can't
+# inferred anymore; in that case give it with `dirn`:
+
+lines <- readLines(file.path(pkgTheo, "theophylline_project.mlxtran"))
+
+mlx <- mlxtran(lines, dirn=pkgTheo)
 
 mlx
 }

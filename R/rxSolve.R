@@ -1,12 +1,13 @@
 # This is built from buildParser.R, edit there
 #'@export
 rxSolve.monolix2rx <- function(object, params = NULL, events = NULL, 
-    inits = NULL, scale = NULL, method = "liblsoda", sigdig = NULL, atol = 1e-08, rtol = 1e-06,
-    maxsteps = 70000L, hmin = 0, hmax = NA_real_, hmaxSd = 0, 
-    hini = 0, maxordn = 12L, maxords = 5L, ..., cores, covsInterpolation = c("locf", 
-        "linear", "nocb", "midpoint"), nStud = 1L, dfSub = 0, 
-    dfObs = 0, thetaMat = NULL, ssAtol = 1e-08, ssRtol = 1e-06, 
-    minSS = 10L, maxSS = 10000L, envir = parent.frame()) {
+    inits = NULL, scale = NULL, method = "liblsoda", sigdig = NULL, 
+    atol = 1e-08, rtol = 1e-06, maxsteps = 70000L, hmin = 0, 
+    hmax = NA_real_, hmaxSd = 0, hini = 0, maxordn = 12L, maxords = 5L, 
+    order = 5L, ..., cores, covsInterpolation = c("locf", "linear", 
+        "nocb", "midpoint"), nStud = 1L, dfSub = 0, dfObs = 0, 
+    thetaMat = NULL, ssAtol = 1e-08, ssRtol = 1e-06, minSS = 10L, 
+    maxSS = 10000L, envir = parent.frame()) {
     if (missing(cores)) {
         cores <- 0L
     }
@@ -45,7 +46,7 @@ rxSolve.monolix2rx <- function(object, params = NULL, events = NULL,
                 .minfo(paste0("using thetaMat from Monolix"))
             }
             else if (nStud > 1L) {
-                warning("no thetaMat covariance is available from the Monolix import; simulating without parameter uncertainty",
+                warning("no thetaMat covariance is available from the Monolix import; simulating without parameter uncertainty", 
                   call. = FALSE)
             }
         }
@@ -88,8 +89,8 @@ rxSolve.monolix2rx <- function(object, params = NULL, events = NULL,
         inits = inits, scale = scale, method = method, sigdig = sigdig, 
         atol = atol, rtol = rtol, maxsteps = maxsteps, hmin = hmin, 
         hmax = hmax, hmaxSd = hmaxSd, hini = hini, maxordn = maxordn, 
-        maxords = maxords, ..., cores = cores, covsInterpolation = covsInterpolation, 
-        nStud = nStud, dfSub = dfSub, dfObs = dfObs, thetaMat = thetaMat, 
-        ssAtol = ssAtol, ssRtol = ssRtol, minSS = minSS, maxSS = maxSS,
-        envir = envir)
+        maxords = maxords, order = order, ..., cores = cores, 
+        covsInterpolation = covsInterpolation, nStud = nStud, 
+        dfSub = dfSub, dfObs = dfObs, thetaMat = thetaMat, ssAtol = ssAtol, 
+        ssRtol = ssRtol, minSS = minSS, maxSS = maxSS, envir = envir)
 }
