@@ -62,9 +62,16 @@ test_that("'dirn' never captures an absolute or 'lib:' file name", {
   # a relative name that exists under 'dirn' is resolved there
   expect_equal(.monolixInDirn(file.path("tmp", "decoy.txt"), .d),
                file.path(.d, "tmp", "decoy.txt"))
-  # a relative name that does not exist under 'dirn' is left alone
-  expect_equal(.monolixInDirn("nope.txt", .d), "nope.txt")
+  # a relative name that does not exist under 'dirn' is not allowed to
+  # fall back to a same-named file in the working directory
+  expect_equal(.monolixInDirn("nope.txt", .d), file.path(.d, "nope.txt"))
   expect_equal(.monolixInDirn("nope.txt", NULL), "nope.txt")
+
+  withr::with_dir(.real, {
+    writeLines("decoy", "decoy.txt")
+    expect_error(mlxTxt("decoy.txt", dirn = .d), "decoy.txt")
+    expect_error(mlxtran("decoy.mlxtran", dirn = .d))
+  })
 })
 
 test_that("re-reading a parsed mlxtran object reads its results directory", {

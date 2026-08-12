@@ -323,9 +323,7 @@
   # "/proj/tmp/m.txt")
   if (.monolixIsAbsPath(file)) return(file)
   if (substr(file, 1, 4) == "lib:") return(file)
-  .f <- file.path(dirn, file)
-  if (file.exists(.f)) return(.f)
-  file
+  file.path(dirn, file)
 }
 
 #' Read and parse mlxtran lines
