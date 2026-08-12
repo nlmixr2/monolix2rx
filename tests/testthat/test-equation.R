@@ -131,6 +131,28 @@ test_that("mixing pk and equation", {
 
 })
 
+test_that("longitudinal PK equations keep dependency order", {
+  pk <- .pk("Cc = pkmodel(ka, V, Cl, k12, k21)")
+  pk$preEq <- c("V <- V1", "k12 <- Q / V1", "k21 <- Q / V2")
+  pk$postEq <- "Cu <- fup * max(0, Cc)"
+
+  tmp <- .equation("K = Kmax * Cu
+  ddt_TS = TS - K * TS", pk)
+
+  .wV <- which(tmp$rx == "V <- V1")
+  .wk12 <- which(tmp$rx == "k12 <- Q / V1")
+  .wk21 <- which(tmp$rx == "k21 <- Q / V2")
+  .wCu <- which(tmp$rx == "Cu <- fup * max(0, Cc)")
+  .wK <- which(tmp$rx == "K <- Kmax * Cu")
+  .wCentral <- grep("^d/dt\\(central\\) <-", tmp$rx)
+
+  expect_true(length(.wCentral) == 1L)
+  expect_true(.wV < .wCentral)
+  expect_true(.wk12 < .wCentral)
+  expect_true(.wk21 < .wCentral)
+  expect_true(.wCu < .wK)
+})
+
 test_that("wsmm mixture not supported", {
   expect_error(.equation("f = wsmm(f1, p, f2, 1-p)"),
                "wsmm")
