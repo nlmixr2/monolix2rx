@@ -106,7 +106,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
       if (!file.exists(.mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$file)) {
         stop("the model file '", .mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$file,
              "' does not exist in '", .monolixGetPwd(.mlxtran),
-             "'\nif it is in another directory, give that directory with 'dirn='",
+             "'\nif it is in another directory, use 'dirn='",
              "\nyou may also need to setup the model library to complete translation",
              call.=FALSE)
       }

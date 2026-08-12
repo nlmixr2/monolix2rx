@@ -348,8 +348,8 @@
 #'
 #' mlx
 #'
-#' # When you edit the mlxtran lines, the project directory can't
-#' # be inferred anymore, so give it with `dirn`:
+#' # Sometimes the project directory can't
+#' # inferred anymore; in that case give it with `dirn`:
 #'
 #' lines <- readLines(file.path(pkgTheo, "theophylline_project.mlxtran"))
 #'

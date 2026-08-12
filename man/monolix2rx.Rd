@@ -71,8 +71,8 @@ rx <- monolix2rx(file.path(pkgCov, "warfarin_covariate3_project.mlxtran"))
 
 rx
 
-# If you edit the mlxtran lines before translating, the project
-# directory cannot be taken from a file name, so give it with `dirn`:
+# If the mlxtran lines are edited it can't detect the directory so
+# give it with `dirn`:
 
 lines <- readLines(file.path(pkgTheo, "theophylline_project.mlxtran"))
 
