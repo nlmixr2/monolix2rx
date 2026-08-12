@@ -56,10 +56,8 @@ is what regenerates the generated files:
   plus a [`file.rename()`](https://rdrr.io/r/base/files.html) of the
   `.c` to `.h`),
 - `R/rxSolve.R` (`.monolix2rxBuildRxSolve()`) – rebuilt from the
-  **installed** `rxode2`’s
-  [`rxSolve()`](https://nlmixr2.github.io/rxode2/reference/rxSolve.html)
-  formals, so it changes whenever rxode2 changes, independently of
-  anything you edited,
+  **installed** `rxode2`’s `rxSolve()` formals, so it changes whenever
+  rxode2 changes, independently of anything you edited,
 - `R/rxUiGetGen.R` (`.monolix2rxRxUiGetMethods()`).
 
 So always `git diff` after documenting and revert churn you did not

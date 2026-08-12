@@ -9,6 +9,7 @@ dosing paradigm with new derived items, in this case `AUC`.
 
 library(monolix2rx)
 library(rxode2)
+library(magrittr) # for the %>% pipe
 
 
 # First we need the location of the nonmem control stream Since we are running an example, we will use one of the built-in examples in `nonmem2rx`

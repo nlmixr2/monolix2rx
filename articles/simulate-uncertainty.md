@@ -12,6 +12,7 @@ uncertainty](simulate-new-dosing.md) in the parameters themselves.
 
 library(monolix2rx)
 library(rxode2)
+library(magrittr) # for the %>% pipe
 # its best practice to set the seed for the simulations
 set.seed(42)
 rxSetSeed(42)

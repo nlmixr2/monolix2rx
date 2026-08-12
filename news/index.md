@@ -2,6 +2,25 @@
 
 ## monolix2rx 0.0.7
 
+- Dropped the re-exports
+  ([`rxode2()`](https://nlmixr2.github.io/rxode2/reference/rxode2.html),
+  [`rxode()`](https://nlmixr2.github.io/rxode2/reference/rxode2.html),
+  [`RxODE()`](https://nlmixr2.github.io/rxode2/reference/rxode2.html),
+  [`ini()`](https://nlmixr2.github.io/rxode2/reference/ini.html),
+  [`model()`](https://nlmixr2.github.io/rxode2/reference/model.html),
+  `model<-`,
+  [`rxRename()`](https://nlmixr2.github.io/rxode2/reference/rxRename.html),
+  [`rxSolve()`](https://nlmixr2.github.io/rxode2/reference/rxSolve.html),
+  [`rxUiGet()`](https://nlmixr2.github.io/rxode2/reference/rxUiGet.html),
+  [`logit()`](https://nlmixr2.github.io/rxode2/reference/logit.html),
+  [`expit()`](https://nlmixr2.github.io/rxode2/reference/logit.html),
+  [`lotri()`](https://nlmixr2.github.io/lotri/reference/lotri.html),
+  [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+  and `%>%`). Load `nlmixr2` (or `rxode2`/`magrittr`) to get them; this
+  also works around a roxygen2 8.1.0 re-export failure (issue
+  [\#47](https://github.com/nlmixr2/monolix2rx/issues/47),
+  r-lib/roxygen2#1915).
+
 - [`monolix2rx()`](../reference/monolix2rx.md),
   [`mlxtran()`](../reference/mlxtran.md) and
   [`mlxTxt()`](../reference/mlxTxt.md) now have `dirn` to giving the

@@ -9,6 +9,7 @@ dosing paradigm than what was modeled.
 
 library(monolix2rx)
 library(rxode2)
+library(magrittr) # for the %>% pipe
 
 # You use the path to the monolix mlxtran file
 
