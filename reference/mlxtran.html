@@ -52,7 +52,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">mlxtran</span><span class="op">(</span><span class="va">file</span>, equation <span class="op">=</span> <span class="cn">FALSE</span>, update <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">mlxtran</span><span class="op">(</span><span class="va">file</span>, equation <span class="op">=</span> <span class="cn">FALSE</span>, update <span class="op">=</span> <span class="cn">FALSE</span>, dirn <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -70,6 +70,10 @@
 <dt id="arg-update">update<a class="anchor" aria-label="anchor" href="#arg-update"></a></dt>
 <dd><p>when true, try to update the parameter block to the final parameter estimates</p></dd>
 
+
+<dt id="arg-dirn">dirn<a class="anchor" aria-label="anchor" href="#arg-dirn"></a></dt>
+<dd><p>directory of the Monolix project</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -82,10 +86,8 @@
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># First load in the model; in this case the theo model</span></span></span>
-<span class="r-in"><span><span class="co"># This is modified from the Monolix demos by saving the model</span></span></span>
-<span class="r-in"><span><span class="co"># File as a text file (hence you can access without model library)</span></span></span>
-<span class="r-in"><span><span class="co"># setup.</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># First load in the model; in this case the theo model</span></span></span>
 <span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># This example is also included in the monolix2rx package, so</span></span></span>
 <span class="r-in"><span><span class="co"># you refer to the location with `system.file()`:</span></span></span>
@@ -93,6 +95,101 @@
 <span class="r-in"><span><span class="va">pkgTheo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"theo"</span>, package<span class="op">=</span><span class="st">"monolix2rx"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">mlx</span> <span class="op">&lt;-</span> <span class="fu">mlxtran</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">pkgTheo</span>, <span class="st">"theophylline_project.mlxtran"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> integrated model file 'oral1_1cpt_kaVCl.txt' into mlxtran object</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> reading run info (# obs, doses, Monolix Version, etc) from summary.txt</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> done</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> reading covariance from FisherInformation/covarianceEstimatesLin.txt</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> done</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">mlx</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> DESCRIPTION:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> The administration is extravascular with a first order absorption (rate constant ka).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> The PK model has one compartment (volume V) and a linear elimination (clearance Cl).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> This has been modified so that it will run without the model library</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;DATAFILE&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [FILEINFO]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ; parsed: $DATAFILE$FILEINFO$FILEINFO</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> file = 'data/theophylline_data.txt'</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> delimiter = tab</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> header = {ID, AMT, TIME, CONC, WEIGHT, SEX}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [CONTENT]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ; parsed: $DATAFILE$CONTENT$CONTENT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ID = {use=identifier}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> TIME = {use=time}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> AMT = {use=amount}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> CONC = {use=observation, name=CONC, type=continuous}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> WEIGHT = {use=covariate, type=continuous}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> SEX = {use=covariate, type=categorical}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;MODEL&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [INDIVIDUAL]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ; parsed: $MODEL$INDIVIDUAL$INDIVIDUAL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> input = {ka_pop, omega_ka, V_pop, omega_V, Cl_pop, omega_Cl}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> DEFINITION:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ; parsed: $MODEL$INDIVIDUAL$DEFINITION</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ka = {distribution=lognormal, typical=ka_pop, sd=omega_ka}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> V = {distribution=lognormal, typical=V_pop, sd=omega_V}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Cl = {distribution=lognormal, typical=Cl_pop, sd=omega_Cl}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [LONGITUDINAL]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ; parsed: $MODEL$LONGITUDINAL$LONGITUDINAL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> input = {a, b, ka, V, Cl}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> DEFINITION:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ; parsed: $MODEL$LONGITUDINAL$DEFINITION</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> CONC = {distribution=normal, prediction=Cc, errorModel=combined1(a, b)}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> EQUATION:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ; PK model definition</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Cc = pkmodel(ka, V, Cl)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OUTPUT:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ; parsed: $MODEL$LONGITUDINAL$OUTPUT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> output = Cc</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;FIT&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ; parsed: $FIT$FIT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> data = {CONC}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> model = {CONC}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;PARAMETER&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ; parsed: $PARAMETER$PARAMETER</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Cl_pop = {value=0.1, method=MLE}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> V_pop = {value=0.5, method=MLE}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a = {value=1, method=MLE}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> b = {value=0.3, method=MLE}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ka_pop = {value=1, method=MLE}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> omega_Cl = {value=1, method=MLE}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> omega_V = {value=1, method=MLE}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> omega_ka = {value=1, method=MLE}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;MONOLIX&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [TASKS]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ; parsed: $MONOLIX$TASKS$TASKS</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> populationParameters()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> individualParameters(method = {conditionalMean, conditionalMode})</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> fim(method = Linearization)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> logLikelihood(method = Linearization)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> plotResult(method = {indfits, obspred, vpc, residualsscatter, residualsdistribution, parameterdistribution, covariatemodeldiagnosis, randomeffects, covariancemodeldiagnosis, saemresults})</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [SETTINGS]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> GLOBAL:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ; parsed: $MONOLIX$SETTINGS$GLOBAL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> exportpath = 'tp'</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ; unparsed sections:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ;  $MODEL$LONGITUDINAL$EQUATION</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Sometimes the project directory can't</span></span></span>
+<span class="r-in"><span><span class="co"># inferred anymore; in that case give it with `dirn`:</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">lines</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html" class="external-link">readLines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">pkgTheo</span>, <span class="st">"theophylline_project.mlxtran"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">mlx</span> <span class="op">&lt;-</span> <span class="fu">mlxtran</span><span class="op">(</span><span class="va">lines</span>, dirn<span class="op">=</span><span class="va">pkgTheo</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> integrated model file 'oral1_1cpt_kaVCl.txt' into mlxtran object</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> reading run info (# obs, doses, Monolix Version, etc) from summary.txt</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> done</span>

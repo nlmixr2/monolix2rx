@@ -2,6 +2,16 @@
 
 ## monolix2rx 0.0.7
 
+- [`monolix2rx()`](../reference/monolix2rx.md),
+  [`mlxtran()`](../reference/mlxtran.md) and
+  [`mlxTxt()`](../reference/mlxTxt.md) now have `dirn` to giving the
+  actual directory of the Monolix project, in case the project moved for
+  some reason. This makes it possible to translate project files outside
+  the project directory
+  ([\#44](https://github.com/nlmixr2/monolix2rx/issues/44))
+
+- The project directory in mlxtran is now absolute.
+
 - Support the `Monolix` 2024 file specification `file={path='data.csv'}`
   in addition to the older `file='data.csv'`; the two are equivalent.
   This applies to the data file in `<DATAFILE> [FILEINFO]` (and

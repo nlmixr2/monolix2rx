@@ -61,7 +61,8 @@
 <span>  theta <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  ci <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  sigdig <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  dirn <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -103,12 +104,18 @@ variability/inter-occasion variability that are missing.</p></dd>
 
 
 <dt id="arg-sigdig">sigdig<a class="anchor" aria-label="anchor" href="#arg-sigdig"></a></dt>
-<dd><p>number of significant digits for validation, by default 3</p></dd>
+<dd><p>number of significant digits for validation, by
+default 3</p></dd>
 
 
 <dt id="arg-envir">envir<a class="anchor" aria-label="anchor" href="#arg-envir"></a></dt>
 <dd><p>represents the environment used for evaluating the
 corresponding rxode2 function</p></dd>
+
+
+<dt id="arg-dirn">dirn<a class="anchor" aria-label="anchor" href="#arg-dirn"></a></dt>
+<dd><p>directory of the Monolix project, by default it is the
+current working directory</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -288,6 +295,101 @@ corresponding rxode2 function</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         Cc &lt;- central/V</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         concentration &lt;- Cc</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         concentration ~ add(a) + prop(b) + combined1()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     })</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># If the mlxtran lines are edited it can't detect the directory so</span></span></span>
+<span class="r-in"><span><span class="co"># give it with `dirn`:</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">lines</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html" class="external-link">readLines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">pkgTheo</span>, <span class="st">"theophylline_project.mlxtran"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">rx</span> <span class="op">&lt;-</span> <span class="fu">monolix2rx</span><span class="op">(</span><span class="va">lines</span>, dirn<span class="op">=</span><span class="va">pkgTheo</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> integrated model file 'oral1_1cpt_kaVCl.txt' into mlxtran object</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> updating model values to final parameter estimates</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> done</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> reading run info (# obs, doses, Monolix Version, etc) from summary.txt</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> done</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> reading covariance from FisherInformation/covarianceEstimatesLin.txt</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> done</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>NAs introduced by coercion</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> imported monolix and translated to rxode2 compatible data (<span style="color: #0000BB; font-weight: bold;">$monolixData</span>)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> imported monolix ETAS (_SAEM) imported to rxode2 compatible data (<span style="color: #0000BB; font-weight: bold;">$etaData</span>)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> imported monolix pred/ipred data to compare (<span style="color: #0000BB; font-weight: bold;">$predIpredData</span>)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> solving ipred problem</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> done</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> solving pred problem</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> done</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">rx</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">rxode2-based free-form 2-cmt ODE model</span> <span style="color: #00BBBB;">──────────────────────────────────────</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ── <span style="font-weight: bold;">Initalization:</span> ──  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Fixed Effects</span> (<span style="color: #0000BB; font-weight: bold;">$theta</span>): </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      ka_pop       V_pop      Cl_pop           a           b </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.42699448 -0.78635157 -3.21457598  0.43327956  0.05425953 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Omega</span> (<span style="color: #0000BB; font-weight: bold;">$omega</span>): </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           omega_ka    omega_V   omega_Cl</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> omega_ka 0.4503145 0.00000000 0.00000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> omega_V  0.0000000 0.01594701 0.00000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> omega_Cl 0.0000000 0.00000000 0.07323701</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">States</span> (<span style="color: #0000BB; font-weight: bold;">$state</span> or <span style="color: #0000BB; font-weight: bold;">$stateDf</span>): </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Compartment Number Compartment Name</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                  1            depot</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                  2          central</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ── <span style="font-weight: bold;">μ-referencing (</span><span style="color: #0000BB; font-weight: bold;">$muRefTable</span><span style="font-weight: bold;">):</span> ──  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    theta      eta level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 ka_pop omega_ka    id</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  V_pop  omega_V    id</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 Cl_pop omega_Cl    id</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ── <span style="font-weight: bold;">Model (Normalized Syntax):</span> ── </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> function() {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     description &lt;- "The administration is extravascular with a first order absorption (rate constant ka).\nThe PK model has one compartment (volume V) and a linear elimination (clearance Cl).\nThis has been modified so that it will run without the model library"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     dfObs &lt;- 120</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     dfSub &lt;- 12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     thetaMat &lt;- lotri({</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         ka_pop ~ 0.09785</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         V_pop ~ c(0.00082606, 0.00041937)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         Cl_pop ~ c(-4.2833e-05, -6.7957e-06, 1.1318e-05)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         omega_ka ~ c(omega_ka = 0.022259)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         omega_V ~ c(omega_ka = -7.6443e-05, omega_V = 0.0014578)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         omega_Cl ~ c(omega_ka = 3.062e-06, omega_V = -1.2912e-05, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             omega_Cl = 0.0039578)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         a ~ c(omega_ka = -0.0001227, omega_V = -6.5914e-05, omega_Cl = -0.00041194, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             a = 0.015333)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         b ~ c(omega_ka = -1.3886e-05, omega_V = -3.1105e-05, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             omega_Cl = 5.2805e-05, a = -0.0026458, b = 0.00056232)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     })</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     validation &lt;- c("ipred relative difference compared to Monolix ipred: 0.04%; 95% percentile: (0%,0.52%); rtol=0.00038", </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         "ipred absolute difference compared to Monolix ipred: 95% percentile: (0.000362, 0.00848); atol=0.00254", </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         "pred relative difference compared to Monolix pred: 0%; 95% percentile: (0%,0%); rtol=6.6e-07", </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         "pred absolute difference compared to Monolix pred: 95% percentile: (1.6e-07, 1.27e-05); atol=3.66e-06", </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         "iwres relative difference compared to Monolix iwres: 0%; 95% percentile: (0.06%,32.22%); rtol=0.0153", </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         "iwres absolute difference compared to Monolix pred: 95% percentile: (0.000403, 0.0138); atol=0.00305")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     ini({</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         ka_pop &lt;- 0.426994483535611</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         V_pop &lt;- -0.786351566327091</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         Cl_pop &lt;- -3.21457597916301</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         a &lt;- c(0, 0.433279557549051)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         b &lt;- c(0, 0.0542595276206251)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         omega_ka ~ 0.450314511978718</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         omega_V ~ 0.0159470121255372</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         omega_Cl ~ 0.0732370098834837</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     })</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     model({</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         cmt(depot)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         cmt(central)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         ka &lt;- exp(ka_pop + omega_ka)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         V &lt;- exp(V_pop + omega_V)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         Cl &lt;- exp(Cl_pop + omega_Cl)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         d/dt(depot) &lt;- -ka * depot</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         d/dt(central) &lt;- +ka * depot - Cl/V * central</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         Cc &lt;- central/V</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         CONC &lt;- Cc</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         CONC ~ add(a) + prop(b) + combined1()</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     })</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
 </code></pre></div>

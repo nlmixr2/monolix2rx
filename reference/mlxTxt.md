@@ -5,7 +5,7 @@ Get equation block from a Monolix model txt file
 ## Usage
 
 ``` r
-mlxTxt(file, retFile = FALSE)
+mlxTxt(file, retFile = FALSE, dirn = NULL)
 ```
 
 ## Arguments
@@ -19,6 +19,12 @@ mlxTxt(file, retFile = FALSE)
 
   boolean that tells `mlxTxt()` to return the file name instead of error
   if the file does not exist
+
+- dirn:
+
+  directory the model text file. default (`NULL`) `file` (working
+  directory); only needed when the model file lives in a different
+  directory than the R session.
 
 ## Value
 
