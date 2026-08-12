@@ -1,5 +1,11 @@
 # monolix2rx 0.0.7
 
+* Support the `Monolix` 2024 file specification `file={path='data.csv'}` in
+  addition to the older `file='data.csv'`; the two are equivalent.  This
+  applies to the data file in `<DATAFILE> [FILEINFO]` (and
+  `<DATA_FORMATTING> [FILEINFO]`) as well as the model file in
+  `<MODEL> [LONGITUDINAL]` (issue #43).
+
 * Range-check the input length in all 13 `trans_*` parser entry-points
   before narrowing it for `dparse()`'s `int` buffer length.  A buffer of
   `INT_MAX` bytes or more now raises a clean R error instead of handing
