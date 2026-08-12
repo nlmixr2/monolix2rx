@@ -93,7 +93,7 @@
                                       " <- ",
                                       .monolix2rx$endpointPred[.w]))
   }
-  .monolix2rx$equationLine <- c(.start, .monolix2rx$equationLine, .end)
+  .monolix2rx$equationLine <- c(.monolix2rx$equationLine)
   .monolix2rx$equationLine <- .updateDdtEq(.monolix2rx$state, .monolix2rx$equationLine, .monolix2rx$pk)
   .monolix2rx$equationLine <- .updateDdtEq(.monolix2rx$state, .monolix2rx$equationLine, .pk3)
   .w <- which(grepl("^ *[<][-] *$", .monolix2rx$equationLine))
@@ -114,8 +114,10 @@
   .cmtNum <- .cmtNum[!is.na(.cmtNum)]
   .ret <- list(monolix=text,
                rx=c(
+                 .start,
                  .monolix2rx$pk$pk,
                  .pk3$pk,
+                 .end,
                  .monolix2rx$equationLine,
                  .monolix2rx$extraPred,
                  .monolix2rx$pk$equation$endLines),
