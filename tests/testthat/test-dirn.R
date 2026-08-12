@@ -4,14 +4,15 @@ test_that("mlxtran() finds the project files when 'dirn' is given (issue #44)", 
 
   .lines <- readLines(file.path(.theo, "theophylline_project.mlxtran"))
 
-  withr::with_dir(tempdir(), {
+  .wd <- withr::local_tempdir()
+  withr::with_dir(.wd, {
     # without 'dirn' the mlxtran lines are resolved against the working
     # directory, so the model text file cannot be found
     expect_error(monolix2rx(.lines, update = FALSE),
                  "does not exist")
     # the error names the directory searched and points at 'dirn='
     expect_error(monolix2rx(.lines, update = FALSE),
-                 normalizePath(tempdir(), winslash = "/"), fixed = TRUE)
+                 normalizePath(.wd, winslash = "/"), fixed = TRUE)
     expect_error(monolix2rx(.lines, update = FALSE), "dirn=", fixed = TRUE)
     expect_error(mlxTxt("oral1_1cpt_kaVCl.txt"), "dirn=", fixed = TRUE)
 
@@ -29,7 +30,8 @@ test_that("'dirn' resolves a relative mlxtran/txt file name", {
   .theo <- system.file("theo", package = "monolix2rx")
   skip_if_not(dir.exists(.theo))
 
-  withr::with_dir(tempdir(), {
+  .wd <- withr::local_tempdir()
+  withr::with_dir(.wd, {
     .mlx <- mlxtran("theophylline_project.mlxtran", dirn = .theo)
     expect_true(inherits(.mlx, "monolix2rxMlxtran"))
 
@@ -85,7 +87,8 @@ test_that("re-reading a parsed mlxtran object reads its results directory", {
   # working directory; updating from elsewhere used to silently drop the
   # covariance and the run information
   attr(.mlx, "covLinUntransformed") <- NULL
-  withr::with_dir(tempdir(), {
+  .wd <- withr::local_tempdir()
+  withr::with_dir(.wd, {
     .upd <- mlxtran(.mlx, update = TRUE)
     expect_true(inherits(attr(.upd, "covLinUntransformed"), "matrix"))
     # summary.txt is read from the project too
@@ -102,24 +105,44 @@ test_that("the stored project directory survives a change of working directory",
                                             "theophylline_project.mlxtran")))
   # the directory is stored absolute, so it still points at the project
   # after the working directory moves elsewhere
-  withr::with_dir(tempdir(), {
+  .wd <- withr::local_tempdir()
+  withr::with_dir(.wd, {
     expect_equal(normalizePath(.monolixGetPwd(.mlx), winslash = "/"),
                  normalizePath(.theo, winslash = "/"))
   })
 })
 
 test_that("'dirn' is checked", {
+  # match the assertion itself: `mlxTxt()`/`monolix2rx()` also mention
+  # 'dirn=' when they cannot find a file, so a looser pattern would pass
+  # even with the check removed
   expect_error(mlxtran("foo.mlxtran", dirn = file.path(tempdir(), "does-not-exist")),
-               "dirn")
+               "Assertion on 'dirn' failed: Directory", fixed = TRUE)
   expect_error(mlxtran("foo.mlxtran", dirn = c("a", "b")),
-               "dirn")
-  expect_error(mlxtran("foo.mlxtran", dirn = NA_character_), "dirn")
-  expect_error(mlxtran("foo.mlxtran", dirn = 1L), "dirn")
-  expect_error(mlxTxt("foo.txt", dirn = 1L), "dirn")
-  expect_error(monolix2rx("foo.txt", dirn = 1L), "dirn")
+               "Assertion on 'dirn' failed: Must have length 1", fixed = TRUE)
+  expect_error(mlxtran("foo.mlxtran", dirn = NA_character_),
+               "Assertion on 'dirn' failed: Contains missing values", fixed = TRUE)
+  expect_error(mlxtran("foo.mlxtran", dirn = 1L),
+               "Assertion on 'dirn' failed: Must be of type 'character'", fixed = TRUE)
+  expect_error(mlxTxt("foo.txt", dirn = 1L),
+               "Assertion on 'dirn' failed: Must be of type 'character'", fixed = TRUE)
+  expect_error(monolix2rx("foo.txt", dirn = 1L),
+               "Assertion on 'dirn' failed: Must be of type 'character'", fixed = TRUE)
+
   expect_null(.monolixDirn(NULL))
-  expect_equal(.monolixDirn(tempdir()),
-               normalizePath(tempdir(), winslash = "/", mustWork = FALSE))
+  # the contract is relative -> absolute, checked against a directory
+  # known independently of how .monolixDirn() computes it
+  .theo <- system.file("theo", package = "monolix2rx")
+  skip_if_not(dir.exists(.theo))
+  withr::with_dir(.theo, {
+    expect_equal(.monolixDirn("."),
+                 normalizePath(.theo, winslash = "/", mustWork = FALSE))
+  })
+  withr::with_dir(dirname(.theo), {
+    expect_equal(.monolixDirn(basename(.theo)),
+                 normalizePath(.theo, winslash = "/", mustWork = FALSE))
+  })
+  expect_true(.monolixIsAbsPath(.monolixDirn(".")))
 })
 
 test_that(".monolixInDirn() only resolves a single file name", {
@@ -165,7 +188,8 @@ test_that("a model text file is routed through mlxTxt() with 'dirn'", {
   .theo <- system.file("theo", package = "monolix2rx")
   skip_if_not(dir.exists(.theo))
 
-  withr::with_dir(tempdir(), {
+  .wd <- withr::local_tempdir()
+  withr::with_dir(.wd, {
     # mlxtran() hands a .txt file to mlxTxt()
     .mlx <- mlxtran(file.path(.theo, "oral1_1cpt_kaVCl.txt"))
     expect_true(inherits(.mlx, "monolix2rxMlxtran"))
@@ -194,8 +218,9 @@ test_that("mlxTxt() keeps 'dirn' for a model read from the model library", {
     monolix2rxGetLibraryModelContent = function(filename) {
       paste(.lines, collapse = "\n")
     })
+  .old <- .monolix2rx$lixoftConnectors
+  on.exit(.monolix2rx$lixoftConnectors <- .old, add = TRUE)
   .monolix2rx$lixoftConnectors <- TRUE
-  on.exit(.monolix2rx$lixoftConnectors <- NA, add = TRUE)
 
   .mlx <- mlxTxt("lib:oral1_1cpt_kaVCl.txt", dirn = .d)
   expect_true(inherits(.mlx, "monolix2rxMlxtran"))
@@ -259,8 +284,9 @@ test_that("mlxTxt() initializes lixoftConnectors on the first 'lib:' model", {
     monolix2rxGetLibraryModelContent = function(filename) {
       paste(.lines, collapse = "\n")
     })
+  .old <- .monolix2rx$lixoftConnectors
+  on.exit(.monolix2rx$lixoftConnectors <- .old, add = TRUE)
   .monolix2rx$lixoftConnectors <- NA
-  on.exit(.monolix2rx$lixoftConnectors <- NA, add = TRUE)
 
   .mlx <- mlxTxt("lib:oral1_1cpt_kaVCl.txt", dirn = .d)
   expect_true(inherits(.mlx, "monolix2rxMlxtran"))
@@ -268,7 +294,8 @@ test_that("mlxTxt() initializes lixoftConnectors on the first 'lib:' model", {
 })
 
 test_that("mlxTxt() warns when lixoftConnectors cannot be initialized", {
-  .d <- normalizePath(tempdir(), winslash = "/", mustWork = FALSE)
+  .d <- withr::local_tempdir()
+  withr::local_options(monolix2rx.library = NULL)
 
   testthat::local_mocked_bindings(
     monolix2rxlixoftConnectors = function() TRUE,
@@ -279,8 +306,9 @@ test_that("mlxTxt() warns when lixoftConnectors cannot be initialized", {
     monolix2rxGetLibraryModelContent = function(filename) {
       stop("unreachable without a connector")
     })
+  .old <- .monolix2rx$lixoftConnectors
+  on.exit(.monolix2rx$lixoftConnectors <- .old, add = TRUE)
   .monolix2rx$lixoftConnectors <- NA
-  on.exit(.monolix2rx$lixoftConnectors <- NA, add = TRUE)
 
   # collect every warning so the unrelated model library warning from
   # .mlxtranLib() does not escape the test
@@ -296,14 +324,18 @@ test_that("mlxTxt() warns when lixoftConnectors cannot be initialized", {
 })
 
 test_that("mlxTxt() falls back when the model library cannot be read", {
-  .d <- normalizePath(tempdir(), winslash = "/", mustWork = FALSE)
+  .d <- withr::local_tempdir()
+  # a machine with a real model library set could otherwise expand the
+  # name and never reach the fallback under test
+  withr::local_options(monolix2rx.library = NULL)
   testthat::local_mocked_bindings(
     monolix2rxlixoftConnectors = function() TRUE,
     monolix2rxGetLibraryModelContent = function(filename) {
       stop("no such library model")
     })
+  .old <- .monolix2rx$lixoftConnectors
+  on.exit(.monolix2rx$lixoftConnectors <- .old, add = TRUE)
   .monolix2rx$lixoftConnectors <- TRUE
-  on.exit(.monolix2rx$lixoftConnectors <- NA, add = TRUE)
 
   # .mlxtranLib() warns about the model library when it cannot expand the
   # name; the fallback behavior is what is under test here
