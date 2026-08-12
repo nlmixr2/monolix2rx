@@ -34,7 +34,7 @@
     .monolix2rx$type <- character(0)
   }
 }
-#' Parse [CONTENT] from mlxtran
+#' Parse `[CONTENT]` from mlxtran
 #'
 #' @param text the parsing string
 #' @return monolix2rxContent list

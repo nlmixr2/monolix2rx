@@ -32,7 +32,7 @@
     .monolix2rx$indDef <- NULL
   }
 }
-#' Parses the mlxtran [individual] definition: text
+#' Parses the mlxtran `[individual]` definition: text
 #'
 #'
 #' @param text text from the individual defition
@@ -46,7 +46,7 @@
   .monolix2rx$indDef
 }
 
-#' Finalized the mlxtran [individual] definition:
+#' Finalized the mlxtran `[individual]` definition:
 #'
 #' @return nothing called for side effects
 #' @noRd
