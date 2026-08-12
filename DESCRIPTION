@@ -28,6 +28,7 @@ License: MIT + file LICENSE
 URL: https://nlmixr2.github.io/monolix2rx/, https://github.com/nlmixr2/monolix2rx/
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
 LinkingTo:
     dparser,
     rxode2,
@@ -52,4 +53,3 @@ Suggests:
     vdiffr
 Config/testthat/edition: 3
 Config/Needs/website: rmarkdown
-Config/roxygen2/version: 8.1.0
