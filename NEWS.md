@@ -1,5 +1,11 @@
 # monolix2rx 0.0.7
 
+* Dropped the re-exports (`rxode2()`, `rxode()`, `RxODE()`, `ini()`,
+  `model()`, `model<-`, `rxRename()`, `rxSolve()`, `rxUiGet()`, `logit()`,
+  `expit()`, `lotri()`, `autoplot()` and `%>%`).  Load `nlmixr2` (or
+  `rxode2`/`magrittr`) to get them; this also works around a roxygen2 8.1.0
+  re-export failure (issue #47, r-lib/roxygen2#1915).
+
 * `monolix2rx()`, `mlxtran()` and `mlxTxt()` now have `dirn` to giving
   the actual directory of the Monolix project, in case the project
   moved for some reason. This makes it possible to translate project files
