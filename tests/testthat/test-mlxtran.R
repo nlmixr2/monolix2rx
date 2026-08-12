@@ -360,3 +360,34 @@ test_that("mlxtran initial list", {
   })
 
 })
+
+test_that("full mlxtran project with the Monolix 2024 file={path=} syntax (#43)", {
+
+  .theo <- system.file("theo", package="monolix2rx")
+  skip_if(.theo == "")
+
+  .ref <- mlxtran(file.path(.theo, "theophylline_project.mlxtran"))
+
+  .dir <- file.path(tempdir(), "mlxtran-path-43")
+  on.exit(unlink(.dir, recursive=TRUE), add=TRUE)
+  dir.create(.dir, recursive=TRUE, showWarnings=FALSE)
+  expect_true(all(file.copy(list.files(.theo, full.names=TRUE), .dir, recursive=TRUE)))
+
+  .f <- file.path(.dir, "theophylline_project.mlxtran")
+  .lines <- readLines(.f)
+  # rewrite both the data file and the model file with the 2024 path syntax
+  .lines <- sub("^file *= *'(.*)' *$", "file={path='\\1'}", .lines)
+  expect_true(any(grepl("file={path='data/theophylline_data.txt'}", .lines, fixed=TRUE)))
+  expect_true(any(grepl("file={path='oral1_1cpt_kaVCl.txt'}", .lines, fixed=TRUE)))
+  writeLines(.lines, .f)
+
+  .new <- mlxtran(.f)
+
+  expect_equal(.new$DATAFILE$FILEINFO$FILEINFO$file,
+               .ref$DATAFILE$FILEINFO$FILEINFO$file)
+  expect_equal(as.character(.new$MODEL$LONGITUDINAL$LONGITUDINAL),
+               as.character(.ref$MODEL$LONGITUDINAL$LONGITUDINAL))
+  expect_equal(.unparsedMlxtran(.new), .unparsedMlxtran(.ref))
+  expect_equal(as.character(.new), as.character(.ref))
+
+})
