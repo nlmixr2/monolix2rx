@@ -13,7 +13,8 @@ monolix2rx(
   theta = 0.5,
   ci = 0.95,
   sigdig = 3,
-  envir = parent.frame()
+  envir = parent.frame(),
+  dirn = NULL
 )
 }
 \arguments{
@@ -40,6 +41,13 @@ variability/inter-occasion variability that are missing.}
 
 \item{envir}{represents the environment used for evaluating the
 corresponding rxode2 function}
+
+\item{dirn}{directory of the Monolix project, used to find the files
+the mlxtran refers to (model text file, data, \code{exportpath}
+results).  By default (\code{NULL}) this is the directory of the
+\code{mlxtran} file; supply it when \code{mlxtran} is a character vector of
+mlxtran lines (where there is no file name to take the directory
+from) or when the file name is relative to another directory.}
 }
 \value{
 rxode2 model
@@ -63,6 +71,15 @@ rx <- monolix2rx(file.path(pkgTheo, "theophylline_project.mlxtran"))
 pkgCov <- system.file("cov", package="monolix2rx")
 
 rx <- monolix2rx(file.path(pkgCov, "warfarin_covariate3_project.mlxtran"))
+
+rx
+
+# If you edit the mlxtran lines before translating, the project
+# directory cannot be taken from a file name, so give it with `dirn`:
+
+lines <- readLines(file.path(pkgTheo, "theophylline_project.mlxtran"))
+
+rx <- monolix2rx(lines, dirn=pkgTheo)
 
 rx
 }

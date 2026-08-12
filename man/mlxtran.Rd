@@ -4,7 +4,7 @@
 \alias{mlxtran}
 \title{Read and parse mlxtran lines}
 \usage{
-mlxtran(file, equation = FALSE, update = FALSE)
+mlxtran(file, equation = FALSE, update = FALSE, dirn = NULL)
 }
 \arguments{
 \item{file}{mlxtran file to process}
@@ -12,6 +12,12 @@ mlxtran(file, equation = FALSE, update = FALSE)
 \item{equation}{parse the equation block to rxode2 (some models cannot be translated)}
 
 \item{update}{when true, try to update the parameter block to the final parameter estimates}
+
+\item{dirn}{directory of the Monolix project, used to find the files
+the mlxtran refers to (model text file, data, \code{exportpath} results).
+By default (\code{NULL}) this is the directory of \code{file}, or the current
+working directory when \code{file} is a character vector of mlxtran
+lines instead of a file name.}
 }
 \value{
 mlxtran object
@@ -31,6 +37,15 @@ Read and parse mlxtran lines
 pkgTheo <- system.file("theo", package="monolix2rx")
 
 mlx <- mlxtran(file.path(pkgTheo, "theophylline_project.mlxtran"))
+
+mlx
+
+# When you edit the mlxtran lines yourself, the project directory can
+# no longer be guessed from a file name, so give it with `dirn`:
+
+lines <- readLines(file.path(pkgTheo, "theophylline_project.mlxtran"))
+
+mlx <- mlxtran(lines, dirn=pkgTheo)
 
 mlx
 }

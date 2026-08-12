@@ -1,5 +1,20 @@
 # monolix2rx 0.0.7
 
+* `monolix2rx()`, `mlxtran()` and `mlxTxt()` gained a `dirn` argument
+  giving the directory of the Monolix project.  This makes it possible
+  to translate a project that lives outside the current working
+  directory when the mlxtran is supplied as a character vector of lines
+  (for example after editing the lines to drop a `<DATAFILE>` block), or
+  when a model text file name is relative to the project directory
+  rather than to the R session (#44).
+
+* The project directory stored on the mlxtran object is now absolute, so
+  a model read through a relative path still finds its model file, data
+  and `exportpath` results after the working directory changes.
+
+* The "model file does not exist" error now reports the directory that
+  was searched and points at `dirn=`.
+
 * Range-check the input length in all 13 `trans_*` parser entry-points
   before narrowing it for `dparse()`'s `int` buffer length.  A buffer of
   `INT_MAX` bytes or more now raises a clean R error instead of handing

@@ -4,7 +4,7 @@
 \alias{mlxTxt}
 \title{Get equation block from a Monolix model txt file}
 \usage{
-mlxTxt(file, retFile = FALSE)
+mlxTxt(file, retFile = FALSE, dirn = NULL)
 }
 \arguments{
 \item{file}{string representing the model text file.  Can be
@@ -12,6 +12,11 @@ lib:fileName.txt if library setup/available}
 
 \item{retFile}{boolean that tells \code{mlxTxt()} to return the file
 name instead of error if the file does not exist}
+
+\item{dirn}{directory the model text file is relative to.  By
+default (\code{NULL}) \code{file} is resolved from the current working
+directory; this is only needed when the model file lives in a
+different directory than the R session.}
 }
 \value{
 parsed equation or file name

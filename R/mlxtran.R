@@ -280,11 +280,48 @@
   .mlxEnv$subsubsection <- sec
   .mlxEnv$isDesc <- FALSE
 }
+#' Normalize a Monolix project directory
+#'
+#' @param dirn directory (or `NULL`)
+#' @return `NULL` when `dirn` is `NULL`, otherwise the normalized
+#'   (absolute) directory.  Absolute directories keep working after the
+#'   R working directory changes, which relative directories do not.
+#' @noRd
+#' @author Matthew L. Fidler
+.monolixDirn <- function(dirn) {
+  if (is.null(dirn)) return(NULL)
+  checkmate::assertCharacter(dirn, len=1, any.missing=FALSE)
+  checkmate::assertDirectoryExists(dirn, access="r")
+  normalizePath(dirn, winslash="/", mustWork=FALSE)
+}
+
+#' Resolve a file relative to a supplied Monolix project directory
+#'
+#' @param file file name to resolve
+#' @param dirn directory the file could be relative to (or `NULL`)
+#' @return `file` resolved inside `dirn` when that exists, otherwise
+#'   `file` unchanged (which covers absolute paths, `lib:` models and
+#'   `dirn=NULL`)
+#' @noRd
+#' @author Matthew L. Fidler
+.monolixInDirn <- function(file, dirn) {
+  if (is.null(dirn)) return(file)
+  if (!checkmate::testCharacter(file, len=1, any.missing=FALSE)) return(file)
+  .f <- file.path(dirn, file)
+  if (file.exists(.f)) return(.f)
+  file
+}
+
 #' Read and parse mlxtran lines
 #'
 #' @param file mlxtran file to process
 #' @param equation parse the equation block to rxode2 (some models cannot be translated)
 #' @param update when true, try to update the parameter block to the final parameter estimates
+#' @param dirn directory of the Monolix project, used to find the files
+#'   the mlxtran refers to (model text file, data, `exportpath` results).
+#'   By default (`NULL`) this is the directory of `file`, or the current
+#'   working directory when `file` is a character vector of mlxtran
+#'   lines instead of a file name.
 #' @return mlxtran object
 #' @export
 #' @author Matthew L. Fidler
@@ -302,13 +339,24 @@
 #' mlx <- mlxtran(file.path(pkgTheo, "theophylline_project.mlxtran"))
 #'
 #' mlx
-mlxtran <- function(file, equation=FALSE, update=FALSE) {
+#'
+#' # When you edit the mlxtran lines yourself, the project directory can
+#' # no longer be guessed from a file name, so give it with `dirn`:
+#'
+#' lines <- readLines(file.path(pkgTheo, "theophylline_project.mlxtran"))
+#'
+#' mlx <- mlxtran(lines, dirn=pkgTheo)
+#'
+#' mlx
+mlxtran <- function(file, equation=FALSE, update=FALSE, dirn=NULL) {
   checkmate::assertLogical(equation, any.missing=FALSE, len=1)
   checkmate::assertLogical(update, any.missing=FALSE, len=1)
+  dirn <- .monolixDirn(dirn)
   on.exit({
     .Call(`_monolix2rx_r_parseFree`)
   })
   if (inherits(file, "monolix2rxMlxtran")) {
+    if (!is.null(dirn)) attr(file, "dirn") <- dirn
     .monolix2rx$endpointPred <- .getMonolixPreds(file)
     if (equation && !is.null(file$MODEL$LONGITUDINAL$EQUATION)) {
       file$MODEL$LONGITUDINAL$EQUATION <- .equation(file$MODEL$LONGITUDINAL$EQUATION,
@@ -322,14 +370,15 @@ mlxtran <- function(file, equation=FALSE, update=FALSE) {
   }
   if (length(file) > 1L) {
     .lines <- file
-    .dirn <- getwd()
+    .dirn <- if (is.null(dirn)) .monolixDirn(getwd()) else dirn
   } else {
+    file <- .monolixInDirn(file, dirn)
     if (checkmate::testFileExists(file, access="r", extension="txt")) {
-      return(mlxTxt(file))
+      return(mlxTxt(file, dirn=dirn))
     }
     checkmate::assertFileExists(file, access="r", extension="mlxtran")
     .lines <- suppressWarnings(readLines(file))
-    .dirn <- dirname(file)
+    .dirn <- .monolixDirn(dirname(file))
   }
   .ret <- withr::with_dir(.dirn,
                           .mlxtran(.lines, equation=equation, update=update))
