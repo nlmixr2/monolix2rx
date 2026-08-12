@@ -280,12 +280,11 @@
   .mlxEnv$subsubsection <- sec
   .mlxEnv$isDesc <- FALSE
 }
-#' Normalize a Monolix project directory
+#' Normalize Monolix project directory
 #'
 #' @param dirn directory (or `NULL`)
-#' @return `NULL` when `dirn` is `NULL`, otherwise the normalized
-#'   (absolute) directory.  Absolute directories keep working after the
-#'   R working directory changes, which relative directories do not.
+#' @return `NULL` when `dirn` is `NULL`, otherwise the absolute
+#'   directory.
 #' @noRd
 #' @author Matthew L. Fidler
 .monolixDirn <- function(dirn) {
@@ -295,18 +294,35 @@
   normalizePath(dirn, winslash="/", mustWork=FALSE)
 }
 
-#' Resolve a file relative to a supplied Monolix project directory
+#' Is this file name absolute?
+#'
+#' @param file file name to check
+#' @return `TRUE` for `~`, unix absolute, Windows drive (`c:/`) and UNC
+#'   (`\\\\server`) paths
+#' @noRd
+#' @author Matthew L. Fidler
+.monolixIsAbsPath <- function(file) {
+  grepl("^(~|[/\\\\]|[A-Za-z]:[/\\\\])", file)
+}
+
+#' Resolve a file relative to Monolix project
 #'
 #' @param file file name to resolve
-#' @param dirn directory the file could be relative to (or `NULL`)
-#' @return `file` resolved inside `dirn` when that exists, otherwise
-#'   `file` unchanged (which covers absolute paths, `lib:` models and
+#' @param dirn directory  (or `NULL`)
+#' @return `file` resolved relative to `dirn` when exists, otherwise
+#'   `file` unchanged (covering absolute paths, `lib:` models and
 #'   `dirn=NULL`)
 #' @noRd
 #' @author Matthew L. Fidler
 .monolixInDirn <- function(file, dirn) {
   if (is.null(dirn)) return(file)
   if (!checkmate::testCharacter(file, len=1, any.missing=FALSE)) return(file)
+  # an absolute name and an unresolved `lib:` model are not relative to
+  # the project; joining them to `dirn` could silently pick up a
+  # same-named file (file.path("/proj", "/tmp/m.txt") reads
+  # "/proj/tmp/m.txt")
+  if (.monolixIsAbsPath(file)) return(file)
+  if (substr(file, 1, 4) == "lib:") return(file)
   .f <- file.path(dirn, file)
   if (file.exists(.f)) return(.f)
   file
@@ -317,19 +333,13 @@
 #' @param file mlxtran file to process
 #' @param equation parse the equation block to rxode2 (some models cannot be translated)
 #' @param update when true, try to update the parameter block to the final parameter estimates
-#' @param dirn directory of the Monolix project, used to find the files
-#'   the mlxtran refers to (model text file, data, `exportpath` results).
-#'   By default (`NULL`) this is the directory of `file`, or the current
-#'   working directory when `file` is a character vector of mlxtran
-#'   lines instead of a file name.
+#' @param dirn directory of the Monolix project
 #' @return mlxtran object
 #' @export
 #' @author Matthew L. Fidler
 #' @examples
+#'
 #' # First load in the model; in this case the theo model
-#' # This is modified from the Monolix demos by saving the model
-#' # File as a text file (hence you can access without model library)
-#' # setup.
 #' #
 #' # This example is also included in the monolix2rx package, so
 #' # you refer to the location with `system.file()`:
@@ -340,8 +350,8 @@
 #'
 #' mlx
 #'
-#' # When you edit the mlxtran lines yourself, the project directory can
-#' # no longer be guessed from a file name, so give it with `dirn`:
+#' # When you edit the mlxtran lines, the project directory can't
+#' # be inferred anymore, so give it with `dirn`:
 #'
 #' lines <- readLines(file.path(pkgTheo, "theophylline_project.mlxtran"))
 #'
@@ -363,8 +373,15 @@ mlxtran <- function(file, equation=FALSE, update=FALSE, dirn=NULL) {
                                                     file$MODEL$LONGITUDINAL$PK)
     }
     if (update && !is.null(file$PARAMETER)) {
-      file <- .parameterUpdate(file)
-      file <- .mlxtranCov(file)
+      # `.mlxtranCov()`/`.mlxtranSumary()` read `exportpath` relative to
+      # the working directory, so move there first; re-reading an
+      # already parsed object from elsewhere otherwise silently dropped
+      # the covariance and run information
+      # the parameters are updated first because `.mlxtranCov()` builds
+      # its jacobian from them (this matches `.mlxtranFinalize()`)
+      file <- withr::with_dir(.monolixGetPwd(file), {
+        .mlxtranCov(.parameterUpdate(file))
+      })
     }
     return(file)
   }

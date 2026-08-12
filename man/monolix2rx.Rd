@@ -37,17 +37,14 @@ variability/inter-occasion variability that are missing.}
 
 \item{ci}{confidence interval for validation, by default 0.95}
 
-\item{sigdig}{number of significant digits for validation, by default 3}
+\item{sigdig}{number of significant digits for validation, by
+default 3}
 
 \item{envir}{represents the environment used for evaluating the
 corresponding rxode2 function}
 
-\item{dirn}{directory of the Monolix project, used to find the files
-the mlxtran refers to (model text file, data, \code{exportpath}
-results).  By default (\code{NULL}) this is the directory of the
-\code{mlxtran} file; supply it when \code{mlxtran} is a character vector of
-mlxtran lines (where there is no file name to take the directory
-from) or when the file name is relative to another directory.}
+\item{dirn}{directory of the Monolix project, by default it is the
+current working directory}
 }
 \value{
 rxode2 model

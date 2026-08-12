@@ -26,15 +26,12 @@
 #' @param cor Default correlation for missing correlations estimate
 #' @param theta default population estimate
 #' @param ci confidence interval for validation, by default 0.95
-#' @param sigdig number of significant digits for validation, by default 3
+#' @param sigdig number of significant digits for validation, by
+#'   default 3
 #' @param envir represents the environment used for evaluating the
 #'   corresponding rxode2 function
-#' @param dirn directory of the Monolix project, used to find the files
-#'   the mlxtran refers to (model text file, data, `exportpath`
-#'   results).  By default (`NULL`) this is the directory of the
-#'   `mlxtran` file; supply it when `mlxtran` is a character vector of
-#'   mlxtran lines (where there is no file name to take the directory
-#'   from) or when the file name is relative to another directory.
+#' @param dirn directory of the Monolix project, by default it is the
+#'   current working directory
 #' @return rxode2 model
 #' @export
 #' @author Matthew L. Fidler
@@ -64,8 +61,8 @@
 #'
 #' rx
 #'
-#' # If you edit the mlxtran lines before translating, the project
-#' # directory cannot be taken from a file name, so give it with `dirn`:
+#' # If the mlxtran lines are edited it can't detect the directory so
+#' # give it with `dirn`:
 #'
 #' lines <- readLines(file.path(pkgTheo, "theophylline_project.mlxtran"))
 #'

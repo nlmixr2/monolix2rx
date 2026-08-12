@@ -13,11 +13,7 @@ mlxtran(file, equation = FALSE, update = FALSE, dirn = NULL)
 
 \item{update}{when true, try to update the parameter block to the final parameter estimates}
 
-\item{dirn}{directory of the Monolix project, used to find the files
-the mlxtran refers to (model text file, data, \code{exportpath} results).
-By default (\code{NULL}) this is the directory of \code{file}, or the current
-working directory when \code{file} is a character vector of mlxtran
-lines instead of a file name.}
+\item{dirn}{directory of the Monolix project}
 }
 \value{
 mlxtran object
@@ -26,10 +22,8 @@ mlxtran object
 Read and parse mlxtran lines
 }
 \examples{
+
 # First load in the model; in this case the theo model
-# This is modified from the Monolix demos by saving the model
-# File as a text file (hence you can access without model library)
-# setup.
 #
 # This example is also included in the monolix2rx package, so
 # you refer to the location with `system.file()`:
@@ -40,8 +34,8 @@ mlx <- mlxtran(file.path(pkgTheo, "theophylline_project.mlxtran"))
 
 mlx
 
-# When you edit the mlxtran lines yourself, the project directory can
-# no longer be guessed from a file name, so give it with `dirn`:
+# When you edit the mlxtran lines, the project directory can't
+# be inferred anymore, so give it with `dirn`:
 
 lines <- readLines(file.path(pkgTheo, "theophylline_project.mlxtran"))
 

@@ -238,10 +238,9 @@ as.list.monolix2rxCovEq <- as.list.monolix2rxEquation
 #' @param retFile boolean that tells `mlxTxt()` to return the file
 #'   name instead of error if the file does not exist
 #'
-#' @param dirn directory the model text file is relative to.  By
-#'   default (`NULL`) `file` is resolved from the current working
-#'   directory; this is only needed when the model file lives in a
-#'   different directory than the R session.
+#' @param dirn directory the model text file.  default (`NULL`) `file`
+#'   (working directory); only needed when the model file
+#'   lives in a different directory than the R session.
 #'
 #' @return parsed equation or file name
 #' @export
@@ -300,7 +299,9 @@ mlxTxt <- function(file, retFile=FALSE, dirn=NULL) {
     }
     if (!is.null(.monolixLib)) {
       .lines <- .monolixLib
-      .dirn <- NULL
+      # a model read from the model library has no directory of its own,
+      # so keep the project directory when one was given
+      .dirn <- dirn
     } else {
       .f <- .monolixInDirn(.mlxtranLib(file), dirn)
       if (checkmate::testFileExists(.f, "r")) {

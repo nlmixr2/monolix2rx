@@ -13,10 +13,9 @@ lib:fileName.txt if library setup/available}
 \item{retFile}{boolean that tells \code{mlxTxt()} to return the file
 name instead of error if the file does not exist}
 
-\item{dirn}{directory the model text file is relative to.  By
-default (\code{NULL}) \code{file} is resolved from the current working
-directory; this is only needed when the model file lives in a
-different directory than the R session.}
+\item{dirn}{directory the model text file.  default (\code{NULL}) \code{file}
+(working directory); only needed when the model file
+lives in a different directory than the R session.}
 }
 \value{
 parsed equation or file name
