@@ -91,7 +91,7 @@ pkgTheo <- system.file("theo", package="monolix2rx")
 
 rx <- monolix2rx(file.path(pkgTheo, "theophylline_project.mlxtran"))
 #> ℹ integrated model file 'oral1_1cpt_kaVCl.txt' into mlxtran object
-#> ℹ updating model values to final parameter estimates
+#> ℹ updating model values to final parameter estimates from tp/populationParameters.txt
 #> ℹ done
 #> ℹ reading run info (# obs, doses, Monolix Version, etc) from summary.txt
 #> ℹ done
@@ -112,7 +112,7 @@ pkgCov <- system.file("cov", package="monolix2rx")
 
 rx <- monolix2rx(file.path(pkgCov, "warfarin_covariate3_project.mlxtran"))
 #> ℹ integrated model file 'oral1_1cpt_TlagkaVCl.txt' into mlxtran object
-#> ℹ updating model values to final parameter estimates
+#> ℹ updating model values to final parameter estimates from w3/populationParameters.txt
 #> ℹ done
 #> ℹ reading run info (# obs, doses, Monolix Version, etc) from summary.txt
 #> ℹ done
@@ -255,7 +255,7 @@ lines <- readLines(file.path(pkgTheo, "theophylline_project.mlxtran"))
 
 rx <- monolix2rx(lines, dirn=pkgTheo)
 #> ℹ integrated model file 'oral1_1cpt_kaVCl.txt' into mlxtran object
-#> ℹ updating model values to final parameter estimates
+#> ℹ updating model values to final parameter estimates from tp/populationParameters.txt
 #> ℹ done
 #> ℹ reading run info (# obs, doses, Monolix Version, etc) from summary.txt
 #> ℹ done

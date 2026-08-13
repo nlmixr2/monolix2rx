@@ -18,7 +18,7 @@ pkgTheo <- system.file("theo/theophylline_project.mlxtran", package="monolix2rx"
 
 mod <- monolix2rx(pkgTheo)
 #> ℹ integrated model file 'oral1_1cpt_kaVCl.txt' into mlxtran object
-#> ℹ updating model values to final parameter estimates
+#> ℹ updating model values to final parameter estimates from tp/populationParameters.txt
 #> ℹ done
 #> ℹ reading run info (# obs, doses, Monolix Version, etc) from summary.txt
 #> ℹ done
