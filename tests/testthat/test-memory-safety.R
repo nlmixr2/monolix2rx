@@ -64,8 +64,9 @@ test_that("repeated parses with cleanup in between stay correct", {
 })
 
 test_that("many syntax errors in one parse are reported without crashing", {
-  # Each reported error copies its source line with getLine(); the copies are
-  # released per error rather than held until the .Call() returns.
+  # Exercises the per-error getLine()/vmaxset() path end to end.  It checks
+  # that many reports in one parse complete cleanly; it cannot observe whether
+  # each line copy is released early (that needs a memory profiler).
   .bad <- strrep("x = !\n", 2000L)
   .out <- capture.output(expect_error(.equation(.bad, .pk(""))))
   expect_true(any(grepl("syntax error", .out, fixed = TRUE)))
