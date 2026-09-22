@@ -41,6 +41,14 @@ test_that("syntax error on an empty last line does not truncate the report", {
   expect_true(any(grepl("^", .out, fixed = TRUE)))
 })
 
+test_that("many syntax errors in one parse are reported without crashing", {
+  # Each reported error copies its source line with getLine(); the copies are
+  # released per error rather than held until the .Call() returns.
+  .bad <- strrep("x = !\n", 2000L)
+  .out <- capture.output(expect_error(.equation(.bad, .pk(""))))
+  expect_true(any(grepl("syntax error", .out, fixed = TRUE)))
+})
+
 test_that("integer overflow protection: dparse input approaching INT_MAX bytes", {
   skip(paste(
     "requires ~2GB free RAM;",

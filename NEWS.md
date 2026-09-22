@@ -37,6 +37,11 @@
 * A syntax error reported on an empty line no longer writes a NUL byte into
   the error report, which silently cut off the rest of the report.
 
+* `rc_dup_str()` now gives each duplicated string its own allocation.  It used
+  to append into one growing buffer, so a reallocation left pointers from
+  earlier calls (held across calls, e.g. both operands of a logical operator)
+  pointing at freed memory.
+
 * Added thread-safety comment to `src/shared.c` documenting that the global
   parser state is intentionally not mutex-protected, consistent with R's
   single-threaded execution model.

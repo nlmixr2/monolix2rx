@@ -151,6 +151,8 @@ static inline void printErrorInfo(Parser *p, char *err, char *after, int printLi
 }
 
 static inline void printErrorLineHighlightPoint(Parser *p) {
+  // dparser may report many errors in one parse; release this line when done
+  const void *vmax = vmaxget();
   char *buf = getLine(eBuf, p->user.loc.line, &eBufLast);
   sAppend(&sbErr1, "      ");
   int i, len = strlen(buf);
@@ -171,6 +173,7 @@ static inline void printErrorLineHighlightPoint(Parser *p) {
     sAppend(&sbErr1, "%c", buf[i]);
   }
   sAppend(&sbErr1, "\n      ");
+  vmaxset(vmax);
   for (int i = 0; i < p->user.loc.col; i++){
     sAppendN(&sbErr1, " ", 1);
     if (i == len-2) { i++; break;}
@@ -331,12 +334,15 @@ static inline void printErrorLineHighlight2(Parser *p, char *buf, char *after, i
 }
 
 static inline void printErrorLineHiglightRegion(Parser *p, char *after) {
+  // dparser may report many errors in one parse; release this line when done
+  const void *vmax = vmaxget();
   char *buf = getLine(eBuf, p->user.loc.line, &eBufLast);
   if (lastSyntaxErrorLine < p->user.loc.line) lastSyntaxErrorLine++;
   printLineNumberAlone(p);
   int len= strlen(buf);
   printErrorLineHighlight1(p, buf, after, len);
   printErrorLineHighlight2(p, buf, after, len);
+  vmaxset(vmax);
 }
 
 

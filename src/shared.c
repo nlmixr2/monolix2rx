@@ -42,7 +42,18 @@ sbuf curLine;
 
 const char *lastStr;
 int lastStrLoc=0;
-vLines _dupStrs;
+// Each duplicated string is its own allocation.  Callers keep the returned
+// pointers across later rc_dup_str() calls (e.g. `v` then `v2`, or curDdt), so
+// the strings must never move; only the array of pointers is reallocated.
+static char **_dupStrs = NULL;
+static int _dupStrsN = 0, _dupStrsMax = 0;
+
+void monolix2rx_dupStrsFree(void) {
+  for (int i = 0; i < _dupStrsN; i++) R_Free(_dupStrs[i]);
+  if (_dupStrs != NULL) R_Free(_dupStrs);
+  _dupStrsN = _dupStrsMax = 0;
+}
+
 char * rc_dup_str(const char *s, const char *e) {
   lastStr=s;
   int l;
@@ -59,6 +70,17 @@ char * rc_dup_str(const char *s, const char *e) {
     }
     l = (int)slen;
   }
-  addLine(&_dupStrs, "%.*s", l, s);
-  return _dupStrs.line[_dupStrs.n-1];
+  if (_dupStrsN == _dupStrsMax) {
+    if (_dupStrsMax > INT_MAX / 2 - 1024) {
+      Rf_error(_("too many strings in rc_dup_str"));
+    }
+    int mx = _dupStrsMax * 2 + 1024;
+    _dupStrs = R_Realloc(_dupStrs, mx, char*);
+    _dupStrsMax = mx;
+  }
+  char *ret = R_Calloc((size_t)l + 1, char);
+  memcpy(ret, s, l);
+  ret[l] = '\0';
+  _dupStrs[_dupStrsN++] = ret;
+  return ret;
 }
