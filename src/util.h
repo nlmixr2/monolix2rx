@@ -1,3 +1,22 @@
+#include <limits.h>
+#include <string.h>
+
+// dparse() takes the buffer length as an int.  Range-check strlen() in
+// size_t before narrowing so an over-long buffer can never reach the
+// parser as a negative length.  Every current caller hands in an R
+// CHARSXP, which R already caps at INT_MAX bytes, so this cannot trip
+// from R; it keeps the trans_* entry-points safe for any future C-level
+// caller that builds its own buffer.
+static inline int monolix2rxParseLen(const char *buf, const char *what) {
+  size_t len = strlen(buf);
+  if (len > (size_t)INT_MAX) {
+    Rf_errorcall(R_NilValue,
+                 "%s: input is too large to parse (%.0f bytes, maximum is %d)",
+                 what, (double)len, INT_MAX);
+  }
+  return (int)len;
+}
+
 SEXP _monolix2rx_trans_indDef(SEXP in);
 SEXP _monolix2rx_trans_parameter(SEXP in);
 SEXP _monolix2rx_trans_individual(SEXP in, SEXP what);

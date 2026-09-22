@@ -20,7 +20,7 @@
 #' Process the monolix input sections (say what to help users find out where)
 #'
 #' @param inp input string
-#' @param where is this being processed (string, default [INDIVIDUAL])
+#' @param where is this being processed (string, default `[INDIVIDUAL]`)
 #' @return input statement
 #' @noRd
 #' @author Matthew L. Fidler

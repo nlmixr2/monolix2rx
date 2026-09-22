@@ -1,16 +1,44 @@
 # monolix2rx 0.0.7
 
-* Add integer overflow guards in the C-level string buffer
-  (`src/sbuf.c`).  `sAppendN`, `sAppend`, and `addLine` previously
-  computed the new allocation size as `sbb->o + 2 + n + SBUF_MXBUF`
-  (or analogous expression).  When the user-controlled `n` was large
-  enough this expression overflowed `int` to a negative value, which
-  `R_Realloc` then converted to a huge unsigned size and crashed.  The
-  guard converts this into a clean R error.
+* Dropped the re-exports (`rxode2()`, `rxode()`, `RxODE()`, `ini()`,
+  `model()`, `model<-`, `rxRename()`, `rxSolve()`, `rxUiGet()`, `logit()`,
+  `expit()`, `lotri()`, `autoplot()` and `%>%`).  Load `nlmixr2` (or
+  `rxode2`/`magrittr`) to get them; this also works around a roxygen2 8.1.0
+  re-export failure (issue #47, r-lib/roxygen2#1915).
+
+* `monolix2rx()`, `mlxtran()` and `mlxTxt()` now have `dirn` to giving
+  the actual directory of the Monolix project, in case the project
+  moved for some reason. This makes it possible to translate project files
+  outside the project directory (#44)
+
+* The project directory in mlxtran is now absolute.
+
+* Support the `Monolix` 2024 file specification `file={path='data.csv'}` in
+  addition to the older `file='data.csv'`; the two are equivalent.  This
+  applies to the data file in `<DATAFILE> [FILEINFO]` (and
+  `<DATA_FORMATTING> [FILEINFO]`) as well as the model file in
+  `<MODEL> [LONGITUDINAL]` (issue #43).
+
+* Range-check the input length in all 13 `trans_*` parser entry-points
+  before narrowing it for `dparse()`'s `int` buffer length.  A buffer of
+  `INT_MAX` bytes or more now raises a clean R error instead of handing
+  the parser a truncated (possibly negative) length.  This is defensive:
+  every current caller passes an R string, which R already caps at
+  `INT_MAX` bytes.
 
 # monolix2rx 0.0.6
 
 * Updated to add types for rstudio completion
+
+- Defensive `drop = FALSE` on the imported `thetaMat` covariance subset so a single surviving parameter is not collapsed to a scalar.
+
+- Parameters whose off-diagonal covariances are `NaN`/`NA`/`Inf` are now also dropped from the imported `thetaMat` (previously only the diagonal was checked for `NaN`/`NA`, so non-finite covariances could silently propagate into simulations).
+
+- When every parameter is dropped from the imported `thetaMat`, the covariance information is now ignored with a warning instead of storing a `0x0` matrix that would break `rxSolve()` simulations; `rxSolve()` also warns when `nStud > 1` is requested but no `thetaMat` is available, so uncertainty is never silently omitted.
+
+- Fixed `rxSolve()` fallbacks that read `dfObs`/`thetaMat` from the wrong location when the values were stored on the model instead of its `meta` environment.
+
+- `rxSolve()` now actually uses the Monolix-style `maxSS` it reports (number of steady-state doses plus one); previously the computed value was ignored and the literal default `10000L` was passed to the solver.  The guard also checked `missing(maxSS)` twice where it meant `minSS`, so a user-specified `minSS` no longer gets silently overwritten.  Note this can change steady-state simulation results: like Monolix itself, a fixed number of doses is now simulated, so slowly accumulating drugs reproduce Monolix's (possibly pre-steady-state) concentrations instead of being dosed to full steady state; pass `maxSS`/`minSS` explicitly to override.
 
 # monolix2rx 0.0.5
 
