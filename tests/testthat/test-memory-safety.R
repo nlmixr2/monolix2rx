@@ -66,6 +66,21 @@ test_that("repeated parses with cleanup in between stay correct", {
   expect_equal(.ret$rx, c("if (time > 0) {", "y <- 1", "}"))
 })
 
+test_that("curDdt is reset at the start of each equation parse", {
+  # Without cleanup the previous parse's ddt string ("x") is still valid, so a
+  # missing reset shows up as the first .equationLine() call receiving "x".
+  .ddt <- character(0)
+  .orig <- .equationLine
+  local_mocked_bindings(.equationLine = function(line, ddt) {
+    .ddt <<- c(.ddt, ddt)
+    .orig(line, ddt)
+  })
+  .equation("ddt_x = -k*x", .pk(""))
+  .ddt <- character(0)
+  .equation("if t > 0\ny = 1\nend", .pk(""))
+  expect_equal(.ddt[1], "")
+})
+
 test_that("many syntax errors in one parse are reported without crashing", {
   # Exercises the per-error getLine()/vmaxset() path end to end.  It checks
   # that many reports in one parse complete cleanly; it cannot observe whether
