@@ -4,7 +4,8 @@
 #   - rc_dup_str: implicit ptrdiff_t to int truncation (shared.c)
 #   - dparse: (int)strlen(gBuf) overflow in all 13 parser entry-points
 #   - sbuf: signed integer overflow in size arithmetic (sbuf.c)
-#   - getLine: int col overflow in parseSyntaxErrors.h
+#   - getLine: int index/col overflow in parseSyntaxErrors.h
+#   - syntax error highlighting: embedded NUL on an empty error line
 #
 # NOTE on the >2GB skipped tests: R's internal CHARSXP type uses a signed
 # 32-bit integer for string length, capping individual R strings at
@@ -28,6 +29,16 @@ test_that("equation parser handles multi-statement input correctly", {
   )
   expect_type(.ret$rx, "character")
   expect_true(any(grepl("d/dt", .ret$rx)))
+})
+
+test_that("syntax error on an empty last line does not truncate the report", {
+  # A syntax error reported past the last character used to emit getLine()'s
+  # terminating NUL into the highlight buffer, silently cutting off the rest
+  # of the report.
+  .out <- capture.output(
+    expect_error(.equation("x = \n", .pk("")))
+  )
+  expect_true(any(grepl("^", .out, fixed = TRUE)))
 })
 
 test_that("integer overflow protection: dparse input approaching INT_MAX bytes", {
@@ -69,21 +80,21 @@ test_that("integer overflow protection: sbuf size arithmetic near INT_MAX", {
   )
 })
 
-test_that("integer overflow protection: getLine col accumulation near INT_MAX", {
+test_that("integer overflow protection: syntax error on a near-INT_MAX line", {
   skip(paste(
-    "requires ~2GB free RAM;",
-    "tests size_t col overflow guard in getLine (parseSyntaxErrors.h).",
-    "Without the fix, int col wraps at INT_MAX+1 and R_Calloc(col+1) receives",
-    "a negative/tiny size, corrupting the heap. The guard fires at col == INT_MAX.",
-    "A syntax error is triggered so getLine is actually called on the long line.",
+    "requires ~4GB free RAM;",
+    "reports a syntax error on a single ~1.8GB line, so getLine() copies the",
+    "whole line and the error highlighter pushes it through sbuf, whose",
+    "overflow guard fires. getLine()'s own col == INT_MAX guard cannot be",
+    "reached from R (R strings are capped below INT_MAX bytes); this checks",
+    "that the path raises a clean R error instead of crashing, and that the",
+    "R_alloc()'d line buffer is reclaimed on the longjmp.",
     "NOTE: use strrep() not paste0(rep()) to avoid a large intermediate vector."
   ))
-  # Construct a valid-but-huge LHS with an invalid RHS to force a syntax error,
-  # which causes getLine to be called on the single giant line (~2GB, no newlines).
-  # 200,000,000 x 10 bytes = 2,000,000,000 bytes (~2GB, under INT_MAX).
+  # 9 bytes x 200,000,000 = 1,800,000,000 bytes on one line (under INT_MAX),
+  # with an invalid RHS to force a syntax error on that line.
   giant_line <- strrep("x_var_abc", 200000000L)
   expect_error(
-    .equation(paste0(giant_line, " = !!!bad"),
-                           .pk(""))
+    .equation(paste0(giant_line, " = !!!bad"), .pk(""))
   )
 })

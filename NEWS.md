@@ -29,8 +29,13 @@
 * Fixed implicit `ptrdiff_t` to `int` truncation in `rc_dup_str` (`src/shared.c`);
   pointer differences are now range-checked before conversion to `int`.
 
-* Fixed `int col` overflow in `getLine` (`src/parseSyntaxErrors.h`): the column
-  accumulator is now `size_t` with an explicit bounds check before use.
+* Fixed `int` index/column overflow in `getLine` (`src/parseSyntaxErrors.h`):
+  both are now `size_t` with explicit bounds checks before use.  The line
+  buffer is now `R_alloc()`'d so it is reclaimed if an error longjmps out of
+  the syntax-error highlighter.
+
+* A syntax error reported on an empty line no longer writes a NUL byte into
+  the error report, which silently cut off the rest of the report.
 
 * Added thread-safety comment to `src/shared.c` documenting that the global
   parser state is intentionally not mutex-protected, consistent with R's

@@ -20,9 +20,12 @@
 #define isEsc monolix2rx_isEsc
 #define syntaxErrorExtra monolix2rx_syntaxErrorExtra
 
+// The returned buffer comes from R_alloc(), so R reclaims it when the
+// enclosing .Call() returns -- including when an Rf_error() longjmp (e.g. an
+// sbuf overflow while highlighting a huge line) skips the caller's cleanup.
 static inline char *getLine (char *src, int line, int *lloc) {
-  int cur = 1, i;
-  size_t col = 0;
+  int cur = 1;
+  size_t i, col = 0;
   for(i = 0; src[i] != '\0' && cur != line; i++){
     if(src[i] == '\n') cur++;
   }
@@ -31,11 +34,11 @@ static inline char *getLine (char *src, int line, int *lloc) {
       Rf_error(_("line too long in getLine"));
     }
   }
-  if ((size_t)i + col > (size_t)INT_MAX) {
+  if (i + col > (size_t)INT_MAX) {
     Rf_error(_("source offset overflow in getLine"));
   }
-  *lloc = i + (int)col;
-  char *buf = R_Calloc((int)col + 1, char);
+  *lloc = (int)(i + col);
+  char *buf = R_alloc(col + 1, sizeof(char));
   memcpy(buf, src + i, col);
   buf[col] = '\0';
   return buf;
@@ -102,7 +105,6 @@ static inline void printPriorLines(Parser *p) {
   for (; lastSyntaxErrorLine < p->user.loc.line; lastSyntaxErrorLine++){
     buf = getLine(eBuf, lastSyntaxErrorLine, &eBufLast);
     Rprintf("\n:%03d: %s", lastSyntaxErrorLine, buf);
-    R_Free(buf);
   }
   if (lastSyntaxErrorLine < p->user.loc.line){
     Rprintf("\n");
@@ -148,21 +150,23 @@ static inline void printErrorLineHighlightPoint(Parser *p) {
   char *buf = getLine(eBuf, p->user.loc.line, &eBufLast);
   sAppend(&sbErr1, "      ");
   int i, len = strlen(buf);
-  for (i = 0; i < p->user.loc.col; i++){
+  for (i = 0; i < p->user.loc.col && i < len; i++){
     sAppend(&sbErr1, "%c", buf[i]);
     if (i == len-2) { i++; break;}
   }
-  if (isEsc) {
-    sAppend(&sbErr1, "\033[35m\033[1m%c\033[0m", buf[i++]);
-  }
-  else {
-    sAppend(&sbErr1, "%c", buf[i++]);
+  // Never emit the terminating NUL: it would truncate sbErr1 when printed
+  if (i < len) {
+    if (isEsc) {
+      sAppend(&sbErr1, "\033[35m\033[1m%c\033[0m", buf[i++]);
+    }
+    else {
+      sAppend(&sbErr1, "%c", buf[i++]);
+    }
   }
   for (; i < len; i++){
     sAppend(&sbErr1, "%c", buf[i]);
   }
   sAppend(&sbErr1, "\n      ");
-  R_Free(buf);
   for (int i = 0; i < p->user.loc.col; i++){
     sAppendN(&sbErr1, " ", 1);
     if (i == len-2) { i++; break;}
@@ -213,21 +217,24 @@ static inline void printLineNumberAlone(Parser *p) {
 
 static inline void printErrorLineHighlight1(Parser *p, char *buf, char *after, int len) {
   int i;
-  for (i = 0; i < p->user.loc.col; i++){
+  for (i = 0; i < p->user.loc.col && i < len; i++){
     sAppend(&sbErr1, "%c", buf[i]);
     if (firstErr.s[0] == 0) {
       sAppend(&sbErr2, "%c", buf[i]);
     }
     if (i == len-2) { i++; break;}
   }
-  if (isEsc) {
-    sAppend(&sbErr1, "\033[35m\033[1m%c\033[0m", buf[i++]);
-  }
-  else {
-    sAppend(&sbErr1, "%c", buf[i++]);
-  }
-  if (firstErr.s[0] == 0) {
-    sAppend(&sbErr2, "%c", buf[i-1]);
+  // Never emit the terminating NUL: it would truncate sbErr1/sbErr2 when printed
+  if (i < len) {
+    if (isEsc) {
+      sAppend(&sbErr1, "\033[35m\033[1m%c\033[0m", buf[i++]);
+    }
+    else {
+      sAppend(&sbErr1, "%c", buf[i++]);
+    }
+    if (firstErr.s[0] == 0) {
+      sAppend(&sbErr2, "%c", buf[i-1]);
+    }
   }
   for (; i < len; i++){
     sAppend(&sbErr1, "%c", buf[i]);
@@ -326,7 +333,6 @@ static inline void printErrorLineHiglightRegion(Parser *p, char *after) {
   int len= strlen(buf);
   printErrorLineHighlight1(p, buf, after, len);
   printErrorLineHighlight2(p, buf, after, len);
-  R_Free(buf);
 }
 
 
