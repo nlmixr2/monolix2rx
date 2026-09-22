@@ -87,8 +87,8 @@ test_that("integer overflow protection: syntax error on a near-INT_MAX line", {
     "whole line and the error highlighter pushes it through sbuf, whose",
     "overflow guard fires. getLine()'s own col == INT_MAX guard cannot be",
     "reached from R (R strings are capped below INT_MAX bytes); this checks",
-    "that the path raises a clean R error instead of crashing, and that the",
-    "R_alloc()'d line buffer is reclaimed on the longjmp.",
+    "that the path raises a clean R error instead of crashing (it does not",
+    "measure whether the line buffer is reclaimed on the longjmp).",
     "NOTE: use strrep() not paste0(rep()) to avoid a large intermediate vector."
   ))
   # 9 bytes x 200,000,000 = 1,800,000,000 bytes on one line (under INT_MAX),

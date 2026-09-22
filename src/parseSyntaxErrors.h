@@ -103,8 +103,12 @@ static inline void printSyntaxErrorHeader(void) {
 static inline void printPriorLines(Parser *p) {
   char *buf;
   for (; lastSyntaxErrorLine < p->user.loc.line; lastSyntaxErrorLine++){
+    // Release each R_alloc()'d line as we go rather than holding a copy of
+    // every prior line until the .Call() returns
+    const void *vmax = vmaxget();
     buf = getLine(eBuf, lastSyntaxErrorLine, &eBufLast);
     Rprintf("\n:%03d: %s", lastSyntaxErrorLine, buf);
+    vmaxset(vmax);
   }
   if (lastSyntaxErrorLine < p->user.loc.line){
     Rprintf("\n");
