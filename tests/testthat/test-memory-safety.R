@@ -42,6 +42,15 @@ test_that("syntax error on an empty last line does not truncate the report", {
   expect_true(any(grepl("^", .out, fixed = TRUE)))
 })
 
+test_that("rc_dup_str strings stay intact across many duplications", {
+  # 1500 statements duplicate well over 1024 strings, so the rc_dup_str()
+  # pointer array is reallocated mid-parse; every earlier string must survive.
+  .i <- 1:1500
+  .eq <- paste0("v", .i, " = a", .i, " + b", .i, collapse = "\n")
+  .ret <- .equation(.eq, .pk(""))
+  expect_equal(.ret$rx, paste0("v", .i, " <- a", .i, " + b", .i))
+})
+
 test_that("repeated parses with cleanup in between stay correct", {
   # rc_dup_str() strings are freed by _monolix2rx_r_parseFree between parses;
   # the next parse must start from a clean pool (and a reset curDdt).
