@@ -369,13 +369,7 @@ void trans_content(const char* parse){
   errP = curP;
   eBufLast = 0;
   gBufFree=0;
-  {
-    size_t _gBuf_len = strlen(gBuf);
-    if (_gBuf_len > (size_t)INT_MAX) {
-      Rf_error(_("input too large to parse (exceeds INT_MAX bytes)"));
-    }
-    _pn= dparse(curP, gBuf, (int)_gBuf_len);
-  }
+  _pn= dparse(curP, gBuf, monolix2rxParseLen(gBuf, "content"));
   if (!_pn || curP->syntax_errors) {
   } else {
     wprint_parsetree_content(parser_tables_mlxtranContent , _pn, 0, wprint_node_content, NULL);

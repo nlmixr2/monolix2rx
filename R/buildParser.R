@@ -110,6 +110,12 @@
 .monolix2rxBuildRxSolve <- function() {
   message("build options for rxSolve to match Monolix")
   .args <- deparse1(eval(str2lang(paste0("args(rxode2::rxSolve)"))))
+  # Keep only the first (preferred) ODE method as the default. rxode2's full
+  # multi-element `method` default is frozen here at build time and goes stale;
+  # a stale multi-element default that no longer matches rxode2's own default
+  # trips odeMethodToInt()'s match.arg() ("'arg' must be of length 1") when the
+  # solve is dispatched. The first element is the default rxode2 would pick.
+  .args <- sub('method = c\\(("[^"]*")[^)]*\\)', "method = \\1", .args)
   .first <- c(strsplit(.args, "[.][.][.]"))[[1]][1]
   .first <- paste(.first,
                   "..., ",
@@ -152,7 +158,6 @@
           .minfo(paste0("using dfObs=", dfObs, " from Monolix"))
         } else if (!is.null(object$dfObs)) {
           dfObs <- object$dfObs
-          dfObs <- object$meta$dfObs
           .minfo(paste0("using dfObs=", dfObs, " from Monolix"))
         }
       }
@@ -161,8 +166,11 @@
           thetaMat <- object$meta$thetaMat
           .minfo(paste0("using thetaMat from Monolix"))
         } else if (!is.null(object$thetaMat)) {
-          thetaMat <- object$meta$thetaMat
+          thetaMat <- object$thetaMat
           .minfo(paste0("using thetaMat from Monolix"))
+        } else if (nStud > 1L) {
+          warning("no thetaMat covariance is available from the Monolix import; simulating without parameter uncertainty",
+                  call.=FALSE)
         }
       }
     }
@@ -192,7 +200,7 @@
       .minfo(paste0("Since Monolix doesn't use ssRtol, set ssAtol=", ssAtol))
     }
     .nss <- .getNbdoses(object)
-    if (missing(maxSS) && missing(maxSS)) {
+    if (missing(maxSS) && missing(minSS)) {
       maxSS <- .nss + 1
       minSS <- .nss
       .minfo(paste0("Since Monolix uses a set number of doses for steady state use maxSS=", maxSS,
@@ -228,7 +236,7 @@
                    "ssAtol = ssAtol, ",
                    "ssRtol = ssRtol, ",
                    "minSS = minSS, ",
-                   "maxSS = 10000L, ",
+                   "maxSS = maxSS, ",
                    "envir = envir")
 
   .formalArgs <- paste0("rxode2::rxSolve(", paste(.formalArgs, collapse=""), ")")

@@ -280,19 +280,64 @@
   .mlxEnv$subsubsection <- sec
   .mlxEnv$isDesc <- FALSE
 }
+#' Normalize Monolix project directory
+#'
+#' @param dirn directory (or `NULL`)
+#' @return `NULL` when `dirn` is `NULL`, otherwise the absolute
+#'   directory.
+#' @noRd
+#' @author Matthew L. Fidler
+.monolixDirn <- function(dirn) {
+  if (is.null(dirn)) return(NULL)
+  checkmate::assertCharacter(dirn, len=1, any.missing=FALSE)
+  checkmate::assertDirectoryExists(dirn, access="r")
+  normalizePath(dirn, winslash="/", mustWork=FALSE)
+}
+
+#' Is this file name absolute?
+#'
+#' @param file file name to check
+#' @return `TRUE` for `~`, unix absolute, Windows drive (`c:/`) and UNC
+#'   (`\\\\server`) paths
+#' @noRd
+#' @author Matthew L. Fidler
+.monolixIsAbsPath <- function(file) {
+  grepl("^(~|[/\\\\]|[A-Za-z]:[/\\\\])", file)
+}
+
+#' Resolve a file relative to Monolix project
+#'
+#' @param file file name to resolve
+#' @param dirn directory  (or `NULL`)
+#' @return `file` resolved relative to `dirn` when exists, otherwise
+#'   `file` unchanged (covering absolute paths, `lib:` models and
+#'   `dirn=NULL`)
+#' @noRd
+#' @author Matthew L. Fidler
+.monolixInDirn <- function(file, dirn) {
+  if (is.null(dirn)) return(file)
+  if (!checkmate::testCharacter(file, len=1, any.missing=FALSE)) return(file)
+  # an absolute name and an unresolved `lib:` model are not relative to
+  # the project; joining them to `dirn` could silently pick up a
+  # same-named file (file.path("/proj", "/tmp/m.txt") reads
+  # "/proj/tmp/m.txt")
+  if (.monolixIsAbsPath(file)) return(file)
+  if (substr(file, 1, 4) == "lib:") return(file)
+  file.path(dirn, file)
+}
+
 #' Read and parse mlxtran lines
 #'
 #' @param file mlxtran file to process
 #' @param equation parse the equation block to rxode2 (some models cannot be translated)
 #' @param update when true, try to update the parameter block to the final parameter estimates
+#' @param dirn directory of the Monolix project
 #' @return mlxtran object
 #' @export
 #' @author Matthew L. Fidler
 #' @examples
+#'
 #' # First load in the model; in this case the theo model
-#' # This is modified from the Monolix demos by saving the model
-#' # File as a text file (hence you can access without model library)
-#' # setup.
 #' #
 #' # This example is also included in the monolix2rx package, so
 #' # you refer to the location with `system.file()`:
@@ -302,34 +347,53 @@
 #' mlx <- mlxtran(file.path(pkgTheo, "theophylline_project.mlxtran"))
 #'
 #' mlx
-mlxtran <- function(file, equation=FALSE, update=FALSE) {
+#'
+#' # Sometimes the project directory can't
+#' # inferred anymore; in that case give it with `dirn`:
+#'
+#' lines <- readLines(file.path(pkgTheo, "theophylline_project.mlxtran"))
+#'
+#' mlx <- mlxtran(lines, dirn=pkgTheo)
+#'
+#' mlx
+mlxtran <- function(file, equation=FALSE, update=FALSE, dirn=NULL) {
   checkmate::assertLogical(equation, any.missing=FALSE, len=1)
   checkmate::assertLogical(update, any.missing=FALSE, len=1)
+  dirn <- .monolixDirn(dirn)
   on.exit({
     .Call(`_monolix2rx_r_parseFree`)
   })
   if (inherits(file, "monolix2rxMlxtran")) {
+    if (!is.null(dirn)) attr(file, "dirn") <- dirn
     .monolix2rx$endpointPred <- .getMonolixPreds(file)
     if (equation && !is.null(file$MODEL$LONGITUDINAL$EQUATION)) {
       file$MODEL$LONGITUDINAL$EQUATION <- .equation(file$MODEL$LONGITUDINAL$EQUATION,
                                                     file$MODEL$LONGITUDINAL$PK)
     }
     if (update && !is.null(file$PARAMETER)) {
-      file <- .parameterUpdate(file)
-      file <- .mlxtranCov(file)
+      # `.mlxtranCov()`/`.mlxtranSumary()` read `exportpath` relative to
+      # the working directory, so move there first; re-reading an
+      # already parsed object from elsewhere otherwise silently dropped
+      # the covariance and run information
+      # the parameters are updated first because `.mlxtranCov()` builds
+      # its jacobian from them (this matches `.mlxtranFinalize()`)
+      file <- withr::with_dir(.monolixGetPwd(file), {
+        .mlxtranCov(.parameterUpdate(file))
+      })
     }
     return(file)
   }
   if (length(file) > 1L) {
     .lines <- file
-    .dirn <- getwd()
+    .dirn <- if (is.null(dirn)) .monolixDirn(getwd()) else dirn
   } else {
+    file <- .monolixInDirn(file, dirn)
     if (checkmate::testFileExists(file, access="r", extension="txt")) {
-      return(mlxTxt(file))
+      return(mlxTxt(file, dirn=dirn))
     }
     checkmate::assertFileExists(file, access="r", extension="mlxtran")
     .lines <- suppressWarnings(readLines(file))
-    .dirn <- dirname(file)
+    .dirn <- .monolixDirn(dirname(file))
   }
   .ret <- withr::with_dir(.dirn,
                           .mlxtran(.lines, equation=equation, update=update))
