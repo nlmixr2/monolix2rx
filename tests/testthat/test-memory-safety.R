@@ -81,15 +81,12 @@ test_that("a later parse reports its syntax error header after an earlier error"
   expect_true(any(grepl(":001: y = 1", .out, fixed = TRUE)))
 })
 
-test_that("integer overflow protection: dparse input approaching INT_MAX bytes", {
+test_that("near-INT_MAX boundary smoke test: dparse input of INT_MAX - 1 bytes", {
   skip_if_not(nzchar(Sys.getenv("MONOLIX2RX_BIG_MEMORY_TESTS")), paste(
-    "requires ~2GB free RAM;",
-    "tests the (int)strlen(gBuf) overflow guard before each dparse() call.",
-    "Without the fix the cast silently wraps to a negative value for inputs",
-    "> INT_MAX bytes, causing dparse to crash. R strings are internally capped",
-    "at INT_MAX-1 bytes so the guard fires for C-level misuse; this test",
-    "exercises the largest string R can construct to verify the path is safe.",
-    "NOTE: use strrep() not paste0(rep()) to avoid a large intermediate vector."
+    "needs several GB of RAM and a long run time; set",
+    "MONOLIX2RX_BIG_MEMORY_TESTS to run. Smoke test only: R strings are",
+    "capped below INT_MAX bytes, so this cannot reach the overflow guard in",
+    "monolix2rxParseLen(); it checks the largest R string parses without a crash."
   ))
   # 6 bytes x 357,913,941 = 2,147,483,646 bytes (INT_MAX - 1): the largest
   # string strrep can produce before R itself errors on string length.
@@ -101,20 +98,16 @@ test_that("integer overflow protection: dparse input approaching INT_MAX bytes",
   )
 })
 
-test_that("integer overflow protection: sbuf size arithmetic near INT_MAX", {
+test_that("near-INT_MAX boundary smoke test: ~1.8GB of translated output", {
   skip_if_not(nzchar(Sys.getenv("MONOLIX2RX_BIG_MEMORY_TESTS")), paste(
-    "requires ~2GB free RAM;",
-    "tests signed integer overflow guards in sbuf.c sAppend/sAppendN/addLine.",
-    "Without the fix, sbb->o + n wraps to a negative int when the accumulated",
-    "buffer approaches INT_MAX, causing R_Realloc to allocate a tiny buffer and",
-    "corrupt the heap. The guard fires before that arithmetic.",
-    "NOTE: use strrep() not paste0(rep()) to avoid a large intermediate vector."
+    "needs several GB of RAM and a long run time; set",
+    "MONOLIX2RX_BIG_MEMORY_TESTS to run. Smoke test only: the output stays",
+    "below INT_MAX, so the sbuf overflow guards are not reached; it checks a",
+    "large parse near the boundary completes without a crash."
   ))
   # 35 bytes x 51,000,000 = 1,785,000,000 bytes (~1.78GB); feeds the parser
   # with enough content to accumulate near the sbuf overflow boundary.
   huge_eq <- strrep("var_a_b_c_d_e_f_g = var_h_i_j_k_l\n", 51000000L)
-  # The equation parser processes all lines; cumulative rc_dup_str calls
-  # grow _dupStrs toward INT_MAX. The guard prevents heap corruption.
   expect_no_error(
     .equation(huge_eq, .pk(""))
   )
@@ -122,7 +115,7 @@ test_that("integer overflow protection: sbuf size arithmetic near INT_MAX", {
 
 test_that("integer overflow protection: syntax error on a near-INT_MAX line", {
   skip_if_not(nzchar(Sys.getenv("MONOLIX2RX_BIG_MEMORY_TESTS")), paste(
-    "requires ~4GB free RAM;",
+    "needs several GB of RAM and a long run time;",
     "reports a syntax error on a single ~1.8GB line, so getLine() copies the",
     "whole line and the error highlighter pushes it through sbuf, whose",
     "overflow guard fires. getLine()'s own col == INT_MAX guard cannot be",
