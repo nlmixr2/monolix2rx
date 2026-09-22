@@ -156,9 +156,8 @@ static inline void printErrorLineHighlightPoint(Parser *p) {
   char *buf = getLine(eBuf, p->user.loc.line, &eBufLast);
   sAppend(&sbErr1, "      ");
   int i, len = strlen(buf);
-  for (i = 0; i < p->user.loc.col && i < len; i++){
+  for (i = 0; i < p->user.loc.col && i < len - 1; i++){
     sAppend(&sbErr1, "%c", buf[i]);
-    if (i == len-2) { i++; break;}
   }
   // Never emit the terminating NUL: it would truncate sbErr1 when printed
   if (i < len) {
@@ -174,9 +173,8 @@ static inline void printErrorLineHighlightPoint(Parser *p) {
   }
   sAppend(&sbErr1, "\n      ");
   vmaxset(vmax);
-  for (int i = 0; i < p->user.loc.col; i++){
+  for (int i = 0; i < p->user.loc.col && i < len - 1; i++){
     sAppendN(&sbErr1, " ", 1);
-    if (i == len-2) { i++; break;}
   }
   if (isEsc) {
     sAppend(&sbErr1, "\033[35m\033[1m^\033[0m");
@@ -224,12 +222,11 @@ static inline void printLineNumberAlone(Parser *p) {
 
 static inline void printErrorLineHighlight1(Parser *p, char *buf, char *after, int len) {
   int i;
-  for (i = 0; i < p->user.loc.col && i < len; i++){
+  for (i = 0; i < p->user.loc.col && i < len - 1; i++){
     sAppend(&sbErr1, "%c", buf[i]);
     if (firstErr.s[0] == 0) {
       sAppend(&sbErr2, "%c", buf[i]);
     }
-    if (i == len-2) { i++; break;}
   }
   // Never emit the terminating NUL: it would truncate sbErr1/sbErr2 when printed
   if (i < len) {
@@ -287,12 +284,11 @@ static inline void printErrorLineHighligt2after(Parser *p, char *buf, char *afte
   while (col != len && strncmp(buf + col, after, lenv) != 0) col++;
   if (col == len) col = 0;
   if (!printErrorLineHighligt2afterCol(p, buf, after, len, col)) {
-    for (int i = 0; i < p->user.loc.col; i++){
+    for (int i = 0; i < p->user.loc.col && i < len - 1; i++){
       sAppend(&sbErr1, " ");
       if (firstErr.s[0] == 0) {
         sAppendN(&sbErr2, " ", 1);
       }
-      if (i == len-2) { i++; break;}
     }
     if (isEsc) {
       sAppend(&sbErr1, "\033[35m\033[1m^\033[0m");
@@ -314,12 +310,11 @@ static inline void printErrorLineHighlight2(Parser *p, char *buf, char *after, i
   if (_rxode2_reallyHasAfter == 1 && after){
     printErrorLineHighligt2after(p, buf, after, len);
   } else {
-    for (int i = 0; i < p->user.loc.col; i++){
+    for (int i = 0; i < p->user.loc.col && i < len - 1; i++){
       sAppendN(&sbErr1, " ", 1);
       if (firstErr.s[0] == 0) {
         sAppendN(&sbErr2, " ", 1);
       }
-      if (i == len-2) { i++; break;}
     }
     if (isEsc) {
       sAppendN(&sbErr1, "\033[35m\033[1m^\033[0m", 14);

@@ -53,7 +53,9 @@ test_that("rc_dup_str strings stay intact across many duplications", {
 
 test_that("repeated parses with cleanup in between stay correct", {
   # rc_dup_str() strings are freed by _monolix2rx_r_parseFree between parses;
-  # the next parse must start from a clean pool (and a reset curDdt).
+  # the next parse must start from a clean pool.  (The curDdt reset in
+  # _monolix2rx_trans_equation is defensive: this input sets curDdt on its first
+  # assignment, so it cannot observe a stale curDdt.)
   for (.i in 1:3) {
     .ret <- .equation("x_0 = V\nddt_x = -k*x", .pk(""))
     expect_true(any(grepl("d/dt(x)", .ret$rx, fixed = TRUE)))
