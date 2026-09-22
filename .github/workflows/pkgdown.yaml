@@ -43,6 +43,7 @@ jobs:
             nlmixr2/nlmixr2extra
             nlmixr2/nlmixr2plot
             nlmixr2/nlmixr2rpt
+            nlmixr2/rxode2lincmt
             nlmixr2/rxode2
             nlmixr2/rxode2ll
             lixoftConnectors=?ignore
