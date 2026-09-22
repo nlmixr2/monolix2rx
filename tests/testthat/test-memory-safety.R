@@ -53,23 +53,27 @@ test_that("rc_dup_str strings stay intact across many duplications", {
 
 test_that("repeated parses with cleanup in between stay correct", {
   # rc_dup_str() strings are freed by _monolix2rx_r_parseFree between parses;
-  # the next parse must start from a clean pool.  (The curDdt reset in
-  # _monolix2rx_trans_equation is defensive: this input sets curDdt on its first
-  # assignment, so it cannot observe a stale curDdt.)
+  # the next parse must start from a clean pool.
   for (.i in 1:3) {
     .ret <- .equation("x_0 = V\nddt_x = -k*x", .pk(""))
     expect_true(any(grepl("d/dt(x)", .ret$rx, fixed = TRUE)))
     .Call(`_monolix2rx_r_parseFree`)
   }
+  # A conditional first line calls pushModel() before any assignment resets
+  # curDdt, so without the per-parse reset it would read the ddt string freed
+  # above (and could inject depot lines for a stale compartment).
+  .ret <- .equation("if t > 0\ny = 1\nend", .pk(""))
+  expect_equal(.ret$rx, c("if (time > 0) {", "y <- 1", "}"))
 })
 
 test_that("many syntax errors in one parse are reported without crashing", {
   # Exercises the per-error getLine()/vmaxset() path end to end.  It checks
   # that many reports in one parse complete cleanly; it cannot observe whether
   # each line copy is released early (that needs a memory profiler).
-  .bad <- strrep("x = !\n", 2000L)
+  # each stray ")" line is reported (and highlighted) as its own error
+  .bad <- strrep("x = 1\n)\n", 500L)
   .out <- capture.output(expect_error(.equation(.bad, .pk(""))))
-  expect_true(any(grepl("syntax error", .out, fixed = TRUE)))
+  expect_gt(sum(grepl("^", .out, fixed = TRUE)), 100)
 })
 
 test_that("a later parse reports its syntax error header after an earlier error", {
