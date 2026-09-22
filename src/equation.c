@@ -535,6 +535,8 @@ void trans_equation(const char* parse){
 }
 
 SEXP _monolix2rx_trans_equation(SEXP in, SEXP what) {
+  // curDdt may still point at an rc_dup_str() string freed after the last parse
+  curDdt = (char*)"";
   sClear(&curLine);
   sClear(&firstErr);
   record = R_CHAR(STRING_ELT(what, 0));

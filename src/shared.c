@@ -50,7 +50,7 @@ static int _dupStrsN = 0, _dupStrsMax = 0;
 
 void monolix2rx_dupStrsFree(void) {
   for (int i = 0; i < _dupStrsN; i++) R_Free(_dupStrs[i]);
-  if (_dupStrs != NULL) R_Free(_dupStrs);
+  if (_dupStrs != NULL) R_Free(_dupStrs); // R_Free() also sets _dupStrs = NULL
   _dupStrsN = _dupStrsMax = 0;
 }
 

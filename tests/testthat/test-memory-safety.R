@@ -41,6 +41,16 @@ test_that("syntax error on an empty last line does not truncate the report", {
   expect_true(any(grepl("^", .out, fixed = TRUE)))
 })
 
+test_that("repeated parses with cleanup in between stay correct", {
+  # rc_dup_str() strings are freed by _monolix2rx_r_parseFree between parses;
+  # the next parse must start from a clean pool (and a reset curDdt).
+  for (.i in 1:3) {
+    .ret <- .equation("x_0 = V\nddt_x = -k*x", .pk(""))
+    expect_true(any(grepl("d/dt(x)", .ret$rx, fixed = TRUE)))
+    .Call(`_monolix2rx_r_parseFree`)
+  }
+})
+
 test_that("many syntax errors in one parse are reported without crashing", {
   # Each reported error copies its source line with getLine(); the copies are
   # released per error rather than held until the .Call() returns.
