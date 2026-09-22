@@ -12,7 +12,8 @@
 # INT_MAX (2,147,483,647) bytes. Because of this, the overflow guards in
 # the C code protect primarily against direct C-level misuse (e.g., calls
 # from C code that bypasses R's string limit). The tests below document
-# the boundary behaviour and require ~2GB of free RAM to run.
+# the boundary behaviour and need several GB of free RAM, so they only run
+# when MONOLIX2RX_BIG_MEMORY_TESTS is set.
 
 test_that("rc_dup_str handles normal strings without error", {
   # Regression: short strings must work correctly after the overflow guards
@@ -59,8 +60,17 @@ test_that("many syntax errors in one parse are reported without crashing", {
   expect_true(any(grepl("syntax error", .out, fixed = TRUE)))
 })
 
+test_that("a later parse reports its syntax error header after an earlier error", {
+  # lastSyntaxErrorLine used to carry over, so the second report lost its
+  # header and the source lines before the error.
+  capture.output(expect_error(.equation(strrep("x = !\n", 20L), .pk(""))))
+  .out <- capture.output(expect_error(.equation("y = 1\ny = !", .pk(""))))
+  expect_true(any(grepl("^=+$", .out)))
+  expect_true(any(grepl(":001: y = 1", .out, fixed = TRUE)))
+})
+
 test_that("integer overflow protection: dparse input approaching INT_MAX bytes", {
-  skip(paste(
+  skip_if_not(nzchar(Sys.getenv("MONOLIX2RX_BIG_MEMORY_TESTS")), paste(
     "requires ~2GB free RAM;",
     "tests the (int)strlen(gBuf) overflow guard before each dparse() call.",
     "Without the fix the cast silently wraps to a negative value for inputs",
@@ -80,7 +90,7 @@ test_that("integer overflow protection: dparse input approaching INT_MAX bytes",
 })
 
 test_that("integer overflow protection: sbuf size arithmetic near INT_MAX", {
-  skip(paste(
+  skip_if_not(nzchar(Sys.getenv("MONOLIX2RX_BIG_MEMORY_TESTS")), paste(
     "requires ~2GB free RAM;",
     "tests signed integer overflow guards in sbuf.c sAppend/sAppendN/addLine.",
     "Without the fix, sbb->o + n wraps to a negative int when the accumulated",
@@ -99,7 +109,7 @@ test_that("integer overflow protection: sbuf size arithmetic near INT_MAX", {
 })
 
 test_that("integer overflow protection: syntax error on a near-INT_MAX line", {
-  skip(paste(
+  skip_if_not(nzchar(Sys.getenv("MONOLIX2RX_BIG_MEMORY_TESTS")), paste(
     "requires ~4GB free RAM;",
     "reports a syntax error on a single ~1.8GB line, so getLine() copies the",
     "whole line and the error highlighter pushes it through sbuf, whose",

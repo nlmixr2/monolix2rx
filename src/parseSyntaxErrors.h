@@ -412,6 +412,8 @@ static inline void finalizeSyntaxError(void) {
     }
     char *v= rc_dup_str(firstErr.s, 0);
     sClear(&firstErr);
+    // Report is complete; the next parse must print its own header and lines
+    lastSyntaxErrorLine = 0;
     Rf_errorcall(R_NilValue, "%s", v);
   }
 }
