@@ -31,11 +31,11 @@ static inline char *getLine (char *src, int line, int *lloc) {
   }
   for(col = 0; src[i + col] != '\n' && src[i + col] != '\0'; col++){
     if (col == (size_t)INT_MAX) {
-      Rf_error(_("line too long in getLine"));
+      Rf_error(_("line too long in getLine")); // # nocov: R strings are shorter than INT_MAX
     }
   }
   if (i + col > (size_t)INT_MAX) {
-    Rf_error(_("source offset overflow in getLine"));
+    Rf_error(_("source offset overflow in getLine")); // # nocov: R strings are shorter than INT_MAX
   }
   *lloc = (int)(i + col);
   char *buf = R_alloc(col + 1, sizeof(char));
@@ -231,7 +231,7 @@ static inline void printErrorLineHighlight1(Parser *p, char *buf, char *after, i
   // Never emit the terminating NUL: it would truncate sbErr1/sbErr2 when printed
   if (i < len) {
     if (isEsc) {
-      sAppend(&sbErr1, "\033[35m\033[1m%c\033[0m", buf[i++]);
+      sAppend(&sbErr1, "\033[35m\033[1m%c\033[0m", buf[i++]); // # nocov: isEsc is never set
     }
     else {
       sAppend(&sbErr1, "%c", buf[i++]);
@@ -248,6 +248,10 @@ static inline void printErrorLineHighlight1(Parser *p, char *buf, char *after, i
   }
 }
 
+// # nocov start
+// Unreachable: monolix2rxSyntaxError() clears _rxode2_reallyHasAfter before
+// printErrorLineHiglightRegion(), so printErrorLineHighlight2() never takes
+// its "after" branch.
 static inline int printErrorLineHighligt2afterCol(Parser *p, char *buf, char *after, int len, int col) {
   if (!col || col == len) return 0;
   for (int i = 0; i < col; i++){
@@ -301,6 +305,7 @@ static inline void printErrorLineHighligt2after(Parser *p, char *buf, char *afte
     }
   }
 }
+// # nocov end
 
 static inline void printErrorLineHighlight2(Parser *p, char *buf, char *after, int len) {
   sAppend(&sbErr1, "\n      ");
@@ -308,7 +313,7 @@ static inline void printErrorLineHighlight2(Parser *p, char *buf, char *after, i
     sAppendN(&sbErr2, "\n      ", 7);
   }
   if (_rxode2_reallyHasAfter == 1 && after){
-    printErrorLineHighligt2after(p, buf, after, len);
+    printErrorLineHighligt2after(p, buf, after, len); // # nocov: see above
   } else {
     for (int i = 0; i < p->user.loc.col && i < len - 1; i++){
       sAppendN(&sbErr1, " ", 1);

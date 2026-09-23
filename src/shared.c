@@ -61,19 +61,19 @@ char * rc_dup_str(const char *s, const char *e) {
   if (e) {
     ptrdiff_t diff = e - s;
     if (diff < 0 || diff > (ptrdiff_t)INT_MAX) {
-      Rf_error(_("string segment too long in rc_dup_str"));
+      Rf_error(_("string segment too long in rc_dup_str")); // # nocov: R strings are shorter than INT_MAX
     }
     l = (int)diff;
   } else {
     size_t slen = strlen(s);
     if (slen > (size_t)INT_MAX) {
-      Rf_error(_("string too long in rc_dup_str"));
+      Rf_error(_("string too long in rc_dup_str")); // # nocov: R strings are shorter than INT_MAX
     }
     l = (int)slen;
   }
   if (_dupStrsN == _dupStrsMax) {
     if (_dupStrsMax > INT_MAX / 2 - 1024) {
-      Rf_error(_("too many strings in rc_dup_str"));
+      Rf_error(_("too many strings in rc_dup_str")); // # nocov: R strings are shorter than INT_MAX
     }
     int mx = _dupStrsMax * 2 + 1024;
     _dupStrs = R_Realloc(_dupStrs, mx, char*);
