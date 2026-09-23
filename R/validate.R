@@ -89,7 +89,7 @@
                              .ret$cmt <- ui$predDf$var[i]
                              .ret
                            }))
-    return(.ret)
+    .ret
   }
 }
 #' Validate the imported model

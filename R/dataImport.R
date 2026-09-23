@@ -37,6 +37,7 @@
     .file <- mlxtran$DATAFILE$FILEINFO$FILEINFO$file
     .try <- try(file.exists(.file), silent=TRUE)
     if (inherits(.try, "try-error")) .try <- FALSE
+    if (length(.try) == 0L) .try <- FALSE
     if (.try) {
       .sep <- mlxtran$DATAFILE$FILEINFO$FILEINFO$delimiter
       .sep <- switch(.sep,

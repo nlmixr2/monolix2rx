@@ -1,4 +1,4 @@
-#' Process <DATAFILE> [SETTINGS]
+#' Process `<DATAFILE> [SETTINGS]`
 #'
 #' @param text character vector of length one with text to process
 #' @return datafile settings object

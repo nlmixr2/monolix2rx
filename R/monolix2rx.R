@@ -26,9 +26,12 @@
 #' @param cor Default correlation for missing correlations estimate
 #' @param theta default population estimate
 #' @param ci confidence interval for validation, by default 0.95
-#' @param sigdig number of significant digits for validation, by default 3
+#' @param sigdig number of significant digits for validation, by
+#'   default 3
 #' @param envir represents the environment used for evaluating the
 #'   corresponding rxode2 function
+#' @param dirn directory of the Monolix project, by default it is the
+#'   current working directory
 #' @return rxode2 model
 #' @export
 #' @author Matthew L. Fidler
@@ -57,9 +60,18 @@
 #' rx <- monolix2rx(file.path(pkgCov, "warfarin_covariate3_project.mlxtran"))
 #'
 #' rx
+#'
+#' # If the mlxtran lines are edited it can't detect the directory so
+#' # give it with `dirn`:
+#'
+#' lines <- readLines(file.path(pkgTheo, "theophylline_project.mlxtran"))
+#'
+#' rx <- monolix2rx(lines, dirn=pkgTheo)
+#'
+#' rx
 monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
                        sd=1.0, cor=1e-5, theta=0.5, ci=0.95, sigdig=3,
-                       envir=parent.frame()) {
+                       envir=parent.frame(), dirn=NULL) {
   if (!requireNamespace("rxode2", quietly=FALSE) ||
         !requireNamespace("lotri", quietly=FALSE)) {
     stop("'monolix2rx' requires 'rxode2' and 'lotri'",
@@ -80,18 +92,22 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   .monolix2rx$iniCi <- ci
   .monolix2rx$iniSigdig <- sigdig
   thetaMatType <- match.arg(thetaMatType)
+  dirn <- .monolixDirn(dirn)
   if (length(mlxtran) == 1L && is.character(mlxtran) &&
         grepl("[.]txt$", mlxtran, ignore.case = TRUE)) {
-    .mlxtran <- mlxTxt(mlxtran)
+    .mlxtran <- mlxTxt(mlxtran, dirn=dirn)
   } else {
-    .mlxtran <- mlxtran(mlxtran, equation=TRUE, update=update)
+    .mlxtran <- mlxtran(mlxtran, equation=TRUE, update=update, dirn=dirn)
   }
   .admd <- NULL
   .cmt <- NULL
   if (!is.null(.mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$file)) {
     withr::with_dir(.monolixGetPwd(.mlxtran), {
       if (!file.exists(.mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$file)) {
-        stop("the model file '", .mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$file, "' does not exist\nyou may need to setup the model library to complete translation",
+        stop("the model file '", .mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$file,
+             "' does not exist in '", .monolixGetPwd(.mlxtran),
+             "'\nif it is in another directory, use 'dirn='",
+             "\nyou may also need to setup the model library to complete translation",
              call.=FALSE)
       }
     })
@@ -171,20 +187,18 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
                       paste(.diff, collapse=", ")),
                       call.=FALSE)
       }
-      .d <- diag(.thetaMat)
-      .w <- which(is.nan(.d) | is.na(.d))
-      if (length(.w) > 0L) {
-        warning(paste("The following parameters are missing from the thetaMat covariance matrix because they were NaN/NA:",
-                      paste(dimnames(.thetaMat)[[1]][.w], collapse=", ")),
-                call.=FALSE)
-        .thetaMat <- .thetaMat[-.w, -.w]
-      }
+      .thetaMat <- .thetaMatPrune(.thetaMat, .thetaMatNames)
       .thetaMatType <- .tt
       break
     }
   }
   if (length(.thetaMatType) == 1L) {
-    assign("thetaMat", .thetaMat, envir=.ui$meta)
+    if (nrow(.thetaMat) == 0L) {
+      warning("all parameters were dropped from the thetaMat covariance matrix because they were NaN/NA; ignoring the Monolix covariance step",
+              call.=FALSE)
+    } else {
+      assign("thetaMat", .thetaMat, envir=.ui$meta)
+    }
   }
   if (!is.null(attr(.mlxtran, "desc")) &&
         attr(.mlxtran, "desc") != "") {
@@ -229,4 +243,46 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   .ui <- rxode2::rxUiCompress(.ui)
   class(.ui) <- c("monolix2rx", class(.ui))
   .ui
+}
+
+#' Drop parameters with NaN/NA (co)variances from an imported covariance matrix
+#'
+#' First drops parameters whose diagonal variance is NaN/NA, then drops
+#' parameters with NaN/NA off-diagonal covariances (most NaN/NA first) so a
+#' matrix containing NaN/NA is never used for simulation.  `drop=FALSE`
+#' keeps a single surviving parameter as a named 1x1 matrix.
+#'
+#' @param thetaMat named square covariance matrix imported from Monolix
+#' @param keep parameter names the model estimates; on tied scores a
+#'   parameter not in `keep` is dropped first so a bad covariance on an
+#'   extraneous row does not delete a real model parameter
+#' @return pruned covariance matrix (possibly 0x0) with dimnames preserved
+#' @noRd
+#' @author Matthew L. Fidler
+.thetaMatPrune <- function(thetaMat, keep=character(0)) {
+  .d <- diag(thetaMat)
+  .w <- which(!is.finite(.d))
+  if (length(.w) > 0L) {
+    warning(paste("The following parameters are missing from the thetaMat covariance matrix because they were NaN/NA/Inf:",
+                  paste(dimnames(thetaMat)[[1]][.w], collapse=", ")),
+            call.=FALSE)
+    thetaMat <- thetaMat[-.w, -.w, drop = FALSE]
+  }
+  # is.finite() is FALSE for NaN/NA/Inf; score rows and columns together
+  # so asymmetric patterns are handled.  On ties the first parameter is
+  # dropped, which may prune more than strictly needed, but each drop
+  # warns and a non-finite value never reaches the simulation
+  while (nrow(thetaMat) > 0L && !all(is.finite(thetaMat))) {
+    .bad <- !is.finite(thetaMat)
+    # the 0.5 boost only breaks integer-score ties in favor of dropping
+    # parameters the model does not estimate
+    .score <- rowSums(.bad) + colSums(.bad) +
+      0.5 * !(dimnames(thetaMat)[[1]] %in% keep)
+    .w <- which.max(.score)
+    warning(paste0("the parameter '", dimnames(thetaMat)[[1]][.w],
+                   "' is dropped from the thetaMat covariance matrix because its covariances were NaN/NA/Inf"),
+            call.=FALSE)
+    thetaMat <- thetaMat[-.w, -.w, drop = FALSE]
+  }
+  thetaMat
 }

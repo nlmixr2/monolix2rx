@@ -526,7 +526,7 @@ void trans_equation(const char* parse){
   errP = curP;
   eBufLast = 0;
   gBufFree=0;
-  _pn= dparse(curP, gBuf, (int)strlen(gBuf));
+  _pn= dparse(curP, gBuf, monolix2rxParseLen(gBuf, "equation"));
   if (!_pn || curP->syntax_errors) {
   } else {
     wprint_parsetree_equation(parser_tables_equation , _pn, 0, wprint_node_equation, NULL);
@@ -535,6 +535,8 @@ void trans_equation(const char* parse){
 }
 
 SEXP _monolix2rx_trans_equation(SEXP in, SEXP what) {
+  // curDdt may still point at an rc_dup_str() string freed after the last parse
+  curDdt = (char*)"";
   sClear(&curLine);
   sClear(&firstErr);
   record = R_CHAR(STRING_ELT(what, 0));

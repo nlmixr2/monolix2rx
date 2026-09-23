@@ -1,4 +1,4 @@
-#' Initialize the [LONGITUDNIAL] DEFINITION: section variables
+#' Initialize the `[LONGITUDINAL] DEFINITION:` section variables
 #'
 #'
 #' @param full if this is full
@@ -99,7 +99,7 @@
 .setMaxEventNumber <- function(var) {
   .monolix2rx$maxEventNumber <- as.integer(var)
 }
-#' Parse the [LONGITUDNIAL] DEFINITION: section
+#' Parse the `[LONGITUDINAL] DEFINITION:` section
 #'
 #' @param text text to parse
 #' @return longDef definition
@@ -356,9 +356,6 @@
   .monolix2rx$transformCatB <- c(.monolix2rx$transformCatB, as.logical(q))
 }
 
-.longDefSetTransformB <- function(q) {
-  .monolix2rx$transformCatB <- c(.monolix2rx$transformCatB, as.logical(q))
-}
 .longDefSetTransformRef <- function(var, q) {
   .monolix2rx$transformReference <- var
   .monolix2rx$transformReferenceQ <- as.logical(q)
@@ -452,7 +449,7 @@ as.list.monolix2rxLongDef <- function(x, ...) {
   class(.x) <- NULL
   .x
 }
-#' Get monolix predictions from <MODEL> [LONGITUDINAL] DEFINITION:
+#' Get monolix predictions from `<MODEL> [LONGITUDINAL] DEFINITION:`
 #'
 #'
 #' @param x mlxtran/longitudinal monolix section

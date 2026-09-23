@@ -8,3 +8,9 @@
 ^cran-comments\.md$
 ^CRAN-SUBMISSION$
 ^revdep$
+^\.git.*$
+^CLAUDE\.md$
+^\.lintr$
+^\.claude$
+^\.vexp$
+^\.antigravity.*$

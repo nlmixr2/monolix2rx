@@ -33,10 +33,10 @@ extern sbuf sbErr1;
 extern sbuf sbErr2;
 extern sbuf sbTransErr;
 extern sbuf curLine;
-extern vLines _dupStrs;
+void monolix2rx_dupStrsFree(void);
 
 void monolix2rx_full_parseFree(int last) {
-  lineFree(&_dupStrs);
+  monolix2rx_dupStrsFree();
   if (last) {
     sFree(&firstErr);
     sFree(&sbTransErr);
@@ -49,7 +49,6 @@ void monolix2rx_full_parseFree(int last) {
     sClear(&sbErr1);
     sClear(&sbErr2);
     sClear(&curLine);
-    lineIni(&_dupStrs);
   }
   monolix2rx_content_parseFree(last);
   monolix2rx_data_settings_parseFree(last);
@@ -74,7 +73,6 @@ void monolix2rx_full_ini(void) {
     sIni(&sbErr1);
     sIni(&sbErr2);
     sIni(&curLine);
-    lineIni(&_dupStrs);
     monolix2rx_full_ini_done = 1;
   }
 }

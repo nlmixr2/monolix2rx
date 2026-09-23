@@ -20,14 +20,25 @@
 #define isEsc monolix2rx_isEsc
 #define syntaxErrorExtra monolix2rx_syntaxErrorExtra
 
+// The returned buffer comes from R_alloc(), so R reclaims it when the
+// enclosing .Call() returns -- including when an Rf_error() longjmp (e.g. an
+// sbuf overflow while highlighting a huge line) skips the caller's cleanup.
 static inline char *getLine (char *src, int line, int *lloc) {
-  int cur = 1, col=0, i;
+  int cur = 1;
+  size_t i, col = 0;
   for(i = 0; src[i] != '\0' && cur != line; i++){
     if(src[i] == '\n') cur++;
   }
-  for(col = 0; src[i + col] != '\n' && src[i + col] != '\0'; col++);
-  *lloc=i+col;
-  char *buf = R_Calloc(col + 1, char);
+  for(col = 0; src[i + col] != '\n' && src[i + col] != '\0'; col++){
+    if (col == (size_t)INT_MAX) {
+      Rf_error(_("line too long in getLine")); // # nocov: R strings are shorter than INT_MAX
+    }
+  }
+  if (i + col > (size_t)INT_MAX) {
+    Rf_error(_("source offset overflow in getLine")); // # nocov: R strings are shorter than INT_MAX
+  }
+  *lloc = (int)(i + col);
+  char *buf = R_alloc(col + 1, sizeof(char));
   memcpy(buf, src + i, col);
   buf[col] = '\0';
   return buf;
@@ -92,9 +103,12 @@ static inline void printSyntaxErrorHeader(void) {
 static inline void printPriorLines(Parser *p) {
   char *buf;
   for (; lastSyntaxErrorLine < p->user.loc.line; lastSyntaxErrorLine++){
+    // Release each R_alloc()'d line as we go rather than holding a copy of
+    // every prior line until the .Call() returns
+    const void *vmax = vmaxget();
     buf = getLine(eBuf, lastSyntaxErrorLine, &eBufLast);
     Rprintf("\n:%03d: %s", lastSyntaxErrorLine, buf);
-    R_Free(buf);
+    vmaxset(vmax);
   }
   if (lastSyntaxErrorLine < p->user.loc.line){
     Rprintf("\n");
@@ -137,27 +151,30 @@ static inline void printErrorInfo(Parser *p, char *err, char *after, int printLi
 }
 
 static inline void printErrorLineHighlightPoint(Parser *p) {
+  // dparser may report many errors in one parse; release this line when done
+  const void *vmax = vmaxget();
   char *buf = getLine(eBuf, p->user.loc.line, &eBufLast);
   sAppend(&sbErr1, "      ");
   int i, len = strlen(buf);
-  for (i = 0; i < p->user.loc.col; i++){
+  for (i = 0; i < p->user.loc.col && i < len - 1; i++){
     sAppend(&sbErr1, "%c", buf[i]);
-    if (i == len-2) { i++; break;}
   }
-  if (isEsc) {
-    sAppend(&sbErr1, "\033[35m\033[1m%c\033[0m", buf[i++]);
-  }
-  else {
-    sAppend(&sbErr1, "%c", buf[i++]);
+  // Never emit the terminating NUL: it would truncate sbErr1 when printed
+  if (i < len) {
+    if (isEsc) {
+      sAppend(&sbErr1, "\033[35m\033[1m%c\033[0m", buf[i++]);
+    }
+    else {
+      sAppend(&sbErr1, "%c", buf[i++]);
+    }
   }
   for (; i < len; i++){
     sAppend(&sbErr1, "%c", buf[i]);
   }
   sAppend(&sbErr1, "\n      ");
-  R_Free(buf);
-  for (int i = 0; i < p->user.loc.col; i++){
+  vmaxset(vmax);
+  for (int i = 0; i < p->user.loc.col && i < len - 1; i++){
     sAppendN(&sbErr1, " ", 1);
-    if (i == len-2) { i++; break;}
   }
   if (isEsc) {
     sAppend(&sbErr1, "\033[35m\033[1m^\033[0m");
@@ -205,21 +222,23 @@ static inline void printLineNumberAlone(Parser *p) {
 
 static inline void printErrorLineHighlight1(Parser *p, char *buf, char *after, int len) {
   int i;
-  for (i = 0; i < p->user.loc.col; i++){
+  for (i = 0; i < p->user.loc.col && i < len - 1; i++){
     sAppend(&sbErr1, "%c", buf[i]);
     if (firstErr.s[0] == 0) {
       sAppend(&sbErr2, "%c", buf[i]);
     }
-    if (i == len-2) { i++; break;}
   }
-  if (isEsc) {
-    sAppend(&sbErr1, "\033[35m\033[1m%c\033[0m", buf[i++]);
-  }
-  else {
-    sAppend(&sbErr1, "%c", buf[i++]);
-  }
-  if (firstErr.s[0] == 0) {
-    sAppend(&sbErr2, "%c", buf[i-1]);
+  // Never emit the terminating NUL: it would truncate sbErr1/sbErr2 when printed
+  if (i < len) {
+    if (isEsc) {
+      sAppend(&sbErr1, "\033[35m\033[1m%c\033[0m", buf[i++]); // # nocov: isEsc is never set
+    }
+    else {
+      sAppend(&sbErr1, "%c", buf[i++]);
+    }
+    if (firstErr.s[0] == 0) {
+      sAppend(&sbErr2, "%c", buf[i-1]);
+    }
   }
   for (; i < len; i++){
     sAppend(&sbErr1, "%c", buf[i]);
@@ -229,6 +248,10 @@ static inline void printErrorLineHighlight1(Parser *p, char *buf, char *after, i
   }
 }
 
+// # nocov start
+// Unreachable: monolix2rxSyntaxError() clears _rxode2_reallyHasAfter before
+// printErrorLineHiglightRegion(), so printErrorLineHighlight2() never takes
+// its "after" branch.
 static inline int printErrorLineHighligt2afterCol(Parser *p, char *buf, char *after, int len, int col) {
   if (!col || col == len) return 0;
   for (int i = 0; i < col; i++){
@@ -265,12 +288,11 @@ static inline void printErrorLineHighligt2after(Parser *p, char *buf, char *afte
   while (col != len && strncmp(buf + col, after, lenv) != 0) col++;
   if (col == len) col = 0;
   if (!printErrorLineHighligt2afterCol(p, buf, after, len, col)) {
-    for (int i = 0; i < p->user.loc.col; i++){
+    for (int i = 0; i < p->user.loc.col && i < len - 1; i++){
       sAppend(&sbErr1, " ");
       if (firstErr.s[0] == 0) {
         sAppendN(&sbErr2, " ", 1);
       }
-      if (i == len-2) { i++; break;}
     }
     if (isEsc) {
       sAppend(&sbErr1, "\033[35m\033[1m^\033[0m");
@@ -283,6 +305,7 @@ static inline void printErrorLineHighligt2after(Parser *p, char *buf, char *afte
     }
   }
 }
+// # nocov end
 
 static inline void printErrorLineHighlight2(Parser *p, char *buf, char *after, int len) {
   sAppend(&sbErr1, "\n      ");
@@ -290,14 +313,13 @@ static inline void printErrorLineHighlight2(Parser *p, char *buf, char *after, i
     sAppendN(&sbErr2, "\n      ", 7);
   }
   if (_rxode2_reallyHasAfter == 1 && after){
-    printErrorLineHighligt2after(p, buf, after, len);
+    printErrorLineHighligt2after(p, buf, after, len); // # nocov: see above
   } else {
-    for (int i = 0; i < p->user.loc.col; i++){
+    for (int i = 0; i < p->user.loc.col && i < len - 1; i++){
       sAppendN(&sbErr1, " ", 1);
       if (firstErr.s[0] == 0) {
         sAppendN(&sbErr2, " ", 1);
       }
-      if (i == len-2) { i++; break;}
     }
     if (isEsc) {
       sAppendN(&sbErr1, "\033[35m\033[1m^\033[0m", 14);
@@ -312,13 +334,15 @@ static inline void printErrorLineHighlight2(Parser *p, char *buf, char *after, i
 }
 
 static inline void printErrorLineHiglightRegion(Parser *p, char *after) {
+  // dparser may report many errors in one parse; release this line when done
+  const void *vmax = vmaxget();
   char *buf = getLine(eBuf, p->user.loc.line, &eBufLast);
   if (lastSyntaxErrorLine < p->user.loc.line) lastSyntaxErrorLine++;
   printLineNumberAlone(p);
   int len= strlen(buf);
   printErrorLineHighlight1(p, buf, after, len);
   printErrorLineHighlight2(p, buf, after, len);
-  R_Free(buf);
+  vmaxset(vmax);
 }
 
 
@@ -388,6 +412,8 @@ static inline void finalizeSyntaxError(void) {
     }
     char *v= rc_dup_str(firstErr.s, 0);
     sClear(&firstErr);
+    // Report is complete; the next parse must print its own header and lines
+    lastSyntaxErrorLine = 0;
     Rf_errorcall(R_NilValue, "%s", v);
   }
 }

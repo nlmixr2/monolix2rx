@@ -18,7 +18,12 @@ filename_t2: "\"([^\"\\]|\\[^])*\"";
 filename_t3: "[^ '\"\n]+";
 filename_t4: ("[^ .\n]+")+ '.'  "[A-Za-z0-9_]+";
 
-fileLine: 'file' '=' filename;
+// Monolix 2024 writes the model file as file={path='model.txt'}, which is
+// equivalent to the older file='model.txt'.  Monolix quotes the path; an
+// unquoted one is swallowed whole by filename_t3 (which allows braces, as
+// it always has), so file={path=model.txt} is not supported.
+fileLine: 'file' '=' filename
+    | 'file' '=' '{' 'path' '=' filename '}';
 
 statement: inputLine singleLineComment?
     | input1Line  singleLineComment?
