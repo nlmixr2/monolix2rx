@@ -1,44 +1,20 @@
-test_that("rc_dup_str handles normal-sized inputs without error", {
-  # Sanity check: regular Mlxtran fragments must continue to parse cleanly
-  # after the INT_MAX guards added to rc_dup_str.
-  expect_no_error(
-    tryCatch(
-      .Call(`_monolix2rx_trans_equation`,
-            "[LONGITUDINAL] EQUATION:\nf = exp(-k*t)\n",
-            "[LONGITUDINAL] EQUATION:"),
-      error = function(e) {
-        if (grepl("rc_dup_str", conditionMessage(e))) stop(e)
-        # Other parse errors (e.g., from synthetic test input) are fine.
-        NULL
-      }
-    )
-  )
+# rc_dup_str() (src/shared.c) copies either a [s, e) segment or, when `e` is
+# NULL, the whole NUL-terminated string.  Its INT_MAX length guards cannot be
+# reached from R (R strings are capped below INT_MAX bytes), so these tests
+# check that both copy paths return exactly the requested bytes.
+
+test_that("rc_dup_str copies [s, e) segments exactly", {
+  # Grammar actions duplicate identifiers and numbers as segments of the
+  # source; any off-by-one in the length would show up in the translation.
+  .ret <- .equation("a_long_name = b1 + 12.5*c\nz = exp(-k*t)", .pk(""))
+  expect_equal(.ret$rx, c("a_long_name <- b1 + 12.5 * c", "z <- exp( - k * time)"))
 })
 
-test_that("rc_dup_str int truncation guard triggers on huge inputs (skipped: requires ~2GB RAM)", {
-  skip("Requires ~2GB free RAM to construct a >INT_MAX-byte string and exercise the rc_dup_str path")
-  # --- What this test checks ---
-  # `rc_dup_str` (src/shared.c) computes the length as
-  #   int l = e ? e-s : (int)strlen(s);
-  # When the source string segment is larger than INT_MAX bytes, the
-  # `(int)` cast silently truncates to a wrong value, which propagates
-  # into `addLine(&_dupStrs, "%.*s", l, s)` and either reads past the
-  # buffer (OOB) or wraps to a tiny copy.
-  #
-  # The guard added by this fix range-checks the ptrdiff_t / size_t
-  # length and raises an R error before the truncation can happen.
-  #
-  # --- How to run manually (outside devtools::test()) ---
-  # Start a fresh R session with at least 3 GB of available RAM, then:
-  #
-  #   library(monolix2rx)
-  #   big <- strrep("a", 2147483647L)   # exactly INT_MAX bytes
-  #   # Before fix: silent truncation; potential heap corruption
-  #   # After fix:  error "string too long in rc_dup_str"
-
-  big <- strrep("a", 2147483647L)
+test_that("rc_dup_str copies whole NUL-terminated strings when e is NULL", {
+  # finalizeSyntaxError() duplicates the full error report with
+  # rc_dup_str(firstErr.s, 0); the message must survive intact.
   expect_error(
-    .Call(`_monolix2rx_trans_equation`, big, "[LONGITUDINAL]"),
-    "rc_dup_str|too long"
+    capture.output(.equation("x = 1\ny = !", .pk(""))),
+    "syntax error"
   )
 })
