@@ -45,6 +45,27 @@
   every current caller passes an R string, which R already caps at
   `INT_MAX` bytes.
 
+- Fixed implicit `ptrdiff_t` to `int` truncation in `rc_dup_str`
+  (`src/shared.c`); pointer differences are now range-checked before
+  conversion to `int`.
+
+- Fixed `int` index/column overflow in `getLine`
+  (`src/parseSyntaxErrors.h`): both are now `size_t` with explicit
+  bounds checks before use. The line buffer is now `R_alloc()`’d so it
+  is reclaimed if an error longjmps out of the syntax-error highlighter.
+
+- A syntax error reported on an empty line no longer writes a NUL byte
+  into the error report, which silently cut off the rest of the report.
+
+- `rc_dup_str()` now gives each duplicated string its own allocation. It
+  used to append into one growing buffer, so a reallocation left
+  pointers from earlier calls (held across calls, e.g. both operands of
+  a logical operator) pointing at freed memory.
+
+- Added thread-safety comment to `src/shared.c` documenting that the
+  global parser state is intentionally not mutex-protected, consistent
+  with R’s single-threaded execution model.
+
 ## monolix2rx 0.0.6
 
 CRAN release: 2025-08-29
