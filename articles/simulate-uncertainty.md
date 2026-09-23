@@ -200,6 +200,7 @@ confidence interval and then plot the confidence bands:
 ``` r
 
 sci <- confint(s, parm=c("CONC", "sim"))
+#> ℹ this simulation drew from 'thetaMat', so the simulated values include parameter uncertainty
 #> summarizing data...done
 
 sci
@@ -233,12 +234,6 @@ p2 <- plot(sci, log="y")
 library(patchwork)
 
 p1/p2
-#> Warning in transformation$transform(x): NaNs produced
-#> Warning in ggplot2::scale_y_log10(..., breaks = breaks, minor_breaks =
-#> minor_breaks, : log-10 transformation introduced infinite
-#> values.
-#> Warning: Removed 3 rows containing missing values or values outside the scale range
-#> (`geom_ribbon()`).
 ```
 
 ![](simulate-uncertainty_files/figure-html/confint-1.png)

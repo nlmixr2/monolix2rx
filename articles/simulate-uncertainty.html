@@ -272,6 +272,7 @@ with uncertainty would be helpful.</p>
 confidence interval and then plot the confidence bands:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sci</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">s</span>, parm<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CONC"</span>, <span class="st">"sim"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> this simulation drew from 'thetaMat', so the simulated values include parameter uncertainty</span></span>
 <span><span class="co">#&gt; summarizing data...done</span></span>
 <span></span>
 <span><span class="va">sci</span></span>
@@ -304,13 +305,7 @@ confidence interval and then plot the confidence bands:</p>
 <span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">p1</span><span class="op">/</span><span class="va">p2</span></span>
-<span><span class="co">#&gt; Warning in transformation$transform(x): NaNs produced</span></span>
-<span><span class="co">#&gt; Warning in ggplot2::scale_y_log10(..., breaks = breaks, minor_breaks =</span></span>
-<span><span class="co">#&gt; minor_breaks, : <span style="color: #00BB00;">log-10</span> transformation introduced infinite</span></span>
-<span><span class="co">#&gt; values.</span></span>
-<span><span class="co">#&gt; Warning: Removed 3 rows containing missing values or values outside the scale range</span></span>
-<span><span class="co">#&gt; (`geom_ribbon()`).</span></span></code></pre></div>
+<span><span class="va">p1</span><span class="op">/</span><span class="va">p2</span></span></code></pre></div>
 <p><img src="simulate-uncertainty_files/figure-html/confint-1.png" class="r-plt" alt="" width="700"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
