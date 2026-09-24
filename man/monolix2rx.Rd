@@ -13,7 +13,8 @@ monolix2rx(
   theta = 0.5,
   ci = 0.95,
   sigdig = 3,
-  envir = parent.frame()
+  envir = parent.frame(),
+  dirn = NULL
 )
 }
 \arguments{
@@ -36,10 +37,14 @@ variability/inter-occasion variability that are missing.}
 
 \item{ci}{confidence interval for validation, by default 0.95}
 
-\item{sigdig}{number of significant digits for validation, by default 3}
+\item{sigdig}{number of significant digits for validation, by
+default 3}
 
 \item{envir}{represents the environment used for evaluating the
 corresponding rxode2 function}
+
+\item{dirn}{directory of the Monolix project, by default it is the
+current working directory}
 }
 \value{
 rxode2 model
@@ -63,6 +68,15 @@ rx <- monolix2rx(file.path(pkgTheo, "theophylline_project.mlxtran"))
 pkgCov <- system.file("cov", package="monolix2rx")
 
 rx <- monolix2rx(file.path(pkgCov, "warfarin_covariate3_project.mlxtran"))
+
+rx
+
+# If the mlxtran lines are edited it can't detect the directory so
+# give it with `dirn`:
+
+lines <- readLines(file.path(pkgTheo, "theophylline_project.mlxtran"))
+
+rx <- monolix2rx(lines, dirn=pkgTheo)
 
 rx
 }

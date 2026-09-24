@@ -2,3 +2,5 @@
 *.so
 .Rhistory
 revdep/
+/.vexp/
+/.claude/

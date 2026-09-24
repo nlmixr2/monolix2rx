@@ -12,6 +12,7 @@
 
 SEXP _monolix2rxlixoftConnectors(void);
 SEXP _monolix2rx_iniDparserPtr(SEXP);
+SEXP _monolix2rx_sbufGuardTest(SEXP);
 SEXP _monolix2rxInitializeLixoftConnectors(SEXP software, SEXP force);
 SEXP _monolix2rxGetLibraryModelContent(SEXP filename);
 
@@ -36,6 +37,7 @@ void R_init_monolix2rx(DllInfo *info) {
     {"_monolix2rx_trans_individual", (DL_FUNC) &_monolix2rx_trans_individual, 2},
     {"_monolix2rx_trans_indDef", (DL_FUNC) &_monolix2rx_trans_indDef, 1},
     {"_monolix2rx_trans_parameter", (DL_FUNC) &_monolix2rx_trans_parameter, 1},
+    {"_monolix2rx_sbufGuardTest", (DL_FUNC) &_monolix2rx_sbufGuardTest, 1},
     {NULL, NULL, 0}
   };
   // log likelihoods used in calculations
