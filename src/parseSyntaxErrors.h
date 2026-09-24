@@ -348,6 +348,9 @@ static inline void printErrorLineHiglightRegion(Parser *p, char *after) {
 
 static inline void monolix2rxSyntaxError(struct D_Parser *ap) {
   if (!rx_suppress_syntax_info){
+    // printErrorInfo() fills firstErr with the header, so decide up front
+    // whether this is the first error and should carry the highlight too
+    int isFirstErr = firstErr.s[0] == 0;
     printSyntaxErrorHeader();
     Parser *p = (Parser *)ap;
     printPriorLines(p);
@@ -363,7 +366,7 @@ static inline void monolix2rxSyntaxError(struct D_Parser *ap) {
     printErrorLineHiglightRegion(p, after);
     printErrorInfo(p, 0, after, 0);
     Rprintf("%s", sbErr1.s);
-    if (firstErr.s[0] == 0) {
+    if (isFirstErr) {
       sAppend(&firstErr, "\n%s", sbErr2.s);
       sAppendN(&firstErr, "\nmore errors could be listed above", 34);
     }
