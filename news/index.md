@@ -62,6 +62,10 @@
   pointers from earlier calls (held across calls, e.g. both operands of
   a logical operator) pointing at freed memory.
 
+- A syntax error’s R error message now includes the highlighted source
+  line and caret. They were only printed to the console because the
+  header written to the error report first suppressed them.
+
 - Added thread-safety comment to `src/shared.c` documenting that the
   global parser state is intentionally not mutex-protected, consistent
   with R’s single-threaded execution model.

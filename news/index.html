@@ -56,6 +56,7 @@
 <li><p>Fixed <code>int</code> index/column overflow in <code>getLine</code> (<code>src/parseSyntaxErrors.h</code>): both are now <code>size_t</code> with explicit bounds checks before use. The line buffer is now <code>R_alloc()</code>’d so it is reclaimed if an error longjmps out of the syntax-error highlighter.</p></li>
 <li><p>A syntax error reported on an empty line no longer writes a NUL byte into the error report, which silently cut off the rest of the report.</p></li>
 <li><p><code>rc_dup_str()</code> now gives each duplicated string its own allocation. It used to append into one growing buffer, so a reallocation left pointers from earlier calls (held across calls, e.g. both operands of a logical operator) pointing at freed memory.</p></li>
+<li><p>A syntax error’s R error message now includes the highlighted source line and caret. They were only printed to the console because the header written to the error report first suppressed them.</p></li>
 <li><p>Added thread-safety comment to <code>src/shared.c</code> documenting that the global parser state is intentionally not mutex-protected, consistent with R’s single-threaded execution model.</p></li>
 </ul></div>
     <div class="section level2">
