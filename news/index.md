@@ -31,6 +31,11 @@
 
 - The project directory in mlxtran is now absolute.
 
+- Import `Monolix` 2024 Excel (`.xls`, `.xlsx`; first sheet) and SAS
+  (`.sas7bdat`, `.xpt`) data sets, using `readxl`/`haven` when they are
+  installed (issue
+  [\#10](https://github.com/nlmixr2/monolix2rx/issues/10)).
+
 - The data set regressor columns (`use=regressor` in `[CONTENT]`) are
   now matched to the model regressors (`use=regressor` in
   `[LONGITUDINAL]`) by their column order in the data set, as Monolix
