@@ -134,8 +134,8 @@
   }
   .content <- mlxtran$DATAFILE$CONTENT$CONTENT
   .use1 <- .content$use1[!is.na(.content$use1)]
-  # cmt/admd are added by .dataConvertAdm()
-  .reserved <- intersect(.modelReg, c(.use1Rx[names(.use1)], "cmt", "admd"))
+  # reserved in the rxode2 data set; cmt/admd are added by .dataConvertAdm()
+  .reserved <- intersect(.modelReg, c(.use1Rx, "cmt", "admd"))
   if (length(.reserved) > 0L) {
     stop("model regressor(s) '", paste(.reserved, collapse="', '"),
          "' clash with a translated data column name", call.=FALSE)

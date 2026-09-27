@@ -76,6 +76,14 @@ cmt = {use=regressor}")
   expect_error(.dataRenameRegressors(data.frame(ID=1, CONC=2), .m),
                "translated data column")
 
+  # reserved even when the data has no time column
+  .m <- .regMlxtran("ID = {use=identifier}
+CONC = {use=regressor}",
+"input = {time}
+time = {use=regressor}")
+  expect_error(.dataRenameRegressors(data.frame(ID=1, CONC=2), .m),
+               "translated data column")
+
   # a declared column absent from the data still blocks the rename
   .m <- .regMlxtran("ID = {use=identifier}
 FOO = {use=time}
