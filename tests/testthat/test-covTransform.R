@@ -58,3 +58,21 @@ test_that("covariate transforms are imported and validated (#6)", {
     expect_true(.rx$predAtol < 0.01)
   }
 })
+
+test_that("a covariate transform without a reference imports (#6)", {
+  skip_on_cran()
+  .dir <- file.path(tempfile(), "cov")
+  dir.create(.dir, recursive=TRUE)
+  on.exit(unlink(dirname(.dir), recursive=TRUE))
+  file.copy(list.files(system.file("cov", package="monolix2rx"), full.names=TRUE),
+            .dir, recursive=TRUE)
+  .f <- file.path(.dir, "warfarin_covariate3_project.mlxtran")
+  .l <- readLines(.f)
+  .l <- sub("'M' = {'1'}  },", "'M' = {'1'}  }", .l, fixed=TRUE)
+  .l <- .l[!grepl("reference = 'M'", .l, fixed=TRUE)]
+  writeLines(.l, .f)
+  .rx <- suppressMessages(monolix2rx(.f))
+  .model <- paste(deparse(.rx$lstExpr), collapse="\n")
+  expect_true(grepl("else {\n    tSex <- \"F\"", .model, fixed=TRUE))
+  expect_true(.rx$predAtol < 0.01)
+})
