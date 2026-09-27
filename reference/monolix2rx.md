@@ -97,7 +97,6 @@ rx <- monolix2rx(file.path(pkgTheo, "theophylline_project.mlxtran"))
 #> ℹ done
 #> ℹ reading covariance from FisherInformation/covarianceEstimatesLin.txt
 #> ℹ done
-#> Warning: NAs introduced by coercion
 #> ℹ imported monolix and translated to rxode2 compatible data ($monolixData)
 #> ℹ imported monolix ETAS (_SAEM) imported to rxode2 compatible data ($etaData)
 #> ℹ imported monolix pred/ipred data to compare ($predIpredData)
@@ -261,7 +260,6 @@ rx <- monolix2rx(lines, dirn=pkgTheo)
 #> ℹ done
 #> ℹ reading covariance from FisherInformation/covarianceEstimatesLin.txt
 #> ℹ done
-#> Warning: NAs introduced by coercion
 #> ℹ imported monolix and translated to rxode2 compatible data ($monolixData)
 #> ℹ imported monolix ETAS (_SAEM) imported to rxode2 compatible data ($etaData)
 #> ℹ imported monolix pred/ipred data to compare ($predIpredData)

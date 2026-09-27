@@ -99,7 +99,6 @@
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> done</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> reading covariance from FisherInformation/covarianceEstimatesLin.txt</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> done</span></span>
-<span><span class="co">#&gt; Warning in .dataRenameFromMlxtran(data, .mlxtran): NAs introduced by coercion</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> imported monolix and translated to rxode2 compatible data (<span style="color: #0000BB; font-weight: bold;">$monolixData</span>)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> imported monolix ETAS (_SAEM) imported to rxode2 compatible data (<span style="color: #0000BB; font-weight: bold;">$etaData</span>)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> imported monolix pred/ipred data to compare (<span style="color: #0000BB; font-weight: bold;">$predIpredData</span>)</span></span>
@@ -275,12 +274,12 @@ used to make the validation predictions (dosing and observations) by the
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">mod</span><span class="op">$</span><span class="va">monolixData</span><span class="op">)</span> <span class="co"># with nlme loaded you can also use getData(mod)</span></span>
 <span><span class="co">#&gt;   id  amt time    dv WEIGHT SEX  cmt admd</span></span>
-<span><span class="co">#&gt; 1  1 4.02 0.00    NA   79.6  NA &lt;NA&gt;   NA</span></span>
-<span><span class="co">#&gt; 2  1   NA 0.25  2.84   79.6  NA &lt;NA&gt;   NA</span></span>
-<span><span class="co">#&gt; 3  1   NA 0.57  6.57   79.6  NA &lt;NA&gt;   NA</span></span>
-<span><span class="co">#&gt; 4  1   NA 1.12 10.50   79.6  NA &lt;NA&gt;   NA</span></span>
-<span><span class="co">#&gt; 5  1   NA 2.02  9.66   79.6  NA &lt;NA&gt;   NA</span></span>
-<span><span class="co">#&gt; 6  1   NA 3.82  8.58   79.6  NA &lt;NA&gt;   NA</span></span></code></pre></div>
+<span><span class="co">#&gt; 1  1 4.02 0.00    NA   79.6   M &lt;NA&gt;   NA</span></span>
+<span><span class="co">#&gt; 2  1   NA 0.25  2.84   79.6   M &lt;NA&gt;   NA</span></span>
+<span><span class="co">#&gt; 3  1   NA 0.57  6.57   79.6   M &lt;NA&gt;   NA</span></span>
+<span><span class="co">#&gt; 4  1   NA 1.12 10.50   79.6   M &lt;NA&gt;   NA</span></span>
+<span><span class="co">#&gt; 5  1   NA 2.02  9.66   79.6   M &lt;NA&gt;   NA</span></span>
+<span><span class="co">#&gt; 6  1   NA 3.82  8.58   79.6   M &lt;NA&gt;   NA</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="comparing-visually">Comparing visually<a class="anchor" aria-label="anchor" href="#comparing-visually"></a>

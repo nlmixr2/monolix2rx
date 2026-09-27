@@ -19,7 +19,6 @@ mod <- monolix2rx(pkgTheo)
 #> ℹ done
 #> ℹ reading covariance from FisherInformation/covarianceEstimatesLin.txt
 #> ℹ done
-#> Warning in .dataRenameFromMlxtran(data, .mlxtran): NAs introduced by coercion
 #> ℹ imported monolix and translated to rxode2 compatible data ($monolixData)
 #> ℹ imported monolix ETAS (_SAEM) imported to rxode2 compatible data ($etaData)
 #> ℹ imported monolix pred/ipred data to compare ($predIpredData)
@@ -205,12 +204,12 @@ to make the validation predictions (dosing and observations) by the
 
 head(mod$monolixData) # with nlme loaded you can also use getData(mod)
 #>   id  amt time    dv WEIGHT SEX  cmt admd
-#> 1  1 4.02 0.00    NA   79.6  NA <NA>   NA
-#> 2  1   NA 0.25  2.84   79.6  NA <NA>   NA
-#> 3  1   NA 0.57  6.57   79.6  NA <NA>   NA
-#> 4  1   NA 1.12 10.50   79.6  NA <NA>   NA
-#> 5  1   NA 2.02  9.66   79.6  NA <NA>   NA
-#> 6  1   NA 3.82  8.58   79.6  NA <NA>   NA
+#> 1  1 4.02 0.00    NA   79.6   M <NA>   NA
+#> 2  1   NA 0.25  2.84   79.6   M <NA>   NA
+#> 3  1   NA 0.57  6.57   79.6   M <NA>   NA
+#> 4  1   NA 1.12 10.50   79.6   M <NA>   NA
+#> 5  1   NA 2.02  9.66   79.6   M <NA>   NA
+#> 6  1   NA 3.82  8.58   79.6   M <NA>   NA
 ```
 
 ## Comparing visually
