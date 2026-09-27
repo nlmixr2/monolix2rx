@@ -164,3 +164,12 @@ test_that("imported data uses the model regressor names (#2)", {
   expect_false("WEIGHT" %in% names(.d))
   expect_true("WT" %in% .rx$allCovs)
 })
+
+test_that("continuous covariates, not categorical ones, are cast to double", {
+  .m <- .regMlxtran("ID = {use=identifier}
+SEX = {use=covariate, type=categorical}
+WT = {use=covariate, type=continuous}", "input = {ka}")
+  .r <- .dataRenameFromMlxtran(data.frame(ID=1, SEX="M", WT=70L), .m)
+  expect_equal(.r$SEX, "M")
+  expect_type(.r$WT, "double")
+})

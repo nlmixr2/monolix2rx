@@ -189,9 +189,8 @@
                         }, character(1), USE.NAMES = FALSE)
   data <- .dataRenameRegressors(data, mlxtran, .orig)
   # Make sure continuous are double
-  for (.i in seq_along(.content$cont)) {
-    .n <- names(.content$cat)[.i]
-    if (!is.na(.n) && any(names(data) == .n)) {
+  for (.n in .content$cont) {
+    if (any(names(data) == .n)) {
       data[[.n]] <- as.double(data[[.n]])
     }
   }
