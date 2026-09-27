@@ -86,6 +86,10 @@ test_that("Excel header and extension edge cases (#10)", {
   expect_equal(.na$COV, c(NA, "a"))
   expect_equal(.na$DT, c("2024-01-01", "2024-01-02"))
 
+  # no mlxtran header keeps the file's own names
+  expect_equal(names(.monolixDataLoadBinary(.x, "xpt", character(0))),
+               c("ID", "DV", "COV", "DT"))
+
   # text formats (and extension-less files) are left to read.table
   expect_null(.monolixDataLoadBinary(.f, "csv", "ID"))
   expect_null(.monolixDataLoadBinary(.f, character(0), "ID"))

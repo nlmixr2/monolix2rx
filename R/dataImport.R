@@ -75,7 +75,7 @@
       .data[[.i]] <- utils::type.convert(.data[[.i]], na.strings=na.strings, as.is=TRUE)
     }
   }
-  if (!identical(names(.data), header)) {
+  if (length(header) > 0L && !identical(names(.data), header)) {
     if (length(.data) != length(header)) {
       stop("the length of the headers between the mlxtran specified model and data are different",
            call.=FALSE)
