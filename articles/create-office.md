@@ -117,6 +117,8 @@ obnd_pptx = report_fit(
 #> vars in future.
 #> Warning in is.na(p_res): is.na() applied to non-(list or vector) of type
 #> 'object'
+#> Warning in is.na(p_res): is.na() applied to non-(list or vector) of type
+#> 'object'
 #> Skipping table: skip_table (NA found, not generated)
 #> Skipping figure: res_vs_pred_idv (NA found, not generated)
 #> Skipping figure: eta_cont (NA found, not generated)
@@ -164,6 +166,8 @@ obnd_docx = report_fit(
 #> non-numeric/integer/logical type columns are considered id.vars, which in this
 #> case are columns [EFFECT]. Consider providing at least one of 'id' or 'measure'
 #> vars in future.
+#> Warning in is.na(p_res): is.na() applied to non-(list or vector) of type
+#> 'object'
 #> Warning in is.na(p_res): is.na() applied to non-(list or vector) of type
 #> 'object'
 #> Skipping figure: res_vs_pred_idv (NA found, not generated)
