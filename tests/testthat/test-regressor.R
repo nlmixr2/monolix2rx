@@ -60,6 +60,15 @@ Cc = {use=regressor}")
   expect_error(.dataRenameRegressors(data.frame(ID=1, Cc=1, CONC=2), .m),
                "non-regressor data column")
 
+  # a model regressor named like a translated single-use column
+  .m <- .regMlxtran("ID = {use=identifier}
+TIME = {use=time}
+CONC = {use=regressor}",
+"input = {time}
+time = {use=regressor}")
+  expect_error(.dataRenameRegressors(data.frame(ID=1, TIME=0, CONC=2), .m),
+               "translated data column")
+
   # an unused column with the model regressor name is dropped
   .m <- .regMlxtran("ID = {use=identifier}
 CONC = {use=regressor}",

@@ -88,6 +88,23 @@
     }
   })
 }
+# rxode2 names for the Monolix single-use columns
+.use1Rx <- c(identifier="id",
+             time="time",
+             eventidentifier="evid",
+             amount="amt",
+             interdoseinterval="ii",
+             censored="cens",
+             limit="limit",
+             observationtype="rxMDvid",
+             administration="adm",
+             steadystate="ss",
+             observation="dv",
+             occasion="occ",
+             rate="rate",
+             additionaldose="addl",
+             missingdependentvariable="mdv",
+             infusiontime="dur")
 #' Rename the data set regressor columns to the model regressor names
 #'
 #' Monolix matches the data set regressor columns (`use=regressor` in
@@ -114,6 +131,13 @@
   if (length(.missing) > 0L) {
     stop("regressor column(s) missing from the data set: ",
          paste(.missing, collapse=", "), call.=FALSE)
+  }
+  .use1 <- mlxtran$DATAFILE$CONTENT$CONTENT$use1
+  .reserved <- intersect(.modelReg,
+                         .use1Rx[names(.use1)[!is.na(.use1)]])
+  if (length(.reserved) > 0L) {
+    stop("model regressor(s) '", paste(.reserved, collapse="', '"),
+         "' clash with a translated data column name", call.=FALSE)
   }
   .clash <- intersect(.modelReg, setdiff(names(data), .dataReg))
   if (length(.clash) > 0L) {
@@ -157,23 +181,7 @@
                           .w <- which(n == .use1)
                           if (length(.w) == 1L) {
                             .n <- names(.use1)[.w]
-                            return(switch(.n,
-                                          identifier="id",
-                                          time="time",
-                                          eventidentifier="evid",
-                                          amount="amt",
-                                          interdoseinterval="ii",
-                                          censored="cens",
-                                          limit="limit",
-                                          observationtype="rxMDvid",
-                                          administration="adm",
-                                          steadystate="ss",
-                                          observation="dv",
-                                          occasion="occ",
-                                          rate="rate",
-                                          additionaldose="addl",
-                                          missingdependentvariable="mdv",
-                                          infusiontime="dur"))
+                            return(.use1Rx[[.n]])
                           }
                           n
                         }, character(1), USE.NAMES = FALSE)
