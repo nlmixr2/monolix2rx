@@ -62,7 +62,12 @@
   if (.pkg == "haven") .data <- haven::zap_formats(haven::zap_labels(.data))
   .data <- as.data.frame(.data)
   # mirror read.table(): dates stay text, and text columns get na.strings/type conversion
+  .naNum <- suppressWarnings(as.numeric(na.strings))
+  .naNum <- .naNum[!is.na(.naNum)]
   for (.i in seq_along(.data)) {
+    if (is.numeric(.data[[.i]]) && length(.naNum) > 0L) {
+      .data[[.i]][.data[[.i]] %in% .naNum] <- NA
+    }
     if (inherits(.data[[.i]], c("Date", "POSIXt", "difftime"))) {
       .data[[.i]] <- as.character(.data[[.i]])
     }

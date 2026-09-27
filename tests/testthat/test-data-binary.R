@@ -69,6 +69,14 @@ test_that("Excel header and extension edge cases (#10)", {
   expect_equal(nrow(.num), 2L)
 
   # text NA markers and dates are handled like read.table()
+  .fna <- file.path(.d, "na.xlsx")
+  writexl::write_xlsx(data.frame(ID=c(1, 2), DV=c(".", "3"), AMT=c(-99, 4)), .fna)
+  .na <- .monolixDataLoadBinary(.fna, "xlsx", c("ID", "DV", "AMT"))
+  expect_equal(.na$DV, c(NA, 3))
+  expect_equal(.na$AMT, c(-99, 4))
+  .na <- .monolixDataLoadBinary(.fna, "xlsx", c("ID", "DV", "AMT"), na.strings=c(".", "-99"))
+  expect_equal(.na$AMT, c(NA, 4))
+
   skip_if_not_installed("haven")
   .x <- file.path(.d, "na.xpt")
   haven::write_xpt(data.frame(ID=c(1, 2), DV=c(".", "3"), COV=c("NA", "a"),
