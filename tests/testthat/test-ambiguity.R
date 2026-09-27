@@ -100,3 +100,12 @@ test_that("unquoted file names parse to one file and no header (#51)", {
   expect_equal(.ind$file, "lib:oral1_1cpt_kaVCl.txt")
   expect_equal(.ind$input, c("V", "Cl"))
 })
+
+test_that("parsers still work with the strict ambiguity check off (#51)", {
+  withr::local_envvar(MONOLIX2RX_STRICT_AMBIGUITY = NA)
+  expect_equal(
+    .equation("if t<=10\n c = 1\nend")$rx,
+    c("if (time <= 10) {", "c <- 1", "}")
+  )
+  expect_equal(.fileinfo("file=data.csv")$file, "data.csv")
+})
