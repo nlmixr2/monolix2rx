@@ -16,6 +16,15 @@
 * Import `Monolix` 2024 Excel (`.xls`, `.xlsx`; first sheet) and SAS
   (`.sas7bdat`, `.xpt`) data sets, using `readxl`/`haven` when they are
   installed (issue #10).
+* The data set regressor columns (`use=regressor` in `[CONTENT]`) are now
+  matched to the model regressors (`use=regressor` in `[LONGITUDINAL]`) by
+  their column order in the data set, as Monolix does, and renamed to the
+  model names on import.  A mismatched regressor count or a missing
+  regressor column is now an error (issue #2).
+
+* Imported data sets now cast the continuous covariates to double;
+  previously the categorical covariates were cast instead, turning
+  character categories into `NA`.
 
 * Support the `Monolix` 2024 file specification `file={path='data.csv'}` in
   addition to the older `file='data.csv'`; the two are equivalent.  This
