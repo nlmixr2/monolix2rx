@@ -137,7 +137,7 @@
   .w <- sort(match(.dataReg, orig))
   .content <- mlxtran$DATAFILE$CONTENT$CONTENT
   # reserved in the rxode2 data set; cmt/admd are added by .dataConvertAdm()
-  .reserved <- intersect(.modelReg, c(.use1Rx, "cmt", "admd"))
+  .reserved <- .modelReg[tolower(.modelReg) %in% c(.use1Rx, "cmt", "admd")]
   if (length(.reserved) > 0L) {
     stop("model regressor(s) '", paste(.reserved, collapse="', '"),
          "' clash with a translated data column name", call.=FALSE)
