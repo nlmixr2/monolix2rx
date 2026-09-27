@@ -1,0 +1,49 @@
+test_that("Monolix 2024 Excel/SAS data sets import (#10)", {
+  skip_if_not_installed("haven")
+  skip_if_not_installed("readxl")
+  skip_if_not_installed("writexl")
+
+  .d <- withr::local_tempdir()
+  file.copy(list.files(system.file("theo", package="monolix2rx"), full.names=TRUE),
+            .d, recursive=TRUE)
+  .f <- file.path(.d, "theophylline_project.mlxtran")
+  .txt <- .monolixDataLoad(mlxtran(.f))
+
+  .dat <- utils::read.table(file.path(.d, "data", "theophylline_data.txt"),
+                            header=TRUE, na.strings=".")
+  writexl::write_xlsx(.dat, file.path(.d, "data", "theo.xlsx"))
+  writexl::write_xlsx(.dat, file.path(.d, "data", "theo_nohead.xlsx"), col_names=FALSE)
+  .lower <- .dat
+  names(.lower) <- tolower(names(.lower))
+  writexl::write_xlsx(.lower, file.path(.d, "data", "theo_lower.xlsx"))
+  haven::write_xpt(.dat, file.path(.d, "data", "theo.xpt"))
+  .files <- c("theo.xlsx", "theo_nohead.xlsx", "theo.xpt")
+  # write_sas() is deprecated in haven, but still the only sas7bdat writer
+  if (exists("write_sas", asNamespace("haven"))) {
+    suppressWarnings(haven::write_sas(.dat, file.path(.d, "data", "theo.sas7bdat")))
+    .files <- c(.files, "theo.sas7bdat")
+  }
+
+  .proj <- function(file) {
+    .l <- sub("theophylline_data.txt", file, readLines(.f), fixed=TRUE)
+    .f2 <- file.path(.d, paste0(gsub("[.]", "_", file), ".mlxtran"))
+    writeLines(.l, .f2)
+    .f2
+  }
+
+  for (.file in .files) {
+    .mlx <- mlxtran(.proj(.file))
+    expect_equal(.mlx$DATAFILE$FILEINFO$FILEINFO$file, paste0("data/", .file))
+    expect_equal(.mlx$DATAFILE$FILEINFO$FILEINFO$header,
+                 c("ID", "AMT", "TIME", "CONC", "WEIGHT", "SEX"))
+    expect_equal(.monolixDataLoad(.mlx), .txt, ignore_attr=TRUE)
+  }
+
+  expect_warning(.lowerData <- .monolixDataLoad(mlxtran(.proj("theo_lower.xlsx"))),
+                 "header does not match")
+  expect_equal(.lowerData, .txt, ignore_attr=TRUE)
+
+  .rx <- suppressWarnings(monolix2rx(.proj("theo.xlsx")))
+  expect_true(inherits(.rx, "rxUi"))
+  expect_true(is.data.frame(.rx$monolixData))
+})

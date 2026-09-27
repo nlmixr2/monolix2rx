@@ -25,6 +25,53 @@
   .dat
 }
 
+#' Read a Monolix 2024 Excel/SAS data set
+#'
+#' @param file data file name
+#' @param ext lower-case file extension
+#' @param header header specified in the mlxtran file
+#' @inheritParams utils::read.table
+#' @return data.frame with the mlxtran header, or NULL when `ext` is a
+#'   text format
+#' @noRd
+#' @author Matthew L. Fidler
+.monolixDataLoadBinary <- function(file, ext, header, na.strings=c("NA", ".")) {
+  .pkg <- switch(ext,
+                 xls="readxl",
+                 xlsx="readxl",
+                 sas7bdat="haven",
+                 xpt="haven",
+                 NULL)
+  if (is.null(.pkg)) return(NULL)
+  rxode2::rxReq(.pkg)
+  .hasHeader <- TRUE
+  if (.pkg == "readxl") {
+    .data <- readxl::read_excel(file, na=na.strings)
+    if (!all(is.na(suppressWarnings(as.numeric(names(.data)))))) {
+      # numeric column names means the sheet has no header row
+      .hasHeader <- FALSE
+      .data <- readxl::read_excel(file, na=na.strings, col_names=FALSE)
+    }
+  } else if (ext == "xpt") {
+    .data <- haven::read_xpt(file)
+  } else {
+    .data <- haven::read_sas(file)
+  }
+  if (.pkg == "haven") .data <- haven::zap_formats(haven::zap_labels(.data))
+  .data <- as.data.frame(.data)
+  if (!identical(names(.data), header)) {
+    if (length(.data) != length(header)) {
+      stop("the length of the headers between the mlxtran specified model and data are different",
+           call.=FALSE)
+    }
+    if (.hasHeader) {
+      warning("the header does not match what was specified in the mlxtran file, overwriting header with mlxtran specs")
+    }
+    names(.data) <- header
+  }
+  .data
+}
+
 #' Load data from a mlxtran defined dataset
 #'
 #' @param mlxtran mlxtran file where data input is specified
@@ -39,6 +86,10 @@
     if (inherits(.try, "try-error")) .try <- FALSE
     if (length(.try) == 0L) .try <- FALSE
     if (.try) {
+      .data <- .monolixDataLoadBinary(.file, tolower(sub("^.*[.]", "", basename(.file))),
+                                      mlxtran$DATAFILE$FILEINFO$FILEINFO$header,
+                                      na.strings=na.strings)
+      if (!is.null(.data)) return(.monolixNaApply(.data, na.strings, mlxtran))
       .sep <- mlxtran$DATAFILE$FILEINFO$FILEINFO$delimiter
       .sep <- switch(.sep,
                      comma=",",

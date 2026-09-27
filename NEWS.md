@@ -13,6 +13,10 @@
 
 * The project directory in mlxtran is now absolute.
 
+* Import `Monolix` 2024 Excel (`.xls`, `.xlsx`; first sheet) and SAS
+  (`.sas7bdat`, `.xpt`) data sets, using `readxl`/`haven` when they are
+  installed (issue #10).
+
 * Support the `Monolix` 2024 file specification `file={path='data.csv'}` in
   addition to the older `file='data.csv'`; the two are equivalent.  This
   applies to the data file in `<DATAFILE> [FILEINFO]` (and
