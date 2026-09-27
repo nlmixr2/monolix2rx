@@ -29,6 +29,8 @@ test_that("categorical covariate transforms translate to rxode2 (#6)", {
     DEFINITION=list(transform=list(tSex=list(transform=character(0), catLabel="F",
                                              catValue=list("0"), reference="F"))))))),
     "transform=")
+  expect_error(.tr("tS = {transform = '', categories = {F = {0}}}"), "transform=")
+  expect_error(.tr("tSex = {transform = sex, reference = M}"), "categories=")
 
   # any character value quotes every value of the transform
   expect_equal(.tr("tS = {transform = S, categories = {A = {x, 1}, B = 2}, reference = B}"),

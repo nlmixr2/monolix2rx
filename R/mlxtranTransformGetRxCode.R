@@ -37,6 +37,10 @@ mlxtranTransformGetRxCode <- function(mlxtran) {
              stop("covariate transformation '", n, "' does not specify 'transform='",
                   call.=FALSE)
            }
+           if (length(.t$catLabel) == 0L) {
+             stop("covariate transformation '", n, "' does not specify 'categories='",
+                  call.=FALSE)
+           }
            # one non-numeric value means the data column is character
            .q <- anyNA(suppressWarnings(as.numeric(unlist(.t$catValue))))
            .cw <- vapply(seq_along(.t$catLabel),
