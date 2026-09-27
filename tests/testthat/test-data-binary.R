@@ -135,6 +135,10 @@ test_that("Excel header and extension edge cases (#10)", {
     names(.monolixDataLoadBinary(.x, "xpt", character(0))),
     c("ID", "DV", "COV", "DT")
   )
+  expect_error(
+    .monolixDataLoadBinary(.x, "xpt", c("ID", "DV")),
+    "length of the headers"
+  )
 
   # text formats (and extension-less files) are left to read.table
   expect_null(.monolixDataLoadBinary(.f, "csv", "ID"))
