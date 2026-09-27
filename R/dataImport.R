@@ -47,6 +47,11 @@
       .try <- FALSE
     }
     if (.try) {
+      .ext <- tolower(regmatches(.file, regexpr("(?<=[.])[^./\\\\]+$", .file, perl=TRUE)))
+      .data <- .monolixDataLoadBinary(.file, .ext,
+                                      mlxtran$DATAFILE$FILEINFO$FILEINFO$header,
+                                      na.strings=na.strings)
+      if (!is.null(.data)) return(.monolixNaApply(.data, na.strings, mlxtran))
       .sep <- mlxtran$DATAFILE$FILEINFO$FILEINFO$delimiter
       .sep <- switch(
         .sep,
