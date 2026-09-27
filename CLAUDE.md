@@ -166,6 +166,14 @@ prototype in `src/util.h`, an entry in the `callMethods[]` table in
 `src/init.c`, and its `<name>_parseFree()` added to `monolix2rx_full_parseFree()`
 in `src/mem.c` (otherwise the parser leaks between calls).
 
+Grammars must be unambiguous (issue #51): an ambiguity dparser breaks by
+greediness makes parsing superlinear.  Each walker calls
+`monolix2rxStrictAmbig(curP)` after `new_D_Parser()` and
+`monolix2rxCheckAmbig()` after `parseFree(0)` (`src/strictAmbig.h`); the tests
+set `MONOLIX2RX_STRICT_AMBIGUITY`, which turns any ambiguity into an error.
+Watch for a nullable or optional element under `(...)*`/`(...)+`, adjacent
+repeated expressions with no separator, and keywords that prefix identifiers.
+
 (`inst/mlxtranPk.g` is dormant -- its `mkdparse()` call is commented out in
 `R/buildParser.R` and `PK:` blocks go through `equation.g`.)
 

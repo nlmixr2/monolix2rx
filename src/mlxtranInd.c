@@ -28,6 +28,7 @@ extern D_ParserTables parser_tables_mlxtranInd;
 #define errP monolix2rx_individual_errP
 #include "parseSyntaxErrors.h"
 #include "util.h"
+#include "strictAmbig.h"
 
 char* gBuf;
 int gBufLast = 0;
@@ -156,6 +157,7 @@ void wprint_parsetree_individual(D_ParserTables pt, D_ParseNode *pn, int depth, 
 void trans_individual(const char* parse){
   freeP();
   curP = new_D_Parser(&parser_tables_mlxtranInd, sizeof(D_ParseNode_User));
+  monolix2rxStrictAmbig(curP);
   curP->save_parse_tree = 1;
   curP->error_recovery = 1;
   curP->initial_scope = NULL;
@@ -182,5 +184,6 @@ SEXP _monolix2rx_trans_individual(SEXP in, SEXP where) {
   record = R_CHAR(STRING_ELT(where, 0));
   trans_individual(R_CHAR(STRING_ELT(in, 0)));
   parseFree(0);
+  monolix2rxCheckAmbig("individual");
   return R_NilValue;
 }

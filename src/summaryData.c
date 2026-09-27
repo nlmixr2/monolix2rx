@@ -28,6 +28,7 @@ extern D_ParserTables parser_tables_summaryData;
 #define errP monolix2rx_summaryData_errP
 #include "parseSyntaxErrors.h"
 #include "util.h"
+#include "strictAmbig.h"
 
 char* gBuf;
 int gBufLast = 0;
@@ -119,6 +120,7 @@ void wprint_parsetree_summaryData(D_ParserTables pt, D_ParseNode *pn, int depth,
 void trans_summaryData(const char* parse){
   freeP();
   curP = new_D_Parser(&parser_tables_summaryData, sizeof(D_ParseNode_User));
+  monolix2rxStrictAmbig(curP);
   curP->save_parse_tree = 1;
   curP->error_recovery = 1;
   curP->initial_scope = NULL;
@@ -145,5 +147,6 @@ SEXP _monolix2rx_trans_summaryData(SEXP in) {
   record = "summary.txt DATASET INFORMATION";
   trans_summaryData(R_CHAR(STRING_ELT(in, 0)));
   parseFree(0);
+  monolix2rxCheckAmbig("summary data");
   return R_NilValue;
 }

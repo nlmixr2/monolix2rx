@@ -28,6 +28,7 @@ extern D_ParserTables parser_tables_equation;
 #define errP monolix2rx_equation_errP
 #include "parseSyntaxErrors.h"
 #include "util.h"
+#include "strictAmbig.h"
 
 char* gBuf;
 int gBufLast = 0;
@@ -535,6 +536,7 @@ void wprint_parsetree_equation(D_ParserTables pt, D_ParseNode *pn, int depth, pr
 void trans_equation(const char* parse){
   freeP();
   curP = new_D_Parser(&parser_tables_equation, sizeof(D_ParseNode_User));
+  monolix2rxStrictAmbig(curP);
   curP->save_parse_tree = 1;
   curP->error_recovery = 1;
   curP->initial_scope = NULL;
@@ -563,5 +565,6 @@ SEXP _monolix2rx_trans_equation(SEXP in, SEXP what) {
   record = R_CHAR(STRING_ELT(what, 0));
   trans_equation(R_CHAR(STRING_ELT(in, 0)));
   parseFree(0);
+  monolix2rxCheckAmbig("equation");
   return R_NilValue;
 }
