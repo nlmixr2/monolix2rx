@@ -88,6 +88,52 @@
     }
   })
 }
+#' Rename the data set regressor columns to the model regressor names
+#'
+#' Monolix matches the data set regressor columns (`use=regressor` in
+#' `[CONTENT]`) to the model regressors (`use=regressor` in
+#' `[LONGITUDINAL]`) by order, not by name.
+#'
+#' @param data data.frame with the Monolix column names
+#' @param mlxtran mlxtran object
+#' @return data with the regressor columns renamed to the model names
+#' @noRd
+#' @author Matthew L. Fidler
+.dataRenameRegressors <- function(data, mlxtran) {
+  .dataReg <- mlxtran$DATAFILE$CONTENT$CONTENT$reg
+  .modelReg <- mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$reg
+  if (length(.dataReg) == 0L && length(.modelReg) == 0L) return(data)
+  if (length(.dataReg) != length(.modelReg)) {
+    stop("the number of regressors in the data set (",
+         length(.dataReg), ": ", paste(.dataReg, collapse=", "),
+         ") and in the model (", length(.modelReg), ": ",
+         paste(.modelReg, collapse=", "), ") differ; they are matched by order",
+         call.=FALSE)
+  }
+  .missing <- setdiff(.dataReg, names(data))
+  if (length(.missing) > 0L) {
+    stop("regressor column(s) missing from the data set: ",
+         paste(.missing, collapse=", "), call.=FALSE)
+  }
+  .clash <- intersect(.modelReg, setdiff(names(data), .dataReg))
+  if (length(.clash) > 0L) {
+    # columns not declared in [CONTENT] are ignored by Monolix; drop them
+    .content <- mlxtran$DATAFILE$CONTENT$CONTENT
+    .used <- c(.content$use1[!is.na(.content$use1)], .content$cont,
+               names(.content$cat))
+    .bad <- intersect(.clash, .used)
+    if (length(.bad) > 0L) {
+      stop("model regressor(s) '", paste(.bad, collapse="', '"),
+           "' also name a non-regressor data column; cannot match regressors by order",
+           call.=FALSE)
+    }
+    .minfo(paste0("dropped unused data column(s) '", paste(.clash, collapse="', '"),
+                  "' that share a model regressor name"))
+    data <- data[, !(names(data) %in% .clash), drop=FALSE]
+  }
+  names(data)[match(.dataReg, names(data))] <- .modelReg
+  data
+}
 #' Rename defined items from monolix to rxode2 reserved names
 #'
 #' This also makes sure the order of factors defined matches what
@@ -103,6 +149,7 @@
 #'
 #' @author Matthew L. Fidler
 .dataRenameFromMlxtran <- function(data, mlxtran) {
+  data <- .dataRenameRegressors(data, mlxtran)
   .content <- mlxtran$DATAFILE$CONTENT$CONTENT
   .use1 <- .content$use1
   names(data) <- vapply(names(data),

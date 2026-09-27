@@ -13,6 +13,12 @@
 
 * The project directory in mlxtran is now absolute.
 
+* The data set regressor columns (`use=regressor` in `[CONTENT]`) are now
+  matched to the model regressors (`use=regressor` in `[LONGITUDINAL]`) by
+  order, as Monolix does, and renamed to the model names on import.  A
+  mismatched regressor count or a missing regressor column is now an error
+  (issue #2).
+
 * Support the `Monolix` 2024 file specification `file={path='data.csv'}` in
   addition to the older `file='data.csv'`; the two are equivalent.  This
   applies to the data file in `<DATAFILE> [FILEINFO]` (and
