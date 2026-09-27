@@ -6,7 +6,8 @@ filename: filename_t1 | filename_t2 | filename_t3 | filename_t4;
 filename_t1: "\'([^\'\\]|\\[^])*\'";
 filename_t2: "\"([^\"\\]|\\[^])*\"";
 filename_t3: "[^ '\"\n]+";
-filename_t4: ("[^ .\n]+")+ '.'  "[A-Za-z0-9_]+";
+// an unquoted name with spaces; a spaceless one is filename_t3 alone
+filename_t4: "[^ .\n]+" ("[^ .\n]+")+ '.'  "[A-Za-z0-9_]+";
 
 // Monolix 2024 writes the data file as file={path='data.csv'}, which is
 // equivalent to the older file='data.csv'.  Monolix quotes the path; an

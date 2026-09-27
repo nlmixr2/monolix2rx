@@ -16,7 +16,8 @@ filename: filename_t1 | filename_t2 | filename_t3 | filename_t4;
 filename_t1: "\'([^\'\\]|\\[^])*\'";
 filename_t2: "\"([^\"\\]|\\[^])*\"";
 filename_t3: "[^ '\"\n]+";
-filename_t4: ("[^ .\n]+")+ '.'  "[A-Za-z0-9_]+";
+// an unquoted name with spaces; a spaceless one is filename_t3 alone
+filename_t4: "[^ .\n]+" ("[^ .\n]+")+ '.'  "[A-Za-z0-9_]+";
 
 // Monolix 2024 writes the model file as file={path='model.txt'}, which is
 // equivalent to the older file='model.txt'.  Monolix quotes the path; an

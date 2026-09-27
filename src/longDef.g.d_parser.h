@@ -2580,7 +2580,7 @@ d_accepts_diff_139_0_longDef
 unsigned char d_scanner_139_0_0_longDef[SCANNER_BLOCK_SIZE] = {
 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
-2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 
 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
 };
 
@@ -2589,6 +2589,13 @@ unsigned char d_scanner_139_0_1_longDef[SCANNER_BLOCK_SIZE] = {
 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 
+};
+
+unsigned char d_scanner_139_1_0_longDef[SCANNER_BLOCK_SIZE] = {
+0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
 };
 
 D_Shift * d_shift_139_1_longDef[] = {&d_shift_78_longDef,NULL};
@@ -4698,7 +4705,7 @@ SB_trans_uint8 d_transition_129_longDef[42] = {
 SB_uint8 d_scanner_139_longDef[2] = {
 {NULL, {d_scanner_139_0_0_longDef, d_scanner_139_0_1_longDef
  , d_scanner_16_0_1_longDef, d_scanner_16_0_1_longDef}},
-{d_shift_139_1_longDef, {d_scanner_139_0_0_longDef, d_scanner_139_0_1_longDef
+{d_shift_139_1_longDef, {d_scanner_139_1_0_longDef, d_scanner_139_0_1_longDef
  , d_scanner_16_0_1_longDef, d_scanner_16_0_1_longDef}}
 };
 
@@ -6121,7 +6128,7 @@ D_Symbol d_symbols_longDef[] = {
 {D_SYMBOL_STRING, "categorical", 11, -1},
 {D_SYMBOL_STRING, ",", 1, -1},
 {D_SYMBOL_STRING, "}", 1, -1},
-{D_SYMBOL_REGEX, "[^}]+", 5, -1},
+{D_SYMBOL_REGEX, "[^},][^}]*", 10, -1},
 {D_SYMBOL_STRING, "=", 1, -1},
 {D_SYMBOL_STRING, "{", 1, -1},
 {D_SYMBOL_STRING, "type", 4, -1},
