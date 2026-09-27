@@ -109,3 +109,12 @@ test_that("parsers still work with the strict ambiguity check off (#51)", {
   )
   expect_equal(.fileinfo("file=data.csv")$file, "data.csv")
 })
+
+test_that("a long equation block keeps its statement order (#51)", {
+  .n <- 5000
+  .ret <- .equation(paste(
+    sprintf("y%d = a%d + 1", seq_len(.n), seq_len(.n)),
+    collapse = "\n"
+  ))
+  expect_equal(.ret$rx, sprintf("y%d <- a%d + 1", seq_len(.n), seq_len(.n)))
+})
