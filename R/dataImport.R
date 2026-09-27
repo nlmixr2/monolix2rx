@@ -9,15 +9,17 @@
 .monolixNaApply <- function(data, na.strings, mlxtran) {
   .dat <- data
   for (v in names(.dat)) {
-    if (tolower(v) %in% c("amt", "time", "dv") &&
-        is.character(.dat[[v]])) {
+    if (tolower(v) %in% c("amt", "time", "dv") && is.character(.dat[[v]])) {
       .n <- suppressWarnings(as.numeric(.dat[[v]]))
       .w <- which(is.na(.n))
       if (length(.w) == 0) {
         .dat[[v]] <- .n
-      } else if (all(grepl(paste0("^ *(",
-                           paste(na.strings, collapse="|"),
-                           ") *$"), .dat[[v]][.w]))) {
+      } else if (
+        all(grepl(
+          paste0("^ *(", paste(na.strings, collapse = "|"), ") *$"),
+          .dat[[v]][.w]
+        ))
+      ) {
         .dat[[v]] <- .n
       }
     }
@@ -30,54 +32,93 @@
 #' @param mlxtran mlxtran file where data input is specified
 #' @inheritParams utils::read.table
 #' @noRd
-.monolixDataLoad <- function(mlxtran, na.strings=c("NA", ".")) {
+.monolixDataLoad <- function(mlxtran, na.strings = c("NA", ".")) {
   mlxtran <- .monolixGetMlxtran(mlxtran)
-  if (is.null(mlxtran)) return(NULL)
+  if (is.null(mlxtran)) {
+    return(NULL)
+  }
   withr::with_dir(.monolixGetPwd(mlxtran), {
     .file <- mlxtran$DATAFILE$FILEINFO$FILEINFO$file
-    .try <- try(file.exists(.file), silent=TRUE)
-    if (inherits(.try, "try-error")) .try <- FALSE
-    if (length(.try) == 0L) .try <- FALSE
+    .try <- try(file.exists(.file), silent = TRUE)
+    if (inherits(.try, "try-error")) {
+      .try <- FALSE
+    }
+    if (length(.try) == 0L) {
+      .try <- FALSE
+    }
     if (.try) {
       .sep <- mlxtran$DATAFILE$FILEINFO$FILEINFO$delimiter
-      .sep <- switch(.sep,
-                     comma=",",
-                     tab="\t",
-                     space=" ",
-                     semicolon=";",
-                     semicolumn=";")
-      .firstLine <- readLines(.file, n=1)
-      .head <- strsplit(.firstLine, .sep, fixed=TRUE)[[1]]
+      .sep <- switch(
+        .sep,
+        comma = ",",
+        tab = "\t",
+        space = " ",
+        semicolon = ";",
+        semicolumn = ";"
+      )
+      .firstLine <- readLines(.file, n = 1)
+      .head <- strsplit(.firstLine, .sep, fixed = TRUE)[[1]]
       if (all(.head == mlxtran$DATAFILE$FILEINFO$FILEINFO$header)) {
         # has header (and it matches)
-        .data <- utils::read.table(.file, header = TRUE, sep=.sep, row.names=NULL,
-                            na.strings=na.strings)
+        .data <- utils::read.table(
+          .file,
+          header = TRUE,
+          sep = .sep,
+          row.names = NULL,
+          na.strings = na.strings
+        )
         return(.monolixNaApply(.data, na.strings, mlxtran))
       } else {
-        .num <- vapply(.head,
-                       function(v) {
-                         .n <- suppressWarnings(as.numeric(v))
-                         if (is.na(.n)) return(FALSE)
-                         TRUE
-                       }, logical(1), USE.NAMES=FALSE)
+        .num <- vapply(
+          .head,
+          function(v) {
+            .n <- suppressWarnings(as.numeric(v))
+            if (is.na(.n)) {
+              return(FALSE)
+            }
+            TRUE
+          },
+          logical(1),
+          USE.NAMES = FALSE
+        )
         if (all(!.num)) {
           # different header (maybe case mis-match)
-          warning("the header does not match what was specified in the mlxtran file, overwriting header with mlxtran specs")
-          .data <- utils::read.table(.file, header = TRUE, sep=.sep, row.names=NULL,
-                              na.strings=na.strings)
-          if (length(.data) != length(mlxtran$DATAFILE$FILEINFO$FILEINFO$header)) {
-            stop("the length of the headers between the mlxtran specified model and data are different",
-                 call.=FALSE)
+          warning(
+            "the header does not match what was specified in the mlxtran file, overwriting header with mlxtran specs"
+          )
+          .data <- utils::read.table(
+            .file,
+            header = TRUE,
+            sep = .sep,
+            row.names = NULL,
+            na.strings = na.strings
+          )
+          if (
+            length(.data) != length(mlxtran$DATAFILE$FILEINFO$FILEINFO$header)
+          ) {
+            stop(
+              "the length of the headers between the mlxtran specified model and data are different",
+              call. = FALSE
+            )
           }
           names(.data) <- mlxtran$DATAFILE$FILEINFO$FILEINFO$header
           return(.monolixNaApply(.data, na.strings, mlxtran))
         } else {
           # missing header
-          .data <- utils::read.table(.file, header = FALSE, sep=.sep, row.names=NULL,
-                              na.strings=na.strings)
-          if (length(.data) != length(mlxtran$DATAFILE$FILEINFO$FILEINFO$header)) {
-            stop("the length of the headers between the mlxtran specified model and data are different",
-                 call.=FALSE)
+          .data <- utils::read.table(
+            .file,
+            header = FALSE,
+            sep = .sep,
+            row.names = NULL,
+            na.strings = na.strings
+          )
+          if (
+            length(.data) != length(mlxtran$DATAFILE$FILEINFO$FILEINFO$header)
+          ) {
+            stop(
+              "the length of the headers between the mlxtran specified model and data are different",
+              call. = FALSE
+            )
           }
           names(.data) <- mlxtran$DATAFILE$FILEINFO$FILEINFO$header
           return(.monolixNaApply(.data, na.strings, mlxtran))
@@ -89,22 +130,24 @@
   })
 }
 # rxode2 names for the Monolix single-use columns
-.use1Rx <- c(identifier="id",
-             time="time",
-             eventidentifier="evid",
-             amount="amt",
-             interdoseinterval="ii",
-             censored="cens",
-             limit="limit",
-             observationtype="rxMDvid",
-             administration="adm",
-             steadystate="ss",
-             observation="dv",
-             occasion="occ",
-             rate="rate",
-             additionaldose="addl",
-             missingdependentvariable="mdv",
-             infusiontime="dur")
+.use1Rx <- c(
+  identifier = "id",
+  time = "time",
+  eventidentifier = "evid",
+  amount = "amt",
+  interdoseinterval = "ii",
+  censored = "cens",
+  limit = "limit",
+  observationtype = "rxMDvid",
+  administration = "adm",
+  steadystate = "ss",
+  observation = "dv",
+  occasion = "occ",
+  rate = "rate",
+  additionaldose = "addl",
+  missingdependentvariable = "mdv",
+  infusiontime = "dur"
+)
 #' Rename the data set regressor columns to the model regressor names
 #'
 #' Monolix matches the data set regressor columns (`use=regressor` in
@@ -118,45 +161,68 @@
 #' @return data with the regressor columns renamed to the model names
 #' @noRd
 #' @author Matthew L. Fidler
-.dataRenameRegressors <- function(data, mlxtran, orig=names(data)) {
+.dataRenameRegressors <- function(data, mlxtran, orig = names(data)) {
   .dataReg <- mlxtran$DATAFILE$CONTENT$CONTENT$reg
   .modelReg <- mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$reg
-  if (length(.dataReg) == 0L && length(.modelReg) == 0L) return(data)
+  if (length(.dataReg) == 0L && length(.modelReg) == 0L) {
+    return(data)
+  }
   if (length(.dataReg) != length(.modelReg)) {
-    stop("the number of regressors in the data set (",
-         length(.dataReg), ": ", paste(.dataReg, collapse=", "),
-         ") and in the model (", length(.modelReg), ": ",
-         paste(.modelReg, collapse=", "), ") differ; they are matched by order",
-         call.=FALSE)
+    stop(
+      "the number of regressors in the data set (",
+      length(.dataReg),
+      ": ",
+      paste(.dataReg, collapse = ", "),
+      ") and in the model (",
+      length(.modelReg),
+      ": ",
+      paste(.modelReg, collapse = ", "),
+      ") differ; they are matched by order",
+      call. = FALSE
+    )
   }
   .missing <- setdiff(.dataReg, orig)
   if (length(.missing) > 0L) {
-    stop("regressor column(s) missing from the data set: ",
-         paste(.missing, collapse=", "), call.=FALSE)
+    stop(
+      "regressor column(s) missing from the data set: ",
+      paste(.missing, collapse = ", "),
+      call. = FALSE
+    )
   }
   .w <- sort(match(.dataReg, orig))
   .content <- mlxtran$DATAFILE$CONTENT$CONTENT
   # reserved in the rxode2 data set; cmt/admd are added by .dataConvertAdm()
-  .reserved <- .modelReg[tolower(.modelReg) %in% tolower(c(.use1Rx, "cmt", "admd"))]
+  .reserved <- .modelReg[
+    tolower(.modelReg) %in% tolower(c(.use1Rx, "cmt", "admd"))
+  ]
   if (length(.reserved) > 0L) {
-    stop("model regressor(s) '", paste(.reserved, collapse="', '"),
-         "' clash with a translated data column name", call.=FALSE)
+    stop(
+      "model regressor(s) '",
+      paste(.reserved, collapse = "', '"),
+      "' clash with a translated data column name",
+      call. = FALSE
+    )
   }
   .used <- setdiff(c(.content$cont, names(.content$cat)), .dataReg)
   .bad <- intersect(.modelReg, .used)
   if (length(.bad) > 0L) {
-    stop("model regressor(s) '", paste(.bad, collapse="', '"),
-         "' also name a non-regressor data column; cannot match regressors by order",
-         call.=FALSE)
+    stop(
+      "model regressor(s) '",
+      paste(.bad, collapse = "', '"),
+      "' also name a non-regressor data column; cannot match regressors by order",
+      call. = FALSE
+    )
   }
   names(data)[.w] <- .modelReg
   # columns not declared in [CONTENT] are ignored by Monolix; drop them
   .drop <- which(names(data) %in% .modelReg & !(seq_along(data) %in% .w))
   if (length(.drop) > 0L) {
-    .minfo(paste0("dropped unused data column(s) '",
-                  paste(orig[.drop], collapse="', '"),
-                  "' that share a model regressor name"))
-    data <- data[, -.drop, drop=FALSE]
+    .minfo(paste0(
+      "dropped unused data column(s) '",
+      paste(orig[.drop], collapse = "', '"),
+      "' that share a model regressor name"
+    ))
+    data <- data[, -.drop, drop = FALSE]
   }
   data
 }
@@ -178,15 +244,19 @@
   .content <- mlxtran$DATAFILE$CONTENT$CONTENT
   .use1 <- .content$use1
   .orig <- names(data)
-  names(data) <- vapply(names(data),
-                        function(n) {
-                          .w <- which(n == .use1)
-                          if (length(.w) == 1L) {
-                            .n <- names(.use1)[.w]
-                            return(.use1Rx[[.n]])
-                          }
-                          n
-                        }, character(1), USE.NAMES = FALSE)
+  names(data) <- vapply(
+    names(data),
+    function(n) {
+      .w <- which(n == .use1)
+      if (length(.w) == 1L) {
+        .n <- names(.use1)[.w]
+        return(.use1Rx[[.n]])
+      }
+      n
+    },
+    character(1),
+    USE.NAMES = FALSE
+  )
   data <- .dataRenameRegressors(data, mlxtran, .orig)
   # Make sure continuous are double
   for (.n in .content$cont) {
@@ -195,8 +265,10 @@
     }
   }
   # Make sure the dvid matches what monolix specified
-  if (any(names(data) == "rxMDvid") &&
-        length(mlxtran$DATAFILE$CONTENT$CONTENT$yname) > 0L) {
+  if (
+    any(names(data) == "rxMDvid") &&
+      length(mlxtran$DATAFILE$CONTENT$CONTENT$yname) > 0L
+  ) {
     .f <- try(factor(data[["rxMDvid"]], mlxtran$DATAFILE$CONTENT$CONTENT$yname))
     if (!inherits(.f, "try-error")) {
       data[["rxMDvid"]] <- as.integer(.f)
@@ -214,8 +286,12 @@
 #' @author Matthew L. Fidler
 .dataConvertEndpoints <- function(data, ui) {
   .w <- which(names(data) == "rxMDvid")
-  if (length(.w) != 1L) return(data) # no observationtype in the dataset
-  if (is.null(ui$predDf)) return(data[, -.w]) # single endpoint; no need to define
+  if (length(.w) != 1L) {
+    return(data)
+  } # no observationtype in the dataset
+  if (is.null(ui$predDf)) {
+    return(data[, -.w])
+  } # single endpoint; no need to define
   # multiple endpoint
   .dvid <- unique(data$rxMDvid)
   .dvid <- .dvid[!is.na(.dvid)]
@@ -224,7 +300,7 @@
     # only overwrite non-dosing events (ie make sure the cmt is NA)
     data$cmt[which(is.na(data$cmt) & data$rxMDvid == .i)] <- ui$predDf$var[.i]
   }
-  for(.i in .dvid) {
+  for (.i in .dvid) {
     data <- data[-which(is.na(data$cmt) & data$rxMDvid == .i), ]
   }
   data[, -.w]
@@ -292,23 +368,27 @@
 #'
 #' monolixDataImport(mod, dat)
 #'
-monolixDataImport <- function(ui, data, na.strings=c("NA", ".")) {
+monolixDataImport <- function(ui, data, na.strings = c("NA", ".")) {
   if (!missing(data)) {
     checkmate::assertDataFrame(data)
   }
   rxui <- rxode2::assertRxUi(ui)
   if (is.null(ui$admd)) {
-    stop("to convert dataset to an rxode2 compatible dataset the model needs to be imported from monolix",
-         call.=FALSE)
+    stop(
+      "to convert dataset to an rxode2 compatible dataset the model needs to be imported from monolix",
+      call. = FALSE
+    )
   }
   .mlxtran <- .monolixGetMlxtran(ui)
   if (is.null(.mlxtran)) {
     stop("monolixDataImport error found")
   }
   if (missing(data)) {
-    data <- .monolixDataLoad(.mlxtran, na.strings=na.strings)
+    data <- .monolixDataLoad(.mlxtran, na.strings = na.strings)
   }
-  if (is.null(data)) return(NULL)
+  if (is.null(data)) {
+    return(NULL)
+  }
   data <- .dataRenameFromMlxtran(data, .mlxtran)
   data <- .dataConvertAdm(data, ui$admd)
   data <- .dataConvertEndpoints(data, ui)
