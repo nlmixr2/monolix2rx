@@ -23,38 +23,89 @@
 #'
 mlxtranTransformGetRxCode <- function(mlxtran) {
   .cov <- mlxtran$MODEL$COVARIATE$COVARIATE
-  if (is.null(.cov)) return(NULL)
+  if (is.null(.cov)) {
+    return(NULL)
+  }
   .cov <- mlxtran$MODEL$COVARIATE$DEFINITION
-  if (is.null(.cov)) return(NULL)
+  if (is.null(.cov)) {
+    return(NULL)
+  }
   .transform <- .cov$transform
-  if (length(.transform) == 0) return(NULL)
+  if (length(.transform) == 0) {
+    return(NULL)
+  }
   paste(
-    vapply(names(.transform),
-         function(n) {
-           .t <- .transform[[n]]
-           .v <- .t$transform
-           .cw <- vapply(seq_along(.t$catLabel),
-                         function(i) {
-                           .tmp <- suppressWarnings(as.numeric(.t$catValue[[i]]))
-                           .q <- ""
-                           if (any(is.na(.tmp))) {
-                             .q <- "'"
-                           }
-                           .or <- paste(paste0(.v, " == ", .q, .t$catValue[[i]], .q),
-                                        collapse=" || ")
-                           .or <- paste0("if (", .or, ") {\n")
-                           .or <- paste0(.or, "  ", n, " <- '", .t$catLabel[i], "'\n")
-                           .or <- paste0(.or, "}")
-                           .or
-                         }, character(1), USE.NAMES = TRUE)
-           .cw <- paste(.cw, collapse=" else ")
-           if (checkmate::testCharacter(.t$reference, min.chars = 1)) {
-             .cw <- paste0(.cw," else {\n  ", n, "<- '", .t$reference, "'\n}")
-           } else {
-             .cw <- c(.cw, paste0("else {\n  ", n, "<- 1\n}"))
-           }
-           .cw
-         }, character(1),
-         USE.NAMES=FALSE),
-    collapse="\n")
+    vapply(
+      names(.transform),
+      function(n) {
+        .t <- .transform[[n]]
+        .v <- .t$transform
+        if (length(.v) != 1L || !nzchar(.v)) {
+          stop(
+            "covariate transformation '",
+            n,
+            "' does not specify 'transform='",
+            call. = FALSE
+          )
+        }
+        if (length(.t$catLabel) == 0L) {
+          stop(
+            "covariate transformation '",
+            n,
+            "' does not specify 'categories='",
+            call. = FALSE
+          )
+        }
+        # one non-numeric value means the data column is character
+        .q <- anyNA(suppressWarnings(as.numeric(unlist(.t$catValue))))
+        .cw <- vapply(
+          seq_along(.t$catLabel),
+          function(i) {
+            .val <- .t$catValue[[i]]
+            if (.q) {
+              .val <- .mlxtranTransformLabel(.val)
+            }
+            .or <- paste(paste0(.v, " == ", .val), collapse = " || ")
+            paste0(
+              "if (",
+              .or,
+              ") {\n  ",
+              n,
+              " <- ",
+              .mlxtranTransformLabel(.t$catLabel[i]),
+              "\n}"
+            )
+          },
+          character(1),
+          USE.NAMES = FALSE
+        )
+        .cw <- paste(.cw, collapse = " else ")
+        # without a reference, unmatched values fall back to the first category
+        .ref <- .t$reference
+        if (length(.ref) != 1L || !nzchar(.ref)) {
+          .ref <- .t$catLabel[1]
+        }
+        paste0(
+          .cw,
+          " else {\n  ",
+          n,
+          " <- ",
+          .mlxtranTransformLabel(.ref),
+          "\n}"
+        )
+      },
+      character(1),
+      USE.NAMES = FALSE
+    ),
+    collapse = "\n"
+  )
+}
+#' Quote a category label as an rxode2 string
+#'
+#' @param x category label(s)
+#' @return quoted label
+#' @noRd
+#' @author Matthew L. Fidler
+.mlxtranTransformLabel <- function(x) {
+  ifelse(grepl("'", x, fixed = TRUE), paste0('"', x, '"'), paste0("'", x, "'"))
 }
