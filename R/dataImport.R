@@ -36,6 +36,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .monolixDataLoadBinary <- function(file, ext, header, na.strings=c("NA", ".")) {
+  if (length(ext) != 1L) return(NULL)
   .pkg <- switch(ext,
                  xls="readxl",
                  xlsx="readxl",
@@ -47,7 +48,8 @@
   .hasHeader <- TRUE
   if (.pkg == "readxl") {
     .data <- readxl::read_excel(file, na=na.strings)
-    if (!all(is.na(suppressWarnings(as.numeric(names(.data)))))) {
+    if (!identical(names(.data), header) &&
+          !all(is.na(suppressWarnings(as.numeric(names(.data)))))) {
       # numeric column names means the sheet has no header row
       .hasHeader <- FALSE
       .data <- readxl::read_excel(file, na=na.strings, col_names=FALSE)
@@ -86,7 +88,8 @@
     if (inherits(.try, "try-error")) .try <- FALSE
     if (length(.try) == 0L) .try <- FALSE
     if (.try) {
-      .data <- .monolixDataLoadBinary(.file, tolower(sub("^.*[.]", "", basename(.file))),
+      .ext <- tolower(regmatches(.file, regexpr("(?<=[.])[^./\\\\]+$", .file, perl=TRUE)))
+      .data <- .monolixDataLoadBinary(.file, .ext,
                                       mlxtran$DATAFILE$FILEINFO$FILEINFO$header,
                                       na.strings=na.strings)
       if (!is.null(.data)) return(.monolixNaApply(.data, na.strings, mlxtran))

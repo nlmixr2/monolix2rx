@@ -47,3 +47,24 @@ test_that("Monolix 2024 Excel/SAS data sets import (#10)", {
   expect_true(inherits(.rx, "rxUi"))
   expect_true(is.data.frame(.rx$monolixData))
 })
+
+test_that("Excel header and extension edge cases (#10)", {
+  skip_if_not_installed("readxl")
+  skip_if_not_installed("writexl")
+
+  .xls <- readxl::readxl_example("datasets.xls")
+  .xlsDat <- .monolixDataLoadBinary(.xls, "xls", names(readxl::read_excel(.xls)))
+  expect_equal(dim(.xlsDat), c(32L, 11L))
+  expect_true(is.numeric(.xlsDat[[1]]))
+
+  # a numeric column name that matches the mlxtran header is still a header
+  .d <- withr::local_tempdir()
+  .f <- file.path(.d, "num.xlsx")
+  writexl::write_xlsx(data.frame(ID=1:2, `24`=c(3, 4), check.names=FALSE), .f)
+  .num <- .monolixDataLoadBinary(.f, "xlsx", c("ID", "24"))
+  expect_equal(.num, data.frame(ID=c(1, 2), `24`=c(3, 4), check.names=FALSE))
+
+  # text formats (and extension-less files) are left to read.table
+  expect_null(.monolixDataLoadBinary(.f, "csv", "ID"))
+  expect_null(.monolixDataLoadBinary(.f, character(0), "ID"))
+})
