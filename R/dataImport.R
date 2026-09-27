@@ -48,7 +48,7 @@
   .hasHeader <- TRUE
   if (.pkg == "readxl") {
     .data <- readxl::read_excel(file, na=na.strings)
-    if (!identical(names(.data), header) &&
+    if (!identical(tolower(names(.data)), tolower(header)) &&
           !all(is.na(suppressWarnings(as.numeric(names(.data)))))) {
       # numeric column names means the sheet has no header row
       .hasHeader <- FALSE

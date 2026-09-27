@@ -64,6 +64,10 @@ test_that("Excel header and extension edge cases (#10)", {
   .num <- .monolixDataLoadBinary(.f, "xlsx", c("ID", "24"))
   expect_equal(.num, data.frame(ID=c(1, 2), `24`=c(3, 4), check.names=FALSE))
 
+  expect_warning(.num <- .monolixDataLoadBinary(.f, "xlsx", c("id", "24")),
+                 "header does not match")
+  expect_equal(nrow(.num), 2L)
+
   # text formats (and extension-less files) are left to read.table
   expect_null(.monolixDataLoadBinary(.f, "csv", "ID"))
   expect_null(.monolixDataLoadBinary(.f, character(0), "ID"))
