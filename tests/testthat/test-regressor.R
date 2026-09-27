@@ -53,6 +53,18 @@ ID_COL = {use=regressor}")
   expect_equal(.r, data.frame(id=1, ID_COL=2))
 })
 
+test_that("a data regressor column named like a translated column (#2)", {
+  .m <- .regMlxtran("ID = {use=identifier}
+TIME_COL = {use=time}
+time = {use=regressor}",
+"input = {Cc}
+Cc = {use=regressor}")
+  .r <- .dataRenameFromMlxtran(data.frame(ID=1, TIME_COL=0, time=2), .m)
+  expect_equal(.r, data.frame(id=1, time=0, Cc=2))
+  expect_error(.dataRenameFromMlxtran(data.frame(ID=1, TIME_COL=0), .m),
+               "missing from the data set")
+})
+
 test_that("regressor count and name checks (#2)", {
   .d <- data.frame(ID=1, CONC=2, E0X=3)
   .m <- .regMlxtran("ID = {use=identifier}

@@ -114,10 +114,11 @@
 #' @param data data.frame after the single-use columns (`id`, `time`,
 #'   ...) have been renamed
 #' @param mlxtran mlxtran object
+#' @param orig the data column names before that renaming
 #' @return data with the regressor columns renamed to the model names
 #' @noRd
 #' @author Matthew L. Fidler
-.dataRenameRegressors <- function(data, mlxtran) {
+.dataRenameRegressors <- function(data, mlxtran, orig=names(data)) {
   .dataReg <- mlxtran$DATAFILE$CONTENT$CONTENT$reg
   .modelReg <- mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$reg
   if (length(.dataReg) == 0L && length(.modelReg) == 0L) return(data)
@@ -128,12 +129,12 @@
          paste(.modelReg, collapse=", "), ") differ; they are matched by order",
          call.=FALSE)
   }
-  .missing <- setdiff(.dataReg, names(data))
+  .missing <- setdiff(.dataReg, orig)
   if (length(.missing) > 0L) {
     stop("regressor column(s) missing from the data set: ",
          paste(.missing, collapse=", "), call.=FALSE)
   }
-  .dataReg <- .dataReg[order(match(.dataReg, names(data)))]
+  .w <- sort(match(.dataReg, orig))
   .content <- mlxtran$DATAFILE$CONTENT$CONTENT
   # reserved in the rxode2 data set; cmt/admd are added by .dataConvertAdm()
   .reserved <- intersect(.modelReg, c(.use1Rx, "cmt", "admd"))
@@ -148,14 +149,15 @@
          "' also name a non-regressor data column; cannot match regressors by order",
          call.=FALSE)
   }
+  names(data)[.w] <- .modelReg
   # columns not declared in [CONTENT] are ignored by Monolix; drop them
-  .clash <- intersect(.modelReg, setdiff(names(data), .dataReg))
-  if (length(.clash) > 0L) {
-    .minfo(paste0("dropped unused data column(s) '", paste(.clash, collapse="', '"),
+  .drop <- which(names(data) %in% .modelReg & !(seq_along(data) %in% .w))
+  if (length(.drop) > 0L) {
+    .minfo(paste0("dropped unused data column(s) '",
+                  paste(orig[.drop], collapse="', '"),
                   "' that share a model regressor name"))
-    data <- data[, !(names(data) %in% .clash), drop=FALSE]
+    data <- data[, -.drop, drop=FALSE]
   }
-  names(data)[match(.dataReg, names(data))] <- .modelReg
   data
 }
 #' Rename defined items from monolix to rxode2 reserved names
@@ -175,6 +177,7 @@
 .dataRenameFromMlxtran <- function(data, mlxtran) {
   .content <- mlxtran$DATAFILE$CONTENT$CONTENT
   .use1 <- .content$use1
+  .orig <- names(data)
   names(data) <- vapply(names(data),
                         function(n) {
                           .w <- which(n == .use1)
@@ -184,7 +187,7 @@
                           }
                           n
                         }, character(1), USE.NAMES = FALSE)
-  data <- .dataRenameRegressors(data, mlxtran)
+  data <- .dataRenameRegressors(data, mlxtran, .orig)
   # Make sure continuous are double
   for (.i in seq_along(.content$cont)) {
     .n <- names(.content$cat)[.i]
