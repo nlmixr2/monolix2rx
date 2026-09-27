@@ -31,6 +31,28 @@ E0 = {use=regressor}")
   expect_equal(.r$E0, 3)
 })
 
+test_that("regressors follow the data set column order (#2)", {
+  .m <- .regMlxtran("ID = {use=identifier}
+E0X = {use=regressor}
+CONC = {use=regressor}",
+"input = {Cc, E0}
+Cc = {use=regressor}
+E0 = {use=regressor}")
+  .r <- .dataRenameFromMlxtran(data.frame(ID=1, CONC=2, E0X=3), .m)
+  expect_equal(names(.r), c("id", "Cc", "E0"))
+  expect_equal(.r$Cc, 2)
+  expect_equal(.r$E0, 3)
+})
+
+test_that("a regressor may reuse a translated single-use column name (#2)", {
+  .m <- .regMlxtran("ID_COL = {use=identifier}
+REG_COL = {use=regressor}",
+"input = {ID_COL}
+ID_COL = {use=regressor}")
+  .r <- .dataRenameFromMlxtran(data.frame(ID_COL=1, REG_COL=2), .m)
+  expect_equal(.r, data.frame(id=1, ID_COL=2))
+})
+
 test_that("regressor count and name checks (#2)", {
   .d <- data.frame(ID=1, CONC=2, E0X=3)
   .m <- .regMlxtran("ID = {use=identifier}
@@ -83,15 +105,6 @@ CONC = {use=regressor}",
 time = {use=regressor}")
   expect_error(.dataRenameRegressors(data.frame(ID=1, CONC=2), .m),
                "translated data column")
-
-  # a declared column absent from the data still blocks the rename
-  .m <- .regMlxtran("ID = {use=identifier}
-FOO = {use=time}
-CONC = {use=regressor}",
-"input = {FOO}
-FOO = {use=regressor}")
-  expect_error(.dataRenameRegressors(data.frame(ID=1, CONC=2), .m),
-               "non-regressor data column")
 
   # an unused column with the model regressor name is dropped
   .m <- .regMlxtran("ID = {use=identifier}

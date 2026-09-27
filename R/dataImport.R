@@ -109,9 +109,10 @@
 #'
 #' Monolix matches the data set regressor columns (`use=regressor` in
 #' `[CONTENT]`) to the model regressors (`use=regressor` in
-#' `[LONGITUDINAL]`) by order, not by name.
+#' `[LONGITUDINAL]`) by their order in the data set, not by name.
 #'
-#' @param data data.frame with the Monolix column names
+#' @param data data.frame after the single-use columns (`id`, `time`,
+#'   ...) have been renamed
 #' @param mlxtran mlxtran object
 #' @return data with the regressor columns renamed to the model names
 #' @noRd
@@ -132,15 +133,15 @@
     stop("regressor column(s) missing from the data set: ",
          paste(.missing, collapse=", "), call.=FALSE)
   }
+  .dataReg <- .dataReg[order(match(.dataReg, names(data)))]
   .content <- mlxtran$DATAFILE$CONTENT$CONTENT
-  .use1 <- .content$use1[!is.na(.content$use1)]
   # reserved in the rxode2 data set; cmt/admd are added by .dataConvertAdm()
   .reserved <- intersect(.modelReg, c(.use1Rx, "cmt", "admd"))
   if (length(.reserved) > 0L) {
     stop("model regressor(s) '", paste(.reserved, collapse="', '"),
          "' clash with a translated data column name", call.=FALSE)
   }
-  .used <- setdiff(c(.use1, .content$cont, names(.content$cat)), .dataReg)
+  .used <- setdiff(c(.content$cont, names(.content$cat)), .dataReg)
   .bad <- intersect(.modelReg, .used)
   if (length(.bad) > 0L) {
     stop("model regressor(s) '", paste(.bad, collapse="', '"),
@@ -172,7 +173,6 @@
 #'
 #' @author Matthew L. Fidler
 .dataRenameFromMlxtran <- function(data, mlxtran) {
-  data <- .dataRenameRegressors(data, mlxtran)
   .content <- mlxtran$DATAFILE$CONTENT$CONTENT
   .use1 <- .content$use1
   names(data) <- vapply(names(data),
@@ -184,6 +184,7 @@
                           }
                           n
                         }, character(1), USE.NAMES = FALSE)
+  data <- .dataRenameRegressors(data, mlxtran)
   # Make sure continuous are double
   for (.i in seq_along(.content$cont)) {
     .n <- names(.content$cat)[.i]

@@ -15,7 +15,7 @@
 
 * The data set regressor columns (`use=regressor` in `[CONTENT]`) are now
   matched to the model regressors (`use=regressor` in `[LONGITUDINAL]`) by
-  order, as Monolix does, and renamed to the model names on import.  A
+  their column order in the data set, as Monolix does, and renamed to the model names on import.  A
   mismatched regressor count or a missing regressor column is now an error
   (issue #2).
 
