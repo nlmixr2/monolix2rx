@@ -108,7 +108,9 @@ else: 'else';
 endit: 'end';
 
 // Keywords only match whole words, so `else`+`if` is not a parse of `elseif`
-// nor `end`+`Time = 1` one of `endTime = 1`.
+// nor `end`+`Time = 1` one of `endTime = 1`.  dparser applies this to every
+// terminal reachable from these rules (the condition expressions too); a
+// keyword is never longer than an identifier at the same spot.
 ${declare longest_match if elseif else endit}
 
 or_expression_monolix: '||' | '|';
