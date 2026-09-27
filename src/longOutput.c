@@ -28,6 +28,7 @@ extern D_ParserTables parser_tables_longOutput;
 #define errP monolix2rx_longoutput_errP
 #include "parseSyntaxErrors.h"
 #include "util.h"
+#include "strictAmbig.h"
 
 char* gBuf;
 int gBufLast = 0;
@@ -106,6 +107,7 @@ void wprint_parsetree_longoutput(D_ParserTables pt, D_ParseNode *pn, int depth, 
 void trans_longoutput(const char* parse){
   freeP();
   curP = new_D_Parser(&parser_tables_longOutput, sizeof(D_ParseNode_User));
+  monolix2rxStrictAmbig(curP);
   curP->save_parse_tree = 1;
   curP->error_recovery = 1;
   curP->initial_scope = NULL;
@@ -132,5 +134,6 @@ SEXP _monolix2rx_trans_longoutput(SEXP in) {
   record = "[LONGITUDINAL] OUTPUT:";
   trans_longoutput(R_CHAR(STRING_ELT(in, 0)));
   parseFree(0);
+  monolix2rxCheckAmbig("longitudinal output");
   return R_NilValue;
 }

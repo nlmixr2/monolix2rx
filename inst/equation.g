@@ -1,6 +1,7 @@
 //loop
-statement_list :
-        (statement)+ ;
+// plain left recursion: dparser flattens an EBNF (statement)+ one level at
+// a time on commit, which is quadratic in the number of statements
+statement_list : statement_list statement | statement ;
 
 odeType: 'odeType' '=' ('stiff' | 'nonStiff' );
 
@@ -8,7 +9,7 @@ pkpars0: 'V' | 'Tk0' | 'ka' | 'Ktr' | 'Mtt' | 'Tlag' | 'p'
     |  'k' | 'Cl' | 'Vm' | 'Km' | 'k12' | 'k21' |  'k13'
     | 'k31';
 
-pkparsE0:  pkpars | 'ke0';
+pkparsE0:  pkpars0 | 'ke0';
 
 eqExpr: '=' logical_or_expression;
 
@@ -106,12 +107,16 @@ else: 'else';
 
 endit: 'end';
 
+// Keywords only match whole words, so `else`+`if` is not a parse of `elseif`
+// nor `end`+`Time = 1` one of `endTime = 1`.  dparser applies this to every
+// terminal reachable from these rules (the condition expressions too); a
+// keyword is never longer than an identifier at the same spot.
+${declare longest_match if elseif else endit}
+
 or_expression_monolix: '||' | '|';
 
 and_expression_monolix: '&' | '&&';
 
-equality_expression0 : equality_expression |
-        '(' equality_expression ')';
 
 eq_expression_monolix:  '==';
 neq_expression_monolix: '!=' | '~=';
@@ -127,8 +132,8 @@ le_expression_monolix: '<=';
 equality_expression : relational_expression
         ((neq_expression_monolix | eq_expression_monolix ) relational_expression)* ;
 
-logical_and_expression : equality_expression0
-        (and_expression_monolix equality_expression0)* ;
+logical_and_expression : equality_expression
+        (and_expression_monolix equality_expression)* ;
 
 logical_or_expression : logical_and_expression
         (or_expression_monolix  logical_and_expression)* ;
@@ -153,9 +158,9 @@ function: function1 | function2;
 
 function2_name: 'atan2(' | 'min(' | 'max(' | 'delay(';
 
-function2 : function2_name (logical_or_expression)*  ',' logical_or_expression* ')' ;
+function2 : function2_name logical_or_expression?  ',' logical_or_expression? ')' ;
 
-function1 : function1_name (logical_or_expression)* ')' ;
+function1 : function1_name logical_or_expression? ')' ;
 function1_name: 'abs(' | 'sqrt(' | 'exp(' | 'log(' | 'log10(' | 'logit(' |
         'invlogit(' | 'probit(' | 'norminv(' | 'qnorm(' | 'normcdf(' |
         'pnorm(' | 'sin(' | 'cos(' | 'tan(' |  'asin(' |  'acos(' |

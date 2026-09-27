@@ -28,6 +28,7 @@ extern D_ParserTables parser_tables_mlxtranContent;
 #define errP monolix2rx_content_errP
 #include "parseSyntaxErrors.h"
 #include "util.h"
+#include "strictAmbig.h"
 
 char* gBuf;
 int gBufLast = 0;
@@ -357,6 +358,7 @@ void wprint_parsetree_content(D_ParserTables pt, D_ParseNode *pn, int depth, pri
 void trans_content(const char* parse){
   freeP();
   curP = new_D_Parser(&parser_tables_mlxtranContent, sizeof(D_ParseNode_User));
+  monolix2rxStrictAmbig(curP);
   curP->save_parse_tree = 1;
   curP->error_recovery = 1;
   curP->initial_scope = NULL;
@@ -383,5 +385,6 @@ SEXP _monolix2rx_trans_content(SEXP in) {
   record = "[CONTENT]";
   trans_content(R_CHAR(STRING_ELT(in, 0)));
   parseFree(0);
+  monolix2rxCheckAmbig("content");
   return R_NilValue;
 }

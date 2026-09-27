@@ -41,6 +41,13 @@
   every current caller passes an R string, which R already caps at
   `INT_MAX` bytes.
 
+* Removed the dparser ambiguities in the `EQUATION:`/`PK:`,
+  `[LONGITUDINAL] DEFINITION:` and `file=` grammars, and made the equation
+  statement list plain left recursive.  Parsing long equation blocks is now
+  linear instead of quadratic; `if`/`else` blocks with function calls parse
+  up to ~80x faster.  Setting `MONOLIX2RX_STRICT_AMBIGUITY` (as the tests
+  do) makes any remaining grammar ambiguity an error (issue #51).
+
 * Fixed implicit `ptrdiff_t` to `int` truncation in `rc_dup_str` (`src/shared.c`);
   pointer differences are now range-checked before conversion to `int`.
 

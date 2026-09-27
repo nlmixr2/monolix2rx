@@ -60,7 +60,8 @@ catOps: (','? categoriesOp);
 
 categorical: identifier '=' '{' 'type' '=' 'categorical' (catOps)*  ','? allCode '}';
 
-allCode: "[^}]+";
+// cannot start with the separating comma, which is the optional ',' before it
+allCode: "[^},][^}]*";
 
 count: identifier '=' '{' 'type' '=' 'count' ','? allCode '}';
 

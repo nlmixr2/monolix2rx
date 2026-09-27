@@ -28,6 +28,7 @@ extern D_ParserTables parser_tables_mlxtranFileinfo;
 #define errP monolix2rx_fileinfo_errP
 #include "parseSyntaxErrors.h"
 #include "util.h"
+#include "strictAmbig.h"
 
 char* gBuf;
 int gBufLast = 0;
@@ -111,6 +112,7 @@ void wprint_parsetree_fileinfo(D_ParserTables pt, D_ParseNode *pn, int depth, pr
 void trans_fileinfo(const char* parse){
   freeP();
   curP = new_D_Parser(&parser_tables_mlxtranFileinfo, sizeof(D_ParseNode_User));
+  monolix2rxStrictAmbig(curP);
   curP->save_parse_tree = 1;
   curP->error_recovery = 1;
   curP->initial_scope = NULL;
@@ -137,5 +139,6 @@ SEXP _monolix2rx_trans_fileinfo(SEXP in) {
   record = "[FILEINFO]";
   trans_fileinfo(R_CHAR(STRING_ELT(in, 0)));
   parseFree(0);
+  monolix2rxCheckAmbig("fileinfo");
   return R_NilValue;
 }
