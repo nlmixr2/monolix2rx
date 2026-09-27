@@ -38,6 +38,12 @@
   `<MODEL> [LONGITUDINAL]` (issue
   [\#43](https://github.com/nlmixr2/monolix2rx/issues/43)).
 
+- Categorical covariate transformations (`[COVARIATE] DEFINITION:`
+  `transform=`/`categories=`/`reference=`) without a `reference` now
+  fall back to the first category instead of assigning an empty label;
+  the transformation translation is now tested end-to-end (issue
+  [\#6](https://github.com/nlmixr2/monolix2rx/issues/6)).
+
 - Range-check the input length in all 13 `trans_*` parser entry-points
   before narrowing it for `dparse()`’s `int` buffer length. A buffer of
   `INT_MAX` bytes or more now raises a clean R error instead of handing
