@@ -446,6 +446,27 @@ int equation_handle_odeType(char *name,  D_ParseNode *pn) {
 
 void wprint_parsetree_equation(D_ParserTables pt, D_ParseNode *pn, int depth, print_node_fn_t fn, void *client_data) {
   char *name = (char*)pt.symbols[pn->symbol].name;
+  if (!strcmp("statement_list", name)) {
+    // statement_list is left recursive; walk it in a loop so a long block
+    // does not nest one C stack frame per statement
+    int n = 0;
+    D_ParseNode *cur = pn;
+    while (d_get_number_of_children(cur) == 2) {
+      n++;
+      cur = d_get_child(cur, 0);
+    }
+    D_ParseNode **lst = (D_ParseNode **)R_alloc(n + 1, sizeof(D_ParseNode *));
+    lst[0] = d_get_child(cur, 0);
+    cur = pn;
+    for (int i = n; i > 0; i--) {
+      lst[i] = d_get_child(cur, 1);
+      cur = d_get_child(cur, 0);
+    }
+    for (int i = 0; i <= n; i++) {
+      wprint_parsetree_equation(pt, lst[i], depth, fn, client_data);
+    }
+    return;
+  }
   if (equation_operators(name, pn) ||
       equation_logic_operators(name, pn) ||
       equation_identifier_or_constant(name, pn) ||

@@ -1,6 +1,7 @@
 //loop
-statement_list :
-        (statement)+ ;
+// plain left recursion: dparser flattens an EBNF (statement)+ one level at
+// a time on commit, which is quadratic in the number of statements
+statement_list : statement_list statement | statement ;
 
 odeType: 'odeType' '=' ('stiff' | 'nonStiff' );
 
