@@ -33,28 +33,32 @@ mlxtranTransformGetRxCode <- function(mlxtran) {
          function(n) {
            .t <- .transform[[n]]
            .v <- .t$transform
+           # one non-numeric value means the data column is character
+           .q <- anyNA(suppressWarnings(as.numeric(unlist(.t$catValue))))
            .cw <- vapply(seq_along(.t$catLabel),
                          function(i) {
-                           .tmp <- suppressWarnings(as.numeric(.t$catValue[[i]]))
-                           .q <- ""
-                           if (any(is.na(.tmp))) {
-                             .q <- "'"
-                           }
-                           .or <- paste(paste0(.v, " == ", .q, .t$catValue[[i]], .q),
+                           .val <- .t$catValue[[i]]
+                           if (.q) .val <- .mlxtranTransformLabel(.val)
+                           .or <- paste(paste0(.v, " == ", .val),
                                         collapse=" || ")
-                           .or <- paste0("if (", .or, ") {\n")
-                           .or <- paste0(.or, "  ", n, " <- '", .t$catLabel[i], "'\n")
-                           .or <- paste0(.or, "}")
-                           .or
-                         }, character(1), USE.NAMES = TRUE)
+                           paste0("if (", .or, ") {\n  ", n, " <- ",
+                                  .mlxtranTransformLabel(.t$catLabel[i]), "\n}")
+                         }, character(1), USE.NAMES=FALSE)
            .cw <- paste(.cw, collapse=" else ")
-           if (checkmate::testCharacter(.t$reference, min.chars = 1)) {
-             .cw <- paste0(.cw," else {\n  ", n, "<- '", .t$reference, "'\n}")
-           } else {
-             .cw <- c(.cw, paste0("else {\n  ", n, "<- 1\n}"))
-           }
-           .cw
+           # without a reference, unmatched values fall back to the first category
+           .ref <- .t$reference
+           if (length(.ref) != 1L || !nzchar(.ref)) .ref <- .t$catLabel[1]
+           paste0(.cw, " else {\n  ", n, " <- ", .mlxtranTransformLabel(.ref), "\n}")
          }, character(1),
          USE.NAMES=FALSE),
     collapse="\n")
+}
+#' Quote a category label as an rxode2 string
+#'
+#' @param x category label(s)
+#' @return quoted label
+#' @noRd
+#' @author Matthew L. Fidler
+.mlxtranTransformLabel <- function(x) {
+  paste0("'", x, "'")
 }

@@ -1,0 +1,45 @@
+test_that("categorical covariate transforms translate to rxode2 (#6)", {
+  .tr <- function(txt) {
+    mlxtranTransformGetRxCode(list(MODEL=list(COVARIATE=list(COVARIATE=list(),
+                                                            DEFINITION=.longDef(txt)))))
+  }
+
+  expect_equal(.tr("tSex = {transform = 'sex', categories = {'F' = {'0'}, 'M' = {'1'}}, reference = 'M'}"),
+               "if (sex == 0) {\n  tSex <- 'F'\n} else if (sex == 1) {\n  tSex <- 'M'\n} else {\n  tSex <- 'M'\n}")
+
+  expect_equal(.tr("tAPGAR = {transform = APGAR, categories = {High = {10, 8, 9}, Low = {1, 2, 3}, Med = {4, 5, 6, 7}}, reference = Med}"),
+               paste0("if (APGAR == 10 || APGAR == 8 || APGAR == 9) {\n  tAPGAR <- 'High'\n}",
+                      " else if (APGAR == 1 || APGAR == 2 || APGAR == 3) {\n  tAPGAR <- 'Low'\n}",
+                      " else if (APGAR == 4 || APGAR == 5 || APGAR == 6 || APGAR == 7) {\n  tAPGAR <- 'Med'\n}",
+                      " else {\n  tAPGAR <- 'Med'\n}"))
+
+  # no reference: fall back to the first category instead of an empty label
+  expect_equal(.tr("tSex = {transform = sex, categories = {F = {0}, M = {1}}}"),
+               "if (sex == 0) {\n  tSex <- 'F'\n} else if (sex == 1) {\n  tSex <- 'M'\n} else {\n  tSex <- 'F'\n}")
+
+  # any character value quotes every value of the transform
+  expect_equal(.tr("tS = {transform = S, categories = {A = {x, 1}, B = 2}, reference = B}"),
+               "if (S == 'x' || S == '1') {\n  tS <- 'A'\n} else if (S == '2') {\n  tS <- 'B'\n} else {\n  tS <- 'B'\n}")
+
+  # several transforms
+  .two <- .tr("tA = {transform = A, categories = {L = 0, H = 1}, reference = L}\ntB = {transform = B, categories = {N = 0, Y = 1}, reference = N}")
+  expect_length(.two, 1L)
+  expect_true(grepl("tA <- 'H'", .two, fixed=TRUE))
+  expect_true(grepl("tB <- 'Y'", .two, fixed=TRUE))
+
+  expect_null(mlxtranTransformGetRxCode(list(MODEL=list())))
+})
+
+test_that("covariate transforms are imported and validated (#6)", {
+  skip_on_cran()
+  .cov <- system.file("cov", package="monolix2rx")
+  for (.f in c("phenobarbital_project.mlxtran", "warfarin_covariate3_project.mlxtran")) {
+    .rx <- suppressMessages(monolix2rx(file.path(.cov, .f)))
+    expect_true(inherits(.rx, "rxUi"))
+    .model <- paste(deparse(.rx$lstExpr), collapse="\n")
+    expect_true(grepl(if (grepl("pheno", .f)) "tAPGAR <- \"Med\"" else "tSex <- \"M\"", .model, fixed=TRUE))
+    expect_false(is.null(.rx$ipredCompare))
+    expect_true(.rx$ipredAtol < 0.5)
+    expect_true(.rx$predAtol < 0.01)
+  }
+})
