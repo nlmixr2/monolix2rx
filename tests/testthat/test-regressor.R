@@ -69,6 +69,22 @@ time = {use=regressor}")
   expect_error(.dataRenameRegressors(data.frame(ID=1, TIME=0, CONC=2), .m),
                "translated data column")
 
+  .m <- .regMlxtran("ID = {use=identifier}
+CONC = {use=regressor}",
+"input = {cmt}
+cmt = {use=regressor}")
+  expect_error(.dataRenameRegressors(data.frame(ID=1, CONC=2), .m),
+               "translated data column")
+
+  # a declared column absent from the data still blocks the rename
+  .m <- .regMlxtran("ID = {use=identifier}
+FOO = {use=time}
+CONC = {use=regressor}",
+"input = {FOO}
+FOO = {use=regressor}")
+  expect_error(.dataRenameRegressors(data.frame(ID=1, CONC=2), .m),
+               "non-regressor data column")
+
   # an unused column with the model regressor name is dropped
   .m <- .regMlxtran("ID = {use=identifier}
 CONC = {use=regressor}",

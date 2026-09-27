@@ -132,25 +132,24 @@
     stop("regressor column(s) missing from the data set: ",
          paste(.missing, collapse=", "), call.=FALSE)
   }
-  .use1 <- mlxtran$DATAFILE$CONTENT$CONTENT$use1
-  .reserved <- intersect(.modelReg,
-                         .use1Rx[names(.use1)[!is.na(.use1)]])
+  .content <- mlxtran$DATAFILE$CONTENT$CONTENT
+  .use1 <- .content$use1[!is.na(.content$use1)]
+  # cmt/admd are added by .dataConvertAdm()
+  .reserved <- intersect(.modelReg, c(.use1Rx[names(.use1)], "cmt", "admd"))
   if (length(.reserved) > 0L) {
     stop("model regressor(s) '", paste(.reserved, collapse="', '"),
          "' clash with a translated data column name", call.=FALSE)
   }
+  .used <- setdiff(c(.use1, .content$cont, names(.content$cat)), .dataReg)
+  .bad <- intersect(.modelReg, .used)
+  if (length(.bad) > 0L) {
+    stop("model regressor(s) '", paste(.bad, collapse="', '"),
+         "' also name a non-regressor data column; cannot match regressors by order",
+         call.=FALSE)
+  }
+  # columns not declared in [CONTENT] are ignored by Monolix; drop them
   .clash <- intersect(.modelReg, setdiff(names(data), .dataReg))
   if (length(.clash) > 0L) {
-    # columns not declared in [CONTENT] are ignored by Monolix; drop them
-    .content <- mlxtran$DATAFILE$CONTENT$CONTENT
-    .used <- c(.content$use1[!is.na(.content$use1)], .content$cont,
-               names(.content$cat))
-    .bad <- intersect(.clash, .used)
-    if (length(.bad) > 0L) {
-      stop("model regressor(s) '", paste(.bad, collapse="', '"),
-           "' also name a non-regressor data column; cannot match regressors by order",
-           call.=FALSE)
-    }
     .minfo(paste0("dropped unused data column(s) '", paste(.clash, collapse="', '"),
                   "' that share a model regressor name"))
     data <- data[, !(names(data) %in% .clash), drop=FALSE]
