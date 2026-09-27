@@ -33,6 +33,10 @@ mlxtranTransformGetRxCode <- function(mlxtran) {
          function(n) {
            .t <- .transform[[n]]
            .v <- .t$transform
+           if (length(.v) != 1L || !nzchar(.v)) {
+             stop("covariate transformation '", n, "' does not specify 'transform='",
+                  call.=FALSE)
+           }
            # one non-numeric value means the data column is character
            .q <- anyNA(suppressWarnings(as.numeric(unlist(.t$catValue))))
            .cw <- vapply(seq_along(.t$catLabel),
@@ -60,5 +64,5 @@ mlxtranTransformGetRxCode <- function(mlxtran) {
 #' @noRd
 #' @author Matthew L. Fidler
 .mlxtranTransformLabel <- function(x) {
-  paste0("'", x, "'")
+  ifelse(grepl("'", x, fixed=TRUE), paste0('"', x, '"'), paste0("'", x, "'"))
 }

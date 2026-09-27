@@ -17,6 +17,19 @@ test_that("categorical covariate transforms translate to rxode2 (#6)", {
   expect_equal(.tr("tSex = {transform = sex, categories = {F = {0}, M = {1}}}"),
                "if (sex == 0) {\n  tSex <- 'F'\n} else if (sex == 1) {\n  tSex <- 'M'\n} else {\n  tSex <- 'F'\n}")
 
+  expect_equal(.tr("tSex = {transform = sex, categories = {F = {0}, M = {1}}, reference = ''}"),
+               "if (sex == 0) {\n  tSex <- 'F'\n} else if (sex == 1) {\n  tSex <- 'M'\n} else {\n  tSex <- 'F'\n}")
+
+  # a label with a single quote is double-quoted
+  expect_equal(.tr("tS = {transform = S, categories = {\"A's\" = {0}, B = {1}}, reference = B}"),
+               "if (S == 0) {\n  tS <- \"A's\"\n} else if (S == 1) {\n  tS <- 'B'\n} else {\n  tS <- 'B'\n}")
+
+  expect_error(mlxtranTransformGetRxCode(list(MODEL=list(COVARIATE=list(
+    COVARIATE=list(),
+    DEFINITION=list(transform=list(tSex=list(transform=character(0), catLabel="F",
+                                             catValue=list("0"), reference="F"))))))),
+    "transform=")
+
   # any character value quotes every value of the transform
   expect_equal(.tr("tS = {transform = S, categories = {A = {x, 1}, B = 2}, reference = B}"),
                "if (S == 'x' || S == '1') {\n  tS <- 'A'\n} else if (S == '2') {\n  tS <- 'B'\n} else {\n  tS <- 'B'\n}")
