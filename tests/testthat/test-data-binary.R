@@ -68,6 +68,16 @@ test_that("Excel header and extension edge cases (#10)", {
                  "header does not match")
   expect_equal(nrow(.num), 2L)
 
+  # text NA markers and dates are handled like read.table()
+  skip_if_not_installed("haven")
+  .x <- file.path(.d, "na.xpt")
+  haven::write_xpt(data.frame(ID=c(1, 2), DV=c(".", "3"), COV=c("NA", "a"),
+                              DT=as.Date(c("2024-01-01", "2024-01-02"))), .x)
+  .na <- .monolixDataLoadBinary(.x, "xpt", c("ID", "DV", "COV", "DT"))
+  expect_equal(.na$DV, c(NA, 3))
+  expect_equal(.na$COV, c(NA, "a"))
+  expect_equal(.na$DT, c("2024-01-01", "2024-01-02"))
+
   # text formats (and extension-less files) are left to read.table
   expect_null(.monolixDataLoadBinary(.f, "csv", "ID"))
   expect_null(.monolixDataLoadBinary(.f, character(0), "ID"))

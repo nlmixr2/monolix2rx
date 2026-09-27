@@ -61,6 +61,15 @@
   }
   if (.pkg == "haven") .data <- haven::zap_formats(haven::zap_labels(.data))
   .data <- as.data.frame(.data)
+  # mirror read.table(): dates stay text, and text columns get na.strings/type conversion
+  for (.i in seq_along(.data)) {
+    if (inherits(.data[[.i]], c("Date", "POSIXt", "difftime"))) {
+      .data[[.i]] <- as.character(.data[[.i]])
+    }
+    if (is.character(.data[[.i]])) {
+      .data[[.i]] <- utils::type.convert(.data[[.i]], na.strings=na.strings, as.is=TRUE)
+    }
+  }
   if (!identical(names(.data), header)) {
     if (length(.data) != length(header)) {
       stop("the length of the headers between the mlxtran specified model and data are different",
