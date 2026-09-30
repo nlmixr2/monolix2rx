@@ -11,14 +11,12 @@
   for (v in names(.dat)) {
     if (tolower(v) %in% c("amt", "time", "dv") && is.character(.dat[[v]])) {
       .n <- suppressWarnings(as.numeric(.dat[[v]]))
-      .w <- which(is.na(.n))
+      .w <- which(is.na(.n) & !is.nan(.n))
       if (length(.w) == 0) {
         .dat[[v]] <- .n
       } else if (
-        all(grepl(
-          paste0("^ *(", paste(na.strings, collapse = "|"), ") *$"),
-          .dat[[v]][.w]
-        ))
+        # literal match; na.strings are not regular expressions (#56)
+        all(trimws(.dat[[v]][.w]) %in% c(trimws(na.strings), "", NA))
       ) {
         .dat[[v]] <- .n
       }

@@ -22,6 +22,12 @@
   model names on import.  A mismatched regressor count or a missing
   regressor column is now an error (issue #2).
 
+* Imported `amt`/`time`/`dv` character columns now match `na.strings`
+  literally (ignoring surrounding whitespace); the default `"."` was a
+  regular expression wildcard, so any single-character value was silently
+  turned into `NA`.  Genuine `NA`, blank and `"NaN"` values no longer keep
+  such a column as character (issue #56).
+
 * Imported data sets now cast the continuous covariates to double;
   previously the categorical covariates were cast instead, turning
   character categories into `NA`.
