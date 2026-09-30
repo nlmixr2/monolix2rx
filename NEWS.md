@@ -23,7 +23,8 @@
   regressor column is now an error (issue #2).
 
 * Imported `amt`/`time`/`dv` character columns now match `na.strings`
-  literally; the default `"."` was a regular expression wildcard, so any
+  literally (ignoring surrounding whitespace); the default `"."` was a
+  regular expression wildcard, so any
   single-character value was silently turned into `NA`.  Genuine `NA`
   values no longer keep such a column as character (issue #56).
 

@@ -14,8 +14,10 @@
       .w <- which(is.na(.n))
       if (length(.w) == 0) {
         .dat[[v]] <- .n
-      } else if (all(trimws(.dat[[v]][.w], whitespace = " ") %in% c(na.strings, NA))) {
+      } else if (
         # literal match; na.strings are not regular expressions (#56)
+        all(trimws(.dat[[v]][.w]) %in% c(trimws(na.strings), NA))
+      ) {
         .dat[[v]] <- .n
       }
     }

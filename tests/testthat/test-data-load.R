@@ -40,6 +40,9 @@ test_that(".monolixNaApply matches na.strings literally (#56)", {
   .r <- .monolixNaApply(.d, c("*", "(", "x"), NULL)
   expect_equal(.r$amt, c(1, NA, 5))
   expect_equal(.r$dv, c(1, NA, 2))
+  .d$dv <- c("1", "\t.\t", "2")
+  .r <- .monolixNaApply(.d, c("NA", " . "), NULL)
+  expect_equal(.r$dv, c(1, NA, 2))
 })
 
 test_that(".monolixDataLoad handles header variants", {
