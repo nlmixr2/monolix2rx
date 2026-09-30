@@ -24,8 +24,8 @@
 
 * Imported `amt`/`time`/`dv` character columns now match `na.strings`
   literally (ignoring surrounding whitespace); the default `"."` was a
-  regular expression wildcard, so any
-  single-character value was silently turned into `NA`.  Genuine `NA`
+  regular expression wildcard, so any single-character value was silently
+  turned into `NA`.  Genuine `NA`
   values no longer keep such a column as character (issue #56).
 
 * Imported data sets now cast the continuous covariates to double;
