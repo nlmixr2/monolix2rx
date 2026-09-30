@@ -14,12 +14,8 @@
       .w <- which(is.na(.n))
       if (length(.w) == 0) {
         .dat[[v]] <- .n
-      } else if (
-        all(grepl(
-          paste0("^ *(", paste(na.strings, collapse = "|"), ") *$"),
-          .dat[[v]][.w]
-        ))
-      ) {
+      } else if (all(trimws(.dat[[v]][.w], whitespace = " ") %in% c(na.strings, NA))) {
+        # literal match; na.strings are not regular expressions (#56)
         .dat[[v]] <- .n
       }
     }

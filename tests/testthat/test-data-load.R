@@ -27,6 +27,21 @@ test_that(".monolixNaApply converts numeric-like character columns", {
   expect_equal(.r$WT, c("1", "2"))
 })
 
+test_that(".monolixNaApply matches na.strings literally (#56)", {
+  .d <- data.frame(
+    time = c("0", "1", NA),
+    amt = c("1", "*", "5"),
+    dv = c("1", "x", "2")
+  )
+  .r <- .monolixNaApply(.d, c("NA", "."), NULL)
+  expect_equal(.r$time, c(0, 1, NA))
+  expect_equal(.r$amt, c("1", "*", "5"))
+  expect_equal(.r$dv, c("1", "x", "2"))
+  .r <- .monolixNaApply(.d, c("*", "(", "x"), NULL)
+  expect_equal(.r$amt, c(1, NA, 5))
+  expect_equal(.r$dv, c(1, NA, 2))
+})
+
 test_that(".monolixDataLoad handles header variants", {
   skip_on_cran()
   .dir <- .theoCopy()
