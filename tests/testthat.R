@@ -9,4 +9,16 @@
 library(testthat)
 library(monolix2rx)
 
+# CRAN/R-hub work-arounds, mirroring rxode2's own tests/testthat.R: keep
+# rxode2, OpenMP and MKL to one thread, and on macOS stop rxode2 from
+# unloading the model dlls, which the ASAN checks trip over.
+if (!identical(Sys.getenv("NOT_CRAN"), "true")) {
+  rxode2::setRxThreads(1L)
+  Sys.setenv(OMP_NUM_THREADS = "1")
+  Sys.setenv(MKL_NUM_THREADS = "1")
+  if (identical(Sys.info()[["sysname"]], "Darwin")) {
+    rxode2::rxUnloadAll(set = FALSE)
+  }
+}
+
 test_check("monolix2rx")
