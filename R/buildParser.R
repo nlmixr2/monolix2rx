@@ -181,6 +181,10 @@
         .minfo(paste0("using Monolix's data for solving"))
       }
     }
+    if (missing(method) && .getDelay(object)) {
+      method <- "dop853"
+      .minfo("delay() needs a dense solver: method=\"dop853\"")
+    }
     .atol <- .rtol <- .getRtolAtol(object)
     if (missing(atol)) {
       atol <- .atol

@@ -86,6 +86,9 @@
   parser state is intentionally not mutex-protected, consistent with R's
   single-threaded execution model.
 
+* `delay(x, T)` in `EQUATION:` is translated to rxode2's `delay()` (needs
+  rxode2 >= 5.1.7); models with a delay are solved with `dop853`.
+
 * `pkmodel()` accepts the peripheral clearances and volumes `Q2`, `V2`,
   `Q3` and `V3` (as `k12 = Q2/V`, `k21 = Q2/V2`, ...).
 

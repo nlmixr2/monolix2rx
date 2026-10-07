@@ -115,3 +115,13 @@ test_that("predRtol is relative to the Monolix pred", {
   expect_equal(unname(f$predRtol),
                stats::median(abs((.p$pred - .p$monolixPred) / .p$monolixPred), na.rm=TRUE))
 })
+
+test_that("delay() models are solved with a dense method", {
+  skip_on_cran()
+  skip_if(utils::packageVersion("rxode2") < "5.1.7")
+  f <- .monolix2rx(system.file("theo/theophylline_project.mlxtran", package="monolix2rx"))
+  expect_false(.getDelay(f))
+  .mlx <- f$mlxtran
+  .mlx$MODEL$LONGITUDINAL$EQUATION <- .equation("ddt_x = -k*delay(x, tau)")
+  expect_true(.getDelay(.mlx))
+})

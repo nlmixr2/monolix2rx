@@ -228,6 +228,11 @@ Notes for later cases:
   `linCmt()` solves steady state analytically (ignores `minSS`): a tighter
   `dose-ss` tolerance or a `linCmt()` SS case will show both.
 
+- rxode2 5.1.8 `delay()` uses `x(0)` as the history only when it is a
+  literal constant; a computed or parameter `x(0)` gives a history of 0
+  (`dde-hutchinson`; monolix2rx writes `x_0 <- 10; x(0) <- x_0`).  To fix
+  in rxode2.
+
 ## Truth gaps to close with the importer work
 
 - BSMM: IPRED needs the true class (`POP`, kept in `sim.rds`).

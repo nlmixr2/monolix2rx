@@ -39,6 +39,21 @@
   }
   c(minSS=.min, maxSS=max(.nss + 1L, 7L))
 }
+#' Does the model use delay()?
+#'
+#' @inheritParams .getNbdoses
+#' @return `TRUE` when the `EQUATION:` block uses `delay()`
+#' @noRd
+#' @author Matthew L. Fidler
+.getDelay <- function(x) {
+  if (inherits(x, c("monolix2rx", "rxUi"))) {
+    x <- x$mlxtran
+  }
+  if (inherits(x, c("monolix2rxMlxtran", "mlxtran"))) {
+    x <- x$MODEL$LONGITUDINAL$EQUATION
+  }
+  inherits(x, "monolix2rxEquation") && any(grepl("\\bdelay[(]", x$rx))
+}
 #' Get if the model object is stiff
 #'
 #' @param x monolix2rx object, its parsed project or its rxUi
@@ -124,6 +139,8 @@
   # default for Monolix: nbSSDoses=7
   .ui <- rxode2::rxUiDecompress(ui)
   .ss <- .getSsLimits(.ui)
+  # delay() needs a dense solver
+  .delayMethod <- if (.getDelay(.ui)) "dop853" else "liblsoda"
   .tol <- .getRtolAtol(.ui)
   .method <- .getMethod(.ui)
   .pop <- .parameterThetaEta(.ui, pop=TRUE)
@@ -149,6 +166,7 @@
                                        minSS=.ss[["minSS"]],
                                        atol=.tol, rtol=.tol,
                                        ssAtol=100, ssRtol=100, omega=NULL,
+                                       method=.delayMethod,
                                        addDosing = FALSE))
 
     .ipredSolve <- .subsetMonolix(.ui, .ipredSolve, c("iwres", "ires"))
@@ -162,6 +180,7 @@
                                       minSS=.ss[["minSS"]],
                                       atol=.tol, rtol=.tol,
                                       ssAtol=100, ssRtol=100, omega=NULL,
+                                      method=.delayMethod,
                                       addDosing = FALSE), silent=TRUE)
     .predSolve <- .subsetMonolix(.ui, .predSolve)
     .nPredSolve <- length(.predSolve[, 1])

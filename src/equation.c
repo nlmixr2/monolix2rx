@@ -237,14 +237,7 @@ int equation_function_name(char *name,  D_ParseNode *pn) {
   } else if (!strcmp("function2_name", name)) {
     D_ParseNode *xpn = d_get_child(pn, 0);
     char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
-    if (!strcmp("delay(", v)) {
-      sClear(&sbTransErr);
-      sAppend(&sbTransErr, "delay() not supported in translation");
-      updateSyntaxCol();
-      trans_syntax_error_report_fn0(sbTransErr.s);
-      finalizeSyntaxError();
-      return 1;
-    }
+    // delay(x, T) is rxode2's delay() (rxode2 >= 5.1.7; checked in R)
     sAppend(&curLine, "%s", v);
     return 1;
   } else if (!strcmp("bsmm_fun", name)) {

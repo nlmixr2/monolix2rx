@@ -108,7 +108,12 @@ ddt_dx = -x-dx", pk)
   .ret <- .equation("a=factln(b)", pk)
   expect_equal(.ret$rx, "a <- lfactorial(b)")
 
-  expect_error(.equation("ddt_x = ka*x-k*delay(x,tau)", pk), "delay")
+  if (utils::packageVersion("rxode2") >= "5.1.7") {
+    expect_equal(.equation("ddt_x = ka*x-k*delay(x,tau)", pk)$rx,
+                 "d/dt(x) <- ka * x - k * delay(x, tau)")
+  } else {
+    expect_error(.equation("ddt_x = ka*x-k*delay(x,tau)", pk), "rxode2 >= 5.1.7")
+  }
 
   expect_error(.equation("ddt_x = ka*x-k*rem(tau)", pk), "rem")
 

@@ -31,6 +31,10 @@
     .Call(`_monolix2rx_trans_equation`, text, "[LONGITUDINAL] EQUATION:")
   }
   .monolix2rx$pkLong <- FALSE
+  if (any(grepl("\\bdelay[(]", c(.monolix2rx$preEq, .monolix2rx$equationLine))) &&
+        utils::packageVersion("rxode2") < "5.1.7") {
+    stop("delay() needs rxode2 >= 5.1.7", call.=FALSE)
+  }
   .eqPre <- .monolix2rx$preEq
   .pkPushStatement()
   .validatePkModel(.monolix2rx$pkPars, .monolix2rx$pkCe)
