@@ -213,9 +213,6 @@ Each one is a `known=` case until its fix lands (phase 2.5):
 - The `pkmodel()` ODEs are written before the `EQUATION:` lines that
   precede `pkmodel()`, so `k12 = Q/V; Cc = pkmodel(V, Cl, k12, k21)` uses
   `k12` before it is defined (`pkmodel-iv-2cmt-k`).
-- A latent covariate (`P(lcat=1)=plcat1`) is translated as a numeric
-  covariate (`beta_Cl_lcat_2*lcat`, not `(lcat == 2)`), and `plcat1` is
-  dropped (`bsmm-latent-cov-cl`).
 - `.getNbdoses()` (`R/validate.R`) tests for class `mlxtran`, but the
   parsed project is `monolix2rxMlxtran`, so validation and `rxSolve()`
   always use 7 steady-state doses (`dose-ss`, `nbdoses=10`).
@@ -235,7 +232,10 @@ Notes for later cases:
 
 ## Truth gaps to close with the importer work
 
-- BSMM: IPRED needs the true class (`POP`, kept in `sim.rds`).
+- BSMM (run mode): validation needs Monolix's estimated class per
+  subject as `mixest`; where Monolix writes it is to confirm.
+- A project without `<MONOLIX> [SETTINGS] exportpath` stops the import
+  (`R/parameterUpdate.R`), seen while writing the latent-covariate test.
 
 ## Risks
 

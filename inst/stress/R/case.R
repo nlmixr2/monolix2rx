@@ -33,6 +33,8 @@
 ## - `minMonolix`: Monolix version needed (like "2024R1"); a failed run
 ##   on an older Monolix is SKIP.
 ## - `solve`: extra rxSolve() options for the truth (like method=).
+## - `mixest`: data column with each subject's true mixture class (its
+##   position in the categories), given to the imported model as mixest.
 
 .kitEnv <- new.env(parent=emptyenv())
 .kitEnv$cases <- list()
@@ -42,7 +44,7 @@ kitCase <- function(name, covers, tags=character(0), sim, data, mlxtran,
                     write=NULL, postSim=NULL, tol=list(), known=NULL,
                     knownRun=NULL, est="default", dryPred=TRUE,
                     dryOmega=TRUE, nSub=NULL, nbSSDoses=7L,
-                    minMonolix=NULL, solve=list()) {
+                    minMonolix=NULL, solve=list(), mixest=NULL) {
   stopifnot(is.character(name), length(name) == 1L,
             !grepl("[^A-Za-z0-9_-]", name))
   if (!is.null(.kitEnv$cases[[name]])) {
@@ -56,6 +58,7 @@ kitCase <- function(name, covers, tags=character(0), sim, data, mlxtran,
                                 dryPred=dryPred, dryOmega=dryOmega,
                                 nSub=nSub, nbSSDoses=nbSSDoses,
                                 minMonolix=minMonolix, solve=solve,
+                                mixest=mixest,
                                 file=if (is.null(.kitEnv$curFile)) NA_character_ else .kitEnv$curFile)
   invisible(name)
 }

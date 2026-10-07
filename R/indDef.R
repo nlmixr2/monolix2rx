@@ -36,14 +36,56 @@
 #'
 #'
 #' @param text text from the individual defition
+#' @param cat named list of the categories of each categorical
+#'   covariate (from `.indCategories()`), used to map coefficients to
+#'   categories by position
 #' @return monolix2rxIndDef class
 #' @noRd
 #' @author Matthew L. Fidler
-.indDef <- function(text) {
+.indDef <- function(text, cat=NULL) {
   .indDefIni()
+  .monolix2rx$indCat <- cat
+  on.exit(.monolix2rx$indCat <- NULL)
   .Call(`_monolix2rx_trans_indDef`, text)
   .indDefFinalize()
   .monolix2rx$indDef
+}
+
+#' Categories of the categorical covariates of a parsed project
+#'
+#' @param model the parsed `<MODEL>` section
+#' @return named list of character category vectors: the `[INDIVIDUAL]`
+#'   and `[COVARIATE]` declarations and the latent covariates of
+#'   `[COVARIATE] DEFINITION:`
+#' @noRd
+#' @author Matthew L. Fidler
+.indCategories <- function(model) {
+  .ret <- list()
+  for (.d in model$COVARIATE$DEFINITION$endpoint) {
+    if (identical(.d$dist, "categorical")) {
+      .ret[[.d$var]] <- as.character(.d$err$categories)
+    }
+  }
+  for (.c in list(model$COVARIATE$COVARIATE$cat, model$INDIVIDUAL$INDIVIDUAL$cat)) {
+    for (.n in names(.c)) .ret[[.n]] <- as.character(.c[[.n]]$cat)
+  }
+  .ret
+}
+
+#' Covariate terms when the coefficients follow the declared categories
+#'
+#' @param coef coefficient names (fixed ones start with rxCov_)
+#' @param cov covariate name
+#' @return the terms, or NULL when `cov` has no matching categories
+#' @noRd
+#' @author Matthew L. Fidler
+.indDefCatTerms <- function(coef, cov) {
+  .cat <- .monolix2rx$indCat[[cov]]
+  if (is.null(.cat) || length(.cat) != length(coef) || length(coef) < 2L) return(NULL)
+  .w <- !grepl("^rxCov_", coef)
+  .num <- !is.na(suppressWarnings(as.numeric(.cat)))
+  .lit <- ifelse(.num, .cat, paste0("'", .cat, "'"))
+  paste(paste0(coef[.w], " * (", cov, " == ", .lit[.w], ")"), collapse=" + ")
 }
 
 #' Finalized the mlxtran `[individual]` definition:
@@ -162,6 +204,8 @@
                                  function(i) {
                                    .coef <- .ret$coef[[i]]
                                    .cov <- .ret$cov[i]
+                                   .cat <- .indDefCatTerms(.coef, .cov)
+                                   if (!is.null(.cat)) return(.cat)
                                    if (length(.coef) > 1) {
                                      .ref <- vapply(strsplit(.coef, paste0(.cov,"_"), fixed = TRUE),
                                                     function(l) {

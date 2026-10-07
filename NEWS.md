@@ -86,6 +86,16 @@
   parser state is intentionally not mutex-protected, consistent with R's
   single-threaded execution model.
 
+* Latent categorical covariates (between-subject mixtures,
+  `lcat = {type=categorical, categories={1, 2}, P(lcat=1)=plcat1}` in
+  `[COVARIATE] DEFINITION:`) are translated to rxode2's `mix()`
+  (`lcat <- mix(1, plcat1, 2)`) with the class probabilities in `ini()`.
+
+* Fixed categorical covariate effects with numeric categories:
+  `coefficient={0, beta}` for categories `{1, 2}` was translated as
+  `beta*lcat` instead of `beta*(lcat == 2)`.  Coefficients now follow the
+  declared categories by position.
+
 * `delay(x, T)` in `EQUATION:` is translated to rxode2's `delay()` (needs
   rxode2 >= 5.1.7); models with a delay are solved with `dop853`.
 

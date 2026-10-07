@@ -56,7 +56,12 @@ kitSimulate <- function(case, nSub, seed=42L) {
   .obs <- .d[.d$EVID == 0 & .d$MDV == 0, c("ROWID", "ID", "TIME")]
   .obs$simPred <- .p$sim[match(.obs$ROWID, .p$ROWID)]
   .obs$simIpred <- .s$ipredSim[match(.obs$ROWID, .s$ROWID)]
-  list(data=.d, pred=.obs, etas=.etas, seed=.seed)
+  .mix <- NULL
+  if (!is.null(case$mixest)) {
+    .first <- !duplicated(.d$ID)
+    .mix <- data.frame(id=as.character(.d$ID[.first]), mixest=as.integer(.d[[case$mixest]][.first]))
+  }
+  list(data=.d, pred=.obs, etas=.etas, mix=.mix, seed=.seed)
 }
 
 ## Monolix missing values: AMT only on doses, DV only on observations

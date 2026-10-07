@@ -126,8 +126,10 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
     .equation <- character(0)
   }
   if (length(.cmt) == 1L && .cmt == "cmt()") .cmt <- NULL
+  .latent <- .latentMix(.mlxtran)
   .model <- c("model({",
               .cmt,
+              .latent$model,
               mlxtranTransformGetRxCode(.mlxtran),
               .mlxtran$MODEL$INDIVIDUAL$DEFINITION$rx,
               .equation,
@@ -150,6 +152,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   .ini <- .def2ini(.mlxtran$MODEL$INDIVIDUAL$DEFINITION,
                    .mlxtran$PARAMETER$PARAMETER,
                    .mlxtran$MODEL$LONGITUDINAL$DEFINITION)
+  .ini <- .latentIni(.ini, .latent$prob, .mlxtran$PARAMETER$PARAMETER)
   .ret <- function() {}
   if (gsub(" +", "", deparse1(.ini)) == "ini({})") {
     body(.ret) <- as.call(c(list(quote(`{`)), .model))

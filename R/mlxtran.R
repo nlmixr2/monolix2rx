@@ -104,7 +104,8 @@
     if (!is.null(.ret$MODEL$INDIVIDUAL)) {
       .ret$MODEL$INDIVIDUAL$INDIVIDUAL <- .ind(.ret$MODEL$INDIVIDUAL$INDIVIDUAL)
       if (!is.null(.ret$MODEL$INDIVIDUAL$DEFINITION)) {
-        .ret$MODEL$INDIVIDUAL$DEFINITION <- .indDef(.ret$MODEL$INDIVIDUAL$DEFINITION)
+        .ret$MODEL$INDIVIDUAL$DEFINITION <- .indDef(.ret$MODEL$INDIVIDUAL$DEFINITION,
+                                                    .indCategories(.ret$MODEL))
       }
     }
     if (!is.null(.ret$MODEL$LONGITUDINAL)) {

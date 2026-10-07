@@ -102,7 +102,7 @@ kitImportMetrics <- function(m) {
 
 ## Solve the imported model with the theta values and `etas` (a data
 ## frame with id and the eta columns, or NULL for zero random effects)
-kitImportSolve <- function(m, etas, case) {
+kitImportSolve <- function(m, etas, case, mix=NULL) {
   ## m$omega is a list by level with inter-occasion variability
   .ini <- m$iniDf
   .ini <- .ini[!is.na(.ini$neta1) & .ini$neta1 == .ini$neta2, ]
@@ -111,6 +111,8 @@ kitImportSolve <- function(m, etas, case) {
   .theta <- utils::getFromNamespace(".addRxerr", "monolix2rx")(m, m$theta)
   .d <- m$monolixData
   if (is.null(.d)) stop("monolix2rx did not read the data", call.=FALSE)
+  ## each subject's true mixture class
+  if (!is.null(mix)) .d$mixest <- mix$mixest[match(as.character(.d$id), mix$id)]
   if (is.null(etas) || nrow(.ini) == 0L) {
     .p <- c(.theta, stats::setNames(rep(0, nrow(.ini)), .ini$name))
   } else {
@@ -166,10 +168,10 @@ kitImportSolve <- function(m, etas, case) {
 kitDryPred <- function(m, sim, case) {
   .t <- sim$pred
   .t$key <- .kitKey(as.character(.t$ID), .t$TIME)
-  .pop <- kitImportSolve(m, NULL, case)
+  .pop <- kitImportSolve(m, NULL, case, sim$mix)
   .cmp <- merge(.t, stats::setNames(.pop[, 1:2], c("key", "mlxPred")), by="key")
   .nEta <- sum(!is.na(m$iniDf$neta1))
-  .ind <- if (!is.null(sim$etas) && .nEta > 0L) kitImportSolve(m, sim$etas, case)
+  .ind <- if (!is.null(sim$etas) && .nEta > 0L) kitImportSolve(m, sim$etas, case, sim$mix)
   .cmp$mlxIpred <- if (is.null(.ind)) NA_real_ else .ind$mlx[match(.cmp$key, .ind$key)]
   ## the truth has etas the import lost: IPRED cannot match
   .lost <- !is.null(sim$etas) && is.null(.ind)

@@ -3,7 +3,8 @@
 kitVariant("pkmodel-oral-1cmt", "bsmm-latent-cov-cl",
            "between-subject mixture as a latent categorical covariate (P(lcat=1)=plcat1) on Cl",
            tags=c("mixture", "bsmm", "smoke"),
-           known="latent covariates (BSMM) are not translated; target is mix()",
+           mixest="POP",
+           knownRun="IPRED needs Monolix's estimated class per subject (not read yet)",
            sim=function() {
              ini({
                ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3; beta_Cl_lcat_2 <- 1
