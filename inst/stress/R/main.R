@@ -10,7 +10,7 @@
 #' @param est estimation preset: "full" or "fixed"
 #' @param nSub subjects per case
 #' @param seed base seed (each case derives a stable seed from its name)
-#' @param jobs cases run in parallel (forked; 1 on Windows)
+#' @param jobs cases run in parallel (socket workers)
 #' @param out output directory
 #' @param timeout Monolix timeout per case (seconds)
 #' @return data.frame with one row per case (invisibly); summary.md and

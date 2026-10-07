@@ -110,7 +110,7 @@ stressBundle <- function(out) {
 #' @param est estimation preset: "full" (SAEM, FIM, log-likelihood) or
 #'   "fixed" (population parameters fixed at the truth; faster)
 #' @param nSub subjects per case
-#' @param jobs cases run in parallel (forked; 1 on Windows)
+#' @param jobs cases run in parallel (socket workers)
 #' @param timeout Monolix timeout per case (seconds; not on Windows)
 #' @param bundle zip the output directory
 #' @return data frame of the results (invisibly) with the attributes `out`

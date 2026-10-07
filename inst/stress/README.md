@@ -27,7 +27,11 @@ are in [PLAN.md](PLAN.md).
 
 ## Quick start: the kit for a Monolix machine
 
-1. In a fresh R session, load the monolix2rx version to test and the kit:
+Everything runs from the R console, for example in RStudio; no terminal
+is needed.
+
+1. In a fresh R session (in RStudio: Session -> Restart R), load the
+   monolix2rx version to test and the kit:
 
    ```r
    devtools::load_all("path/to/monolix2rx")
@@ -61,7 +65,8 @@ are in [PLAN.md](PLAN.md).
 
 `stressKit()` arguments: `monolix=`, `modes=` (`"translate"` and/or
 `"run"`), `cases=` (a regular expression), `tags=`, `est=` (`"full"` or
-`"fixed"`), `nSub=`, `jobs=`, `timeout=`, `out=`, `bundle=`.
+`"fixed"`), `nSub=`, `jobs=` (cases at once, in background R sessions;
+safe in RStudio and on Windows), `timeout=`, `out=`, `bundle=`.
 `stressList()` lists the cases.
 
 ### Without Monolix

@@ -245,30 +245,58 @@ kitRunCase <- function(case, outDir, mode="dry", nSub=20L, seed=42L,
   NA_character_
 }
 
+## one case; errors become an ERROR row
+.kitRunOne <- function(case, outDir, mode, nSub, seed, est, cmd, timeout) {
+  .t0 <- Sys.time()
+  .r <- tryCatch(kitRunCase(case, outDir, mode=mode, nSub=nSub,
+                            seed=seed, est=est, cmd=cmd, timeout=timeout),
+                 error=function(e) {
+                   data.frame(case=case$name, file=case$file,
+                              tags=paste(case$tags, collapse=","),
+                              known=!is.null(case$known), mode=mode,
+                              status="ERROR", note=conditionMessage(e))
+                 })
+  message(sprintf("[%-5s] %-32s %6.1fs %s", .r$status, case$name,
+                  as.numeric(Sys.time() - .t0, units="secs"),
+                  if (!is.null(.r$note) && !is.na(.r$note)) .r$note else ""))
+  .r
+}
+
+## Socket workers, not forks: forking is unsafe in RStudio and missing on
+## Windows.  Each worker loads the same monolix2rx and the kit.
+.kitCluster <- function(jobs) {
+  .cl <- parallel::makePSOCKcluster(jobs)
+  .ok <- try(parallel::clusterCall(.cl, function(pkgDir, stress) {
+    if (nzchar(pkgDir)) pkgload::load_all(pkgDir, quiet=TRUE) else library(monolix2rx)
+    suppressMessages(source(stress))
+    TRUE
+  }, Sys.getenv("MLXKIT_PKGDIR"), file.path(.kitDir, "stress.R")), silent=TRUE)
+  if (inherits(.ok, "try-error")) {
+    parallel::stopCluster(.cl)
+    stop("could not start the kit on the parallel workers: ",
+         attr(.ok, "condition")$message, call.=FALSE)
+  }
+  .cl
+}
+
 kitRun <- function(cases, outDir, mode="dry", nSub=20L, seed=42L,
                    est="full", cmd=NULL, jobs=1L, timeout=3600) {
   dir.create(outDir, recursive=TRUE, showWarnings=FALSE)
-  .one <- function(case) {
-    .t0 <- Sys.time()
-    .r <- tryCatch(kitRunCase(case, outDir, mode=mode, nSub=nSub,
-                              seed=seed, est=est, cmd=cmd, timeout=timeout),
-                   error=function(e) {
-                     data.frame(case=case$name, file=case$file,
-                                tags=paste(case$tags, collapse=","),
-                                known=!is.null(case$known), mode=mode,
-                                status="ERROR", note=conditionMessage(e))
-                   })
-    message(sprintf("[%-5s] %-32s %6.1fs %s", .r$status, case$name,
-                    as.numeric(Sys.time() - .t0, units="secs"),
-                    if (!is.null(.r$note) && !is.na(.r$note)) .r$note else ""))
-    .r
-  }
-  .l <- if (jobs > 1L && .Platform$OS.type == "unix") {
-    parallel::mclapply(cases, .one, mc.cores=jobs, mc.preschedule=FALSE)
+  .args <- list(outDir=outDir, mode=mode, nSub=nSub, seed=seed, est=est,
+                cmd=cmd, timeout=timeout)
+  .l <- if (jobs > 1L && length(cases) > 1L) {
+    .cl <- .kitCluster(min(jobs, length(cases)))
+    on.exit(parallel::stopCluster(.cl), add=TRUE)
+    .f <- function(case, args) {
+      do.call(get(".kitRunOne", envir=as.environment("monolix2rx-stress")),
+              c(list(case), args))
+    }
+    environment(.f) <- globalenv()
+    parallel::clusterApplyLB(.cl, cases, .f, args=.args)
   } else {
-    lapply(cases, .one)
+    lapply(cases, function(case) do.call(.kitRunOne, c(list(case), .args)))
   }
-  ## a crashed fork gives NULL or a try-error instead of a result row
+  ## a crashed worker gives NULL or a try-error instead of a result row
   .l <- lapply(seq_along(.l), function(i) {
     .x <- .l[[i]]
     if (is.data.frame(.x)) return(.x)
