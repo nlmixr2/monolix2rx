@@ -85,6 +85,27 @@ test_that(".getNbdoses() reads nbdoses from the project (also from the decompres
   assign("mlxtran", .mlx, envir=.ui)
   expect_equal(.getNbdoses(.ui), 10L)
   expect_equal(.getNbdoses(NULL), 7L)
+  # rxode2 needs minSS >= 5 and maxSS >= 7
+  expect_equal(.getSsLimits(.ui), c(minSS=10L, maxSS=11L))
+  .mlx$DATAFILE$CONTENT$CONTENT$nbdoses <- 3L
+  assign("mlxtran", .mlx, envir=.ui)
+  expect_equal(.getSsLimits(.ui), c(minSS=5L, maxSS=7L))
+  class(.ui) <- class(f)
+  s <- .rxSolve(.ui, nStud=1)
+  expect_equal(s$env$.args$minSS, 5L)
+  expect_equal(s$env$.args$maxSS, 7L)
+})
+
+test_that(".getStiff() reads odeType from the project (also from the decompressed ui)", {
+  skip_on_cran()
+  f <- .monolix2rx(system.file("theo/theophylline_project.mlxtran", package="monolix2rx"))
+  expect_false(.getStiff(f))
+  .mlx <- f$mlxtran
+  .mlx$MODEL$LONGITUDINAL$EQUATION$odeType <- "stiff"
+  expect_true(.getStiff(.mlx))
+  .ui <- rxode2::rxUiDecompress(f)
+  assign("mlxtran", .mlx, envir=.ui)
+  expect_true(.getStiff(.ui))
 })
 
 test_that("predRtol is relative to the Monolix pred", {

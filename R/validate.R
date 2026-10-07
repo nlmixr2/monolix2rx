@@ -1,6 +1,6 @@
 #' Get the number of doses for steady state for monolix2rx
 #'
-#' @param x monolix2rx object
+#' @param x monolix2rx object, its parsed project or its rxUi
 #' @return Number of doses for monolix2rx object
 #' @export
 #' @keywords internal
@@ -20,18 +20,37 @@
   }
   7L
 }
+#' rxode2 steady-state limits for Monolix's number of steady-state doses
+#'
+#' With `ssAtol`/`ssRtol` of 100 rxode2 stops at `minSS` doses, so
+#' `maxSS` can be raised to rxode2's floor without changing the solve;
+#' `minSS` below rxode2's floor of 5 cannot be reproduced.
+#'
+#' @inheritParams .getNbdoses
+#' @return named integer vector `minSS`, `maxSS`
+#' @export
+#' @keywords internal
+#' @author Matthew L. Fidler
+.getSsLimits <- function(x) {
+  .nss <- .getNbdoses(x)
+  .min <- max(.nss, 5L)
+  if (.min != .nss) {
+    .minfo(paste0("Monolix uses ", .nss, " steady-state doses; rxode2 needs at least 5, so minSS=5"))
+  }
+  c(minSS=.min, maxSS=max(.nss + 1L, 7L))
+}
 #' Get if the model object is stiff
 #'
-#' @param x monolix2rx object
+#' @param x monolix2rx object, its parsed project or its rxUi
 #' @return boolean indicating if the object is a stiff system (as indicated by monolix)
 #' @export
 #' @keywords internal
 #' @author Matthew L. Fidler
 .getStiff <- function(x) {
-  if (inherits(x, "monolix2rx")) {
+  if (inherits(x, c("monolix2rx", "rxUi"))) {
     x <- x$mlxtran
   }
-  if (inherits(x, "mlxtran")) {
+  if (inherits(x, c("monolix2rxMlxtran", "mlxtran"))) {
     x <- x$MODEL$LONGITUDINAL$EQUATION
   }
   if (inherits(x, "monolix2rxEquation")) {
@@ -104,7 +123,7 @@
 .validateModel <- function(ui, ci=0.95, sigdig=3) {
   # default for Monolix: nbSSDoses=7
   .ui <- rxode2::rxUiDecompress(ui)
-  .nss <- .getNbdoses(.ui)
+  .ss <- .getSsLimits(.ui)
   .tol <- .getRtolAtol(.ui)
   .method <- .getMethod(.ui)
   .pop <- .parameterThetaEta(.ui, pop=TRUE)
@@ -126,8 +145,8 @@
                                        covsInterpolation="locf",
                                        #addlKeepsCov=TRUE, addlDropSs=TRUE, ssAtDoseTime=TRUE,
                                        #safeZero=TRUE, ss2cancelAllPending=TRUE,
-                                       maxSS=.nss + 1,
-                                       minSS=.nss,
+                                       maxSS=.ss[["maxSS"]],
+                                       minSS=.ss[["minSS"]],
                                        atol=.tol, rtol=.tol,
                                        ssAtol=100, ssRtol=100, omega=NULL,
                                        addDosing = FALSE))
@@ -139,8 +158,8 @@
                                       covsInterpolation="locf",
                                       #addlKeepsCov=TRUE, addlDropSs=TRUE, ssAtDoseTime=TRUE,
                                       #safeZero=TRUE, ss2cancelAllPending=TRUE,
-                                      maxSS=.nss + 1,
-                                      minSS=.nss,
+                                      maxSS=.ss[["maxSS"]],
+                                      minSS=.ss[["minSS"]],
                                       atol=.tol, rtol=.tol,
                                       ssAtol=100, ssRtol=100, omega=NULL,
                                       addDosing = FALSE), silent=TRUE)

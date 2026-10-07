@@ -199,10 +199,10 @@
       ssAtol <- 100
       .minfo(paste0("Since Monolix doesn't use ssRtol, set ssAtol=", ssAtol))
     }
-    .nss <- .getNbdoses(object)
     if (missing(maxSS) && missing(minSS)) {
-      maxSS <- .nss + 1
-      minSS <- .nss
+      .ss <- .getSsLimits(object)
+      maxSS <- .ss[["maxSS"]]
+      minSS <- .ss[["minSS"]]
       .minfo(paste0("Since Monolix uses a set number of doses for steady state use maxSS=", maxSS,
                     ", minSS=", minSS))
     }

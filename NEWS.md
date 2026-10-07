@@ -86,13 +86,16 @@
   parser state is intentionally not mutex-protected, consistent with R's
   single-threaded execution model.
 
-* The steady-state dose count (`nbdoses=` in `[CONTENT]`) is now used by
-  the validation and `rxSolve()`; `.getNbdoses()` did not recognize the
-  parsed project and always returned 7 (found by the stress kit).
+* Fixed `.getNbdoses()` and `.getStiff()`, which did not recognize the
+  parsed project and always returned 7 and `FALSE`: the validation,
+  `rxSolve()` and babelmixr2 (which calls both) now use the project's
+  `nbdoses=` and `odeType=`.  The new `.getSsLimits()` gives the matching
+  `minSS`/`maxSS`, raised to rxode2's floor (5 and 7) when `nbdoses` is
+  smaller.
 
-* `predRtol` (and the pred line of the validation) is now relative to
-  Monolix's `pred` instead of its `ipred`; the iwres line of the
-  validation now reports the iwres median, not the pred one.
+* Fixed `predRtol` (and the pred line of the validation), which was
+  relative to Monolix's `ipred` instead of its `pred`; the iwres line of
+  the validation reported the pred median.
 
 # monolix2rx 0.0.6
 

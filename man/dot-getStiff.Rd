@@ -7,7 +7,7 @@
 .getStiff(x)
 }
 \arguments{
-\item{x}{monolix2rx object}
+\item{x}{monolix2rx object, its parsed project or its rxUi}
 }
 \value{
 boolean indicating if the object is a stiff system (as indicated by monolix)
