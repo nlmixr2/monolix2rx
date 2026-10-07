@@ -94,9 +94,9 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
-monolix2rx parses `delay()` but refuses it (`src/equation.c:240`).
-rxode2 >= 5.1.7 has `delay(state, T)` with Monolix semantics (constant
-initial-condition history).
+monolix2rx translates `delay()` to rxode2's `delay(state, T)` (rxode2 >=
+5.1.7), solved with `dop853`.  The history is the initial condition in
+Monolix, but in rxode2 5.1.8 only for a literal `x(0)` (see the findings).
 
 | case | covers |
 |---|---|
