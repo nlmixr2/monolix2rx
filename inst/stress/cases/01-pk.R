@@ -23,58 +23,9 @@
           mlxObs(.id, pkTimes(48), cmt=2))
 }
 
-## one endpoint CONC with a combined1 error; Monolix sd = sqrt(omega)
-.oralProject <- "<DATAFILE>
-
-[FILEINFO]
-file = '{{DATA}}'
-delimiter = comma
-header = {{{HEADER}}}
-
-[CONTENT]
-ID = {use=identifier}
-TIME = {use=time}
-AMT = {use=amount}
-DV = {use=observation, name=CONC, type=continuous}
-
-<MODEL>
-
-[INDIVIDUAL]
-input = {ka_pop, omega_ka, V_pop, omega_V, Cl_pop, omega_Cl}
-
-DEFINITION:
-ka = {distribution=logNormal, typical=ka_pop, sd=omega_ka}
-V = {distribution=logNormal, typical=V_pop, sd=omega_V}
-Cl = {distribution=logNormal, typical=Cl_pop, sd=omega_Cl}
-
-[LONGITUDINAL]
-input = {a, b}
-
-file = '{{MODEL}}'
-
-DEFINITION:
-CONC = {distribution=normal, prediction=Cc, errorModel=combined1(a, b)}
-
-<FIT>
-data = CONC
-model = CONC
-
-<PARAMETER>
-ka_pop = {value=1.2, method=MLE}
-V_pop = {value=30, method=MLE}
-Cl_pop = {value=3, method=MLE}
-omega_ka = {value=0.3, method=MLE}
-omega_V = {value=0.2, method=MLE}
-omega_Cl = {value=0.3, method=MLE}
-a = {value=0.05, method=MLE}
-b = {value=0.1, method=MLE}
-
-<MONOLIX>
-
-{{TASKS}}
-
-{{SETTINGS}}
-"
+## one endpoint CONC with a combined1 error
+.oralProject <- .mlxProject(list(ka=.mlxPar(1.2, 0.3), V=.mlxPar(30, 0.2),
+                                 Cl=.mlxPar(3, 0.3)))
 
 kitCase(
   name="pkmodel-oral-1cmt",
@@ -114,3 +65,97 @@ Cc = Ac/V
 OUTPUT:
 output = Cc
 ")
+
+## IV bolus, two compartments
+kitCase(
+  name="pkmodel-iv-2cmt",
+  covers="pkmodel(V, Cl, Q2=Q, V2) two-compartment IV bolus with clearances",
+  tags=c("pk", "pkmodel"),
+  known="pkmodel() Q2/V2/Q3/V3 are not in the equation.g grammar (only k12/k21/k13/k31)",
+  sim=function() {
+    ini({
+      V_pop <- 10; Cl_pop <- 2; Q_pop <- 4; V2_pop <- 40
+      omega_V ~ 0.04; omega_Cl ~ 0.09; omega_Q ~ 0.04; omega_V2 ~ 0.04
+      a <- 0.05; b <- 0.1
+    })
+    model({
+      V <- V_pop * exp(omega_V)
+      Cl <- Cl_pop * exp(omega_Cl)
+      Q <- Q_pop * exp(omega_Q)
+      V2 <- V2_pop * exp(omega_V2)
+      d/dt(central) <- -Cl / V * central - Q / V * central + Q / V2 * periph
+      d/dt(periph) <- Q / V * central - Q / V2 * periph
+      Cc <- central / V
+      Cc ~ add(a) + prop(b) + combined1()
+    })
+  },
+  data=function(nSub) {
+    .id <- seq_len(nSub)
+    mlxBind(mlxDose(.id, 0, amt=100, cmt=1),
+            mlxObs(.id, c(0.1, pkTimes(72)), cmt=1))
+  },
+  model="DESCRIPTION: {{PROBLEM}}
+
+[LONGITUDINAL]
+input = {V, Cl, Q, V2}
+
+EQUATION:
+Cc = pkmodel(V, Cl, Q2=Q, V2)
+
+OUTPUT:
+output = Cc
+",
+  mlxtran=.mlxProject(list(V=.mlxPar(10, 0.2), Cl=.mlxPar(2, 0.3),
+                           Q=.mlxPar(4, 0.2), V2=.mlxPar(40, 0.2))))
+
+kitVariant("pkmodel-iv-2cmt", "pkmodel-iv-2cmt-k",
+           "pkmodel(V, Cl, k12, k21) two-compartment IV bolus, rates computed in EQUATION:",
+           known="pkmodel() ODEs are emitted before the EQUATION: lines that precede pkmodel(), so k12/k21 are used before they are defined",
+           model="DESCRIPTION: {{PROBLEM}}
+
+[LONGITUDINAL]
+input = {V, Cl, Q, V2}
+
+EQUATION:
+k12 = Q/V
+k21 = Q/V2
+Cc = pkmodel(V, Cl, k12, k21)
+
+OUTPUT:
+output = Cc
+")
+
+kitVariant("pkmodel-oral-1cmt", "pkmodel-oral-tlag",
+           "pkmodel(Tlag, ka, V, Cl) with a lag time with between-subject variability",
+           tags=c("pk", "pkmodel"),
+           sim=function() {
+             ini({
+               Tlag_pop <- 0.5; ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3
+               omega_Tlag ~ 0.04; omega_ka ~ 0.09; omega_V ~ 0.04; omega_Cl ~ 0.09
+               a <- 0.05; b <- 0.1
+             })
+             model({
+               Tlag <- Tlag_pop * exp(omega_Tlag)
+               ka <- ka_pop * exp(omega_ka)
+               V <- V_pop * exp(omega_V)
+               Cl <- Cl_pop * exp(omega_Cl)
+               d/dt(depot) <- -ka * depot
+               lag(depot) <- Tlag
+               d/dt(central) <- ka * depot - Cl / V * central
+               Cc <- central / V
+               Cc ~ add(a) + prop(b) + combined1()
+             })
+           },
+           model="DESCRIPTION: {{PROBLEM}}
+
+[LONGITUDINAL]
+input = {Tlag, ka, V, Cl}
+
+EQUATION:
+Cc = pkmodel(Tlag, ka, V, Cl)
+
+OUTPUT:
+output = Cc
+",
+           mlxtran=.mlxProject(list(Tlag=.mlxPar(0.5, 0.2), ka=.mlxPar(1.2, 0.3),
+                                    V=.mlxPar(30, 0.2), Cl=.mlxPar(3, 0.3))))

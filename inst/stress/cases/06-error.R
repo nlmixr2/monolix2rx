@@ -1,12 +1,8 @@
 ## Residual error models on the oral one-compartment model of 01-pk.R
 
-## .oralProject with another error model and residual parameter values
-.errProject <- function(err, input, values) {
-  .p <- sub("errorModel=combined1(a, b)", paste0("errorModel=", err), .oralProject, fixed=TRUE)
-  .p <- sub("[LONGITUDINAL]\ninput = {a, b}",
-            paste0("[LONGITUDINAL]\ninput = {", paste(input, collapse=", "), "}"), .p, fixed=TRUE)
-  sub("a = {value=0.05, method=MLE}\nb = {value=0.1, method=MLE}\n",
-      paste0(paste0(input, " = {value=", values, ", method=MLE}\n"), collapse=""), .p, fixed=TRUE)
+.errProject <- function(err, errPar) {
+  .mlxProject(list(ka=.mlxPar(1.2, 0.3), V=.mlxPar(30, 0.2), Cl=.mlxPar(3, 0.3)),
+              err=err, errPar=errPar)
 }
 
 kitVariant("pkmodel-oral-1cmt", "err-constant", "constant(a) error",
@@ -27,7 +23,7 @@ kitVariant("pkmodel-oral-1cmt", "err-constant", "constant(a) error",
                Cc ~ add(a)
              })
            },
-           mlxtran=.errProject("constant(a)", "a", 0.2))
+           mlxtran=.errProject("constant(a)", c(a=0.2)))
 
 kitVariant("pkmodel-oral-1cmt", "err-proportional", "proportional(b) error",
            tags=c("error"),
@@ -47,7 +43,7 @@ kitVariant("pkmodel-oral-1cmt", "err-proportional", "proportional(b) error",
                Cc ~ prop(b)
              })
            },
-           mlxtran=.errProject("proportional(b)", "b", 0.15))
+           mlxtran=.errProject("proportional(b)", c(b=0.15)))
 
 kitVariant("pkmodel-oral-1cmt", "err-combined2", "combined2(a, b) error",
            tags=c("error"),
@@ -67,4 +63,4 @@ kitVariant("pkmodel-oral-1cmt", "err-combined2", "combined2(a, b) error",
                Cc ~ add(a) + prop(b) + combined2()
              })
            },
-           mlxtran=.errProject("combined2(a, b)", c("a", "b"), c(0.05, 0.1)))
+           mlxtran=.errProject("combined2(a, b)", c(a=0.05, b=0.1)))
