@@ -50,6 +50,19 @@
                        ", cmt=1",
                        ")"))
   }
+  # Q2/V2 (Q3/V3) are rates relative to the central volume
+  .v <- function(n) {
+    if (.pkmodel[n] == "") return(n)
+    paste0("(", .pkmodel[n], ")")
+  }
+  for (.i in 2:3) {
+    .q <- paste0("Q", .i)
+    .vp <- paste0("V", .i)
+    if (!is.na(.pkmodel[.q]) && !is.na(.pkmodel[.vp])) {
+      .pkmodel[paste0("k1", .i)] <- paste0(.v(.q), "/", .v("V"))
+      .pkmodel[paste0("k", .i, "1")] <- paste0(.v(.q), "/", .v(.vp))
+    }
+  }
   if (!is.na(.pkmodel["k12"]) && !is.na(.pkmodel["k21"])) {
     .macro <- c(.macro,
                 paste0("peripheral(",

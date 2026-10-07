@@ -5,9 +5,10 @@ statement_list : statement_list statement | statement ;
 
 odeType: 'odeType' '=' ('stiff' | 'nonStiff' );
 
+// Q2/V2/Q3/V3: peripheral clearances and volumes (instead of k12/k21/k13/k31)
 pkpars0: 'V' | 'Tk0' | 'ka' | 'Ktr' | 'Mtt' | 'Tlag' | 'p'
     |  'k' | 'Cl' | 'Vm' | 'Km' | 'k12' | 'k21' |  'k13'
-    | 'k31';
+    | 'k31' | 'Q2' | 'V2' | 'Q3' | 'V3';
 
 pkparsE0:  pkpars0 | 'ke0';
 

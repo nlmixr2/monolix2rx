@@ -86,6 +86,9 @@
   parser state is intentionally not mutex-protected, consistent with R's
   single-threaded execution model.
 
+* `pkmodel()` accepts the peripheral clearances and volumes `Q2`, `V2`,
+  `Q3` and `V3` (as `k12 = Q2/V`, `k21 = Q2/V2`, ...).
+
 * Fixed `.getNbdoses()` and `.getStiff()`, which did not recognize the
   parsed project and always returned 7 and `FALSE`: the validation and
   `rxSolve()` now use the project's `nbdoses=` and `odeType=`.  The new

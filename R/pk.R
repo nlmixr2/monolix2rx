@@ -24,6 +24,10 @@
                             k21=NA_character_,
                             k13=NA_character_,
                             k31=NA_character_,
+                            Q2=NA_character_,
+                            V2=NA_character_,
+                            Q3=NA_character_,
+                            V3=NA_character_,
                             ke0=NA_character_)
 
     .monolix2rx$admd <- data.frame(adm=integer(0), admd=integer(0), cmt=integer(0), target=character(0),
@@ -332,6 +336,16 @@
           !is.na(pkmodel["Km"])) {
       stop("pkmodel defines an elimination constant ('Cl') and cannot also define 'Vm', and/or 'Km'",
            call.=FALSE)
+    }
+  }
+  for (.i in 2:3) {
+    .q <- paste0(c("Q", "V", "k1", "k"), .i, c("", "", "", "1"))
+    if (is.na(pkmodel[.q[1]]) != is.na(pkmodel[.q[2]])) {
+      stop("pkmodel needs both '", .q[1], "' and '", .q[2], "'", call.=FALSE)
+    }
+    if (!is.na(pkmodel[.q[1]]) && (!is.na(pkmodel[.q[3]]) || !is.na(pkmodel[.q[4]]))) {
+      stop("pkmodel defines '", .q[1], "'/'", .q[2], "' and cannot also define '",
+           .q[3], "'/'", .q[4], "'", call.=FALSE)
     }
   }
   if (!is.na(Ce) && is.na(pkmodel["ke0"])) {

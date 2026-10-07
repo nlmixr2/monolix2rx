@@ -71,7 +71,6 @@ kitCase(
   name="pkmodel-iv-2cmt",
   covers="pkmodel(V, Cl, Q2=Q, V2) two-compartment IV bolus with clearances",
   tags=c("pk", "pkmodel"),
-  known="pkmodel() Q2/V2/Q3/V3 are not in the equation.g grammar (only k12/k21/k13/k31)",
   sim=function() {
     ini({
       V_pop <- 10; Cl_pop <- 2; Q_pop <- 4; V2_pop <- 40
