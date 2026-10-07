@@ -66,7 +66,6 @@ kitCase(
   covers="steady-state dose (use=steadystate, nbdoses=10) with II, then a second regimen",
   tags=c("dosing", "ss"),
   nbSSDoses=10L,
-  known=".getNbdoses() tests for class mlxtran, not monolix2rxMlxtran, so nbdoses is always 7",
   sim=function() {
     ini({
       V_pop <- 30; Cl_pop <- 0.3

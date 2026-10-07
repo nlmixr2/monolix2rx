@@ -86,6 +86,14 @@
   parser state is intentionally not mutex-protected, consistent with R's
   single-threaded execution model.
 
+* The steady-state dose count (`nbdoses=` in `[CONTENT]`) is now used by
+  the validation and `rxSolve()`; `.getNbdoses()` did not recognize the
+  parsed project and always returned 7 (found by the stress kit).
+
+* `predRtol` (and the pred line of the validation) is now relative to
+  Monolix's `pred` instead of its `ipred`; the iwres line of the
+  validation now reports the iwres median, not the pred one.
+
 # monolix2rx 0.0.6
 
 * Updated to add types for rstudio completion

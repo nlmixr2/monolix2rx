@@ -73,3 +73,24 @@ test_that("rxSolve falls back to model-level dfObs/thetaMat when meta lacks them
   expect_warning(try(suppressMessages(rxSolve(f, nStud=2)), silent=TRUE),
                  "simulating without parameter uncertainty")
 })
+
+test_that(".getNbdoses() reads nbdoses from the project (also from the decompressed ui)", {
+  skip_on_cran()
+  f <- .monolix2rx(system.file("theo/theophylline_project.mlxtran", package="monolix2rx"))
+  expect_equal(.getNbdoses(f), 7L)
+  .mlx <- f$mlxtran
+  .mlx$DATAFILE$CONTENT$CONTENT$nbdoses <- 10L
+  expect_equal(.getNbdoses(.mlx), 10L)
+  .ui <- rxode2::rxUiDecompress(f)
+  assign("mlxtran", .mlx, envir=.ui)
+  expect_equal(.getNbdoses(.ui), 10L)
+  expect_equal(.getNbdoses(NULL), 7L)
+})
+
+test_that("predRtol is relative to the Monolix pred", {
+  skip_on_cran()
+  f <- .monolix2rx(system.file("theo/theophylline_project.mlxtran", package="monolix2rx"))
+  .p <- f$predCompare
+  expect_equal(unname(f$predRtol),
+               stats::median(abs((.p$pred - .p$monolixPred) / .p$monolixPred), na.rm=TRUE))
+})

@@ -6,14 +6,17 @@
 #' @keywords internal
 #' @author Matthew L. Fidler
 .getNbdoses <- function(x) {
-  if (inherits(x, "monolix2rx")) {
+  # .validateModel() passes the decompressed rxUi (no monolix2rx class)
+  if (inherits(x, c("monolix2rx", "rxUi"))) {
     x <- x$mlxtran
   }
-  if (inherits(x, "mlxtran")) {
+  # the parsed project is a monolix2rxMlxtran
+  if (inherits(x, c("monolix2rxMlxtran", "mlxtran"))) {
     x <- x$DATAFILE$CONTENT$CONTENT
   }
-  if (inherits(x, "monolix2rxContent")) {
-    return(x$nbdoses)
+  if (inherits(x, "monolix2rxContent") &&
+        length(x$nbdoses) == 1L && !is.na(x$nbdoses)) {
+    return(as.integer(x$nbdoses))
   }
   7L
 }
@@ -182,7 +185,7 @@
     .q <- c(0, .ci, 0.5, 1 - .ci, 1)
     .qi <- stats::quantile(with(.both, 100*abs((ipred-monolixIpred)/monolixIpred)), .q, na.rm=TRUE)
     .qai <- stats::quantile(with(.both, abs(ipred-monolixIpred)), .q, na.rm=TRUE)
-    .qp <- stats::quantile(with(.both, 100*abs((pred-monolixPred)/monolixIpred)), .q, na.rm=TRUE)
+    .qp <- stats::quantile(with(.both, 100*abs((pred-monolixPred)/monolixPred)), .q, na.rm=TRUE)
     .qap <- stats::quantile(with(.both, abs(pred-monolixPred)), .q, na.rm=TRUE)
 
     .qw <- stats::quantile(with(.both, 100*abs((iwres-monolixIwres)/monolixIwres)), .q, na.rm=TRUE)
@@ -216,11 +219,11 @@
                      signif(.qap[2], .sigdig), ", ",
                      signif(.qap[4], .sigdig), "); atol=",
                      signif(.qap[3], .sigdig)),
-              paste0("iwres relative difference compared to Monolix iwres: ", round(.qp[3], 2),
+              paste0("iwres relative difference compared to Monolix iwres: ", round(.qw[3], 2),
                      "%; ", .ci0 * 100,"% percentile: (",
                      round(.qw[2], 2), "%,", round(.qw[4], 2), "%); rtol=",
                      signif(.qw[3] / 100, digits=.sigdig)),
-              paste0("iwres absolute difference compared to Monolix pred: ", .ci0 * 100,
+              paste0("iwres absolute difference compared to Monolix iwres: ", .ci0 * 100,
                      "% percentile: (",
                      signif(.qaw[2], .sigdig), ", ",
                      signif(.qaw[4], .sigdig), "); atol=",
