@@ -33,10 +33,13 @@ kitSimulate <- function(case, nSub, seed=42L) {
   .d$ROWID <- seq_len(nrow(.d))
   .ui <- suppressMessages(rxode2::assertRxUi(case$sim))
   .s <- .kitSolve(.ui, .d, case, returnType="rxSolve")
-  .eta <- rownames(.ui$omega)
+  ## ui$omega drops the etas when there is inter-occasion variability
+  .ini <- .ui$iniDf
+  .par <- as.data.frame(.s$params)
+  .eta <- intersect(.ini$name[!is.na(.ini$neta1) & .ini$neta1 == .ini$neta2], names(.par))
   .etas <- NULL
   if (length(.eta) > 0L) {
-    .etas <- as.data.frame(.s$params)[, c("id", .eta), drop=FALSE]
+    .etas <- .par[, c("id", .eta), drop=FALSE]
     .etas$id <- as.character(.etas$id)
   }
   .s <- as.data.frame(.s)

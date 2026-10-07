@@ -203,6 +203,21 @@ per subject-occasion; `dfSub` counts subjects.
      occasion columns).  Additive only to babelmixr2-facing fields.
 4. **Full case list**; record results per Monolix version.
 
+## Importer findings (translate mode)
+
+Each one is a `known=` case until its fix lands (phase 2.5):
+
+- `pkmodel()` does not accept `Q2`/`V2`/`Q3`/`V3` (`inst/equation.g`
+  `pkpars0`); `.pkmodel2macro()` would emit
+  `peripheral(k12=Q2/V, k21=Q2/V2)` (`pkmodel-iv-2cmt`).
+- The `pkmodel()` ODEs are written before the `EQUATION:` lines that
+  precede `pkmodel()`, so `k12 = Q/V; Cc = pkmodel(V, Cl, k12, k21)` uses
+  `k12` before it is defined (`pkmodel-iv-2cmt-k`).
+- A latent covariate (`P(lcat=1)=plcat1`) is translated as a numeric
+  covariate (`beta_Cl_lcat_2*lcat`, not `(lcat == 2)`), and `plcat1` is
+  dropped (`bsmm-latent-cov-cl`).
+- IOV: the `id*occ` eta becomes `gamma_Cl ~ 0.04 | occ2` (`iov-cl-basic`).
+
 ## Risks
 
 - Real rxode2/Monolix differences (dose/observation ties, regressor
