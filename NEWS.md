@@ -94,6 +94,10 @@
   there (`k12 = Q/V`) was used before it was defined.  Lines between
   macros in a `PK:` block are no longer dropped.
 
+* Fixed the inter-occasion variability level name: `varlevel={id, id*occ}`
+  gave `gamma ~ ... | occ2`, but the data's occasion column is `occ`
+  (`id*occ*occ` is now `occ2`).
+
 * Fixed `.getNbdoses()` and `.getStiff()`, which did not recognize the
   parsed project and always returned 7 and `FALSE`: the validation and
   `rxSolve()` now use the project's `nbdoses=` and `odeType=`.  The new

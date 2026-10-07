@@ -3,7 +3,7 @@
 kitVariant("pkmodel-oral-1cmt", "iov-cl-basic",
            "use=occasion; Cl with varlevel={id, id*occ}, two occasions",
            tags=c("iov", "smoke"),
-           known="IOV: the id*occ eta is renamed occ2 while the data column is occ, and validation ignores per-occasion parameters",
+           knownRun="Monolix writes individual parameters per occasion; monolix2rx's validation expects one row per subject (to confirm on Monolix)",
            sim=function() {
              ini({
                ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3

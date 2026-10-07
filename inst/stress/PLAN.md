@@ -159,8 +159,8 @@ component's mean/SD; optional `fit` tag: an nlmixr2 focei fit recovers
 Parsed today (`varlevel={id, id*occ}`, `correlation={level=id*occ,...}`);
 three things to check first:
 
-1. `.def2iniRenameOcc()` (`R/def2ini.R:247`) appears to name `id*occ`
-   `occ2` while the data column is `occ`.
+1. Fixed: `.def2iniRenameOcc()` named `id*occ` `occ2` while the data
+   column is `occ`.
 2. Only one occasion column is mapped (`.use1Rx`), so nested occasions
    have nowhere to go.
 3. Monolix writes per-(subject, occasion) individual parameters; the
@@ -219,7 +219,6 @@ Each one is a `known=` case until its fix lands (phase 2.5):
 - `.getNbdoses()` (`R/validate.R`) tests for class `mlxtran`, but the
   parsed project is `monolix2rxMlxtran`, so validation and `rxSolve()`
   always use 7 steady-state doses (`dose-ss`, `nbdoses=10`).
-- IOV: the `id*occ` eta becomes `gamma_Cl ~ 0.04 | occ2` (`iov-cl-basic`).
 
 Notes for later cases:
 
@@ -231,8 +230,6 @@ Notes for later cases:
 
 ## Truth gaps to close with the importer work
 
-- IOV: the truth keeps only per-subject etas; the per-occasion draws (and
-  `ui$omega`, a list by level) are needed before `iov-*` can XPASS.
 - BSMM: IPRED needs the true class (`POP`, kept in `sim.rds`).
 
 ## Risks

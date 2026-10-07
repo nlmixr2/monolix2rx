@@ -103,12 +103,16 @@ kitImportMetrics <- function(m) {
 ## Solve the imported model with the theta values and `etas` (a data
 ## frame with id and the eta columns, or NULL for zero random effects)
 kitImportSolve <- function(m, etas, case) {
-  .eta <- rownames(m$omega)
+  ## m$omega is a list by level with inter-occasion variability
+  .ini <- m$iniDf
+  .ini <- .ini[!is.na(.ini$neta1) & .ini$neta1 == .ini$neta2, ]
+  .iov <- .ini$condition != "id"
+  .eta <- .ini$name[!.iov]
   .theta <- utils::getFromNamespace(".addRxerr", "monolix2rx")(m, m$theta)
   .d <- m$monolixData
   if (is.null(.d)) stop("monolix2rx did not read the data", call.=FALSE)
-  if (is.null(etas) || length(.eta) == 0L) {
-    .p <- c(.theta, stats::setNames(rep(0, length(.eta)), .eta))
+  if (is.null(etas) || nrow(.ini) == 0L) {
+    .p <- c(.theta, stats::setNames(rep(0, nrow(.ini)), .ini$name))
   } else {
     .miss <- setdiff(.eta, names(etas))
     if (length(.miss)) stop("imported etas not in the truth: ",
@@ -118,6 +122,10 @@ kitImportSolve <- function(m, etas, case) {
     .p <- etas[match(.id, etas$id), .eta, drop=FALSE]
     if (anyNA(.p)) stop("subjects without true etas", call.=FALSE)
     for (.n in names(.theta)) .p[[.n]] <- .theta[[.n]]
+    ## each row gets its occasion's eta as a data column
+    for (.i in which(.iov)) {
+      .d[[.ini$name[.i]]] <- .kitIovColumn(.d, etas, .ini$name[.i], .ini$condition[.i])
+    }
   }
   .s <- suppressMessages(do.call(rxode2::rxSolve,
                                  c(list(m$monolixModelIwres, .p, .d,
@@ -125,6 +133,24 @@ kitImportSolve <- function(m, etas, case) {
                                    .kitSolveOpts(.kitNbdoses(m)), case$solve)))
   data.frame(key=.kitKey(as.character(.s$id), .s$time), mlx=.s$ipredSim,
              iwres=if (is.null(.s$iwres)) NA_real_ else .s$iwres)
+}
+
+## The true inter-occasion eta of each data row: the truth's
+## `eta(OCC==k)` columns matched on the imported occasion column's value
+.kitIovColumn <- function(d, etas, eta, level) {
+  .re <- paste0("^", eta, "[(][^=]*==(.*)[)]$")
+  .cols <- grep(.re, names(etas), value=TRUE)
+  if (length(.cols) == 0L) {
+    stop("imported etas not in the truth: ", eta, call.=FALSE)
+  }
+  if (is.null(d[[level]])) {
+    stop("the imported data has no occasion column '", level, "'", call.=FALSE)
+  }
+  .occ <- sub(.re, "\\1", .cols)
+  .row <- match(as.character(d$id), etas$id)
+  .col <- match(as.character(d[[level]]), .occ)
+  if (anyNA(.row) || anyNA(.col)) stop("rows without true occasion etas", call.=FALSE)
+  as.matrix(etas[, .cols, drop=FALSE])[cbind(.row, .col)]
 }
 
 .kitMaxRel <- function(a, b) {
@@ -142,7 +168,8 @@ kitDryPred <- function(m, sim, case) {
   .t$key <- .kitKey(as.character(.t$ID), .t$TIME)
   .pop <- kitImportSolve(m, NULL, case)
   .cmp <- merge(.t, stats::setNames(.pop[, 1:2], c("key", "mlxPred")), by="key")
-  .ind <- if (!is.null(sim$etas) && NROW(m$omega) > 0L) kitImportSolve(m, sim$etas, case)
+  .nEta <- sum(!is.na(m$iniDf$neta1))
+  .ind <- if (!is.null(sim$etas) && .nEta > 0L) kitImportSolve(m, sim$etas, case)
   .cmp$mlxIpred <- if (is.null(.ind)) NA_real_ else .ind$mlx[match(.cmp$key, .ind$key)]
   ## the truth has etas the import lost: IPRED cannot match
   .lost <- !is.null(sim$etas) && is.null(.ind)
@@ -162,12 +189,18 @@ kitDryPred <- function(m, sim, case) {
   max(abs(.a - b) / pmax(1, abs(b)))
 }
 
+## omega entries named "eta1|eta2"; a list (inter-occasion levels) is
+## flattened, so differently named levels still compare
+.kitOmegaFlat <- function(o) {
+  if (is.null(o)) return(numeric(0))
+  if (is.list(o)) return(unlist(lapply(unname(o), .kitOmegaFlat)))
+  .n <- rownames(o)
+  stats::setNames(as.vector(o), paste0(rep(.n, length(.n)), "|", rep(.n, each=length(.n))))
+}
+
 ## omega difference by eta name; different eta names are Inf
 .kitOmegaDiff <- function(mo, so) {
-  if (is.null(so) && is.null(mo)) return(0)
-  if (is.null(so) || is.null(mo) || !setequal(rownames(so), rownames(mo))) return(Inf)
-  .n <- rownames(so)
-  max(abs(mo[.n, .n] - so) / pmax(1, abs(so)))
+  .kitNamedDiff(.kitOmegaFlat(mo), .kitOmegaFlat(so))
 }
 
 ## Residual error model: each parameter with its type, and the

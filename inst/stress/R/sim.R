@@ -37,6 +37,8 @@ kitSimulate <- function(case, nSub, seed=42L) {
   .ini <- .ui$iniDf
   .par <- as.data.frame(.s$params)
   .eta <- intersect(.ini$name[!is.na(.ini$neta1) & .ini$neta1 == .ini$neta2], names(.par))
+  ## inter-occasion etas are per-subject columns like gamma_Cl(OCC==2)
+  .eta <- c(.eta, grep("[(].*==.*[)]$", names(.par), value=TRUE))
   .etas <- NULL
   if (length(.eta) > 0L) {
     .etas <- .par[, c("id", .eta), drop=FALSE]
