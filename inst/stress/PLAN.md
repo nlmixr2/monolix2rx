@@ -221,6 +221,14 @@ Each one is a `known=` case until its fix lands (phase 2.5):
   always use 7 steady-state doses (`dose-ss`, `nbdoses=10`).
 - IOV: the `id*occ` eta becomes `gamma_Cl ~ 0.04 | occ2` (`iov-cl-basic`).
 
+Notes for later cases:
+
+- A stiff project with `delay()` needs `ros4`, not `liblsoda` (what
+  `.getMethod()` and babelmixr2 pick for `odeType=stiff`).
+- rxode2's `minSS=n` is not the same as `n` explicit doses, and
+  `linCmt()` solves steady state analytically (ignores `minSS`): a tighter
+  `dose-ss` tolerance or a `linCmt()` SS case will show both.
+
 ## Truth gaps to close with the importer work
 
 - IOV: the truth keeps only per-subject etas; the per-occasion draws (and

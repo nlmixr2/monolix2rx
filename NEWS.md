@@ -87,11 +87,11 @@
   single-threaded execution model.
 
 * Fixed `.getNbdoses()` and `.getStiff()`, which did not recognize the
-  parsed project and always returned 7 and `FALSE`: the validation,
-  `rxSolve()` and babelmixr2 (which calls both) now use the project's
-  `nbdoses=` and `odeType=`.  The new `.getSsLimits()` gives the matching
-  `minSS`/`maxSS`, raised to rxode2's floor (5 and 7) when `nbdoses` is
-  smaller.
+  parsed project and always returned 7 and `FALSE`: the validation and
+  `rxSolve()` now use the project's `nbdoses=` and `odeType=`.  The new
+  `.getSsLimits()` gives the matching `minSS`/`maxSS`, raised to rxode2's
+  floor (5 and 7) when `nbdoses` is smaller; babelmixr2, which calls
+  `.getNbdoses()` directly, needs it for `nbdoses` below 6.
 
 * Fixed `predRtol` (and the pred line of the validation), which was
   relative to Monolix's `ipred` instead of its `pred`; the iwres line of
