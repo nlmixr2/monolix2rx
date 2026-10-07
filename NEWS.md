@@ -1,5 +1,10 @@
 # monolix2rx 0.0.7
 
+* Added a Monolix stress kit (`inst/stress`, like the nonmem2rx and
+  babelmixr2 kits): it simulates each case with rxode2, writes the Monolix
+  project, runs Monolix and checks the `monolix2rx()` import; a translate
+  mode and a mock Monolix check it without Monolix.
+
 * Dropped the re-exports (`rxode2()`, `rxode()`, `RxODE()`, `ini()`,
   `model()`, `model<-`, `rxRename()`, `rxSolve()`, `rxUiGet()`, `logit()`,
   `expit()`, `lotri()`, `autoplot()` and `%>%`).  Load `nlmixr2` (or
