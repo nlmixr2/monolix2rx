@@ -225,7 +225,8 @@
 
 .pkPushPre <- function() {
   if(.monolix2rx$pkLong && length(.monolix2rx$equationLine) > 0) {
-    .monolix2rx$preEq <- .monolix2rx$equationLine
+    # lines between macros are kept too
+    .monolix2rx$preEq <- c(.monolix2rx$preEq, .monolix2rx$equationLine)
     .monolix2rx$equationLine <- character(0)
   }
 }

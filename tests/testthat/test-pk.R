@@ -610,3 +610,8 @@ test_that("pk in long pk captures equations", {
   expect_equal(as.character(tmp),
                c("before <- 1", "Cc = pkmodel(V, ka, Cl)", "after <- 1"))
 })
+
+test_that("PK: lines between macros are all kept", {
+  .p <- .pk("a = 1\ncompartment(cmt=1, amount=Ac, volume=V)\nb = 2\nelimination(cmt=1, k)", long=TRUE)
+  expect_equal(.p$preEq, c("a <- 1", "b <- 2"))
+})

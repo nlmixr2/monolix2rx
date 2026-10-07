@@ -25,9 +25,13 @@
   }
   # Apparently pk macros can also be in the EQUATION: block
   .pkIni(TRUE)
+  # lines before a pkmodel()/macro must stay before its ODEs
+  .monolix2rx$pkLong <- TRUE
   if (text!="") {
     .Call(`_monolix2rx_trans_equation`, text, "[LONGITUDINAL] EQUATION:")
   }
+  .monolix2rx$pkLong <- FALSE
+  .eqPre <- .monolix2rx$preEq
   .pkPushStatement()
   .validatePkModel(.monolix2rx$pkPars, .monolix2rx$pkCe)
   .pk2 <- list(Cc=.monolix2rx$pkCc,
@@ -100,6 +104,9 @@
   if (length(.w) > 0L) {
     .monolix2rx$equationLine <- .monolix2rx$equationLine[-.w]
   }
+  .eqPre <- .updateDdtEq(.monolix2rx$state, .eqPre, .monolix2rx$pk)
+  .eqPre <- .updateDdtEq(.monolix2rx$state, .eqPre, .pk3)
+  .eqPre <- .eqPre[!grepl("^ *[<][-] *$", .eqPre)]
   .cmtOther <- vapply(c(.monolix2rx$stateExtra, .monolix2rx$state),
                       function(x) {
                         if (x %in% .cmtNum) return(NA_character_)
@@ -116,8 +123,9 @@
                rx=c(
                  .start,
                  .monolix2rx$pk$pk,
-                 .pk3$pk,
                  .end,
+                 .eqPre,
+                 .pk3$pk,
                  .monolix2rx$equationLine,
                  .monolix2rx$extraPred,
                  .monolix2rx$pk$equation$endLines),

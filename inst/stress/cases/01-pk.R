@@ -109,7 +109,6 @@ output = Cc
 
 kitVariant("pkmodel-iv-2cmt", "pkmodel-iv-2cmt-k",
            "pkmodel(V, Cl, k12, k21) two-compartment IV bolus, rates computed in EQUATION:",
-           known="pkmodel() ODEs are emitted before the EQUATION: lines that precede pkmodel(), so k12/k21 are used before they are defined",
            model="DESCRIPTION: {{PROBLEM}}
 
 [LONGITUDINAL]

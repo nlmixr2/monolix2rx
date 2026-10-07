@@ -89,6 +89,11 @@
 * `pkmodel()` accepts the peripheral clearances and volumes `Q2`, `V2`,
   `Q3` and `V3` (as `k12 = Q2/V`, `k21 = Q2/V2`, ...).
 
+* Fixed the order of `EQUATION:` lines written before `pkmodel()` or a PK
+  macro: they were translated after the macro's ODEs, so a rate computed
+  there (`k12 = Q/V`) was used before it was defined.  Lines between
+  macros in a `PK:` block are no longer dropped.
+
 * Fixed `.getNbdoses()` and `.getStiff()`, which did not recognize the
   parsed project and always returned 7 and `FALSE`: the validation and
   `rxSolve()` now use the project's `nbdoses=` and `odeType=`.  The new

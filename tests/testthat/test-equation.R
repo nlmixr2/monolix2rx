@@ -167,3 +167,10 @@ test_that("bsmm", {
   expect_error(.equation("M = bsmm(M1,p1,M2,1-p1)"),
                "bsmm")
 })
+
+test_that("EQUATION: lines before pkmodel() stay before its ODEs", {
+  .rx <- .equation("k12 = Q/V\nk21 = Q/V2\nCc = pkmodel(V, Cl, k12, k21)\nE = 2*Cc")$rx
+  expect_equal(.rx[1:2], c("k12 <- Q / V", "k21 <- Q / V2"))
+  expect_equal(.rx[length(.rx)], "E <- 2 * Cc")
+  expect_true(any(grepl("^d/dt[(]central[)]", .rx[3:5])))
+})
