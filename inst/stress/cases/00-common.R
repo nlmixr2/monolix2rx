@@ -16,10 +16,11 @@ DV = {use=observation, name=CONC, type=continuous}"
 ## `err`/`errPar`: the error model and its parameter values; `params`:
 ## other population parameters (covariate coefficients ...);
 ## `indInput`: extra [INDIVIDUAL] inputs (covariates); `covariate`: a
-## [COVARIATE] section; `indExtra`: extra [INDIVIDUAL] DEFINITION lines.
+## [COVARIATE] section; `indExtra`: extra [INDIVIDUAL] DEFINITION lines;
+## `pred`: the model output observed.
 .mlxProject <- function(par, err="combined1(a, b)", errPar=c(a=0.05, b=0.1),
                         params=NULL, content=.mlxContent, indInput=NULL,
-                        covariate=NULL, indExtra=NULL) {
+                        covariate=NULL, indExtra=NULL, pred="Cc") {
   .nm <- names(par)
   .in <- unlist(lapply(.nm, function(n) {
     c(paste0(n, "_pop"), if (!is.null(par[[n]]$sd)) paste0("omega_", n))
@@ -61,7 +62,7 @@ input = {", paste(names(errPar), collapse=", "), "}
 file = '{{MODEL}}'
 
 DEFINITION:
-CONC = {distribution=normal, prediction=Cc, errorModel=", err, "}
+CONC = {distribution=normal, prediction=", pred, ", errorModel=", err, "}
 
 <FIT>
 data = CONC
