@@ -25,11 +25,12 @@
 ## for the observation rows the population prediction (all random effects
 ## and residual errors zero) and the individual prediction (true etas).
 kitSimulate <- function(case, nSub, seed=42L) {
-  .d <- case$data(if (is.null(case$nSub)) nSub else case$nSub)
-  .d$ROWID <- seq_len(nrow(.d))
   .seed <- .kitSeed(case$name, seed)
   set.seed(.seed)
   rxode2::rxSetSeed(.seed)
+  ## after the seed: data functions may draw covariates
+  .d <- case$data(if (is.null(case$nSub)) nSub else case$nSub)
+  .d$ROWID <- seq_len(nrow(.d))
   .ui <- suppressMessages(rxode2::assertRxUi(case$sim))
   .s <- .kitSolve(.ui, .d, case, returnType="rxSolve")
   .eta <- rownames(.ui$omega)
