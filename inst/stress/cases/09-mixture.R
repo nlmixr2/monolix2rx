@@ -30,7 +30,8 @@ kitVariant("pkmodel-oral-1cmt", "bsmm-latent-cov-cl",
            mlxtran=.mlxProject(
              list(ka=.mlxPar(1.2, 0.3), V=.mlxPar(30, 0.2),
                   Cl=.mlxPar(3, 0.2, extra=", covariate=lcat, coefficient={0, beta_Cl_lcat_2}")),
-             params=c(beta_Cl_lcat_2=1, plcat1=0.6), indInput="lcat",
+             params=c(beta_Cl_lcat_2=1), covParams=c(plcat1=0.6), indInput="lcat",
+             indDecl="lcat = {type=categorical, categories={1, 2}}",
              covariate="[COVARIATE]
 input = plcat1
 

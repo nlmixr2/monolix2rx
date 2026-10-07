@@ -216,7 +216,16 @@ Each one is a `known=` case until its fix lands (phase 2.5):
 - A latent covariate (`P(lcat=1)=plcat1`) is translated as a numeric
   covariate (`beta_Cl_lcat_2*lcat`, not `(lcat == 2)`), and `plcat1` is
   dropped (`bsmm-latent-cov-cl`).
+- `.getNbdoses()` (`R/validate.R`) tests for class `mlxtran`, but the
+  parsed project is `monolix2rxMlxtran`, so validation and `rxSolve()`
+  always use 7 steady-state doses (`dose-ss`, `nbdoses=10`).
 - IOV: the `id*occ` eta becomes `gamma_Cl ~ 0.04 | occ2` (`iov-cl-basic`).
+
+## Truth gaps to close with the importer work
+
+- IOV: the truth keeps only per-subject etas; the per-occasion draws (and
+  `ui$omega`, a list by level) are needed before `iov-*` can XPASS.
+- BSMM: IPRED needs the true class (`POP`, kept in `sim.rds`).
 
 ## Risks
 

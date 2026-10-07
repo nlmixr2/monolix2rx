@@ -94,6 +94,12 @@ kitImportMetrics <- function(m) {
   paste(id, sprintf("%.12g", time), .k, sep="|")
 }
 
+## steady-state doses monolix2rx read from the project
+.kitNbdoses <- function(m) {
+  .n <- utils::getFromNamespace(".getNbdoses", "monolix2rx")(m)
+  if (length(.n) != 1L || is.na(.n)) 7L else as.integer(.n)
+}
+
 ## Solve the imported model with the theta values and `etas` (a data
 ## frame with id and the eta columns, or NULL for zero random effects)
 kitImportSolve <- function(m, etas, case) {
@@ -116,7 +122,7 @@ kitImportSolve <- function(m, etas, case) {
   .s <- suppressMessages(do.call(rxode2::rxSolve,
                                  c(list(m$monolixModelIwres, .p, .d,
                                         returnType="data.frame", addDosing=FALSE),
-                                   .kitSolveOpts(case$nbSSDoses), case$solve)))
+                                   .kitSolveOpts(.kitNbdoses(m)), case$solve)))
   data.frame(key=.kitKey(as.character(.s$id), .s$time), mlx=.s$ipredSim,
              iwres=if (is.null(.s$iwres)) NA_real_ else .s$iwres)
 }
@@ -138,11 +144,14 @@ kitDryPred <- function(m, sim, case) {
   .cmp <- merge(.t, stats::setNames(.pop[, 1:2], c("key", "mlxPred")), by="key")
   .ind <- if (!is.null(sim$etas) && NROW(m$omega) > 0L) kitImportSolve(m, sim$etas, case)
   .cmp$mlxIpred <- if (is.null(.ind)) NA_real_ else .ind$mlx[match(.cmp$key, .ind$key)]
+  ## the truth has etas the import lost: IPRED cannot match
+  .lost <- !is.null(sim$etas) && is.null(.ind)
   list(cmp=.cmp[, c("ID", "TIME", "simPred", "mlxPred", "simIpred", "mlxIpred")],
        nObs=nrow(.cmp), nExpected=nrow(.t),
        rowsExtra=nrow(.pop) - nrow(.cmp), rowsMissing=nrow(.t) - nrow(.cmp),
        maxRel=.kitMaxRel(.cmp$mlxPred, .cmp$simPred),
-       maxRelIpred=if (is.null(.ind)) NA_real_ else .kitMaxRel(.cmp$mlxIpred, .cmp$simIpred))
+       maxRelIpred=if (.lost) Inf else if (is.null(.ind)) NA_real_ else
+         .kitMaxRel(.cmp$mlxIpred, .cmp$simIpred))
 }
 
 ## largest relative difference of named values; a missing name is Inf
@@ -161,8 +170,20 @@ kitDryPred <- function(m, sim, case) {
   max(abs(mo[.n, .n] - so) / pmax(1, abs(so)))
 }
 
+## Residual error model: each parameter with its type, and the
+## combined1/combined2 form of add + prop endpoints
+.kitErrModel <- function(ui) {
+  .ini <- ui$iniDf
+  .ini <- .ini[!is.na(.ini$err) & is.na(.ini$neta1), ]
+  .p <- ui$predDf
+  .ap <- as.character(.p$addProp)
+  .ap[.ap == "default"] <- getOption("rxode2.addProp", "combined2")
+  .ap <- .ap[grepl("add", .p$errType) & grepl("prop", .p$errType)]
+  paste(c(sort(paste0(.ini$name, ":", .ini$err)), .ap), collapse=", ")
+}
+
 ## Compare the imported omega and residual-error parameters with the truth
-## by name (PRED does not depend on them)
+## by name (PRED does not depend on them); a different error model is Inf
 kitDryMatrices <- function(m, case) {
   .ui <- suppressMessages(rxode2::assertRxUi(case$sim))
   .ret <- c(omega=NA_real_, err=NA_real_)
@@ -170,8 +191,11 @@ kitDryMatrices <- function(m, case) {
   .ini <- .ui$iniDf
   .ini <- .ini[!is.na(.ini$err) & is.na(.ini$neta1), ]
   .mi <- m$iniDf
-  .mi <- .mi[.mi$name %in% .ini$name, ]
+  .mi <- .mi[!is.na(.mi$err) & is.na(.mi$neta1), ]
   .ret["err"] <- .kitNamedDiff(stats::setNames(.mi$est, .mi$name),
                                stats::setNames(.ini$est, .ini$name))
+  .em <- c(truth=.kitErrModel(.ui), import=.kitErrModel(m))
+  if (.em[1] != .em[2]) .ret["err"] <- Inf
+  attr(.ret, "errModel") <- .em
   .ret
 }

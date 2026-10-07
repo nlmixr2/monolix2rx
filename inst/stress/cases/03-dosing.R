@@ -59,11 +59,28 @@ kitCase(
   mlxtran=.mlxProject(.ivPar, content=paste0(.mlxContent, "
 RATE = {use=rate}")))
 
+## a long half-life relative to II, so the number of steady-state doses
+## (nbdoses=10, not the default 7) changes the predictions
 kitCase(
   name="dose-ss",
-  covers="steady-state dose (use=steadystate, nbdoses=7) with II, then a second regimen",
+  covers="steady-state dose (use=steadystate, nbdoses=10) with II, then a second regimen",
   tags=c("dosing", "ss"),
-  sim=.ivTruth,
+  nbSSDoses=10L,
+  known=".getNbdoses() tests for class mlxtran, not monolix2rxMlxtran, so nbdoses is always 7",
+  sim=function() {
+    ini({
+      V_pop <- 30; Cl_pop <- 0.3
+      omega_V ~ 0.04; omega_Cl ~ 0.09
+      a <- 0.05; b <- 0.1
+    })
+    model({
+      V <- V_pop * exp(omega_V)
+      Cl <- Cl_pop * exp(omega_Cl)
+      d/dt(central) <- -Cl / V * central
+      Cc <- central / V
+      Cc ~ add(a) + prop(b) + combined1()
+    })
+  },
   data=function(nSub) {
     .id <- seq_len(nSub)
     mlxBind(mlxDose(.id, 0, amt=100, cmt=1, ss=1L, ii=12),
@@ -72,6 +89,7 @@ kitCase(
   },
   columns=c("ID", "TIME", "AMT", "SS", "II", "DV"),
   model=.ivModel,
-  mlxtran=.mlxProject(.ivPar, content=paste0(.mlxContent, "
-SS = {use=steadystate, nbdoses=7}
+  mlxtran=.mlxProject(list(V=.mlxPar(30, 0.2), Cl=.mlxPar(0.3, 0.3)),
+                      content=paste0(.mlxContent, "
+SS = {use=steadystate, nbdoses=10}
 II = {use=interdoseinterval}")))

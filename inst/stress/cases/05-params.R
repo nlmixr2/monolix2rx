@@ -73,7 +73,7 @@ kitVariant("pkmodel-oral-1cmt", "cov-sex-categorical",
 input = SEX
 
 SEX = {type=categorical, categories={0, 1}}",
-             indExtra=NULL))
+             indDecl="SEX = {type=categorical, categories={0, 1}}"))
 
 kitVariant("pkmodel-oral-1cmt", "param-corr",
            "correlated random effects: correlation = {level=id, r(ka, Cl)=corr_ka_Cl}",

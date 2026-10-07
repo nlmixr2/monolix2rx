@@ -21,7 +21,7 @@ kitRunCase <- function(case, outDir, mode="dry", nSub=20L, seed=42L,
                importError=NA_character_, dryImport=NA,
                dryError=NA_character_, dryMaxRel=NA_real_, dryIpredMaxRel=NA_real_,
                dryNobs=NA_integer_, dryNexpected=NA_integer_,
-               dryOmegaDiff=NA_real_, dryErrDiff=NA_real_,
+               dryOmegaDiff=NA_real_, dryErrDiff=NA_real_, dryErrModel=NA_character_,
                ipredRtol=NA_real_, ipredQ95=NA_real_, ipredMax=NA_real_,
                predRtol=NA_real_, predQ95=NA_real_, predMax=NA_real_,
                pkgIpredRtol=NA_real_, pkgPredRtol=NA_real_,
@@ -55,6 +55,8 @@ kitRunCase <- function(case, outDir, mode="dry", nSub=20L, seed=42L,
       } else {
         .res$dryOmegaDiff <- .mat[["omega"]]
         .res$dryErrDiff <- .mat[["err"]]
+        .em <- attr(.mat, "errModel")
+        if (.em[1] != .em[2]) .res$dryErrModel <- paste0("truth ", .em[1], "; import ", .em[2])
       }
     }
     if (.res$dryImport && isTRUE(case$dryPred)) {
@@ -196,6 +198,7 @@ kitRunCase <- function(case, outDir, mode="dry", nSub=20L, seed=42L,
   if (!is.na(res$dryError)) return(res$dryError)
   if (is.finite(res$dryOmegaDiff) && res$dryOmegaDiff > tol$mat ||
         identical(res$dryOmegaDiff, Inf)) return("omega differs from the truth")
+  if (!is.na(res$dryErrModel)) return(paste("error model differs:", res$dryErrModel))
   if (is.finite(res$dryErrDiff) && res$dryErrDiff > tol$mat ||
         identical(res$dryErrDiff, Inf)) return("residual parameters differ from the truth")
   if (!is.na(res$dryMaxRel) && res$dryMaxRel > tol$dry) {
@@ -246,7 +249,10 @@ kitRunCase <- function(case, outDir, mode="dry", nSub=20L, seed=42L,
 }
 
 ## one case; errors become an ERROR row
-.kitRunOne <- function(case, outDir, mode, nSub, seed, est, cmd, timeout) {
+.kitRunOne <- function(case, outDir, mode, nSub, seed, est, cmd, timeout,
+                       mlxVersion=NULL) {
+  ## socket workers have their own kit: the Monolix version comes along
+  .kitEnv$mlxVersion <- mlxVersion
   .t0 <- Sys.time()
   .r <- tryCatch(kitRunCase(case, outDir, mode=mode, nSub=nSub,
                             seed=seed, est=est, cmd=cmd, timeout=timeout),
@@ -283,7 +289,8 @@ kitRun <- function(cases, outDir, mode="dry", nSub=20L, seed=42L,
                    est="full", cmd=NULL, jobs=1L, timeout=3600) {
   dir.create(outDir, recursive=TRUE, showWarnings=FALSE)
   .args <- list(outDir=outDir, mode=mode, nSub=nSub, seed=seed, est=est,
-                cmd=cmd, timeout=timeout)
+                cmd=cmd, timeout=timeout, mlxVersion=.kitEnv$mlxVersion)
+  .t0 <- Sys.time()
   .l <- if (jobs > 1L && length(cases) > 1L) {
     .cl <- .kitCluster(min(jobs, length(cases)))
     on.exit(parallel::stopCluster(.cl), add=TRUE)
@@ -292,7 +299,16 @@ kitRun <- function(cases, outDir, mode="dry", nSub=20L, seed=42L,
               c(list(case), args))
     }
     environment(.f) <- globalenv()
-    parallel::clusterApplyLB(.cl, cases, .f, args=.args)
+    tryCatch(parallel::clusterApplyLB(.cl, cases, .f, args=.args),
+             error=function(e) {
+               ## a dead worker stops clusterApplyLB: keep the results the
+               ## finished cases saved
+               message("a parallel worker failed: ", conditionMessage(e))
+               lapply(cases, function(case) {
+                 .f <- file.path(outDir, case$name, "result.rds")
+                 if (file.exists(.f) && file.mtime(.f) >= .t0) readRDS(.f)
+               })
+             })
   } else {
     lapply(cases, function(case) do.call(.kitRunOne, c(list(case), .args)))
   }

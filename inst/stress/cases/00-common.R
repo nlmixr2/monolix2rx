@@ -17,10 +17,13 @@ DV = {use=observation, name=CONC, type=continuous}"
 ## other population parameters (covariate coefficients ...);
 ## `indInput`: extra [INDIVIDUAL] inputs (covariates); `covariate`: a
 ## [COVARIATE] section; `indExtra`: extra [INDIVIDUAL] DEFINITION lines;
-## `pred`: the model output observed.
+## `pred`: the model output observed; `covParams`: population parameters
+## used only in [COVARIATE] (latent class probabilities); `indDecl`:
+## [INDIVIDUAL] declarations (Monolix repeats categorical covariates there).
 .mlxProject <- function(par, err="combined1(a, b)", errPar=c(a=0.05, b=0.1),
                         params=NULL, content=.mlxContent, indInput=NULL,
-                        covariate=NULL, indExtra=NULL, pred="Cc") {
+                        covariate=NULL, indExtra=NULL, pred="Cc",
+                        covParams=NULL, indDecl=NULL) {
   .nm <- names(par)
   .in <- unlist(lapply(.nm, function(n) {
     c(paste0(n, "_pop"), if (!is.null(par[[n]]$sd)) paste0("omega_", n))
@@ -37,6 +40,7 @@ DV = {use=observation, name=CONC, type=continuous}"
              if (!is.null(par[[n]]$sd)) .val(paste0("omega_", n), par[[n]]$sd)
            })),
            if (length(params)) .val(names(params), params),
+           if (length(covParams)) .val(names(covParams), covParams),
            .val(names(errPar), errPar))
   paste0("<DATAFILE>
 
@@ -52,7 +56,7 @@ header = {{{HEADER}}}
 ", if (!is.null(covariate)) paste0("\n", covariate, "\n"), "
 [INDIVIDUAL]
 input = {", paste(c(.in, names(params), indInput), collapse=", "), "}
-
+", if (length(indDecl)) paste0("\n", paste(indDecl, collapse="\n"), "\n"), "
 DEFINITION:
 ", paste(c(.def, indExtra), collapse="\n"), "
 
