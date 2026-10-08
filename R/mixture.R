@@ -57,8 +57,8 @@
     if (.n < 2L || length(.args) %% 2L != 0L) {
       stop("bsmm() needs at least two (model, probability) pairs", call.=FALSE)
     }
-    .mixtureLastProb(.args[.k + 1])
     .prob <- .mixtureProb(.args[.k[-.n] + 1], env$vars)
+    .mixtureLastProb(.args[.k + 1])
     if (is.null(env$prob)) {
       env$prob <- .prob
     } else if (!identical(env$prob, .prob)) {
@@ -84,17 +84,19 @@
 #' @author Matthew L. Fidler
 .mixtureLastProb <- function(p) {
   .n <- length(p)
-  .last <- p[[.n]]
-  .rest <- p[-.n]
-  if (all(vapply(p, is.numeric, logical(1)))) {
-    if (abs(.last - (1 - sum(unlist(.rest)))) < 1e-8) return(invisible())
-  } else {
-    .expect <- Reduce(function(a, b) bquote(.(a) - .(b)), .rest, 1)
-    if (identical(gsub(" ", "", deparse1(.last)), gsub(" ", "", deparse1(.expect)))) {
-      return(invisible())
-    }
-  }
-  warning("the last bsmm() probability '", deparse1(.last), "' is taken as 1 minus the others",
+  .expect <- Reduce(function(a, b) bquote(.(a) - (.(b))), p[-.n], 1)
+  # compare at a few fixed values, so any spelling of 1 - p1 - ... passes
+  # (no RNG: an import must not move the user's seed)
+  .vars <- unique(unlist(lapply(p, all.vars)))
+  .same <- vapply(c(0.0731, 0.1137, 0.0519), function(step) {
+    .val <- (seq_along(.vars) * step) %% 0.29 + 0.01
+    .env <- list2env(stats::setNames(as.list(.val), .vars))
+    .a <- try(eval(p[[.n]], .env), silent=TRUE)
+    .b <- try(eval(.expect, .env), silent=TRUE)
+    is.numeric(.a) && is.numeric(.b) && isTRUE(abs(.a - .b) < 1e-8)
+  }, logical(1))
+  if (all(.same)) return(invisible())
+  warning("the last bsmm() probability '", deparse1(p[[.n]]), "' is taken as 1 minus the others",
           call.=FALSE)
 }
 

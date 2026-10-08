@@ -64,6 +64,13 @@ test_that("malformed bsmm() calls and missing etas give clear errors", {
   expect_warning(.mixtureRewrite(quote(model({Cc <- bsmm(C1, 0.3, C2, 0.3)})), .ok),
                  "1 minus the others")
   expect_warning(.mixtureRewrite(quote(model({Cc <- bsmm(C1, 0.3, C2, 0.7)})), .ok), NA)
+  .two <- .mixMlx(paste("p1 = {distribution=logitNormal, typical=p1_pop, no-variability}",
+                        "p2 = {distribution=logitNormal, typical=p2_pop, no-variability}",
+                        "V = {distribution=logNormal, typical=V_pop, sd=omega_V}", sep="\n"))
+  for (.last in list(quote(1 - (p1 + p2)), quote(1 - p2 - p1), quote((1 - p1) - p2))) {
+    .e <- bquote(model({Cc <- bsmm(C1, p1, C2, p2, C3, .(.last))}))
+    expect_warning(.mixtureRewrite(.e, .two), NA)
+  }
   .noEta <- .mixMlx("p1 = {distribution=logitNormal, typical=p1_pop, no-variability}")
   expect_error(.mixtureRewrite(quote(model({Cc <- bsmm(C1, p1, C2, 1 - p1)})), .noEta),
                "between-subject variability")
