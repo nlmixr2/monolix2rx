@@ -29,6 +29,8 @@
 ## - `est`: "default" uses the run-wide preset; any other string is used
 ##   verbatim as the [TASKS] section.
 ## - `dryPred`/`dryOmega`: FALSE skips that translate check.
+## - `dryLik`: TRUE compares the per-observation log-likelihood at the
+##   true etas instead (discrete endpoints; set dryPred=FALSE).
 ## - `nbSSDoses`: Monolix steady-state doses (default 7).
 ## - `minMonolix`: Monolix version needed (like "2024R1"); a failed run
 ##   on an older Monolix is SKIP.
@@ -48,7 +50,7 @@ kitCase <- function(name, covers, tags=character(0), sim, data, mlxtran,
                     knownRun=NULL, est="default", dryPred=TRUE,
                     dryOmega=TRUE, nSub=NULL, nbSSDoses=7L,
                     minMonolix=NULL, solve=list(), mixest=NULL,
-                    dataFile="data.csv", dryData=NULL) {
+                    dataFile="data.csv", dryData=NULL, dryLik=FALSE) {
   stopifnot(is.character(name), length(name) == 1L,
             !grepl("[^A-Za-z0-9_-]", name))
   if (!is.null(.kitEnv$cases[[name]])) {
@@ -63,7 +65,7 @@ kitCase <- function(name, covers, tags=character(0), sim, data, mlxtran,
                                 nSub=nSub, nbSSDoses=nbSSDoses,
                                 minMonolix=minMonolix, solve=solve,
                                 mixest=mixest, dataFile=dataFile,
-                                dryData=dryData,
+                                dryData=dryData, dryLik=dryLik,
                                 file=if (is.null(.kitEnv$curFile)) NA_character_ else .kitEnv$curFile)
   invisible(name)
 }

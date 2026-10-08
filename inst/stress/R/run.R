@@ -77,6 +77,17 @@ kitRunCase <- function(case, outDir, mode="dry", nSub=20L, seed=42L,
         }
       }
     }
+    if (.res$dryImport && isTRUE(case$dryLik)) {
+      .dl <- try(kitDryLik(.dry$value, .sim, case), silent=TRUE)
+      if (inherits(.dl, "try-error")) {
+        .res$dryError <- paste("likelihood check:", trimws(.dl))
+      } else {
+        utils::write.csv(.dl$cmp, file.path(.dir, "dry-compare.csv"), row.names=FALSE)
+        .res$dryMaxRel <- .dl$maxRel
+        .res$dryNobs <- .dl$nObs
+        .res$dryNexpected <- .dl$nExpected
+      }
+    }
     if (.res$dryImport && is.na(.res$dryError) && is.function(case$dryData)) {
       .dd <- try(case$dryData(.dry$value, .sim), silent=TRUE)
       if (inherits(.dd, "try-error")) .dd <- trimws(.dd)
@@ -143,7 +154,7 @@ kitRunCase <- function(case, outDir, mode="dry", nSub=20L, seed=42L,
   .matOk <- function(x) is.na(x) || x <= tol$mat
   if (!.matOk(res$dryOmegaDiff) || !.matOk(res$dryErrDiff)) return(FALSE)
   if (!is.na(res$dryError)) return(FALSE)
-  if (!isTRUE(case$dryPred)) return(TRUE)
+  if (!isTRUE(case$dryPred) && !isTRUE(case$dryLik)) return(TRUE)
   if (!is.na(res$dryIpredMaxRel) && res$dryIpredMaxRel > tol$dry) return(FALSE)
   is.finite(res$dryMaxRel) && res$dryMaxRel <= tol$dry &&
     identical(as.integer(res$dryNobs), as.integer(res$dryNexpected))

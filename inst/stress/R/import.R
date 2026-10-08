@@ -238,3 +238,62 @@ kitDryMatrices <- function(m, case) {
   attr(.ret, "errModel") <- .em
   .ret
 }
+
+## The log-likelihood expression of a pois(), ordinal c() or ll() endpoint
+.kitLikExpr <- function(ui) {
+  .p <- ui$predDf
+  if (nrow(.p) != 1L) stop("the likelihood check needs one endpoint", call.=FALSE)
+  .e <- ui$lstExpr[[.p$line]]
+  .d <- as.character(.p$distribution)
+  if (.d == "LL") return(.e[[3]])
+  if (.d == "pois") return(bquote(llikPois(DV, .(.e[[3]][[2]]))))
+  if (.d != "ordinal") stop("no likelihood check for '", .d, "'", call.=FALSE)
+  .a <- as.list(.e[[3]])[-1]
+  .n <- names(.a)
+  .val <- if (is.null(.n)) seq_along(.a) else
+    vapply(.a, function(x) as.numeric(eval(x)), numeric(1))
+  .pr <- if (is.null(.n)) .a[-length(.a)] else lapply(.n[-length(.n)], as.name)
+  .last <- Reduce(function(x, y) bquote(.(x) - .(y)), .pr, quote(1))
+  .terms <- Map(function(v, p) bquote((DV == .(v)) * .(p)), .val, c(.pr, list(.last)))
+  bquote(log(.(Reduce(function(x, y) bquote(.(x) + .(y)), .terms))))
+}
+
+## Per-observation log-likelihood of `ui` at its thetas and `etas`
+.kitLik <- function(ui, d, etas, case) {
+  .l <- ui$lstExpr
+  .l[[ui$predDf$line]] <- bquote(kitLL <- .(.kitLikExpr(ui)))
+  .mod <- rxode2::rxode2(paste(vapply(.l, deparse1, character(1)), collapse="\n"))
+  .ini <- ui$iniDf
+  .theta <- stats::setNames(.ini$est, .ini$name)[is.na(.ini$neta1)]
+  .eta <- .ini$name[!is.na(.ini$neta1) & .ini$neta1 == .ini$neta2]
+  names(d) <- tolower(names(d))
+  .id <- unique(as.character(d$id))
+  .p <- if (length(.eta) == 0L) data.frame(row.names=seq_along(.id)) else
+    etas[match(.id, etas$id), .eta, drop=FALSE]
+  if (anyNA(.p)) stop("subjects without true etas", call.=FALSE)
+  for (.n in names(.theta)) .p[[.n]] <- .theta[[.n]]
+  .d <- d
+  .zero <- function(x) if (is.null(x)) 0L else x
+  .d$kitObs <- as.integer(.zero(.d$evid) %in% 0L & .zero(.d$mdv) %in% 0L)
+  .s <- suppressMessages(do.call(rxode2::rxSolve,
+                                 c(list(.mod, .p, .d, returnType="data.frame",
+                                        addDosing=FALSE, keep="kitObs"),
+                                   case$solve)))
+  .s <- .s[.s$kitObs == 1L, ]
+  data.frame(key=.kitKey(as.character(.s$id), .s$time), ll=.s$kitLL)
+}
+
+## Translate check for discrete endpoints: the imported model's
+## log-likelihood of each observation equals the truth's at the true etas
+kitDryLik <- function(m, sim, case) {
+  .ui <- suppressMessages(rxode2::assertRxUi(case$sim))
+  if (is.null(m$monolixData)) stop("monolix2rx did not read the data", call.=FALSE)
+  .t <- .kitLik(.ui, sim$data, sim$etas, case)
+  .i <- .kitLik(m, m$monolixData, sim$etas, case)
+  .cmp <- merge(stats::setNames(.t, c("key", "simLL")),
+                stats::setNames(.i, c("key", "mlxLL")), by="key")
+  .r <- 100 * abs(expm1(.cmp$mlxLL - .cmp$simLL))
+  .r[!is.finite(.r)] <- Inf
+  list(cmp=.cmp, nObs=nrow(.cmp), nExpected=nrow(sim$pred),
+       maxRel=if (nrow(.cmp)) max(.r) else NA_real_)
+}

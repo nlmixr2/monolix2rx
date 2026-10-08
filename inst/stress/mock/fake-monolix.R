@@ -54,23 +54,26 @@ if (length(.eta) && !is.null(.sim$etas)) {
 } else {
   .p <- c(.theta, stats::setNames(rep(0, length(.eta)), .eta))
 }
-.s <- suppressMessages(rxode2::rxSolve(.ui$monolixModelIwres, .p, .ui$monolixData,
-                                       returnType="data.frame", addDosing=FALSE,
-                                       covsInterpolation="locf"))
-.key <- function(id, time) {
-  paste(id, sprintf("%.12g", time),
-        stats::ave(seq_along(id), id, time, FUN=seq_along), sep="|")
-}
-.t <- .sim$pred
-.m <- match(.key(.t$ID, .t$TIME), .key(as.character(.s$id), .s$time))
 .obs <- utils::getFromNamespace("monolixEndpoints", "monolix2rx")(.mlx)
 if (length(.obs) != 1L) .fail("the mock handles one endpoint only")
-.pred <- data.frame(id=.t$ID, time=.t$TIME,
-                    dv=.sim$data$DV[match(.t$ROWID, .sim$data$ROWID)],
-                    popPred=.t$simPred, indivPred_SAEM=.t$simIpred,
-                    indWRes_SAEM=.s$iwres[.m])
-names(.pred)[3] <- .obs
-.w(.pred, "predictions.txt")
+.t <- .sim$pred
+## Monolix writes no predictions of discrete observations
+if (!any(as.character(.ui$predDf$distribution) %in% c("pois", "ordinal", "LL"))) {
+  .s <- suppressMessages(rxode2::rxSolve(.ui$monolixModelIwres, .p, .ui$monolixData,
+                                         returnType="data.frame", addDosing=FALSE,
+                                         covsInterpolation="locf"))
+  .key <- function(id, time) {
+    paste(id, sprintf("%.12g", time),
+          stats::ave(seq_along(id), id, time, FUN=seq_along), sep="|")
+  }
+  .m <- match(.key(.t$ID, .t$TIME), .key(as.character(.s$id), .s$time))
+  .pred <- data.frame(id=.t$ID, time=.t$TIME,
+                      dv=.sim$data$DV[match(.t$ROWID, .sim$data$ROWID)],
+                      popPred=.t$simPred, indivPred_SAEM=.t$simIpred,
+                      indWRes_SAEM=.s$iwres[.m])
+  names(.pred)[3] <- .obs
+  .w(.pred, "predictions.txt")
+}
 
 .re <- data.frame(id=.ids)
 for (.e in .eta) {

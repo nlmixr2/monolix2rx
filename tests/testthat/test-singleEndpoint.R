@@ -88,11 +88,11 @@ logit(P(State <=2|State_p=2)) = a21+a22
 logit(P(State <=1|State_p=3)) = a31
 logit(P(State <=2|State_p=3)) = a31+a32}")
 
-  expect_error(.handleSingleEndpoint(tmp$endpoint[[1]]))
+  expect_error(.handleSingleEndpoint(tmp$endpoint[[1]]), "Markov")
 
   tmp <- .longDef("y = {type=count, P(y=k) = exp(-lambda)*(lambda^k)/factorial(k)}")
 
-  expect_error(.handleSingleEndpoint(tmp$endpoint[[1]]))
+  expect_equal(.handleSingleEndpoint(tmp$endpoint[[1]]), "y ~ pois(lambda)")
 
   tmp <- .longDef("rx_prd_cp={distribution = normal, prediction = rx_pred_cp, errorModel=combined2c(pkadd__err,prop__err, tc)}")
 

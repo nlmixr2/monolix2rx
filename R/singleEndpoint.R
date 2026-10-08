@@ -10,11 +10,9 @@
     stop("'event' endpoint not supported in translation yet",
          call.=FALSE)
   } else if (endpoint$dist == "categorical") {
-    stop("'categorical' endpoint not supported in translation yet",
-         call.=FALSE)
+    return(.handleCategoricalEndpoint(endpoint))
   } else if (endpoint$dist == "count") {
-    stop("'count' endpoint not supported in translation yet",
-         call.=FALSE)
+    return(.handleCountEndpoint(endpoint))
   } else if (endpoint$dist == "lognormal") {
     .add <- "lnorm"
   } else if (endpoint$dist == "normal") {

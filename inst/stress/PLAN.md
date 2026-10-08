@@ -90,7 +90,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `08-dde.R` | delay differential equations (below) |
 | `09-mixture.R` | BSMM and WSMM mixtures (below) |
 | `10-iov.R` | inter-occasion variability (below) |
-| `11-special.R` | parent/metabolite (YTYPE); count and ordered categorical observations (XFAIL: not translated) |
+| `11-special.R` | parent/metabolite (YTYPE); count (Poisson, zero-inflated) and categorical (cumulative logit, P(Y=c), binary with PK) observations |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -254,12 +254,13 @@ Notes for later cases:
   (rxode2's own default is `dop853+ros4`); `.getDelay()` is not exported
   for babelmixr2's control.
 
-- Discrete observations (`type=count`, `type=categorical`) stop the
-  translation (`.handleSingleEndpoint()`); `disc-count-poisson` and
-  `disc-categorical-ordinal` are XFAIL.  Translating them (rxode2
-  `pois()`/ordinal `c(...)` or `ll()`) also needs a translate check other
-  than PRED/IPRED (the likelihood at the true parameters); the cases set
-  `dryPred=FALSE` until then.
+- Discrete observations (`type=count`, `type=categorical`) stopped the
+  translation; they become rxode2 `pois()`, `ll()` or the named ordinal
+  `c()`.  PRED of a random draw is not comparable, so these cases check
+  the per-observation log-likelihood at the true etas (`dryLik=TRUE`).
+  To confirm in run mode: that Monolix writes no `predictions.txt` for a
+  discrete-only project (the kit accepts its absence) and the
+  zero-inflated `if k > 0` syntax.  Markov dependence is refused.
 
 ## Truth gaps to close with the importer work
 
