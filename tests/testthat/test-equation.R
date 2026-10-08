@@ -76,7 +76,7 @@ ddt_dx = -x-dx", pk)
 
   .ret <- .equation("a=amtDose", pk)
 
-  expect_equal(.ret$rx, "a <- dose")
+  expect_equal(.ret$rx, "a <- dose()")
 
   .ret <- .equation("a=tDose", pk)
 
@@ -193,4 +193,16 @@ test_that("transfer() keeps the inflow of the receiving compartment", {
   expect_equal(.equation("Cb = Ab/V", .pk(paste0(.pk, "\nelimination(cmt=2, k)")))$rx[2],
                "d/dt(Ab) <-  + kt*Ac - k*Ab")
   expect_equal(.equation("Cb = Ab/V", .pk(.pk))$rx[2], "d/dt(Ab) <-  + kt*Ac")
+})
+
+test_that("chained powers are right associative for rxode2", {
+  expect_equal(.equation("y = 2^x^2\nz = x^2 + y^3\nu = a^b^c^d")$rx,
+               c("y <- 2^(x^2)", "z <- x^2 + y^3", "u <- a^(b^(c^d))"))
+})
+
+test_that("dose keywords in PK macro arguments are translated", {
+  .rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, p=2/amtDose, Tlag=tDose)")$rx
+  expect_true("f(Ap) <- 2/dose()" %in% .rx)
+  expect_true("alag(Ap) <- tlast" %in% .rx)
+  expect_true("f(central) <- dose()/100" %in% .equation("", "Cc = pkmodel(V, Cl, p=amtDose/100)")$rx)
 })

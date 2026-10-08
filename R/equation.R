@@ -140,16 +140,19 @@
                     }, character(1), USE.NAMES = FALSE)
   .cmtNum <- c(.cmtPre, .cmtNum, .cmtOther)
   .cmtNum <- .cmtNum[!is.na(.cmtNum)]
+  .rx <- c(.start,
+           .monolix2rx$pk$pk,
+           .end,
+           .eqPre,
+           .pk3$pk,
+           .monolix2rx$equationLine,
+           .monolix2rx$extraPred,
+           .monolix2rx$pk$equation$endLines)
+  # PK macro arguments are copied as written; translate the dose keywords
+  .rx <- gsub("\\bamtDose\\b", "dose()", .rx, perl=TRUE)
+  .rx <- gsub("\\btDose\\b", "tlast", .rx, perl=TRUE)
   .ret <- list(monolix=text,
-               rx=c(
-                 .start,
-                 .monolix2rx$pk$pk,
-                 .end,
-                 .eqPre,
-                 .pk3$pk,
-                 .monolix2rx$equationLine,
-                 .monolix2rx$extraPred,
-                 .monolix2rx$pk$equation$endLines),
+               rx=.rx,
                lhs=.monolix2rx$equationLhs,
                odeType=.monolix2rx$odeType,
                admd=.admd,

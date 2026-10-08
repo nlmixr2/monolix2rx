@@ -139,6 +139,13 @@
   the `id*occ*...` levels.  The parsed `[CONTENT]` gained `occ`, every
   occasion column in order.
 
+* Fixed `amtDose`, which became a parameter `dose` instead of rxode2's
+  last dose amount `dose()`; `amtDose`/`tDose` in `PK:` macro arguments
+  (like `depot(p=)`) were not translated at all.
+
+* Fixed chained powers: `a^b^c` was written unchanged, which rxode2 does
+  not parse; it is now `a^(b^c)` (right associative, as in Monolix).
+
 * Fixed a project without `<MONOLIX> [SETTINGS] exportpath`, which
   stopped the import: its results are read from the directory named like
   the project (Monolix's default).

@@ -81,7 +81,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | file | theme |
 |---|---|
 | `01-pk.R` | `lib:` models; `pkmodel()` parameterizations (`k`/`Cl`, `k12`/`Q`, `Tlag`, `p`, `Tk0`, `Ktr`/`Mtt`, `Vm`/`Km`); explicit macros (`compartment`, `oral`, `iv`, `depot(target, adm=)`, `peripheral`, `transfer`, `effect`, `elimination`, `empty`/`reset`) |
-| `02-ode.R` | `ddt_` systems: turnover with `_0`, Michaelis-Menten, `t` in equations, `t0`, `odeType=stiff`, if/else, math functions |
+| `02-ode.R` | `ddt_` systems: turnover with `_0`, Michaelis-Menten, `t` in equations, `t0`, `odeType=stiff`, if/else, math functions; `amtDose`/`tDose` (also in `depot(p=)`), logical operators and nested if, less common functions and `a^b^c`, an initial condition with an eta |
 | `03-dosing.R` | ADDL/II, SS (`nbSSDoses`), `infusionrate` and `infusiontime`, several ADM routes, EVID 3/4 washout, MDV, ties, first dose not at 0 |
 | `04-data.R` | delimiters, ignored columns and lines, string IDs, MDV, CENS/LIMIT (imported values checked), two regressors matched by order, string categories, 2024 `file={path=}`, data in a subdirectory |
 | `05-params.R` | logNormal/normal/logitNormal/probitNormal, covariate effects with transformed covariates, correlation blocks, `method=FIXED`, no-variability parameters, `[INDIVIDUAL]` vs `[POPULATION]` |
@@ -276,6 +276,14 @@ Notes for later cases:
   bounds) when fitting a named ordinal `c(p0=0, 1)`: the category values
   become fixed `rx.Y.ordinal*` thetas that no model line names.  Plain
   rxode2 reproduces it (nlmixr2/rxode2#1450).  Simulation is fine.
+
+- `amtDose` became a parameter `dose` (rxode2's last dose amount is
+  `dose()`), and `amtDose`/`tDose` in `PK:` macro arguments were copied
+  untranslated (fixed; `ode-dose-keywords`, `pk-depot-p-amtdose`).  That
+  `amtDose` in `depot(p=)` is the amount of the dose being given, and
+  `tDose` at an observation tied with a dose, are to confirm in run mode.
+- `a^b^c` was written unchanged and rxode2 does not parse it (fixed:
+  `a^(b^c)`; `ode-math-functions-2`).
 
 ## Truth gaps to close with the importer work
 

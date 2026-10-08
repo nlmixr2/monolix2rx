@@ -154,7 +154,8 @@ int equation_identifier_or_constant(char *name,  D_ParseNode *pn) {
     D_ParseNode *xpn = d_get_child(pn, 0);
     char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
     if (!strcmp("amtDose", v)) {
-      sAppendN(&curLine, "dose", 4);
+      // the last dose amount is rxode2's dose() (a bare dose is a parameter)
+      sAppendN(&curLine, "dose()", 6);
       return 1;
     } else if (!strcmp("inftDose", v)) {
       sClear(&sbTransErr);
@@ -503,6 +504,16 @@ void wprint_parsetree_equation(D_ParserTables pt, D_ParseNode *pn, int depth, pr
         continue;
       }
       D_ParseNode *xpn = d_get_child(pn, i);
+      // rxode2 does not chain ^, so a^b^c becomes a^(b^c)
+      if (i == 2 && !strcmp("power_expression", name)) {
+        char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+        if (strchr(v, '^') != NULL) {
+          sAppendN(&curLine, "(", 1);
+          wprint_parsetree_equation(pt, xpn, depth, fn, client_data);
+          sAppendN(&curLine, ")", 1);
+          continue;
+        }
+      }
       // process other arguments
       wprint_parsetree_equation(pt, xpn, depth, fn, client_data);
     }
