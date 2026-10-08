@@ -103,6 +103,15 @@
                                       .monolix2rx$endpointPred[.w]))
   }
   .monolix2rx$equationLine <- c(.monolix2rx$equationLine)
+  # depot(target=) into a compartment whose ODE a macro wrote
+  .tgt <- unique(unlist(lapply(list(.monolix2rx$pk$equation, .pk3$equation), function(e) {
+    lapply(e[c("lhsDepot", "dur", "f", "tlag")], names)
+  })))
+  .tgt <- setdiff(.tgt, .monolix2rx$state)
+  for (.p in list(.monolix2rx$pk, .pk3)) {
+    .monolix2rx$pk$pk <- .updateDdtEq(.tgt, .monolix2rx$pk$pk, .p)
+    .pk3$pk <- .updateDdtEq(.tgt, .pk3$pk, .p)
+  }
   .monolix2rx$equationLine <- .updateDdtEq(.monolix2rx$state, .monolix2rx$equationLine, .monolix2rx$pk)
   .monolix2rx$equationLine <- .updateDdtEq(.monolix2rx$state, .monolix2rx$equationLine, .pk3)
   .w <- which(grepl("^ *[<][-] *$", .monolix2rx$equationLine))

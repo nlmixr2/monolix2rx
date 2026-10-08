@@ -21,12 +21,12 @@ DV = {use=observation, name=CONC, type=continuous}"
 ## used only in [COVARIATE] (latent class probabilities); `indDecl`:
 ## [INDIVIDUAL] declarations (Monolix repeats categorical covariates there);
 ## `obsDist`/`obsExtra`: the observation distribution and extra fields
-## (like ", min=0, max=1").
+## (like ", min=0, max=1"); `delimiter`; `file`: the [FILEINFO] file value.
 .mlxProject <- function(par, err="combined1(a, b)", errPar=c(a=0.05, b=0.1),
                         params=NULL, content=.mlxContent, indInput=NULL,
                         covariate=NULL, indExtra=NULL, pred="Cc",
                         covParams=NULL, indDecl=NULL, obsDist="normal",
-                        obsExtra="") {
+                        obsExtra="", delimiter="comma", file="'{{DATA}}'") {
   .nm <- names(par)
   .in <- unlist(lapply(.nm, function(n) {
     c(paste0(n, "_pop"), if (!is.null(par[[n]]$sd)) paste0("omega_", n))
@@ -48,8 +48,8 @@ DV = {use=observation, name=CONC, type=continuous}"
   paste0("<DATAFILE>
 
 [FILEINFO]
-file = '{{DATA}}'
-delimiter = comma
+file = ", file, "
+delimiter = ", delimiter, "
 header = {{{HEADER}}}
 
 [CONTENT]

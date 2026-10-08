@@ -48,7 +48,7 @@
 kitWriteProject <- function(case, header, dir, est="full") {
   .tasks <- if (identical(case$est, "default")) .kitTasks(est) else case$est
   .sub <- c(PROBLEM=paste("kit case", case$name, "--", case$covers),
-            DATA="data.csv", HEADER=paste(header, collapse=", "),
+            DATA=case$dataFile, HEADER=paste(header, collapse=", "),
             MODEL="model.txt", TASKS=.tasks, SETTINGS=.kitSettings())
   .txt <- .kitExpand(case$mlxtran, .sub, case$name)
   .lines <- strsplit(.txt, "\n", fixed=TRUE)[[1]]

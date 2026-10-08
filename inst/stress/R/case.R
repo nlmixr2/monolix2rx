@@ -35,6 +35,7 @@
 ## - `solve`: extra rxSolve() options for the truth (like method=).
 ## - `mixest`: data column with each subject's true mixture class (its
 ##   position in the categories), given to the imported model as mixest.
+## - `dataFile`: the data file, relative to the project (default data.csv).
 
 .kitEnv <- new.env(parent=emptyenv())
 .kitEnv$cases <- list()
@@ -44,7 +45,8 @@ kitCase <- function(name, covers, tags=character(0), sim, data, mlxtran,
                     write=NULL, postSim=NULL, tol=list(), known=NULL,
                     knownRun=NULL, est="default", dryPred=TRUE,
                     dryOmega=TRUE, nSub=NULL, nbSSDoses=7L,
-                    minMonolix=NULL, solve=list(), mixest=NULL) {
+                    minMonolix=NULL, solve=list(), mixest=NULL,
+                    dataFile="data.csv") {
   stopifnot(is.character(name), length(name) == 1L,
             !grepl("[^A-Za-z0-9_-]", name))
   if (!is.null(.kitEnv$cases[[name]])) {
@@ -58,7 +60,7 @@ kitCase <- function(name, covers, tags=character(0), sim, data, mlxtran,
                                 dryPred=dryPred, dryOmega=dryOmega,
                                 nSub=nSub, nbSSDoses=nbSSDoses,
                                 minMonolix=minMonolix, solve=solve,
-                                mixest=mixest,
+                                mixest=mixest, dataFile=dataFile,
                                 file=if (is.null(.kitEnv$curFile)) NA_character_ else .kitEnv$curFile)
   invisible(name)
 }

@@ -408,3 +408,91 @@ output = Cc
                            k12=.mlxPar(0.3), k21=.mlxPar(0.1)),
                       content=paste0(.mlxContent, "
 ADM = {use=administration}")))
+
+kitVariant("pkmodel-oral-1cmt", "macro-depot-target",
+           "depot(target=Ac, ka) into a compartment() macro",
+           tags=c("pk", "macro"),
+           model="DESCRIPTION: {{PROBLEM}}
+
+[LONGITUDINAL]
+input = {ka, V, Cl}
+
+PK:
+compartment(cmt=1, amount=Ac)
+depot(target=Ac, ka)
+elimination(cmt=1, k=Cl/V)
+Cc = Ac/V
+
+OUTPUT:
+output = Cc
+")
+
+## one administration split between a zero-order and a first-order route
+kitCase(
+  name="macro-dual-absorption",
+  covers="two absorption() macros on one adm: Tk0 (fraction F1) and ka (fraction 1-F1)",
+  tags=c("pk", "macro", "absorption"),
+  sim=function() {
+    ini({
+      F1_pop <- 0.4; Tk0_pop <- 2; ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3
+      omega_F1 ~ 0.25; omega_V ~ 0.04; omega_Cl ~ 0.09
+      a <- 0.05; b <- 0.1
+    })
+    model({
+      F1 <- expit(logit(F1_pop) + omega_F1)
+      Tk0 <- Tk0_pop
+      ka <- ka_pop
+      V <- V_pop * exp(omega_V)
+      Cl <- Cl_pop * exp(omega_Cl)
+      d/dt(depot) <- -ka * depot
+      f(depot) <- 1 - F1
+      d/dt(central) <- ka * depot - Cl / V * central
+      f(central) <- F1
+      dur(central) <- Tk0
+      Cc <- central / V
+      Cc ~ add(a) + prop(b) + combined1()
+    })
+  },
+  data=function(nSub) {
+    .id <- seq_len(nSub)
+    mlxBind(mlxDose(.id, 0, amt=100, cmt=1),
+            mlxDose(.id, 0, amt=100, cmt=2, rate=-2),
+            mlxObs(.id, c(0.5, 1, 1.5, 2, 3, 4, 6, 8, 12, 24, 36), cmt=2))
+  },
+  ## Monolix sees one dose per time
+  write=function(d) {
+    d <- .kitMonolixRows(d)
+    d <- d[!(d$EVID == 1L & d$CMT == 2L), c("ID", "TIME", "AMT", "DV")]
+    d
+  },
+  model="DESCRIPTION: {{PROBLEM}}
+
+[LONGITUDINAL]
+input = {F1, Tk0, ka, V, Cl}
+
+PK:
+F2 = 1 - F1
+compartment(cmt=1, amount=Ac)
+absorption(adm=1, cmt=1, Tk0, p=F1)
+absorption(adm=1, cmt=1, ka, p=F2)
+elimination(cmt=1, k=Cl/V)
+Cc = Ac/V
+
+OUTPUT:
+output = Cc
+",
+  mlxtran=.mlxProject(list(F1=.mlxPar(0.4, 0.5, dist="logitNormal"), Tk0=.mlxPar(2),
+                           ka=.mlxPar(1.2), V=.mlxPar(30, 0.2), Cl=.mlxPar(3, 0.3))))
+
+## Monolix data with an ADM value and AMT=0 on the observation rows
+kitVariant("pkmodel-tk0", "pkmodel-tk0-adm-rows",
+           "Tk0 with ADM=1 and AMT=0 written on every observation row",
+           tags=c("pk", "data"),
+           write=function(d) {
+             d <- .kitMonolixRows(d)
+             d$AMT[is.na(d$AMT)] <- 0
+             d$ADM <- 1L
+             d[, c("ID", "TIME", "AMT", "ADM", "DV")]
+           },
+           mlxtran=.mlxProject(list(Tk0=.mlxPar(2, 0.3), V=.mlxPar(30, 0.2), Cl=.mlxPar(3, 0.3)),
+                               content=paste0(.mlxContent, "\nADM = {use=administration}")))

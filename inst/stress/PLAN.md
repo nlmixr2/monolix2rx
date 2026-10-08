@@ -222,7 +222,10 @@ Notes for later cases:
 - Fixed: the imported data routed doses by the Monolix compartment
   number.  Without an ADM column nothing was routed (`data$adm` partially
   matched `admd`).  `Tk0` doses had no `rate=-2` and transit doses no
-  `evid=7` (`macro-oral-iv-2cmt`, `pkmodel-tk0`, `pkmodel-oral-transit`).
+  `evid=7` (`macro-oral-iv-2cmt`, `pkmodel-tk0`, `pkmodel-oral-transit`);
+  observation rows with an ADM value could become doses
+  (`pkmodel-tk0-adm-rows`); MDV=1 rows were read as doses (`data-mdv`);
+  `depot(target=Ac, ka)` lost its depot ODE (`macro-depot-target`).
 - `compartment(cmt=1, amount=Ac)` without a volume also emits
   `Cc <- Ac/1`; it is harmless while the model defines `Cc` after it.
 - `dose-late-ties`: the data lists the dose before the tied observation;

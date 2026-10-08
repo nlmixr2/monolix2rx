@@ -73,3 +73,48 @@ test_that("a second macro on one adm copies every dose", {
   expect_equal(.r$cmt[5:6], c("central", "central"))
   expect_equal(.r$rate, c(NA, NA, NA, NA, -2, -2))
 })
+
+test_that("routing only touches dose rows and copies unmodified doses", {
+  .admd <- function(admd=1L, rxCmt="depot", dur=FALSE, transit=FALSE) {
+    data.frame(adm=1L, admd=admd, cmt=1L, target=NA_character_, depot=FALSE,
+               dur=dur, f=FALSE, tlag=FALSE, transit=transit, rxCmt=rxCmt)
+  }
+  # transit first, Tk0 second: the Tk0 copy is a plain dose with rate -2
+  .d <- data.frame(id=1L, time=c(0, 1), amt=c(100, NA), dv=c(NA, 1))
+  .r <- .dataConvertAdm(.d, rbind(.admd(transit=TRUE), .admd(2L, "central", dur=TRUE)))
+  expect_equal(.r$evid, c(7L, 0L, 1L))
+  expect_equal(.r$rate, c(NA, NA, -2))
+  # Tk0 first, first order second: the depot copy has no rate
+  .r <- .dataConvertAdm(.d, rbind(.admd(rxCmt="central", dur=TRUE), .admd(2L, "depot")))
+  expect_equal(.r$rate, c(-2, NA, NA))
+  # AMT=0 observations without an ADM column are not doses
+  .d0 <- data.frame(id=1L, time=c(0, 1, 2), amt=c(100, 0, 0), dv=c(NA, 1, 2))
+  .r <- .dataConvertAdm(.d0, .admd(transit=TRUE))
+  expect_equal(.r$evid, c(7L, 0L, 0L))
+  expect_equal(.r$cmt, c("depot", NA, NA))
+  # ADM=1 on every row: observations get neither a rate nor a compartment
+  .d1 <- data.frame(id=1L, time=c(0, 1), amt=c(100, NA), adm=1L, dv=c(NA, 1))
+  .r <- .dataConvertAdm(.d1, .admd(rxCmt="central", dur=TRUE))
+  expect_equal(.r$rate, c(-2, NA))
+  expect_equal(.r$cmt, c("central", NA))
+  # a data infusion time wins over Tk0
+  .r <- .dataConvertAdm(transform(.d, dur=c(3, NA)), .admd(rxCmt="central", dur=TRUE))
+  expect_equal(.r$rate, c(NA_real_, NA))
+  # EVID=4 transit dose: a reset, then the evid 7 dose
+  .d4 <- data.frame(id=1L, time=c(0, 1, 6, 7), amt=c(100, NA, 100, NA),
+                    evid=c(1L, 0L, 4L, 0L), dv=c(NA, 1, NA, 2))
+  .r <- .dataConvertAdm(.d4, .admd(transit=TRUE))
+  expect_equal(.r$evid, c(7L, 0L, 3L, 7L, 0L))
+  expect_equal(.r$time, c(0, 1, 6, 6, 7))
+  expect_null(.r$rxTransitReset)
+})
+
+test_that("MDV=1 rows are not doses", {
+  .d <- data.frame(id=1L, time=c(0, 1, 2), amt=c(100, NA, NA), mdv=c(1L, 1L, 0L), dv=c(NA, 999, 1))
+  expect_equal(.dataEvid(.d)$evid, c(1L, 2L, 0L))
+})
+
+test_that("a depot named by target= keeps its depot compartment", {
+  .pk <- .pk("compartment(cmt=1, amount=Ac)\ndepot(target=Ac, ka)\nelimination(cmt=1, k)")
+  expect_equal(.equation("Cc = Ac/V", .pk)$admd$rxCmt, "Acd")
+})

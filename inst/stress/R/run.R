@@ -43,7 +43,9 @@ kitRunCase <- function(case, outDir, mode="dry", nSub=20L, seed=42L,
     }
     .res$sim <- TRUE
     saveRDS(.sim, file.path(.dir, "sim.rds"))
-    .header <- kitWriteData(case, .sim$data, file.path(.dir, "data.csv"))
+    .df <- file.path(.dir, case$dataFile)
+    dir.create(dirname(.df), showWarnings=FALSE, recursive=TRUE)
+    .header <- kitWriteData(case, .sim$data, .df)
     kitWriteProject(case, .header, .dir, est=est)
     .dry <- kitImport(.dir, log="import-dry.log")
     .res$dryImport <- is.na(.dry$error)

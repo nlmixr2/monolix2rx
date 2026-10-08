@@ -531,28 +531,20 @@
   .ret$rxCmt <- vapply(seq_along(.ret$target),
                        function(i) {
                          .cur <- .ret$target[i]
-                         # env$name is indexed by the Monolix compartment
-                         .c <- .ret$cmt[i]
-                         if (is.na(.c) || length(env$name) < .c) {
-                           return(.cur)
-                         }
                          if (is.na(.cur)) {
+                           # env$name is indexed by the Monolix compartment
+                           .c <- .ret$cmt[i]
+                           if (is.na(.c) || length(env$name) < .c) {
+                             return(.cur)
+                           }
                            .cur <- env$name[[.c]]
-                           if (.ret$depot[i]) {
-                             .cmtName <- paste0(.cur, env$depotPostfix)
-                             if (.cmtName == paste0("central", env$depotPostfix)) {
-                               .cmtName <- "depot" # align with linCmt
-                             }
-                             return(.cmtName)
+                         }
+                         if (.ret$depot[i]) {
+                           .cmtName <- paste0(.cur, env$depotPostfix)
+                           if (.cmtName == paste0("central", env$depotPostfix)) {
+                             .cmtName <- "depot" # align with linCmt
                            }
-                         } else if (.ret$depot[i]) {
-                           if (.ret$depot[i]) {
-                             .cmtName <- paste0(.cur, env$depotPostfix)
-                             if (.cmtName == paste0("central", env$depotPostfix)) {
-                               .cmtName <- "depot" # align with linCmt
-                             }
-                             return(.cmtName)
-                           }
+                           return(.cmtName)
                          }
                          .cur
                        }, character(1), USE.NAMES=FALSE)

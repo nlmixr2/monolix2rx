@@ -179,3 +179,8 @@ test_that("EQUATION: lines before pkmodel() stay before its ODEs", {
   expect_equal(.rx[length(.rx)], "E <- 2 * Cc")
   expect_true(any(grepl("^d/dt[(]central[)]", .rx[3:5])))
 })
+
+test_that("depot(target=) into a macro compartment", {
+  .rx <- .equation("Cc = Ac/V", .pk("compartment(cmt=1, amount=Ac)\ndepot(target=Ac, ka, Tlag)\nelimination(cmt=1, k=Cl/V)"))$rx
+  expect_equal(.rx[1:3], c("d/dt(Acd) <-  - ka*Acd", "alag(Acd) <- Tlag", "d/dt(Ac) <-  - Cl/V*Ac + ka*Acd"))
+})

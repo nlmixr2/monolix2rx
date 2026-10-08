@@ -129,10 +129,14 @@ kitImportSolve <- function(m, etas, case, mix=NULL) {
       .d[[.ini$name[.i]]] <- .kitIovColumn(.d, etas, .ini$name[.i], .ini$condition[.i])
     }
   }
+  ## only observations (MDV=1 rows are imported as evid 2)
+  .d$kitObs <- if (is.null(.d[["evid"]])) 1L else as.integer(.d$evid %in% 0L)
   .s <- suppressMessages(do.call(rxode2::rxSolve,
                                  c(list(m$monolixModelIwres, .p, .d,
-                                        returnType="data.frame", addDosing=FALSE),
+                                        returnType="data.frame", addDosing=FALSE,
+                                        keep="kitObs"),
                                    .kitSolveOpts(.kitNbdoses(m)), case$solve)))
+  .s <- .s[.s$kitObs == 1L, ]
   data.frame(key=.kitKey(as.character(.s$id), .s$time), mlx=.s$ipredSim,
              iwres=if (is.null(.s$iwres)) NA_real_ else .s$iwres)
 }

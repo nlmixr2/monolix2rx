@@ -320,12 +320,14 @@
 .dataConvertAdm <- function(data, admd) {
   data$cmt <- NA_character_
   data$admd <- NA_integer_
+  .dose <- .dataIsDose(data)
   # without an administration column every dose is adm 1; [[ ]] since
   # data$adm partially matches admd
   .adm <- data[["adm"]]
-  if (is.null(.adm) && !is.null(data[["amt"]])) {
-    .adm <- ifelse(is.na(data[["amt"]]), NA_integer_, 1L)
-  }
+  if (is.null(.adm)) .adm <- 1L
+  .adm <- ifelse(.dose, .adm, NA_integer_)
+  # later routes copy the doses before any route changed them
+  .orig <- data
   .extra <- NULL
   for (i in seq_along(admd$adm)) {
     .cur <- admd[i, ]
@@ -337,10 +339,9 @@
       if (isTRUE(.cur$dur)) data <- .dataDurRate(data, .w)
       if (isTRUE(.cur$transit)) data <- .dataTransitEvid(data, .w)
     } else {
-      # add an extra item
-      .w <- which(.adm == .cur$adm & data$admd == 1L)
+      .w <- which(.adm == .cur$adm)
       if (length(.w) > 0L) {
-        .dE <- data[.w, ]
+        .dE <- .orig[.w, ]
         .dE$admd <- .cur$admd
         .dE$cmt <- .cmt
         if (isTRUE(.cur$dur)) .dE <- .dataDurRate(.dE, seq_along(.w))
@@ -349,7 +350,21 @@
       }
     }
   }
-  .dataBindFill(data, .extra)
+  .dataTransitReset(.dataBindFill(data, .extra))
+}
+
+#' Monolix dose rows: an amount, and a dose event when there is an evid column
+#'
+#' @param data dataset
+#' @return logical vector
+#' @noRd
+#' @author Matthew L. Fidler
+.dataIsDose <- function(data) {
+  .amt <- data[["amt"]]
+  if (is.null(.amt)) return(rep(FALSE, nrow(data)))
+  .ret <- !is.na(.amt) & .amt != 0
+  if (!is.null(data[["evid"]])) .ret <- .ret & data$evid %in% c(1L, 4L)
+  .ret
 }
 
 #' rbind when rate/evid were added to only one side
@@ -361,15 +376,14 @@
 .dataBindFill <- function(a, b) {
   if (is.null(a)) return(b)
   if (is.null(b)) return(a)
-  .fill <- function(to, from) {
-    for (.n in setdiff(names(from), names(to))) {
-      to[[.n]] <- if (.n == "evid") ifelse(is.na(to[["amt"]]), 0L, 1L) else from[[.n]][NA_integer_]
-    }
-    to
+  .fill <- function(.to, .from) {
+    if (!is.null(.from[["evid"]]) && is.null(.to[["evid"]])) .to <- .dataEvid(.to)
+    for (.n in setdiff(names(.from), names(.to))) .to[[.n]] <- .from[[.n]][NA_integer_]
+    .to
   }
-  a <- .fill(a, b)
-  b <- .fill(b, a)
-  rbind(a, b[, names(a)])
+  .a <- .fill(a, b)
+  .b <- .fill(b, .a)
+  rbind(.a, .b[, names(.a)])
 }
 
 #' Zero-order absorption doses (Tk0) are modeled infusions
@@ -383,6 +397,8 @@
   if (length(w) == 0L) return(data)
   if (is.null(data[["rate"]])) data$rate <- NA_real_
   .w <- w[is.na(data$rate[w]) | data$rate[w] == 0]
+  # a data infusion time wins
+  if (!is.null(data[["dur"]])) .w <- .w[is.na(data$dur[.w]) | data$dur[.w] == 0]
   data$rate[.w] <- -2
   data
 }
@@ -396,14 +412,53 @@
 #' @author Matthew L. Fidler
 .dataTransitEvid <- function(data, w) {
   if (length(w) == 0L) return(data)
-  if (is.null(data[["evid"]])) {
-    data$evid <- ifelse(is.na(data[["amt"]]), 0L, 1L)
-    if (!is.null(data[["mdv"]])) {
-      data$evid[data$evid == 0L & !is.na(data$mdv) & data$mdv == 1L] <- 2L
-    }
+  if (is.null(data[["evid"]])) data <- .dataEvid(data)
+  # EVID=4 also resets: .dataTransitReset() adds the reset before the dose
+  .w4 <- w[data$evid[w] %in% 4L]
+  if (length(.w4) > 0L) {
+    if (is.null(data[["rxTransitReset"]])) data$rxTransitReset <- FALSE
+    data$rxTransitReset[.w4] <- TRUE
   }
-  .w <- w[is.na(data$evid[w]) | data$evid[w] == 1L]
+  .w <- w[is.na(data$evid[w]) | data$evid[w] %in% c(1L, 4L)]
   data$evid[.w] <- 7L
+  data
+}
+
+#' Insert an evid=3 reset before each transit dose that was EVID=4
+#'
+#' @param data dataset
+#' @return data without the rxTransitReset column
+#' @noRd
+#' @author Matthew L. Fidler
+.dataTransitReset <- function(data) {
+  .r <- data[["rxTransitReset"]]
+  if (is.null(.r)) return(data)
+  .r <- which(!is.na(.r) & .r)
+  data$rxTransitReset <- NULL
+  if (length(.r) == 0L) return(data)
+  .reset <- data[.r, ]
+  .reset$evid <- 3L
+  .reset$amt <- NA
+  .reset$cmt <- NA_character_
+  .ret <- rbind(data, .reset)
+  .ret <- .ret[order(c(seq_len(nrow(data)), .r - 0.5)), ]
+  rownames(.ret) <- NULL
+  .ret
+}
+
+#' Monolix doses are the rows with an amount; MDV=1 only drops an observation
+#'
+#' Without an evid column rxode2 would read an MDV=1 row as a dose.
+#'
+#' @param data dataset
+#' @return data with an evid column
+#' @noRd
+#' @author Matthew L. Fidler
+.dataEvid <- function(data) {
+  if (is.null(data[["evid"]])) data$evid <- ifelse(.dataIsDose(data), 1L, 0L)
+  if (!is.null(data[["mdv"]])) {
+    data$evid[data$evid == 0L & !is.na(data$mdv) & data$mdv == 1L] <- 2L
+  }
   data
 }
 
@@ -460,6 +515,7 @@ monolixDataImport <- function(ui, data, na.strings = c("NA", ".")) {
   }
   data <- .dataRenameFromMlxtran(data, .mlxtran)
   data <- .dataConvertAdm(data, ui$admd)
+  if (!is.null(data[["mdv"]])) data <- .dataEvid(data)
   data <- .dataConvertEndpoints(data, ui)
   .ld <- tolower(names(data))
   .wt <- which(.ld == "time")

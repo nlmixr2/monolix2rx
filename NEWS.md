@@ -121,19 +121,29 @@
   `.getNbdoses()` directly, needs it for `nbdoses` below 6.
 
 * Fixed the dose routing of the imported data (`$monolixData`):
-  - Without an administration column the doses were not routed at all
-    (`data$adm` partially matched the new `admd` column).  They are now
-    `adm=1`, as in Monolix.
-  - Doses now go to the rxode2 compartment by name.  Before, the Monolix
-    compartment number was used, so an `iv(adm=2, cmt=1)` dose next to
-    `oral(adm=1, cmt=1)` went to the depot.
-  - A second macro on one administration copies every dose, not only a
-    single dose.
-  - `Tk0` (zero-order absorption) doses now get `rate=-2`, so `dur()`
-    applies.
-  - Transit doses (`Mtt`, `Ktr`) now get `evid=7`, so the dose only starts
-    `transit()` and is not also added to the depot.
-  - The administration table (`$admd`) has a new `transit` column.
+  - Without an administration column no dose was routed, because
+    `data$adm` partially matched the `admd` column added during the
+    import; doses now default to `adm=1`, as in Monolix.
+  - Doses went to the Monolix compartment number instead of the rxode2
+    compartment, so an `iv(adm=2, cmt=1)` dose next to `oral(adm=1, cmt=1)`
+    went to the depot; they are now routed by compartment name.
+  - Only dose rows (an amount, and EVID 1 or 4 when there is an EVID
+    column) were routed; observation rows with an `ADM` value or `AMT=0`
+    could become doses.
+  - A second macro on one administration copied only a single dose, and
+    copied it after the first route had changed it; it now copies every
+    unmodified dose.
+  - `Tk0` (zero-order absorption) doses got no `rate=-2`, so `dur()` was
+    ignored; a data infusion time still takes precedence.
+  - Transit doses (`Mtt`, `Ktr`) were also added to the depot; they now
+    get `evid=7` (an `EVID=4` dose becomes a reset followed by `evid=7`).
+    The administration table (`$admd`) gained a `transit` column.
+  - With an `MDV` column and no `EVID` column, rxode2 read the `MDV=1`
+    rows as doses; they are now `evid=2`.
+
+* Fixed `depot(target=Ac, ka)` into a `compartment()` macro: the depot
+  ODE and its `ka` transfer were dropped (only `EQUATION:` states received
+  them).
 
 * Fixed `predRtol` (and the pred line of the validation), which was
   relative to Monolix's `ipred` instead of its `pred`; the iwres line of
