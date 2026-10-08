@@ -127,13 +127,17 @@ one group with probability `pk`.  So:
 - `bsmm(f1, p1, f2, p2)` -> `mix(f1, p1_pop, f2)`: rxode2 `mix()` needs
   population probabilities, so `p1` must be a literal or an individual
   parameter without variability or covariates; its typical value becomes
-  a natural-scale `ini()` parameter (`p1_pop <- c(0, 0.3, 1)`) and the
-  model line `p1 <- p1_pop`.  A probability with an eta is refused.
+  a natural-scale `ini()` parameter (`p1_pop <- 0.3`, unbounded:
+  nlmixr2 estimates `mix()` probabilities on the mlogit scale) and the
+  model line `p1 <- p1_pop`.  A probability with an eta is refused, a last
+  probability other than `1 - p1 - ...` warns, and `mix()` needs an eta
+  somewhere in the model.  A population parameter used directly as a
+  probability (no `[INDIVIDUAL]` definition) is not supported yet.
 - Latent covariates (`P(lcat=1)=plcat1`) -> `lcat <- mix(1, plcat1, 2)`.
 - Mixture models are not validated until Monolix's class per subject is
   read (rxode2 would draw the classes at random).
 
-| case | Monolix form | status |
+| case | Monolix form | translate mode |
 |---|---|---|
 | `bsmm-latent-cov-cl` | latent categorical covariate on `Cl` | PASS |
 | `bsmm-structural` | `bsmm(C1, p1, C2, 1-p1)` | PASS |
@@ -189,8 +193,8 @@ per subject-occasion; `dfSub` counts subjects.
    record `known=` diagnoses, confirm the resaved import, freeze the mock's
    per-occasion and mixture output layouts.
    - 2.5 **Importer PRs**, each turning cases XFAIL -> PASS: `delay()`;
-     latent BSMM -> `mix()`; structural `bsmm()` -> `mix()`; `wsmm()` -> weighted prediction +
-     simulation; IOV fixes (name match, per-occasion validation, several
+     latent BSMM -> `mix()`; structural `bsmm()` -> `mix()`; `wsmm()` ->
+     weighted prediction; IOV fixes (name match, per-occasion validation, several
      occasion columns).  Additive only to babelmixr2-facing fields.
 4. **Full case list**; record results per Monolix version.
 
@@ -245,6 +249,9 @@ Notes for later cases:
   subject as `mixest`; where Monolix writes it is to confirm.
 - A project without `<MONOLIX> [SETTINGS] exportpath` stops the import
   (`R/parameterUpdate.R`), seen while writing the latent-covariate test.
+
+- `knownRun=` turns any run-mode failure into XFAIL, including a Monolix
+  run that did not finish; it should match the expected reason.
 
 ## Risks
 

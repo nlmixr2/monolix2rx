@@ -22,6 +22,11 @@
   .ret <- .mixtureWalk(model, .env)
   .prob <- .env$prob
   if (!is.null(.prob)) {
+    .vars <- .env$vars
+    if (!any(vapply(.vars, function(v) !is.null(v$sd), logical(1)))) {
+      stop("bsmm() (rxode2 mix()) needs a parameter with between-subject variability",
+           call.=FALSE)
+    }
     if (utils::packageVersion("rxode2") < "5.1.8") {
       stop("bsmm() (mix()) needs rxode2 >= 5.1.8", call.=FALSE)
     }
@@ -49,6 +54,10 @@
   if (identical(.fun, quote(bsmm))) {
     .k <- seq(1, length(.args), by=2)
     .n <- length(.k)
+    if (.n < 2L || length(.args) %% 2L != 0L) {
+      stop("bsmm() needs at least two (model, probability) pairs", call.=FALSE)
+    }
+    .mixtureLastProb(.args[.k + 1])
     .prob <- .mixtureProb(.args[.k[-.n] + 1], env$vars)
     if (is.null(env$prob)) {
       env$prob <- .prob
@@ -63,6 +72,30 @@
     return(as.call(.mix))
   }
   as.call(c(list(.fun), .args))
+}
+
+#' Warn when the last bsmm() probability is not 1 minus the others
+#'
+#' rxode2's mix() takes the last group's probability as the remainder.
+#'
+#' @param p list of all the probability expressions
+#' @return nothing, called for the warning
+#' @noRd
+#' @author Matthew L. Fidler
+.mixtureLastProb <- function(p) {
+  .n <- length(p)
+  .last <- p[[.n]]
+  .rest <- p[-.n]
+  if (all(vapply(p, is.numeric, logical(1)))) {
+    if (abs(.last - (1 - sum(unlist(.rest)))) < 1e-8) return(invisible())
+  } else {
+    .expect <- Reduce(function(a, b) bquote(.(a) - .(b)), .rest, 1)
+    if (identical(gsub(" ", "", deparse1(.last)), gsub(" ", "", deparse1(.expect)))) {
+      return(invisible())
+    }
+  }
+  warning("the last bsmm() probability '", deparse1(.last), "' is taken as 1 minus the others",
+          call.=FALSE)
 }
 
 #' The ini() probabilities of a bsmm() call
@@ -136,7 +169,8 @@
       .new <- if (.parsGetFixed(pars, .n)) {
         bquote(.(str2lang(.n)) <- fixed(.(.v)))
       } else {
-        bquote(.(str2lang(.n)) <- c(0, .(.v), 1))
+        # unbounded: nlmixr2 estimates mix() probabilities on the mlogit scale
+        bquote(.(str2lang(.n)) <- .(.v))
       }
     }
     .w <- which(vapply(.body, function(l) {
