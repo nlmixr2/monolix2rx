@@ -286,3 +286,87 @@ kitVariant("iov-cl-basic", "iov-nested",
                                            content=paste0(.mlxContent, "
 OCC1 = {use=occasion}
 OCC2 = {use=occasion}")), fixed=TRUE), fixed=TRUE), fixed=TRUE)))
+
+## IOV with a delay: the occasion changes Cl while the delayed state
+## carries its history across the boundary (no washout)
+kitVariant("dde-delayed-effect", "iov-dde",
+           "IOV on Cl in a delay() model; the second occasion starts with drug and delayed history on board",
+           tags=c("iov", "dde"),
+           knownRun=.iovKnownRun,
+           sim=function() {
+             ini({
+               ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3
+               Kin_pop <- 10; Kout_pop <- 0.1; Imax_pop <- 0.8; IC50_pop <- 1; tau_pop <- 4
+               omega_Cl ~ 0.09; omega_tau ~ 0.04
+               gamma_Cl ~ 0.04 | OCC
+               a <- 1; b <- 0.05
+             })
+             model({
+               ka <- ka_pop
+               V <- V_pop
+               Cl <- Cl_pop * exp(omega_Cl + gamma_Cl)
+               Kin <- Kin_pop
+               Kout <- Kout_pop
+               Imax <- Imax_pop
+               IC50 <- IC50_pop
+               tau <- tau_pop * exp(omega_tau)
+               R(0) <- Kin / Kout
+               d/dt(depot) <- -ka * depot
+               d/dt(central) <- ka * depot - Cl / V * central
+               Cd <- delay(central, tau) / V
+               d/dt(R) <- Kin * (1 - Imax * Cd / (Cd + IC50)) - Kout * R
+               R ~ add(a) + prop(b) + combined1()
+             })
+           },
+           data=function(nSub) {
+             .id <- seq_len(nSub)
+             mlxBind(mlxDose(.id, 0, amt=100, cmt=1, OCC=1L),
+                     mlxObs(.id, c(pkTimes(24), 36), cmt=3, OCC=1L),
+                     mlxDose(.id, 48, amt=100, cmt=1, OCC=2L),
+                     mlxObs(.id, 48 + c(0.5, 1, 2, 4, 6, 8, 12, 24, 48, 72), cmt=3, OCC=2L))
+           },
+           columns=c("ID", "TIME", "AMT", "OCC", "DV"),
+           mlxtran=.mlxProject(list(ka=.mlxPar(1.2), V=.mlxPar(30), Cl=.mlxPar(3, 0.3, iov=0.2),
+                                    Kin=.mlxPar(10), Kout=.mlxPar(0.1), Imax=.mlxPar(0.8),
+                                    IC50=.mlxPar(1), tau=.mlxPar(4, 0.2)),
+                               errPar=c(a=1, b=0.05), pred="R",
+                               content=paste0(.mlxContent, "\nOCC = {use=occasion}")))
+
+## IOV inside a between-subject mixture: V varies by occasion in both groups
+kitVariant("bsmm-structural", "iov-mixture",
+           "bsmm(C1, p1, C2, 1-p1) with IOV on V over two dosing occasions",
+           tags=c("iov", "mixture", "bsmm"),
+           knownRun="IPRED needs Monolix's estimated class per subject and per-occasion individual parameters (not read yet)",
+           sim=function() {
+             ini({
+               V_pop <- 30; Cl1_pop <- 1; Cl2_pop <- 5
+               omega_V ~ 0.04; omega_Cl1 ~ 0.09; omega_Cl2 ~ 0.09
+               gamma_V ~ 0.04 | OCC
+               a <- 0.05; b <- 0.1
+             })
+             model({
+               V <- V_pop * exp(omega_V + gamma_V)
+               Cl1 <- Cl1_pop * exp(omega_Cl1)
+               Cl2 <- Cl2_pop * exp(omega_Cl2)
+               d/dt(A1) <- -Cl1 / V * A1
+               d/dt(A2) <- -Cl2 / V * A2
+               Cc <- (POP == 1) * A1 / V + (POP == 2) * A2 / V
+               Cc ~ add(a) + prop(b) + combined1()
+             })
+           },
+           data=function(nSub) {
+             .id <- seq_len(nSub)
+             mlxBind(mlxDose(.id, 0, amt=100, cmt=1, OCC=1L), mlxDose(.id, 0, amt=100, cmt=2, OCC=1L),
+                     mlxObs(.id, c(0.5, 1, 2, 4, 8, 12, 24), cmt=1, OCC=1L),
+                     mlxDose(.id, 48, amt=100, cmt=1, OCC=2L), mlxDose(.id, 48, amt=100, cmt=2, OCC=2L),
+                     mlxObs(.id, 48 + c(0.5, 1, 2, 4, 8, 12, 24, 36), cmt=1, OCC=2L),
+                     cov=mlxCov(nSub, POP=function(n) sample.int(2L, n, replace=TRUE, prob=c(0.4, 0.6))))
+           },
+           write=function(d) {
+             d <- .kitMonolixRows(d)
+             d <- d[!(d$EVID == 1L & d$CMT != 1L), ]
+             d[, c("ID", "TIME", "AMT", "OCC", "DV")]
+           },
+           mlxtran=.mlxProject(list(V=.mlxPar(30, 0.2, iov=0.2), Cl1=.mlxPar(1, 0.3),
+                                    Cl2=.mlxPar(5, 0.3), p1=.mlxPar(0.4, dist="logitNormal")),
+                               content=paste0(.mlxContent, "\nOCC = {use=occasion}")))

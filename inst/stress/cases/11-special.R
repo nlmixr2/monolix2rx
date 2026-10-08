@@ -66,3 +66,105 @@ TIME = {use=time}
 AMT = {use=amount}
 DV = {use=observation, name={y1, y2}, yname={'1', '2'}, type={continuous, continuous}}
 YTYPE = {use=observationtype}"))
+
+## Discrete observations: the observation model is in the model file, so
+## the project has no [LONGITUDINAL] DEFINITION and no error parameters
+.discProject <- function(par, obs) {
+  .p <- .mlxProject(par, content="ID = {use=identifier}
+TIME = {use=time}
+DV = {use=observation, name=CONC, type=discrete}")
+  .p <- sub("[LONGITUDINAL]\ninput = {a, b}\n\nfile = '{{MODEL}}'\n\nDEFINITION:\nCONC = {distribution=normal, prediction=Cc, errorModel=combined1(a, b)}",
+            "[LONGITUDINAL]\nfile = '{{MODEL}}'", .p, fixed=TRUE)
+  .p <- sub("a = {value=0.05, method=MLE}\nb = {value=0.1, method=MLE}\n", "", .p, fixed=TRUE)
+  .p <- gsub("CONC", obs, .p, fixed=TRUE)
+  if (grepl("errorModel", .p, fixed=TRUE) || grepl("b = {value", .p, fixed=TRUE)) {
+    stop("discrete project still has a continuous observation model", call.=FALSE)
+  }
+  .p
+}
+
+.discKnown <- "discrete observations (count, categorical) are not translated (.handleSingleEndpoint)"
+
+kitCase(
+  name="disc-count-poisson",
+  covers="count observation: log(P(Y=k)) = -lambda + k*log(lambda) - factln(k), lambda decaying in time",
+  tags=c("discrete", "count"),
+  known=.discKnown,
+  sim=function() {
+    ini({
+      lambda0_pop <- 8; kdecay_pop <- 0.05
+      omega_lambda0 ~ 0.09
+    })
+    model({
+      lambda0 <- lambda0_pop * exp(omega_lambda0)
+      kdecay <- kdecay_pop
+      lambda <- lambda0 * exp(-kdecay * time)
+      Y ~ pois(lambda)
+    })
+  },
+  data=function(nSub) mlxObs(seq_len(nSub), c(1, 2, 4, 7, 10, 14, 21, 28), cmt=1),
+  columns=c("ID", "TIME", "DV"),
+  model="DESCRIPTION: {{PROBLEM}}
+
+[LONGITUDINAL]
+input = {lambda0, kdecay}
+
+EQUATION:
+lambda = lambda0*exp(-kdecay*t)
+
+DEFINITION:
+Y = {type=count, log(P(Y=k)) = -lambda + k*log(lambda) - factln(k)}
+
+OUTPUT:
+output = Y
+",
+  mlxtran=.discProject(list(lambda0=.mlxPar(8, 0.3), kdecay=.mlxPar(0.05)), "Y"))
+
+## proportional odds on three ordered categories 0 < 1 < 2; rxode2's
+## ordinal draws 1..3, the data set holds 0..2
+kitCase(
+  name="disc-categorical-ordinal",
+  covers="ordered categorical observation (categories {0, 1, 2}) with logit(P(Level<=k)) proportional odds",
+  tags=c("discrete", "categorical"),
+  known=.discKnown,
+  sim=function() {
+    ini({
+      th1_pop <- -0.5; th2_pop <- 1.5; slope_pop <- 0.05
+      omega_th1 ~ 0.25
+    })
+    model({
+      th1 <- th1_pop + omega_th1
+      th2 <- th2_pop
+      slope <- slope_pop
+      lp0 <- th1 - slope * time
+      p0 <- expit(lp0)
+      p1 <- expit(lp0 + th2) - p0
+      Level ~ c(p0, p1)
+    })
+  },
+  data=function(nSub) mlxObs(seq_len(nSub), c(1, 2, 4, 7, 10, 14, 21, 28), cmt=1),
+  postSim=function(d, s) {
+    .m <- match(d$ROWID, s$ROWID)
+    .obs <- d$EVID == 0 & d$MDV == 0 & !is.na(.m)
+    d$DV[.obs] <- s$sim[.m[.obs]] - 1
+    d
+  },
+  columns=c("ID", "TIME", "DV"),
+  model="DESCRIPTION: {{PROBLEM}}
+
+[LONGITUDINAL]
+input = {th1, th2, slope}
+
+EQUATION:
+lp0 = th1 - slope*t
+
+DEFINITION:
+Level = {type=categorical, categories={0, 1, 2},
+logit(P(Level<=0)) = lp0,
+logit(P(Level<=1)) = lp0 + th2}
+
+OUTPUT:
+output = Level
+",
+  mlxtran=.discProject(list(th1=.mlxPar(-0.5, 0.5, dist="normal"), th2=.mlxPar(1.5),
+                            slope=.mlxPar(0.05)), "Level"))

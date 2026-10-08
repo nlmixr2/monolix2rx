@@ -90,7 +90,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `08-dde.R` | delay differential equations (below) |
 | `09-mixture.R` | BSMM and WSMM mixtures (below) |
 | `10-iov.R` | inter-occasion variability (below) |
-| `11-special.R` | discrete/categorical endpoints, parent/metabolite, resaved project re-import |
+| `11-special.R` | parent/metabolite (YTYPE); count and ordered categorical observations (XFAIL: not translated); resaved project re-import (run mode) |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -176,7 +176,8 @@ three things to check first:
 | `iov-ss` | SS at each occasion with drug still on board at the second (reset vs. added dose: to confirm in run mode) |
 | `iov-time-varying-cov` | covariate (`lw70`) changing between occasions |
 | `iov-nested` | `OCC1`/`OCC2`, `varlevel={id, id*occ1, id*occ1*occ2}` |
-| `iov-dde`, `iov-mixture` | combinations |
+| `iov-dde` | IOV on `Cl` in a `delay()` model, delayed history across the occasion change |
+| `iov-mixture` | `bsmm()` with IOV on `V` over two dosing occasions |
 
 Translate checks add: each omega level vs its truth matrix; the `ini()`
 occasion variable exists in the imported data.  Run checks add: ipred with
@@ -252,6 +253,12 @@ Notes for later cases:
 - Delay models are solved with `dop853` even for `odeType=stiff`
   (rxode2's own default is `dop853+ros4`); `.getDelay()` is not exported
   for babelmixr2's control.
+
+- Discrete observations (`type=count`, `type=categorical`) stop the
+  translation (`.handleSingleEndpoint()`); `disc-count-poisson` and
+  `disc-categorical-ordinal` are XFAIL.  Translating them (rxode2
+  `pois()`/ordinal `c(...)` or `ll()`) also needs a translate check other
+  than PRED/IPRED (the likelihood at the true parameters).
 
 ## Truth gaps to close with the importer work
 
