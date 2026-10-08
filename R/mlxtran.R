@@ -164,6 +164,18 @@
     .ret <- .parameterUpdate(.ret)
   }
   .ret <- .mlxtranCov(.ret)
+  if (!update && !is.null(.ret$PARAMETER)) {
+    # the covariance is converted at Monolix's final estimates, not the
+    # initial ones the model keeps
+    .fin <- try(suppressWarnings(suppressMessages(.mlxtranCov(.parameterUpdate(.ret)))),
+                silent=TRUE)
+    if (!inherits(.fin, "try-error") && !is.null(.fin)) {
+      for (.a in c("covSaTransformed", "covSaUntransformed", "covLinTransformed",
+                   "covLinUntransformed", "covJac")) {
+        attr(.ret, .a) <- attr(.fin, .a)
+      }
+    }
+  }
   attr(.ret, "desc") <- .mlxEnv$desc
   class(.ret) <- "monolix2rxMlxtran"
   .ret

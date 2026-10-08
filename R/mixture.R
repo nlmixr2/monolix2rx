@@ -202,8 +202,12 @@
 .mixtureThetaMat <- function(mat, prob, mlxtran) {
   .n <- intersect(prob$name[!is.na(prob$var)], dimnames(mat)[[1]])
   if (length(.n) == 0L) return(mat)
-  .jac <- .mlxtranJacobianDiag(mlxtran$MODEL$INDIVIDUAL$DEFINITION,
-                               mlxtran$PARAMETER$PARAMETER)
+  # the Jacobian the covariance was converted with (final estimates)
+  .jac <- attr(mlxtran, "covJac")
+  if (is.null(.jac)) {
+    .jac <- .mlxtranJacobianDiag(mlxtran$MODEL$INDIVIDUAL$DEFINITION,
+                                 mlxtran$PARAMETER$PARAMETER)
+  }
   .d <- stats::setNames(rep(1, nrow(mat)), dimnames(mat)[[1]])
   .d[.n] <- .jac[.n]
   .ret <- diag(.d, nrow=length(.d)) %*% mat %*% diag(.d, nrow=length(.d))

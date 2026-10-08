@@ -168,7 +168,9 @@
   natural-scale covariance while the `ini()` estimates of log-, logit- and
   probit-normal parameters are on the transformed scale, so `rxSolve()`
   with `nStud > 1` drew their uncertainty on the wrong scale.  `thetaMat`
-  is now on the `ini()` scale for every Monolix version.
+  is now on the `ini()` (transformed) scale for both the older
+  natural-scale and the newer transformed Monolix outputs, converted at
+  Monolix's final estimates.
 
 * Fixed `predRtol` (and the pred line of the validation), which was
   relative to Monolix's `ipred` instead of its `pred`; the iwres line of

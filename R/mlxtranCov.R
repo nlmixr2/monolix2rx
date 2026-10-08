@@ -140,5 +140,6 @@
   attr(.mlx, "covSaUntransformed") <- .saUntransformed
   attr(.mlx, "covLinTransformed") <- .linTransformed
   attr(.mlx, "covLinUntransformed") <- .linUntransformed
+  attr(.mlx, "covJac") <- .jac
   .mlx
 }

@@ -49,7 +49,8 @@ pkgTheo <- system.file("theo", package="monolix2rx")
 mlxtranFile <- file.path(pkgTheo, "theophylline_project.mlxtran")
 
 rx <- monolix2rx(mlxtranFile)
-#> ℹ updating model values to final parameter estimates
+#> ℹ integrated model file 'oral1_1cpt_kaVCl.txt' into mlxtran object
+#> ℹ updating model values to final parameter estimates from tp/populationParameters.txt
 #> ℹ done
 #> ℹ reading run info (# obs, doses, Monolix Version, etc) from summary.txt
 #> ℹ done
@@ -58,7 +59,6 @@ rx <- monolix2rx(mlxtranFile)
 #> ℹ imported monolix and translated to rxode2 compatible data ($monolixData)
 #> ℹ imported monolix ETAS (_SAEM) imported to rxode2 compatible data ($etaData)
 #> ℹ imported monolix pred/ipred data to compare ($predIpredData)
-#> using C compiler: ‘gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0’
 #> ℹ solving ipred problem
 #> ℹ done
 #> ℹ solving pred problem
@@ -93,16 +93,25 @@ rx
 #>     dfObs <- 120
 #>     dfSub <- 12
 #>     thetaMat <- lotri({
-#>         ka_pop + V_pop + Cl_pop ~ c(0.09785, 0.00082606, 0.00041937, 
-#>             -4.2833e-05, -6.7957e-06, 1.1318e-05)
-#>         a + b ~ c(0.015333, -0.0026458, 0.00056232)
+#>         ka_pop ~ 0.0416560546073138
+#>         V_pop ~ c(0.00118325511651798, 0.00202122030181813)
+#>         Cl_pop ~ c(-0.000695680378916356, -0.000371376957496329, 
+#>             0.00701317875319478)
+#>         omega_ka ~ c(omega_ka = 0.022259)
+#>         omega_V ~ c(omega_ka = -7.6443e-05, omega_V = 0.0014578)
+#>         omega_Cl ~ c(omega_ka = 3.062e-06, omega_V = -1.2912e-05, 
+#>             omega_Cl = 0.0039578)
+#>         a ~ c(omega_ka = -0.0001227, omega_V = -6.5914e-05, omega_Cl = -0.00041194, 
+#>             a = 0.015333)
+#>         b ~ c(omega_ka = -1.3886e-05, omega_V = -3.1105e-05, 
+#>             omega_Cl = 5.2805e-05, a = -0.0026458, b = 0.00056232)
 #>     })
 #>     validation <- c("ipred relative difference compared to Monolix ipred: 0.04%; 95% percentile: (0%,0.52%); rtol=0.00038", 
 #>         "ipred absolute difference compared to Monolix ipred: 95% percentile: (0.000362, 0.00848); atol=0.00254", 
-#>         "pred relative difference compared to Monolix pred: 0%; 95% percentile: (0%,0%); rtol=6.6e-07", 
+#>         "pred relative difference compared to Monolix pred: 0%; 95% percentile: (0%,0%); rtol=6.78e-07", 
 #>         "pred absolute difference compared to Monolix pred: 95% percentile: (1.6e-07, 1.27e-05); atol=3.66e-06", 
-#>         "iwres relative difference compared to Monolix iwres: 0%; 95% percentile: (0.06%,32.22%); rtol=0.0153", 
-#>         "iwres absolute difference compared to Monolix pred: 95% percentile: (0.000403, 0.0138); atol=0.00305")
+#>         "iwres relative difference compared to Monolix iwres: 1.53%; 95% percentile: (0.06%,32.22%); rtol=0.0153", 
+#>         "iwres absolute difference compared to Monolix iwres: 95% percentile: (0.000403, 0.0138); atol=0.00305")
 #>     ini({
 #>         ka_pop <- 0.426994483535611
 #>         V_pop <- -0.786351566327091
@@ -130,6 +139,7 @@ rx
 # If you are only interseted in the parsing you can use `mlxtran`
 
 mlx <- mlxtran(mlxtranFile)
+#> ℹ integrated model file 'oral1_1cpt_kaVCl.txt' into mlxtran object
 #> ℹ reading run info (# obs, doses, Monolix Version, etc) from summary.txt
 #> ℹ done
 #> ℹ reading covariance from FisherInformation/covarianceEstimatesLin.txt
@@ -171,7 +181,6 @@ mlx
 #> [LONGITUDINAL]
 #> ; parsed: $MODEL$LONGITUDINAL$LONGITUDINAL
 #> input = {a, b, ka, V, Cl}
-#> file = 'oral1_1cpt_kaVCl.txt'
 #> 
 #> DEFINITION:
 #> ; parsed: $MODEL$LONGITUDINAL$DEFINITION

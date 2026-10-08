@@ -166,6 +166,10 @@ test_that("thetaMat is on the scale of the ini() estimates", {
   .p <- stats::setNames(.p$se_lin / .p$value, .p$parameter)
   expect_equal(sqrt(diag(.m$thetaMat))[c("ka_pop", "V_pop", "Cl_pop")],
                .p[c("ka_pop", "V_pop", "Cl_pop")], tolerance=1e-5)
+  # converted at the final estimates even when the model keeps the initial ones
+  .m0 <- suppressWarnings(suppressMessages(monolix2rx(file.path(.theo, "theophylline_project.mlxtran"),
+                                                      update=FALSE)))
+  expect_equal(.m0$thetaMat, .m$thetaMat)
   # Monolix 2023 output (transformed scale): log-scale sd = rse
   .cov <- system.file("cov", package="monolix2rx")
   .m <- suppressWarnings(suppressMessages(monolix2rx(file.path(.cov, "warfarin_covariate3_project.mlxtran"))))

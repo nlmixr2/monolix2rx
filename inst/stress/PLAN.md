@@ -253,6 +253,11 @@ Notes for later cases:
 - `knownRun=` turns any run-mode failure into XFAIL, including a Monolix
   run that did not finish; it should match the expected reason.
 
+- `thetaMat` is the transformed-scale covariance.  To confirm on a real
+  Monolix 2021+ run: latent class probabilities (natural in `ini()`, with no
+  `[INDIVIDUAL]` Jacobian) and `mean=` parameters may be stored on another
+  scale in the covariance files.
+
 ## Risks
 
 - Real rxode2/Monolix differences (dose/observation ties, regressor
