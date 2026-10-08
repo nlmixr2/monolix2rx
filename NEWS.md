@@ -11,7 +11,8 @@
   statements and `if`/`else`) `ll(Y)`; a `type=categorical` endpoint given
   by `P(Y=c)` for all but one category, or cumulative `P(Y<=c)`, under
   `logit()`/`probit()`/`log()` or not, becomes rxode2's ordinal
-  `c(p0=0, p1=1, 2)`.  Markov dependence is still not supported.
+  `c(p0=0, p1=1, 2)` (fitting it needs nlmixr2/rxode2#1450 fixed).
+  Markov dependence is still not supported.
 
 * Dropped the re-exports (`rxode2()`, `rxode()`, `RxODE()`, `ini()`,
   `model()`, `model<-`, `rxRename()`, `rxSolve()`, `rxUiGet()`, `logit()`,
