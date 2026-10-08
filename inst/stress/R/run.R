@@ -9,7 +9,8 @@
 ##   "import" re-import Monolix output already in the output directory.
 
 .kitTranslateCols <- c("sim", "dryImport", "dryError", "dryMaxRel", "dryNobs",
-                       "dryNexpected", "dryOmegaDiff", "dryErrDiff", "dryIpredMaxRel")
+                       "dryNexpected", "dryOmegaDiff", "dryErrDiff", "dryIpredMaxRel",
+                       "dryLikMaxRel")
 
 kitRunCase <- function(case, outDir, mode="dry", nSub=20L, seed=42L,
                        est="full", cmd=NULL, timeout=3600) {
@@ -20,6 +21,7 @@ kitRunCase <- function(case, outDir, mode="dry", nSub=20L, seed=42L,
                sim=NA, monolix=NA, mlxSeconds=NA_real_, import=NA,
                importError=NA_character_, dryImport=NA,
                dryError=NA_character_, dryMaxRel=NA_real_, dryIpredMaxRel=NA_real_,
+               dryLikMaxRel=NA_real_,
                dryNobs=NA_integer_, dryNexpected=NA_integer_,
                dryOmegaDiff=NA_real_, dryErrDiff=NA_real_, dryErrModel=NA_character_,
                ipredRtol=NA_real_, ipredQ95=NA_real_, ipredMax=NA_real_,
@@ -77,15 +79,17 @@ kitRunCase <- function(case, outDir, mode="dry", nSub=20L, seed=42L,
         }
       }
     }
-    if (.res$dryImport && isTRUE(case$dryLik)) {
+    if (.res$dryImport && !isFALSE(case$dryLik)) {
       .dl <- try(kitDryLik(.dry$value, .sim, case), silent=TRUE)
       if (inherits(.dl, "try-error")) {
         .res$dryError <- paste("likelihood check:", trimws(.dl))
       } else {
-        utils::write.csv(.dl$cmp, file.path(.dir, "dry-compare.csv"), row.names=FALSE)
-        .res$dryMaxRel <- .dl$maxRel
-        .res$dryNobs <- .dl$nObs
-        .res$dryNexpected <- .dl$nExpected
+        utils::write.csv(.dl$cmp, file.path(.dir, "dry-likelihood.csv"), row.names=FALSE)
+        .res$dryLikMaxRel <- .dl$maxRel
+        if (.dl$nObs != .dl$nExpected || .dl$nImport != .dl$nExpected) {
+          .res$dryError <- sprintf("likelihood check: %d of %d observations matched (%d imported)",
+                                   .dl$nObs, .dl$nExpected, .dl$nImport)
+        }
       }
     }
     if (.res$dryImport && is.na(.res$dryError) && is.function(case$dryData)) {
@@ -104,7 +108,7 @@ kitRunCase <- function(case, outDir, mode="dry", nSub=20L, seed=42L,
   }
   if (mode == "full") {
     if (is.null(cmd)) stop("full mode needs a Monolix command", call.=FALSE)
-    .mlx <- kitRunMonolix(.dir, cmd, timeout=timeout)
+    .mlx <- kitRunMonolix(.dir, cmd, timeout=timeout, export=.kitCaseExport(case))
     .res$monolix <- .mlx$ok
     .res$mlxSeconds <- .mlx$seconds
     if (!.mlx$ok) {
@@ -154,7 +158,10 @@ kitRunCase <- function(case, outDir, mode="dry", nSub=20L, seed=42L,
   .matOk <- function(x) is.na(x) || x <= tol$mat
   if (!.matOk(res$dryOmegaDiff) || !.matOk(res$dryErrDiff)) return(FALSE)
   if (!is.na(res$dryError)) return(FALSE)
-  if (!isTRUE(case$dryPred) && !isTRUE(case$dryLik)) return(TRUE)
+  if (!isFALSE(case$dryLik) && !(is.finite(res$dryLikMaxRel) && res$dryLikMaxRel <= tol$dry)) {
+    return(FALSE)
+  }
+  if (!isTRUE(case$dryPred)) return(TRUE)
   if (!is.na(res$dryIpredMaxRel) && res$dryIpredMaxRel > tol$dry) return(FALSE)
   is.finite(res$dryMaxRel) && res$dryMaxRel <= tol$dry &&
     identical(as.integer(res$dryNobs), as.integer(res$dryNexpected))
@@ -225,6 +232,10 @@ kitRunCase <- function(case, outDir, mode="dry", nSub=20L, seed=42L,
   if (!is.na(res$dryIpredMaxRel) && res$dryIpredMaxRel > tol$dry) {
     return(sprintf("translated IPRED at the true etas differs from the truth by %.3g %%",
                    res$dryIpredMaxRel))
+  }
+  if (!is.na(res$dryLikMaxRel) && res$dryLikMaxRel > tol$dry) {
+    return(sprintf("translated likelihood at the true etas differs from the truth by %.3g %%",
+                   res$dryLikMaxRel))
   }
   NA_character_
 }

@@ -462,10 +462,12 @@ as.list.monolix2rxLongDef <- function(x, ...) {
   }
   if (!inherits(x, "monolix2rxLongDef")) return(character(0))
   x <- as.list(x)
-  vapply(seq_along(x$endpoint),
-         function(i) {
-           .ret <- x$endpoint[[i]]
-           if (!checkmate::testCharacter(.ret$pred, len=1)) return(NA_character_)
-           .ret$pred
-         }, character(1), USE.NAMES = TRUE)
+  .ret <- vapply(seq_along(x$endpoint),
+                 function(i) {
+                   .ret <- x$endpoint[[i]]
+                   if (!checkmate::testCharacter(.ret$pred, len=1)) return(NA_character_)
+                   .ret$pred
+                 }, character(1), USE.NAMES = TRUE)
+  # discrete endpoints have no prediction
+  .ret[!is.na(.ret)]
 }

@@ -330,3 +330,75 @@ output = Y
 TIME = {use=time}
 AMT = {use=amount}
 DV = {use=observation, name=CONC, type=discrete}"))
+
+## the continuous observation is y1, the discrete one Y
+.discMixedProject <- function(p) {
+  p <- sub("CONC = {", "y1 = {", p, fixed=TRUE)
+  p <- sub("data = CONC", "data = {y1, Y}", p, fixed=TRUE)
+  p <- sub("model = CONC", "model = {y1, Y}", p, fixed=TRUE)
+  if (grepl("CONC", p, fixed=TRUE)) stop("mixed project still names CONC", call.=FALSE)
+  p
+}
+
+## a continuous and a discrete observation in one data set (YTYPE 1 is
+## the concentration, 2 the binary response)
+kitCase(
+  name="disc-mixed-continuous",
+  covers="continuous concentration and binary response in one project (type={continuous, discrete})",
+  tags=c("discrete", "categorical", "endpoints"),
+  dryLik="Y",
+  sim=function() {
+    ini({
+      ka_pop <- 1; V_pop <- 10; Cl_pop <- 2
+      e0_pop <- -2; slope_pop <- 0.4
+      omega_Cl ~ 0.09; omega_e0 ~ 0.25
+      a1 <- 0.05; b1 <- 0.1
+    })
+    model({
+      ka <- ka_pop
+      V <- V_pop
+      Cl <- Cl_pop * exp(omega_Cl)
+      e0 <- e0_pop + omega_e0
+      slope <- slope_pop
+      d/dt(depot) <- -ka * depot
+      d/dt(central) <- ka * depot - Cl / V * central
+      Cc <- central / V
+      p1 <- expit(e0 + slope * Cc)
+      Cc ~ add(a1) + prop(b1) + combined1()
+      Y ~ c(p1=1, 0)
+    })
+  },
+  data=function(nSub) {
+    .id <- seq_len(nSub)
+    mlxBind(mlxDose(.id, 0, amt=100, cmt=1, DVID=1L),
+            mlxObs(.id, pkTimes(48), cmt=2, DVID=1L),
+            mlxObs(.id, c(1, 2, 4, 8, 12, 24, 36, 48), cmt=2, DVID=2L))
+  },
+  write=function(d) {
+    d <- .kitMonolixRows(d)
+    d$YTYPE <- ifelse(is.na(d$DV), NA, d$DVID)
+    d[, c("ID", "TIME", "AMT", "DV", "YTYPE")]
+  },
+  model="DESCRIPTION: {{PROBLEM}}
+
+[LONGITUDINAL]
+input = {ka, V, Cl, e0, slope}
+
+EQUATION:
+Cc = pkmodel(ka, V, Cl)
+lp = e0 + slope*Cc
+
+DEFINITION:
+Y = {type=categorical, categories={0, 1}, logit(P(Y=1)) = lp}
+
+OUTPUT:
+output = {Cc, Y}
+",
+  mlxtran=.discMixedProject(.mlxProject(list(ka=.mlxPar(1), V=.mlxPar(10), Cl=.mlxPar(2, 0.3),
+                                              e0=.mlxPar(-2, 0.5, dist="normal"), slope=.mlxPar(0.4)),
+                                         err="combined1(a1, b1)", errPar=c(a1=0.05, b1=0.1),
+                                         content="ID = {use=identifier}
+TIME = {use=time}
+AMT = {use=amount}
+DV = {use=observation, name={y1, Y}, yname={'1', '2'}, type={continuous, discrete}}
+YTYPE = {use=observationtype}")))

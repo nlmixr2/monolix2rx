@@ -12,10 +12,10 @@
 #' @author Matthew L. Fidler
 .monolixPredIpredFile <- function(endpoint, mlxtran, na.strings) {
   if (!is.null(endpoint)) {
-    .est <- file.path(mlxtran$MONOLIX$SETTINGS$GLOBAL$exportpath,
+    .est <- file.path(.mlxtranExportPath(mlxtran),
                       paste0("predictions_", endpoint, ".txt"))
   } else {
-    .est <- file.path(mlxtran$MONOLIX$SETTINGS$GLOBAL$exportpath,
+    .est <- file.path(.mlxtranExportPath(mlxtran),
                       "predictions.txt")
   }
   .try <- try(file.exists(.est), silent=TRUE)
@@ -57,9 +57,16 @@
 monolixPredIpred <- function(mlxtran, na.strings=c("NA", ".")) {
   mlxtran <- .monolixGetMlxtran(mlxtran)
   withr::with_dir(.monolixGetPwd(mlxtran), {
-    .end <- monolixEndpoints(mlxtran)
+    .all <- monolixEndpoints(mlxtran)
+    # discrete endpoints have no predictions
+    .disc <- vapply(mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint,
+                    function(e) e$dist %in% c("categorical", "count", "event"),
+                    logical(1))
+    .end <- .all[!.disc]
     if (length(.end) == 1) {
       .ret <- .monolixPredIpredFile(NULL, mlxtran=mlxtran, na.strings=na.strings)
+      if (is.null(.ret)) .ret <- .monolixPredIpredFile(.end, mlxtran, na.strings=na.strings)
+      if (!is.null(.ret) && length(.all) > 1L) .ret$cmt <- .end
     } else {
       .ret <- do.call("rbind",
                       lapply(.end,

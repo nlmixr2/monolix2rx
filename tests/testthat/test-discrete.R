@@ -71,3 +71,9 @@ test_that("discrete endpoints translate to an rxode2 model", {
   .ui <- rxode2::rxode2(.m(.discTrans("Level = {type=categorical, categories={0, 1}, logit(P(Level<=0)) = lp0}")))
   expect_equal(as.character(.ui$predDf$distribution), "ordinal")
 })
+
+test_that("a discrete endpoint has no prediction to alias", {
+  .ld <- .longDef("y1 = {distribution=normal, prediction=Cc, errorModel=constant(a)}
+Y = {type=categorical, categories={0, 1}, logit(P(Y=1)) = lp}")
+  expect_equal(unname(.getMonolixPreds(.ld)), "Cc")
+})

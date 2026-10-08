@@ -18,8 +18,16 @@
          stop("unknown estimation preset: ", est, call.=FALSE))
 }
 
-.kitSettings <- function() {
-  paste0("[SETTINGS]\nGLOBAL:\nexportpath = '", .kitExport, "'")
+## a case's results directory: its exportpath, or Monolix's default (the
+## project name) when the project has none
+.kitCaseExport <- function(case) {
+  .e <- case$exportpath
+  if (is.null(.e) || is.na(.e)) .kitExport else .e
+}
+
+.kitSettings <- function(case) {
+  if (is.na(case$exportpath)) return("")
+  paste0("[SETTINGS]\nGLOBAL:\nexportpath = '", case$exportpath, "'")
 }
 
 ## est="fixed": every <PARAMETER> estimated by MLE becomes FIXED
@@ -49,7 +57,7 @@ kitWriteProject <- function(case, header, dir, est="full") {
   .tasks <- if (identical(case$est, "default")) .kitTasks(est) else case$est
   .sub <- c(PROBLEM=paste("kit case", case$name, "--", case$covers),
             DATA=case$dataFile, HEADER=paste(header, collapse=", "),
-            MODEL="model.txt", TASKS=.tasks, SETTINGS=.kitSettings())
+            MODEL="model.txt", TASKS=.tasks, SETTINGS=.kitSettings(case))
   .txt <- .kitExpand(case$mlxtran, .sub, case$name)
   .lines <- strsplit(.txt, "\n", fixed=TRUE)[[1]]
   if (est == "fixed" && identical(case$est, "default")) {

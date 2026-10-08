@@ -54,11 +54,14 @@ if (length(.eta) && !is.null(.sim$etas)) {
 } else {
   .p <- c(.theta, stats::setNames(rep(0, length(.eta)), .eta))
 }
-.obs <- utils::getFromNamespace("monolixEndpoints", "monolix2rx")(.mlx)
-if (length(.obs) != 1L) .fail("the mock handles one endpoint only")
+## Monolix writes no predictions of discrete observations; one
+## continuous endpoint is supported
+.pd <- .ui$predDf
+.cont <- !as.character(.pd$distribution) %in% c("pois", "ordinal", "LL")
+if (sum(.cont) > 1L) .fail("the mock handles one continuous endpoint only")
+.obs <- as.character(.pd$var[.cont])
 .t <- .sim$pred
-## Monolix writes no predictions of discrete observations
-if (!any(as.character(.ui$predDf$distribution) %in% c("pois", "ordinal", "LL"))) {
+if (any(.cont)) {
   .s <- suppressMessages(rxode2::rxSolve(.ui$monolixModelIwres, .p, .ui$monolixData,
                                          returnType="data.frame", addDosing=FALSE,
                                          covsInterpolation="locf"))
@@ -67,6 +70,11 @@ if (!any(as.character(.ui$predDf$distribution) %in% c("pois", "ordinal", "LL")))
           stats::ave(seq_along(id), id, time, FUN=seq_along), sep="|")
   }
   .m <- match(.key(.t$ID, .t$TIME), .key(as.character(.s$id), .s$time))
+  if (nrow(.pd) > 1L) {
+    .keep <- .sim$data$DVID[match(.t$ROWID, .sim$data$ROWID)] %in% .pd$dvid[.cont]
+    .t <- .t[.keep, ]
+    .m <- .m[.keep]
+  }
   .pred <- data.frame(id=.t$ID, time=.t$TIME,
                       dv=.sim$data$DV[match(.t$ROWID, .sim$data$ROWID)],
                       popPred=.t$simPred, indivPred_SAEM=.t$simIpred,
@@ -83,6 +91,12 @@ for (.e in .eta) {
 .w(.re, "IndividualParameters", "estimatedRandomEffects.txt")
 .w(data.frame(id=.ids), "IndividualParameters", "estimatedIndividualParameters.txt")
 
+## observations per endpoint
+.dvid <- if (nrow(.pd) > 1L) .sim$data$DVID[match(.sim$pred$ROWID, .sim$data$ROWID)] else 1L
+.nObs <- vapply(seq_len(nrow(.pd)), function(k) {
+  paste0("Number of observations (", .pd$var[k], "): ",
+         if (nrow(.pd) > 1L) sum(.dvid == .pd$dvid[k]) else nrow(.sim$pred))
+}, character(1))
 .nDose <- sum(.sim$data$EVID %in% c(1L, 4L))
 writeLines(c(strrep("*", 80),
              paste0("*  ", basename(.f)),
@@ -90,8 +104,14 @@ writeLines(c(strrep("*", 80),
              strrep("*", 80), "",
              "DATASET INFORMATION",
              paste0("Number of individuals: ", length(unique(.sim$data$ID))),
-             paste0("Number of observations (", .obs, "): ", nrow(.t)),
+             .nObs,
              paste0("Number of doses: ", .nDose), ""),
            file.path(.export, "summary.txt"))
-file.copy(.f, "run-resaved.mlxtran", overwrite=TRUE)
+## the resaved copy points at the results (what Monolix writes there
+## without an exportpath is to confirm)
+.rs <- readLines(.f, warn=FALSE)
+if (is.null(.mlx$MONOLIX$SETTINGS$GLOBAL$exportpath)) {
+  .rs <- c(.rs, "", "[SETTINGS]", "GLOBAL:", paste0("exportpath = '", .export, "'"))
+}
+writeLines(.rs, "run-resaved.mlxtran")
 quit(status=0)

@@ -59,10 +59,13 @@
 #' @param .ret object to finalize
 #' @param equation boolean indicating if the equation should be parsed
 #' @param update boolean indicating if the parameters should be updated.
+#' @param name project file name without `.mlxtran` (or NULL)
 #' @return nothing, called for side effects
 #' @noRd
 #' @author Matthew L. Fidler
-.mlxtranFinalize <- function(.ret, equation=FALSE, update=FALSE) {
+.mlxtranFinalize <- function(.ret, equation=FALSE, update=FALSE, name=NULL) {
+  # Monolix exports to a directory named like the project by default
+  attr(.ret, "exportDefault") <- name
   if (!is.null(.ret$DATA_FORMATTING)) {
     if (!is.null(.ret$DATA_FORMATTING$FILEINFO$FILEINFO)) {
       .ret$DATA_FORMATTING$FILEINFO$FILEINFO <- .fileinfo(.ret$DATA_FORMATTING$FILEINFO$FILEINFO)
@@ -185,11 +188,12 @@
 #' @param lines a character vector representing a set of lines to parse
 #' @param equation when TRUE, try to parse equation too
 #' @param update when TRUE, try to update the initial estimates to the final estimates
+#' @param name project file name without `.mlxtran` (or NULL)
 #' @return a mlxtran object
 #' @noRd
 #' @author Matthew L. Fidler
 .mlxtran <- function(lines, equation=FALSE,
-                     update=FALSE) {
+                     update=FALSE, name=NULL) {
   .mlxtranIni()
   lapply(lines, .mlxtranParseItem)
   # Add file entries
@@ -202,7 +206,7 @@
       .minfo(paste0("integrated model file '", .file ,"' into mlxtran object"))
     }
   }
-  .mlxtranFinalize(.mlxEnv$lst, equation=equation, update=update)
+  .mlxtranFinalize(.mlxEnv$lst, equation=equation, update=update, name=name)
 }
 #' Paste together lines, ignoring empty ones and adding \n between substantial lines
 #'
@@ -407,9 +411,11 @@ mlxtran <- function(file, equation=FALSE, update=FALSE, dirn=NULL) {
     checkmate::assertFileExists(file, access="r", extension="mlxtran")
     .lines <- suppressWarnings(readLines(file))
     .dirn <- .monolixDirn(dirname(file))
+    .name <- sub("[.]mlxtran$", "", basename(file), ignore.case=TRUE)
   }
   .ret <- withr::with_dir(.dirn,
-                          .mlxtran(.lines, equation=equation, update=update))
+                          .mlxtran(.lines, equation=equation, update=update,
+                                   name=if (length(file) == 1L) .name))
   attr(.ret, "dirn") <- .dirn
   .ret
 }

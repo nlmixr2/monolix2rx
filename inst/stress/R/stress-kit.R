@@ -183,7 +183,7 @@ stressReplay <- function(zip, cases=NULL, out=tempfile("monolix2rx-replay-"),
   }
   .ran <- basename(list.dirs(.dir, recursive=FALSE))
   .done <- vapply(.ran, function(r) {
-    file.exists(file.path(.dir, r, .kitExport, "populationParameters.txt"))
+    file.exists(file.path(.dir, r, .kitCaseExport(.kitEnv$cases[[r]]), "populationParameters.txt"))
   }, logical(1))
   if (any(!.done)) {
     message("Monolix did not finish (not replayed): ",

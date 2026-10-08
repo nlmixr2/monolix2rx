@@ -52,10 +52,10 @@ stressFindMonolix <- function() {
 }
 
 ## Run Monolix on run.mlxtran in `dir`
-kitRunMonolix <- function(dir, cmd, timeout=3600) {
+kitRunMonolix <- function(dir, cmd, timeout=3600, export=.kitExport) {
   .old <- setwd(dir)
   on.exit(setwd(.old))
-  unlink(c(.kitExport, "monolix.failed", "resave.failed", "run-resaved.mlxtran",
+  unlink(c(export, "monolix.failed", "resave.failed", "run-resaved.mlxtran",
            "run-resaved"), recursive=TRUE)
   .cmd <- gsub("{mlxtran}", "run.mlxtran", cmd, fixed=TRUE)
   .t0 <- Sys.time()
@@ -77,8 +77,8 @@ kitRunMonolix <- function(dir, cmd, timeout=3600) {
   .obs <- grep("use=observation", .prj, fixed=TRUE, value=TRUE)
   .disc <- length(.obs) > 0L && all(grepl("type=discrete", .obs, fixed=TRUE))
   .ok <- identical(as.integer(.status), 0L) && !file.exists("monolix.failed") &&
-    file.exists(file.path(.kitExport, "populationParameters.txt")) &&
-    (.disc || length(Sys.glob(file.path(.kitExport, "predictions*.txt"))) > 0L)
+    file.exists(file.path(export, "populationParameters.txt")) &&
+    (.disc || length(Sys.glob(file.path(export, "predictions*.txt"))) > 0L)
   list(status=.status, ok=.ok,
        seconds=as.numeric(Sys.time() - .t0, units="secs"))
 }

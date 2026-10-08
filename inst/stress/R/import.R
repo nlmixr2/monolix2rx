@@ -131,14 +131,18 @@ kitImportSolve <- function(m, etas, case, mix=NULL) {
   }
   ## only observations (MDV=1 rows are imported as evid 2)
   .d$kitObs <- if (is.null(.d[["evid"]])) 1L else as.integer(.d$evid %in% 0L)
+  ## rows of the endpoint checked by likelihood instead
+  .d$kitLik <- 0L
+  if (is.character(case$dryLik)) .d$kitLik <- as.integer(.kitEndpointRows(.d, m, .kitLikIndex(m, case)))
   .s <- suppressMessages(do.call(rxode2::rxSolve,
                                  c(list(m$monolixModelIwres, .p, .d,
                                         returnType="data.frame", addDosing=FALSE,
-                                        keep="kitObs"),
+                                        keep=c("kitObs", "kitLik")),
                                    .kitSolveOpts(.kitNbdoses(m)), case$solve)))
   .s <- .s[.s$kitObs == 1L, ]
-  data.frame(key=.kitKey(as.character(.s$id), .s$time), mlx=.s$ipredSim,
-             iwres=if (is.null(.s$iwres)) NA_real_ else .s$iwres)
+  .ret <- data.frame(key=.kitKey(as.character(.s$id), .s$time), mlx=.s$ipredSim,
+                     iwres=if (is.null(.s$iwres)) NA_real_ else .s$iwres)
+  .ret[.s$kitLik == 0L, ]
 }
 
 ## The true inter-occasion eta of each data row: the truth's
@@ -171,6 +175,12 @@ kitImportSolve <- function(m, etas, case, mix=NULL) {
 ## IPRED (the true etas, which also checks how etas enter the parameters).
 kitDryPred <- function(m, sim, case) {
   .t <- sim$pred
+  if (is.character(case$dryLik)) {
+    .ui <- suppressMessages(rxode2::assertRxUi(case$sim))
+    .d <- sim$data[match(.t$ROWID, sim$data$ROWID), , drop=FALSE]
+    names(.d) <- tolower(names(.d))
+    .t <- .t[!.kitEndpointRows(.d, .ui, .kitLikIndex(.ui, case)), ]
+  }
   .t$key <- .kitKey(as.character(.t$ID), .t$TIME)
   .pop <- kitImportSolve(m, NULL, case, sim$mix)
   .cmp <- merge(.t, stats::setNames(.pop[, 1:2], c("key", "mlxPred")), by="key")
@@ -239,18 +249,40 @@ kitDryMatrices <- function(m, case) {
   .ret
 }
 
-## The log-likelihood expression of the endpoint, from rxode2 itself
-.kitLikExpr <- function(ui) {
+## The endpoint checked by the likelihood: dryLik=TRUE is the only one,
+## a name picks one of several
+.kitLikIndex <- function(ui, case) {
   .p <- ui$predDf
-  if (nrow(.p) != 1L) stop("the likelihood check needs one endpoint", call.=FALSE)
-  .ui <- rxode2::rxUiDecompress(ui)
-  utils::getFromNamespace(".getQuotedDistributionAndLlikArgs", "rxode2")(.ui, .p[1, ])
+  if (isTRUE(case$dryLik)) {
+    if (nrow(.p) != 1L) stop("dryLik=TRUE needs one endpoint; name it", call.=FALSE)
+    return(1L)
+  }
+  .k <- which(as.character(.p$var) == case$dryLik)
+  if (length(.k) != 1L) stop("no endpoint '", case$dryLik, "'", call.=FALSE)
+  .k
 }
 
-## Per-observation log-likelihood of `ui` at its thetas and `etas`
-.kitLik <- function(ui, d, etas, case) {
+## observation rows of endpoint k: the truth's DVID or the import's cmt
+.kitEndpointRows <- function(d, ui, k) {
+  .p <- ui$predDf
+  if (nrow(.p) == 1L) return(rep(TRUE, nrow(d)))
+  if (!is.null(d$dvid)) return(d$dvid %in% .p$dvid[k])
+  as.character(d$cmt) %in% as.character(.p$var[k])
+}
+
+## The log-likelihood expression of endpoint k, from rxode2 itself
+.kitLikExpr <- function(ui, k) {
+  .ui <- rxode2::rxUiDecompress(ui)
+  utils::getFromNamespace(".getQuotedDistributionAndLlikArgs", "rxode2")(.ui, ui$predDf[k, ])
+}
+
+## Per-observation log-likelihood of endpoint k of `ui` at its thetas and
+## `etas`; the other endpoints are dropped
+.kitLik <- function(ui, d, etas, case, k) {
   .l <- ui$lstExpr
-  .l[[ui$predDf$line]] <- bquote(kitLL <- .(.kitLikExpr(ui)))
+  .line <- ui$predDf$line
+  .l[[.line[k]]] <- bquote(kitLL <- .(.kitLikExpr(ui, k)))
+  .l <- .l[setdiff(seq_along(.l), .line[-k])]
   .mod <- rxode2::rxode2(paste(vapply(.l, deparse1, character(1)), collapse="\n"))
   .ini <- ui$iniDf
   .theta <- stats::setNames(.ini$est, .ini$name)[is.na(.ini$neta1)]
@@ -264,12 +296,16 @@ kitDryMatrices <- function(m, case) {
   .d <- d
   .zero <- function(x) if (is.null(x)) 0L else x
   .d$kitObs <- as.integer(.zero(.d$evid) %in% 0L & .zero(.d$mdv) %in% 0L)
+  .d$kitLik <- as.integer(.kitEndpointRows(.d, ui, k))
+  ## the endpoint compartments are not in the likelihood model
+  if (is.character(.d$cmt)) .d$cmt <- NULL
   .s <- suppressMessages(do.call(rxode2::rxSolve,
                                  c(list(.mod, .p, .d, returnType="data.frame",
-                                        addDosing=FALSE, keep="kitObs"),
+                                        addDosing=FALSE, keep=c("kitObs", "kitLik")),
                                    case$solve)))
   .s <- .s[.s$kitObs == 1L, ]
-  data.frame(key=.kitKey(as.character(.s$id), .s$time), ll=.s$kitLL)
+  .ret <- data.frame(key=.kitKey(as.character(.s$id), .s$time), ll=.s$kitLL)
+  .ret[.s$kitLik == 1L, ]
 }
 
 ## Translate check for discrete endpoints: the imported model's
@@ -277,12 +313,12 @@ kitDryMatrices <- function(m, case) {
 kitDryLik <- function(m, sim, case) {
   .ui <- suppressMessages(rxode2::assertRxUi(case$sim))
   if (is.null(m$monolixData)) stop("monolix2rx did not read the data", call.=FALSE)
-  .t <- .kitLik(.ui, sim$data, sim$etas, case)
-  .i <- .kitLik(m, m$monolixData, sim$etas, case)
+  .t <- .kitLik(.ui, sim$data, sim$etas, case, .kitLikIndex(.ui, case))
+  .i <- .kitLik(m, m$monolixData, sim$etas, case, .kitLikIndex(m, case))
   .cmp <- merge(stats::setNames(.t, c("key", "simLL")),
                 stats::setNames(.i, c("key", "mlxLL")), by="key")
   .r <- 100 * abs(expm1(.cmp$mlxLL - .cmp$simLL))
   .r[!is.finite(.r)] <- Inf
-  list(cmp=.cmp, nObs=nrow(.cmp), nExpected=nrow(sim$pred),
+  list(cmp=.cmp, nObs=nrow(.cmp), nExpected=nrow(.t), nImport=nrow(.i),
        maxRel=if (nrow(.cmp)) max(.r) else NA_real_)
 }

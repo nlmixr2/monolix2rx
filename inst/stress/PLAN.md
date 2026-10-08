@@ -86,11 +86,11 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `04-data.R` | delimiters, ignored columns and lines, string IDs, MDV, CENS/LIMIT (imported values checked), two regressors matched by order, string categories, 2024 `file={path=}`, data in a subdirectory |
 | `05-params.R` | logNormal/normal/logitNormal/probitNormal, covariate effects with transformed covariates, correlation blocks, `method=FIXED`, no-variability parameters, `[INDIVIDUAL]` vs `[POPULATION]` |
 | `06-error.R` | constant, proportional, combined1/2, `c` variants, logNormal/logitNormal observations, two endpoints |
-| `07-tasks.R` | FIM linearization vs SA, conditional mean vs mode, custom `exportpath`, `nbSSDoses`, `odeType` |
+| `07-tasks.R` | no `exportpath`, `exportpath` in a subdirectory, FIM/likelihood by linearization, conditional mode only, population parameters only (mostly run mode; `nbSSDoses` is in `03-dosing.R`, `odeType` in `02-ode.R`) |
 | `08-dde.R` | delay differential equations (below) |
 | `09-mixture.R` | BSMM and WSMM mixtures (below) |
 | `10-iov.R` | inter-occasion variability (below) |
-| `11-special.R` | parent/metabolite (YTYPE); count (Poisson, zero-inflated) and categorical (cumulative logit, P(Y=c), binary with PK) observations |
+| `11-special.R` | parent/metabolite (YTYPE); count (Poisson, zero-inflated) and categorical (cumulative logit, P(Y=c), binary with PK) observations; a continuous and a discrete observation in one project |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -261,6 +261,11 @@ Notes for later cases:
   To confirm in run mode: that Monolix writes no `predictions.txt` for a
   discrete-only project (the kit accepts its absence) and the
   zero-inflated `if k > 0` syntax.  Markov dependence is refused.
+  A continuous and a discrete observation (`disc-mixed-continuous`): the
+  discrete endpoint gave `NA <- Cc` (fixed), and the continuous one was not
+  validated (fixed: predictions are read for continuous endpoints only).
+  Whether Monolix then writes `predictions.txt` or `predictions_y1.txt` is
+  to confirm; the import reads either.
   nlmixr2est 7.1.0 aborts R (rxode2 `rxFixRes()` subscript out of
   bounds) when fitting a named ordinal `c(p0=0, 1)`: the category values
   become fixed `rx.Y.ordinal*` thetas that no model line names.  Plain
@@ -270,8 +275,11 @@ Notes for later cases:
 
 - BSMM (run mode): validation needs Monolix's estimated class per
   subject as `mixest`; where Monolix writes it is to confirm.
-- A project without `<MONOLIX> [SETTINGS] exportpath` stops the import
-  (`R/parameterUpdate.R`), seen while writing the latent-covariate test.
+- A project without `<MONOLIX> [SETTINGS] exportpath` stopped the import
+  (`R/parameterUpdate.R`); the results are now read from the directory
+  named like the project, Monolix's default (`tasks-no-exportpath`).  To
+  confirm in run mode: that default, and what `saveProject()` writes
+  without an exportpath (the mock adds `exportpath = 'run'`).
 
 - `use=ignoredline`: the import drops each flagged line (doses too) and
   the flag column (`data-ignoredline`); that Monolix ignores the whole

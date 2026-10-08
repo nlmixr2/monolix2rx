@@ -3,7 +3,7 @@
 kitReport <- function(res, outDir) {
   utils::write.csv(res, file.path(outDir, "summary.csv"), row.names=FALSE)
   .fmt <- function(x) ifelse(is.na(x), "", formatC(x, digits=3, format="g"))
-  .num <- c("dryMaxRel", "dryOmegaDiff", "dryErrDiff", "ipredRtol", "predRtol",
+  .num <- c("dryMaxRel", "dryLikMaxRel", "dryOmegaDiff", "dryErrDiff", "ipredRtol", "predRtol",
             "iwresAtol", "mlxSeconds")
   .cols <- intersect(c("case", "status", "tags", .num, "note"), names(res))
   .tab <- res[, .cols, drop=FALSE]
@@ -21,6 +21,8 @@ kitReport <- function(res, outDir) {
            paste(paste0(names(.counts), ": ", .counts), collapse=" | "), "",
            "Columns: `dryMaxRel` = max % difference between the translated",
            "model's PRED and the rxode2 truth (no Monolix);",
+           "`dryLikMaxRel` = the same for each observation's likelihood",
+           "(discrete endpoints);",
            "`dryOmegaDiff`/`dryErrDiff` = max relative difference of the",
            "imported omega/residual parameters from the truth;",
            "`ipredRtol`/`predRtol` = median % difference rxode2 vs Monolix",

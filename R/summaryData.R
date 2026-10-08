@@ -5,7 +5,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .mlxtranSumary <- function(mlxtran) {
-  .exportPath <- mlxtran$MONOLIX$SETTINGS$GLOBAL$exportpath
+  .exportPath <- .mlxtranExportPath(mlxtran)
   .monolix2rx$dfSub <- 0L
   .monolix2rx$dfObs <- 0L
   .monolix2rx$obsLst <- list()
