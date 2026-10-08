@@ -23,6 +23,8 @@ DV = {use=observation, name=CONC, type=continuous}"
 ## [INDIVIDUAL] declarations (Monolix repeats categorical covariates there);
 ## `obsDist`/`obsExtra`: the observation distribution and extra fields
 ## (like ", min=0, max=1"); `delimiter`; `file`: the [FILEINFO] file value.
+## Several endpoints: named `pred` (observation name = model output) and
+## `err` vectors.
 .mlxProject <- function(par, err="combined1(a, b)", errPar=c(a=0.05, b=0.1),
                         params=NULL, content=.mlxContent, indInput=NULL,
                         covariate=NULL, indExtra=NULL, pred="Cc",
@@ -43,6 +45,9 @@ DV = {use=observation, name=CONC, type=continuous}"
     paste0(n, " = {distribution=", .p$dist, ", typical=", n, "_pop, ", .var, .p$extra, "}")
   }, character(1))
   .val <- function(n, v) paste0(n, " = {value=", v, ", method=MLE}")
+  ## several endpoints: `pred`/`err` vectors, named by observation name
+  .obs <- if (length(pred) > 1L) names(pred) else "CONC"
+  .fit <- if (length(.obs) > 1L) paste0("{", paste(.obs, collapse=", "), "}") else .obs
   .pv <- c(vapply(.nm, function(n) .val(paste0(n, "_pop"), par[[n]]$pop), ""),
            unlist(lapply(.nm, function(n) {
              c(if (!is.null(par[[n]]$sd)) .val(paste0("omega_", n), par[[n]]$sd),
@@ -75,11 +80,12 @@ input = {", paste(names(errPar), collapse=", "), "}
 file = '{{MODEL}}'
 
 DEFINITION:
-CONC = {distribution=", obsDist, obsExtra, ", prediction=", pred, ", errorModel=", err, "}
+", paste0(.obs, " = {distribution=", obsDist, obsExtra, ", prediction=", pred,
+          ", errorModel=", err, "}", collapse="\n"), "
 
 <FIT>
-data = CONC
-model = CONC
+data = ", .fit, "
+model = ", .fit, "
 
 <PARAMETER>
 ", paste(.pv, collapse="\n"), "
