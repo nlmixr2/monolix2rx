@@ -197,3 +197,10 @@ test_that("depot(target=) into a compartment without other flows", {
   expect_true("d/dt(Ac) <- 0 + ka*Acd" %in% .rx)
   expect_true("d/dt(Acd) <-  - ka*Acd" %in% .rx)
 })
+
+test_that("transfer() keeps the inflow of the receiving compartment", {
+  .pk <- "compartment(cmt=1, amount=Ac)\ncompartment(cmt=2, amount=Ab)\ntransfer(from=1, to=2, kt)"
+  expect_equal(.equation("Cb = Ab/V", .pk(paste0(.pk, "\nelimination(cmt=2, k)")))$rx[2],
+               "d/dt(Ab) <-  + kt*Ac - k*Ab")
+  expect_equal(.equation("Cb = Ab/V", .pk(.pk))$rx[2], "d/dt(Ab) <-  + kt*Ac")
+})

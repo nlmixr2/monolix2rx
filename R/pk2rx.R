@@ -152,6 +152,8 @@
     .c1 <- .pk2rxAmt(env, pk, .trans$from)
     .i1 <- .trans$from
     .i2 <- .trans$to
+    # name the receiving compartment now; naming it later resets its rhs
+    .pk2rxAmt(env, pk, .i2)
     .kt <- .pk2rxGetVar(.trans, "kt")
     # from
     env$rhs[[.i1]] <- paste0(env$rhs[[.i1]],

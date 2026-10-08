@@ -133,3 +133,8 @@ test_that("transit reset rows drop addl/ii/ss and NA evid doses are routed", {
   expect_equal(.r$cmt, c("depot", NA))
   expect_equal(.r$evid, c(7L, 0L))
 })
+
+test_that("an EVID column with NA on a dose is filled", {
+  .d <- data.frame(id=1L, time=c(0, 1), amt=c(100, NA), evid=c(NA, 0L), dv=c(NA, 1))
+  expect_equal(.dataEvid(.d)$evid, c(1L, 0L))
+})

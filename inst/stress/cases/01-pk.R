@@ -496,3 +496,24 @@ kitVariant("pkmodel-tk0", "pkmodel-tk0-adm-rows",
            },
            mlxtran=.mlxProject(list(Tk0=.mlxPar(2, 0.3), V=.mlxPar(30, 0.2), Cl=.mlxPar(3, 0.3)),
                                content=paste0(.mlxContent, "\nADM = {use=administration}")))
+
+## the oral model written with two compartments and transfer()
+kitVariant("pkmodel-oral-1cmt", "macro-transfer",
+           "iv() into a gut compartment, transfer(from=1, to=2, kt=ka), elimination(cmt=2)",
+           tags=c("pk", "macro"),
+           model="DESCRIPTION: {{PROBLEM}}
+
+[LONGITUDINAL]
+input = {ka, V, Cl}
+
+PK:
+compartment(cmt=1, amount=Ag)
+compartment(cmt=2, amount=Ac)
+iv(adm=1, cmt=1)
+transfer(from=1, to=2, kt=ka)
+elimination(cmt=2, k=Cl/V)
+Cc = Ac/V
+
+OUTPUT:
+output = Cc
+")

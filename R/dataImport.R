@@ -518,7 +518,7 @@ monolixDataImport <- function(ui, data, na.strings = c("NA", ".")) {
   }
   data <- .dataRenameFromMlxtran(data, .mlxtran)
   data <- .dataConvertAdm(data, ui$admd)
-  if (!is.null(data[["mdv"]])) data <- .dataEvid(data)
+  if (!is.null(data[["mdv"]]) || !is.null(data[["evid"]])) data <- .dataEvid(data)
   data <- .dataConvertEndpoints(data, ui)
   .ld <- tolower(names(data))
   .wt <- which(.ld == "time")

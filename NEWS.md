@@ -139,11 +139,16 @@
     get `evid=7` (an `EVID=4` dose becomes a reset followed by `evid=7`).
     The administration table (`$admd`) gained a `transit` column.
   - With an `MDV` column and no `EVID` column, rxode2 read the `MDV=1`
-    rows as doses; they are now `evid=2`.
+    rows as doses; they are now `evid=2`.  A missing `EVID` value on a
+    dose is now 1.
 
 * Fixed `depot(target=Ac, ka)` into a `compartment()` macro: the depot
   ODE and its `ka` transfer were dropped (only `EQUATION:` states received
   them), also when the compartment had no other flows.
+
+* Fixed `transfer(from=1, to=2, kt)`: the inflow into the receiving
+  compartment was dropped when that compartment was named later (for
+  example by `elimination(cmt=2, ...)`).
 
 * Fixed PK state leaking between parses: an `EQUATION:` block could pick
   up `dur()`/`f()`/`alag()` lines of the previously parsed model, and a
