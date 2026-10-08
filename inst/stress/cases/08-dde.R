@@ -132,7 +132,7 @@ ADDL = {use=additionaldose}")))
 kitVariant("dde-delayed-effect", "dde-ss",
            "steady-state dose (use=steadystate, q24h) through delay(Ac, tau)",
            tags=c("dde", "ss"),
-           knownRun="rxode2 5.1.8 steady state with delay(): Ac reaches steady state but R starts at R_0 and the delay history is 0",
+           knownRun="rxode2 5.1.8 steady state with delay(): Ac reaches steady state but R starts at R_0 and the delay history is 0 (nlmixr2/rxode2#1447)",
            data=function(nSub) {
              .id <- seq_len(nSub)
              mlxBind(mlxDose(.id, 0, amt=100, cmt=1, ss=1L, ii=24),

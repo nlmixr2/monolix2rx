@@ -241,7 +241,8 @@ Notes for later cases:
 
 - rxode2 5.1.8 steady state with `delay()`: the undelayed states reach
   steady state, but a state driven by the delay starts at its initial
-  condition and the delay history is 0 (`dde-ss`, `knownRun=`).  An
+  condition and the delay history is 0 (`dde-ss`, `knownRun=`;
+  nlmixr2/rxode2#1447).  An
   ignored `SS` column was still read by rxode2 (fixed: ignored columns
   named like rxode2 event columns are dropped).
 
