@@ -2,9 +2,10 @@
 
 ## One [INDIVIDUAL] parameter: Monolix `sd` is the square root of the
 ## rxode2 omega; NULL sd is no-variability.  `extra` is appended to the
-## definition (like ", covariate=lw70, coefficient=beta_Cl_lw70").
-.mlxPar <- function(pop, sd=NULL, dist="logNormal", extra="") {
-  list(pop=pop, sd=sd, dist=dist, extra=extra)
+## definition (like ", covariate=lw70, coefficient=beta_Cl_lw70"); `iov`
+## is the inter-occasion sd (gamma_<name>, level id*occ).
+.mlxPar <- function(pop, sd=NULL, dist="logNormal", extra="", iov=NULL) {
+  list(pop=pop, sd=sd, dist=dist, extra=extra, iov=iov)
 }
 
 .mlxContent <- "ID = {use=identifier}
@@ -29,18 +30,23 @@ DV = {use=observation, name=CONC, type=continuous}"
                         obsExtra="", delimiter="comma", file="'{{DATA}}'") {
   .nm <- names(par)
   .in <- unlist(lapply(.nm, function(n) {
-    c(paste0(n, "_pop"), if (!is.null(par[[n]]$sd)) paste0("omega_", n))
+    c(paste0(n, "_pop"), if (!is.null(par[[n]]$sd)) paste0("omega_", n),
+      if (!is.null(par[[n]]$iov)) paste0("gamma_", n))
   }))
   .def <- vapply(.nm, function(n) {
     .p <- par[[n]]
-    paste0(n, " = {distribution=", .p$dist, ", typical=", n, "_pop, ",
-           if (is.null(.p$sd)) "no-variability" else paste0("sd=omega_", n),
-           .p$extra, "}")
+    .var <- if (!is.null(.p$iov) && !is.null(.p$sd)) {
+      paste0("varlevel={id, id*occ}, sd={omega_", n, ", gamma_", n, "}")
+    } else if (!is.null(.p$iov)) {
+      paste0("varlevel=id*occ, sd=gamma_", n)
+    } else if (is.null(.p$sd)) "no-variability" else paste0("sd=omega_", n)
+    paste0(n, " = {distribution=", .p$dist, ", typical=", n, "_pop, ", .var, .p$extra, "}")
   }, character(1))
   .val <- function(n, v) paste0(n, " = {value=", v, ", method=MLE}")
   .pv <- c(vapply(.nm, function(n) .val(paste0(n, "_pop"), par[[n]]$pop), ""),
            unlist(lapply(.nm, function(n) {
-             if (!is.null(par[[n]]$sd)) .val(paste0("omega_", n), par[[n]]$sd)
+             c(if (!is.null(par[[n]]$sd)) .val(paste0("omega_", n), par[[n]]$sd),
+               if (!is.null(par[[n]]$iov)) .val(paste0("gamma_", n), par[[n]]$iov))
            })),
            if (length(params)) .val(names(params), params),
            if (length(covParams)) .val(names(covParams), covParams),
