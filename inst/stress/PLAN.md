@@ -266,6 +266,12 @@ Notes for later cases:
   validated (fixed: predictions are read for continuous endpoints only).
   Whether Monolix then writes `predictions.txt` or `predictions_y1.txt` is
   to confirm; the import reads either.
+
+- `07-tasks.R` under the mock only reruns the base case (the mock ignores
+  [TASKS] and writes no FisherInformation).  With Monolix,
+  `tasks-pop-only` may write no `predictions*.txt` (the kit would call
+  that unfinished) and `tasks-fim-lin` should give `covarianceEstimatesLin`;
+  to confirm.
   nlmixr2est 7.1.0 aborts R (rxode2 `rxFixRes()` subscript out of
   bounds) when fitting a named ordinal `c(p0=0, 1)`: the category values
   become fixed `rx.Y.ordinal*` thetas that no model line names.  Plain

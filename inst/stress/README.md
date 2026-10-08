@@ -101,7 +101,7 @@ The exit status is 1 when any case fails.
 The output directory has `results.csv` (one row per case), `summary.md`,
 `sessionInfo.txt` and one directory per case with `run.mlxtran`,
 `model.txt`, `data.csv`, the simulation (`sim.rds`), Monolix's results
-(`run/`), `run-resaved.mlxtran`, `monolix.log` and the import logs.
+(`run/`, or the case's `exportpath`), `run-resaved.mlxtran`, `monolix.log` and the import logs.
 
 `status` is `PASS`, `FAIL`, `ERROR` (the kit itself failed), `XFAIL` (a
 known issue; the diagnosis is in `note`), `XPASS` (a known issue that now
@@ -112,6 +112,9 @@ passes) or `SKIP` (the case needs a newer Monolix).  The checks:
   truth's simulated etas, which checks how the etas enter the parameters;
   `dryOmegaDiff`/`dryErrDiff`: largest relative
   difference of the imported omega/residual parameters (passes at 1e-6)
+- `dryLikMaxRel`: largest % difference of each observation's likelihood
+  at the true etas, for discrete endpoints (`dryLik=`; 0.01 %;
+  `dry-likelihood.csv`)
 - `ipredRtol`/`predRtol`: median % difference between Monolix and rxode2
   (passes at 1 %; computed by the kit from monolix2rx's compared rows,
   monolix2rx's own values are `pkgIpredRtol`/`pkgPredRtol`); `ipredQ95`/`predQ95`: 95th percentiles (5 %)

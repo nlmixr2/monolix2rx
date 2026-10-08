@@ -86,7 +86,7 @@ kitRunCase <- function(case, outDir, mode="dry", nSub=20L, seed=42L,
       } else {
         utils::write.csv(.dl$cmp, file.path(.dir, "dry-likelihood.csv"), row.names=FALSE)
         .res$dryLikMaxRel <- .dl$maxRel
-        if (.dl$nObs != .dl$nExpected || .dl$nImport != .dl$nExpected) {
+        if (.dl$nExpected == 0L || .dl$nObs != .dl$nExpected || .dl$nImport != .dl$nExpected) {
           .res$dryError <- sprintf("likelihood check: %d of %d observations matched (%d imported)",
                                    .dl$nObs, .dl$nExpected, .dl$nImport)
         }

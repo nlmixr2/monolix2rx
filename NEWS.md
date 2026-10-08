@@ -14,10 +14,6 @@
   `c(p0=0, p1=1, 2)` (fitting it needs nlmixr2/rxode2#1450 fixed).
   Markov dependence is still not supported.
 
-* A project without `<MONOLIX> [SETTINGS] exportpath` now reads its
-  results from the directory named like the project (Monolix's default);
-  the import stopped before.
-
 * Dropped the re-exports (`rxode2()`, `rxode()`, `RxODE()`, `ini()`,
   `model()`, `model<-`, `rxRename()`, `rxSolve()`, `rxUiGet()`, `logit()`,
   `expit()`, `lotri()`, `autoplot()` and `%>%`).  Load `nlmixr2` (or
@@ -142,6 +138,10 @@
   the k-th `occk`, numbering each combination of the first k columns, for
   the `id*occ*...` levels.  The parsed `[CONTENT]` gained `occ`, every
   occasion column in order.
+
+* Fixed a project without `<MONOLIX> [SETTINGS] exportpath`, which
+  stopped the import: its results are read from the directory named like
+  the project (Monolix's default).
 
 * Fixed a project with continuous and discrete observations: the discrete
   endpoint (no prediction) translated to `NA <- Cc`, and the continuous

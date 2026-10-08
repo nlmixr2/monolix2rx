@@ -175,13 +175,9 @@ kitImportSolve <- function(m, etas, case, mix=NULL) {
 ## IPRED (the true etas, which also checks how etas enter the parameters).
 kitDryPred <- function(m, sim, case) {
   .t <- sim$pred
-  if (is.character(case$dryLik)) {
-    .ui <- suppressMessages(rxode2::assertRxUi(case$sim))
-    .d <- sim$data[match(.t$ROWID, sim$data$ROWID), , drop=FALSE]
-    names(.d) <- tolower(names(.d))
-    .t <- .t[!.kitEndpointRows(.d, .ui, .kitLikIndex(.ui, case)), ]
-  }
+  ## keyed over all observations, as the import is
   .t$key <- .kitKey(as.character(.t$ID), .t$TIME)
+  if (is.character(case$dryLik)) .t <- .t[!.kitPredLikRows(sim, case), ]
   .pop <- kitImportSolve(m, NULL, case, sim$mix)
   .cmp <- merge(.t, stats::setNames(.pop[, 1:2], c("key", "mlxPred")), by="key")
   .nEta <- sum(!is.na(m$iniDf$neta1))
@@ -270,6 +266,14 @@ kitDryMatrices <- function(m, case) {
   as.character(d$cmt) %in% as.character(.p$var[k])
 }
 
+## the truth's observations (sim$pred rows) of the likelihood endpoint
+.kitPredLikRows <- function(sim, case) {
+  .ui <- suppressMessages(rxode2::assertRxUi(case$sim))
+  .d <- sim$data[match(sim$pred$ROWID, sim$data$ROWID), , drop=FALSE]
+  names(.d) <- tolower(names(.d))
+  .kitEndpointRows(.d, .ui, .kitLikIndex(.ui, case))
+}
+
 ## The log-likelihood expression of endpoint k, from rxode2 itself
 .kitLikExpr <- function(ui, k) {
   .ui <- rxode2::rxUiDecompress(ui)
@@ -297,8 +301,9 @@ kitDryMatrices <- function(m, case) {
   .zero <- function(x) if (is.null(x)) 0L else x
   .d$kitObs <- as.integer(.zero(.d$evid) %in% 0L & .zero(.d$mdv) %in% 0L)
   .d$kitLik <- as.integer(.kitEndpointRows(.d, ui, k))
-  ## the endpoint compartments are not in the likelihood model
+  ## the endpoint compartments and ids are not in the likelihood model
   if (is.character(.d$cmt)) .d$cmt <- NULL
+  .d$dvid <- NULL
   .s <- suppressMessages(do.call(rxode2::rxSolve,
                                  c(list(.mod, .p, .d, returnType="data.frame",
                                         addDosing=FALSE, keep=c("kitObs", "kitLik")),
@@ -319,6 +324,6 @@ kitDryLik <- function(m, sim, case) {
                 stats::setNames(.i, c("key", "mlxLL")), by="key")
   .r <- 100 * abs(expm1(.cmp$mlxLL - .cmp$simLL))
   .r[!is.finite(.r)] <- Inf
-  list(cmp=.cmp, nObs=nrow(.cmp), nExpected=nrow(.t), nImport=nrow(.i),
+  list(cmp=.cmp, nObs=nrow(.cmp), nExpected=sum(.kitPredLikRows(sim, case)), nImport=nrow(.i),
        maxRel=if (nrow(.cmp)) max(.r) else NA_real_)
 }

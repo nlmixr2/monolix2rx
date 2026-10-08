@@ -334,3 +334,21 @@ test_that("without exportpath the results are in the directory named like the pr
   # lines without a project file still import (no results)
   expect_error(mlxtran(.l, update=TRUE, dirn=.dir), NA)
 })
+
+test_that("predictions are also read from predictions_<observation>.txt", {
+  skip_if_not_installed("rxode2")
+  .dir <- file.path(tempdir(), "predEndpointFile")
+  unlink(.dir, recursive=TRUE)
+  dir.create(.dir)
+  on.exit(unlink(.dir, recursive=TRUE))
+  .theo <- system.file("theo", package="monolix2rx")
+  file.copy(file.path(.theo, c("data", "tp", "oral1_1cpt_kaVCl.txt", "theophylline_project.mlxtran")),
+            .dir, recursive=TRUE)
+  .mlx <- mlxtran(file.path(.dir, "theophylline_project.mlxtran"))
+  .ref <- monolixPredIpred(.mlx)
+  expect_gt(NROW(.ref), 0L)
+  file.rename(file.path(.dir, "tp", "predictions.txt"),
+              file.path(.dir, "tp", paste0("predictions_", monolixEndpoints(.mlx), ".txt")))
+  .p <- monolixPredIpred(.mlx)
+  expect_equal(.p[, names(.ref)], .ref)
+})
