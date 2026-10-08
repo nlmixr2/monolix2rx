@@ -225,6 +225,8 @@ Notes for later cases:
   `evid=7` (`macro-oral-iv-2cmt`, `pkmodel-tk0`, `pkmodel-oral-transit`).
 - `compartment(cmt=1, amount=Ac)` without a volume also emits
   `Cc <- Ac/1`; it is harmless while the model defines `Cc` after it.
+- `dose-late-ties`: the data lists the dose before the tied observation;
+  which one Monolix applies first is to confirm in run mode.
 - rxode2's `transit()` only follows the last dose (Savic); Monolix's
   transit with overlapping doses is to confirm in run mode.
 
