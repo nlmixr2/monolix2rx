@@ -151,9 +151,9 @@
   - With an `MDV` column and no `EVID` column, rxode2 read the `MDV=1`
     rows as doses; they are now `evid=2`.  A missing `EVID` value on a
     dose is now 1.
-  - An ignored data column named like an rxode2 event column (`SS`,
-    `RATE`, `EVID`, ...) was still used by rxode2, which matches those
-    names ignoring case; it is now dropped.
+  - A `use=ignore` data column named like an rxode2 event column (`SS`,
+    `RATE`, `EVID`, `DOSE`, ...) was still used by rxode2, which matches
+    those names ignoring case; it is now dropped.
 
 * Fixed `depot(target=Ac, ka)` into a `compartment()` macro: the depot
   ODE and its `ka` transfer were dropped (only `EQUATION:` states received

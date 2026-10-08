@@ -114,7 +114,9 @@ Importer work: emit `delay(x, T)`; `.getMethod()` must use a dense method
 (`dop853`, or `ros4` when stiff -- `liblsoda` cannot record the history);
 a clear error on rxode2 < 5.1.7 (cases SKIP there).  Run ipred tolerance
 starts at 2 %.  To confirm on Monolix: delays varying in time/by
-individual, SS with delays.
+individual, SS with delays, an expression as the delay
+(`dde-delay-expr`), `delay()` of a macro compartment amount
+(`dde-pkmodel-mixed`), and `odeType=stiff` with a delay (`dde-stiff`).
 
 ### Mixtures (`09-mixture.R`, tag `mixture`)
 

@@ -231,8 +231,10 @@
 }
 #' Drop ignored columns that rxode2 would read as event columns
 #'
-#' rxode2 matches its event columns (`ss`, `rate`, `evid`, ...) ignoring
-#' case, so an ignored `SS` column would still be used.
+#' rxode2 matches its event columns (`ss`, `rate`, `evid`, `dose`, ...)
+#' ignoring case, so an ignored `SS` column would still be used.  Only
+#' `use=ignore` columns are dropped: `[CONTENT]` keeps one column per
+#' `use=` type, so the declared columns are not fully known.
 #'
 #' @param data data.frame as read
 #' @param content parsed `[CONTENT]`
@@ -240,9 +242,10 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .dataDropIgnoredEvent <- function(data, content) {
-  .used <- c(content$use1, content$cont, names(content$cat), content$reg)
-  .reserved <- c(.use1Rx, "cmt", "dvid", "admd")
-  .drop <- which(!(names(data) %in% .used) & tolower(names(data)) %in% tolower(.reserved))
+  .event <- c("id", "time", "evid", "amt", "rate", "dur", "ss", "ii", "addl",
+              "cmt", "mdv", "dv", "dvid", "cens", "limit", "method", "dose",
+              "value", "mixest", "mixunif")
+  .drop <- which(names(data) %in% content$ignore & tolower(names(data)) %in% .event)
   if (length(.drop) == 0L) return(data)
   .minfo(paste0("dropped ignored data column(s) '",
                 paste(names(data)[.drop], collapse="', '"),

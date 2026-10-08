@@ -157,9 +157,10 @@ kitVariant("dde-delayed-effect", "dde-pkmodel-mixed",
 input = {ka, V, Cl, Kin, Kout, Imax, IC50, tau}
 
 PK:
+k = Cl/V
 compartment(cmt=1, amount=Ac)
 oral(cmt=1, ka)
-elimination(cmt=1, k=Cl/V)
+elimination(cmt=1, k)
 
 EQUATION:
 t_0 = 0

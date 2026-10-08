@@ -140,11 +140,15 @@ test_that("an EVID column with NA on a dose is filled", {
 })
 
 test_that("ignored columns named like rxode2 event columns are dropped", {
-  .c <- .content("ID = {use=identifier}\nTIME = {use=time}\nAMT = {use=amount}\nSS = {use=ignore}\nRate = {use=ignore}\nWT = {use=covariate, type=continuous}\nDV = {use=observation, name=y, type=continuous}")
-  .d <- data.frame(ID=1L, TIME=0, AMT=100, SS=1L, Rate=10, II=24, WT=70, DV=NA)
-  expect_message(.r <- .dataDropIgnoredEvent(.d, .c), "SS', 'Rate', 'II")
-  expect_equal(names(.r), c("ID", "TIME", "AMT", "WT", "DV"))
-  .c <- .content("ID = {use=identifier}\nTIME = {use=time}\nAMT = {use=amount}\nSS = {use=steadystate}\nII = {use=interdoseinterval}\nDV = {use=observation, name=y, type=continuous}")
-  .d <- data.frame(ID=1L, TIME=0, AMT=100, SS=1L, II=24, DV=NA)
+  .c <- .content("ID = {use=identifier}\nTIME = {use=time}\nAMT = {use=amount}\nSS = {use=ignore}\nDose = {use=ignore}\nNOTE = {use=ignore}\nSEX = {use=covariate, type=categorical}\nDV = {use=observation, name=y, type=continuous}")
+  .d <- data.frame(ID=1L, TIME=0, AMT=100, SS=1L, Dose=10, NOTE="a", II=24, SEX=1L, DV=NA)
+  expect_message(.r <- .dataDropIgnoredEvent(.d, .c), "SS', 'Dose'")
+  # undeclared columns are kept: [CONTENT] does not list every declared column
+  expect_equal(names(.r), c("ID", "TIME", "AMT", "NOTE", "II", "SEX", "DV"))
+  # lowercased user data and nested occasion columns are kept
+  .d <- data.frame(id=1L, time=0, amt=100, ss=1L, dv=NA)
+  expect_identical(.dataDropIgnoredEvent(.d, .c), .d)
+  .c <- .content("ID = {use=identifier}\nTIME = {use=time}\nOCC = {use=occasion}\nOCC2 = {use=occasion}\nDV = {use=observation, name=y, type=continuous}")
+  .d <- data.frame(ID=1L, TIME=0, OCC=1L, OCC2=1L, DV=NA)
   expect_identical(.dataDropIgnoredEvent(.d, .c), .d)
 })
