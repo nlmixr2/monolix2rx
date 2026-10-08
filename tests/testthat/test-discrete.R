@@ -53,6 +53,9 @@ logit(P(Level <= 1)) = lp0 + th2}"),
                "categories 1, 2, 3")
   expect_error(.discTrans("Level = {type=categorical, categories={1, 2, 3}, P(Level<=2) = p1, P(Level<=3) = p2}"),
                "categories 1, 2, 3")
+  .e <- tryCatch(.discTrans("Level = {type=categorical, categories={1, 2}, P(Level=1) = p1, P(Level=2) = p2}"),
+                 error=function(e) conditionMessage(e))
+  expect_false(grepl("Markov", .e))
 })
 
 test_that("discrete endpoints translate to an rxode2 model", {

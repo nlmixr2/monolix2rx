@@ -239,23 +239,12 @@ kitDryMatrices <- function(m, case) {
   .ret
 }
 
-## The log-likelihood expression of a pois(), ordinal c() or ll() endpoint
+## The log-likelihood expression of the endpoint, from rxode2 itself
 .kitLikExpr <- function(ui) {
   .p <- ui$predDf
   if (nrow(.p) != 1L) stop("the likelihood check needs one endpoint", call.=FALSE)
-  .e <- ui$lstExpr[[.p$line]]
-  .d <- as.character(.p$distribution)
-  if (.d == "LL") return(.e[[3]])
-  if (.d == "pois") return(bquote(llikPois(DV, .(.e[[3]][[2]]))))
-  if (.d != "ordinal") stop("no likelihood check for '", .d, "'", call.=FALSE)
-  .a <- as.list(.e[[3]])[-1]
-  .n <- names(.a)
-  .val <- if (is.null(.n)) seq_along(.a) else
-    vapply(.a, function(x) as.numeric(eval(x)), numeric(1))
-  .pr <- if (is.null(.n)) .a[-length(.a)] else lapply(.n[-length(.n)], as.name)
-  .last <- Reduce(function(x, y) bquote(.(x) - .(y)), .pr, quote(1))
-  .terms <- Map(function(v, p) bquote((DV == .(v)) * .(p)), .val, c(.pr, list(.last)))
-  bquote(log(.(Reduce(function(x, y) bquote(.(x) + .(y)), .terms))))
+  .ui <- rxode2::rxUiDecompress(ui)
+  utils::getFromNamespace(".getQuotedDistributionAndLlikArgs", "rxode2")(.ui, .p[1, ])
 }
 
 ## Per-observation log-likelihood of `ui` at its thetas and `etas`

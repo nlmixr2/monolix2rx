@@ -74,8 +74,8 @@ kitRunMonolix <- function(dir, cmd, timeout=3600) {
   ## must be 0 too (timeout exits 124)
   ## no predictions are expected when every observation is discrete
   .prj <- gsub("[[:space:]]", "", readLines("run.mlxtran", warn=FALSE))
-  .disc <- any(grepl("type=discrete", .prj, fixed=TRUE)) &&
-    !any(grepl("type=(continuous|[{])", .prj))
+  .obs <- grep("use=observation", .prj, fixed=TRUE, value=TRUE)
+  .disc <- length(.obs) > 0L && all(grepl("type=discrete", .obs, fixed=TRUE))
   .ok <- identical(as.integer(.status), 0L) && !file.exists("monolix.failed") &&
     file.exists(file.path(.kitExport, "populationParameters.txt")) &&
     (.disc || length(Sys.glob(file.path(.kitExport, "predictions*.txt"))) > 0L)

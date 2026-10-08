@@ -5,6 +5,14 @@
   project, runs Monolix and checks the `monolix2rx()` import; a translate
   mode and a mock Monolix check it without Monolix.
 
+* Translated discrete observations, which stopped the import: a
+  `type=count` Poisson probability becomes `pois(lambda)` and any other
+  count probability (`log(P(Y=k))` or `P(Y=k)`, with intermediate
+  statements and `if`/`else`) `ll(Y)`; a `type=categorical` endpoint given
+  by `P(Y=c)` for all but one category, or cumulative `P(Y<=c)`, under
+  `logit()`/`probit()`/`log()` or not, becomes rxode2's ordinal
+  `c(p0=0, p1=1, 2)`.  Markov dependence is still not supported.
+
 * Dropped the re-exports (`rxode2()`, `rxode()`, `RxODE()`, `ini()`,
   `model()`, `model<-`, `rxRename()`, `rxSolve()`, `rxUiGet()`, `logit()`,
   `expit()`, `lotri()`, `autoplot()` and `%>%`).  Load `nlmixr2` (or
@@ -129,14 +137,6 @@
   the k-th `occk`, numbering each combination of the first k columns, for
   the `id*occ*...` levels.  The parsed `[CONTENT]` gained `occ`, every
   occasion column in order.
-
-* Translated discrete observations, which stopped the import: a
-  `type=count` Poisson probability becomes `pois(lambda)` and any other
-  count probability (`log(P(Y=k))` or `P(Y=k)`, with intermediate
-  statements and `if`/`else`) `ll(Y)`; a `type=categorical` endpoint given
-  by `P(Y=c)` for all but one category, or cumulative `P(Y<=c)`, under
-  `logit()`/`probit()`/`log()` or not, becomes rxode2's ordinal
-  `c(p0=0, p1=1, 2)`.  Markov dependence is still not supported.
 
 * Fixed `.getNbdoses()` and `.getStiff()`, which did not recognize the
   parsed project and always returned 7 and `FALSE`: the validation and

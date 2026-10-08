@@ -261,6 +261,10 @@ Notes for later cases:
   To confirm in run mode: that Monolix writes no `predictions.txt` for a
   discrete-only project (the kit accepts its absence) and the
   zero-inflated `if k > 0` syntax.  Markov dependence is refused.
+  nlmixr2est 7.1.0 aborts R (rxode2 `rxFixRes()` subscript out of
+  bounds) when fitting a named ordinal `c(p0=0, 1)`: the category values
+  become fixed `rx.Y.ordinal*` thetas that no model line names.  Plain
+  rxode2 reproduces it; to fix in rxode2.  Simulation is fine.
 
 ## Truth gaps to close with the importer work
 

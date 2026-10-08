@@ -18,6 +18,20 @@
   .ret[.ret != ""]
 }
 
+#' Note for an unsupported Markov definition
+#'
+#' @param ns statements without spaces
+#' @return message suffix
+#' @noRd
+#' @author Matthew L. Fidler
+.discreteMarkov <- function(ns) {
+  if (any(grepl("[|]|^dependence=|^transitionRate", ns))) {
+    " (Markov dependence is not supported)"
+  } else {
+    ""
+  }
+}
+
 #' Translate discrete definition statements to rxode2 lines
 #'
 #' @param stmt statements (the probability statements already rewritten
@@ -35,12 +49,12 @@
 #' Match a Poisson log-probability and return its rate
 #'
 #' @param e expression of DV
-#' @param log is `e` the log probability
+#' @param isLog is `e` the log probability
 #' @return rate symbol or NULL
 #' @noRd
 #' @author Matthew L. Fidler
-.discretePoisLambda <- function(e, log=TRUE) {
-  .tmpl <- if (log) {
+.discretePoisLambda <- function(e, isLog=TRUE) {
+  .tmpl <- if (isLog) {
     list(quote(-.L + DV * log(.L) - lfactorial(DV)),
          quote(DV * log(.L) - .L - lfactorial(DV)),
          quote(-.L + DV * log(.L) - lgamma(DV + 1)),
@@ -96,12 +110,12 @@
   .isP <- grepl(.reP, .ns)
   if (!any(.isLog | .isP) || (any(.isLog) && any(.isP))) {
     stop("count endpoint '", .var, "' needs log(P(", .var, "=k)) = or P(",
-         .var, "=k) = (Markov dependence is not supported)", call.=FALSE)
+         .var, "=k) =", .discreteMarkov(.ns), call.=FALSE)
   }
   .log <- any(.isLog)
-  .lhs <- paste0(.var, ifelse(.log, "_logp", "_p"))
+  .lhs <- paste0(.var, if (.log) "_logp" else "_p")
   .w <- which(.isLog | .isP)
-  .s[.w] <- paste0(.lhs, " = ", sub(ifelse(.log, .reLog, .reP), "\\1", .ns[.w]))
+  .s[.w] <- paste0(.lhs, " = ", sub(if (.log) .reLog else .reP, "\\1", .ns[.w]))
   .rx <- .discreteRx(.s, "k")
   if (length(.s) == 1L) {
     .e <- str2lang(sub(paste0("^", .lhs, " <- "), "", .rx))
@@ -111,7 +125,7 @@
   }
   # rxode2 reads a sum after ll() ~ as error terms, so use a variable
   paste(c(.rx,
-          paste0("ll(", .var, ") ~ ", ifelse(.log, .lhs, paste0("log(", .lhs, ")")))),
+          paste0("ll(", .var, ") ~ ", if (.log) .lhs else paste0("log(", .lhs, ")"))),
         collapse="\n")
 }
 
@@ -149,13 +163,13 @@
   if (length(.op) != 1L || length(.rest) != 1L || !setequal(.c, .need)) {
     stop("categorical endpoint '", .var, "' needs P(", .var, "=c) for all but one of the categories ",
          paste(.cat, collapse=", "), " or P(", .var, "<=c) for all but the last",
-         " (Markov dependence is not supported)", call.=FALSE)
+         .discreteMarkov(.ns), call.=FALSE)
   }
   .rhs <- ifelse(.fun == "logit", paste0("invlogit(", .rhs, ")"),
                  ifelse(.fun == "probit", paste0("normcdf(", .rhs, ")"),
                         ifelse(.fun == "log", paste0("exp(", .rhs, ")"), .rhs)))
   .p <- paste0(.var, "_p", .need)
-  .s[.w] <- paste0(.var, ifelse(.cum, "_le", "_p"), .c, " = ", .rhs)
+  .s[.w] <- paste0(.var, if (.cum) "_le" else "_p", .c, " = ", .rhs)
   .rx <- .discreteRx(.s)
   if (.cum) {
     .le <- paste0(.var, "_le", .need)
