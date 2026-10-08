@@ -154,9 +154,11 @@
 #' @noRd
 .asCharacterIgnore <- function(x) {
   if (length(x$ignore) == 0L) return(character(0))
+  # objects without ignoreLine (older parses) keep the ignoredline form
+  .line <- if (is.null(x$ignoreLine)) x$ignore else x$ignoreLine
   vapply(x$ignore,
          function(n) {
-           paste0(n, " = {use = ignoredline}")
+           paste0(n, " = {use = ", if (n %in% .line) "ignoredline" else "ignore", "}")
          }, character(1), USE.NAMES = FALSE)
 }
 

@@ -245,11 +245,12 @@
   .event <- c("id", "time", "evid", "amt", "rate", "dur", "ss", "ii", "addl",
               "cmt", "mdv", "dv", "dvid", "cens", "limit", "method", "dose",
               "value", "mixest", "mixunif")
-  # ignoredline columns flag rows; a used column is kept even when an
-  # ignored one differs from it only by case
-  .ignore <- setdiff(content$ignore, content$ignoreLine)
+  # an ignoredline MDV flag is kept: rxode2 then skips the flagged rows
+  # too; a used column is kept even when an ignored one differs only by case
+  .keep <- tolower(content$ignoreLine)
+  .ignore <- setdiff(tolower(content$ignore), .keep[.keep == "mdv"])
   .used <- c(content$use1, content$cont, names(content$cat), content$reg)
-  .drop <- which(tolower(names(data)) %in% tolower(.ignore) & !(names(data) %in% .used) &
+  .drop <- which(tolower(names(data)) %in% .ignore & !(names(data) %in% .used) &
                    tolower(names(data)) %in% .event)
   if (length(.drop) == 0L) return(data)
   .minfo(paste0("dropped ignored data column(s) '",
