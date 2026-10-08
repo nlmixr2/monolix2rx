@@ -6,7 +6,7 @@ kitCase(
   name="dde-hutchinson",
   covers="delayed logistic growth without doses: x_0 history and t_0",
   tags=c("dde", "smoke"),
-  known="rxode2 5.1.8 delay() history is 0 when x(0) is not a literal constant (monolix2rx writes x(0) <- x_0); Monolix uses x_0",
+  known="rxode2 5.1.8 delay() history is 0 when x(0) is not a literal constant (monolix2rx writes x(0) <- x_0); Monolix uses x_0 (nlmixr2/rxode2#1441)",
   solve=list(method="dop853"),
   sim=function() {
     ini({
