@@ -112,16 +112,16 @@ test_that("monolix2rx imports a 1x1 thetaMat when all but one parameter is NaN",
   .f <- system.file("theo/parent_metabolite_project.mlxtran", package="monolix2rx")
   .v <- suppressWarnings(suppressMessages(mlxtran(.f, equation=TRUE)))
 
-  .cov <- attr(.v, "covSaUntransformed")
+  .cov <- attr(.v, "covSaTransformed")
   skip_if(is.null(.cov))
   .cov0 <- .cov
 
   # make every diagonal element but the first NaN
   .n <- dim(.cov)[1]
   diag(.cov)[-1] <- NaN
-  attr(.v, "covSaUntransformed") <- .cov
-  if (!is.null(attr(.v, "covLinUntransformed"))) {
-    attr(.v, "covLinUntransformed") <- .cov
+  attr(.v, "covSaTransformed") <- .cov
+  if (!is.null(attr(.v, "covLinTransformed"))) {
+    attr(.v, "covLinTransformed") <- .cov
   }
 
   expect_warning(.rx <- suppressMessages(monolix2rx(.v, update=FALSE)),
@@ -132,9 +132,9 @@ test_that("monolix2rx imports a 1x1 thetaMat when all but one parameter is NaN",
 
   # when every parameter is NaN the covariance information is ignored
   diag(.cov) <- NaN
-  attr(.v, "covSaUntransformed") <- .cov
-  if (!is.null(attr(.v, "covLinUntransformed"))) {
-    attr(.v, "covLinUntransformed") <- .cov
+  attr(.v, "covSaTransformed") <- .cov
+  if (!is.null(attr(.v, "covLinTransformed"))) {
+    attr(.v, "covLinTransformed") <- .cov
   }
 
   .ws <- capture_warnings(.rx <- suppressMessages(monolix2rx(.v, update=FALSE)))
@@ -144,9 +144,9 @@ test_that("monolix2rx imports a 1x1 thetaMat when all but one parameter is NaN",
   # a clean diagonal with NaN off-diagonal covariances drops the parameter
   .cov <- .cov0
   .cov[1, 2] <- .cov[2, 1] <- NaN
-  attr(.v, "covSaUntransformed") <- .cov
-  if (!is.null(attr(.v, "covLinUntransformed"))) {
-    attr(.v, "covLinUntransformed") <- .cov
+  attr(.v, "covSaTransformed") <- .cov
+  if (!is.null(attr(.v, "covLinTransformed"))) {
+    attr(.v, "covLinTransformed") <- .cov
   }
 
   .ws <- capture_warnings(.rx <- suppressMessages(monolix2rx(.v, update=FALSE)))
@@ -155,4 +155,35 @@ test_that("monolix2rx imports a 1x1 thetaMat when all but one parameter is NaN",
   expect_equal(dim(.rx$thetaMat), dim(.cov) - 1L)
   expect_false(anyNA(.rx$thetaMat))
 
+})
+
+test_that("thetaMat is on the scale of the ini() estimates", {
+  skip_on_cran()
+  # Monolix 2018 output (natural scale): log-scale sd = se/value
+  .theo <- system.file("theo", package="monolix2rx")
+  .m <- suppressWarnings(suppressMessages(monolix2rx(file.path(.theo, "theophylline_project.mlxtran"))))
+  .p <- utils::read.csv(file.path(.theo, "tp", "populationParameters.txt"))
+  .p <- stats::setNames(.p$se_lin / .p$value, .p$parameter)
+  expect_equal(sqrt(diag(.m$thetaMat))[c("ka_pop", "V_pop", "Cl_pop")],
+               .p[c("ka_pop", "V_pop", "Cl_pop")], tolerance=1e-5)
+  # Monolix 2023 output (transformed scale): log-scale sd = rse
+  .cov <- system.file("cov", package="monolix2rx")
+  .m <- suppressWarnings(suppressMessages(monolix2rx(file.path(.cov, "warfarin_covariate3_project.mlxtran"))))
+  .p <- utils::read.csv(file.path(.cov, "w3", "populationParameters.txt"))
+  .p <- stats::setNames(.p$rse_sa / 100, .p$parameter)
+  expect_equal(sqrt(diag(.m$thetaMat))[c("Tlag_pop", "ka_pop", "V_pop")],
+               .p[c("Tlag_pop", "ka_pop", "V_pop")], tolerance=1e-4)
+})
+
+test_that("bsmm() probabilities stay on the natural scale in thetaMat", {
+  .mlx <- list(MODEL=list(INDIVIDUAL=list(DEFINITION=.indDef(paste(
+    "p1 = {distribution=logitNormal, typical=p1_pop, no-variability}",
+    "V = {distribution=logNormal, typical=V_pop, sd=omega_V}", sep="\n")))),
+    PARAMETER=list(PARAMETER=.parameter("p1_pop = {value=0.3, method=MLE}\nV_pop = {value=10, method=MLE}")))
+  .mat <- matrix(c(0.04, 0.01, 0.01, 0.09), 2, dimnames=list(c("p1_pop", "V_pop"), c("p1_pop", "V_pop")))
+  .prob <- data.frame(name="p1_pop", var="p1", value=NA_real_)
+  .r <- .mixtureThetaMat(.mat, .prob, .mlx)
+  # dp/dlogit(p) = p*(1 - p)
+  .j <- 0.3 * 0.7
+  expect_equal(.r, matrix(c(0.04 * .j^2, 0.01 * .j, 0.01 * .j, 0.09), 2, dimnames=dimnames(.mat)))
 })

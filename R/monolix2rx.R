@@ -180,10 +180,11 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   if (.dfObs > 0L) assign("dfObs", as.double(.dfObs), envir=.ui$meta)
   .dfSub <- attr(.mlxtran, "dfSub")
   if (.dfSub > 0L) assign("dfSub", as.double(.dfSub), envir=.ui$meta)
+  # the transformed (log/logit/probit) scale matches the ini() estimates
   if (thetaMatType == "sa") {
-    .thetaMatType <- c("covSaUntransformed", "covLinUntransformed")
+    .thetaMatType <- c("covSaTransformed", "covLinTransformed")
   } else {
-    .thetaMatType <- c("covLinUntransformed", "covSaUntransformed")
+    .thetaMatType <- c("covLinTransformed", "covSaTransformed")
   }
   for (.tt in .thetaMatType) {
     if (inherits(attr(.mlxtran, .tt), "matrix")) {
@@ -198,6 +199,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
                       call.=FALSE)
       }
       .thetaMat <- .thetaMatPrune(.thetaMat, .thetaMatNames)
+      .thetaMat <- .mixtureThetaMat(.thetaMat, .mix$prob, .mlxtran)
       .thetaMatType <- .tt
       break
     }

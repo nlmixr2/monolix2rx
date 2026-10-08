@@ -187,3 +187,26 @@
   ini[[2]] <- as.call(.body)
   ini
 }
+
+#' Put the bsmm() probabilities of thetaMat on their natural scale
+#'
+#' thetaMat is on the transformed scale of the ini() estimates, but the
+#' bsmm() probabilities are natural-scale ini() parameters.
+#'
+#' @param mat thetaMat
+#' @param prob probability data frame from `.mixtureRewrite()`
+#' @param mlxtran parsed mlxtran object
+#' @return thetaMat
+#' @noRd
+#' @author Matthew L. Fidler
+.mixtureThetaMat <- function(mat, prob, mlxtran) {
+  .n <- intersect(prob$name[!is.na(prob$var)], dimnames(mat)[[1]])
+  if (length(.n) == 0L) return(mat)
+  .jac <- .mlxtranJacobianDiag(mlxtran$MODEL$INDIVIDUAL$DEFINITION,
+                               mlxtran$PARAMETER$PARAMETER)
+  .d <- stats::setNames(rep(1, nrow(mat)), dimnames(mat)[[1]])
+  .d[.n] <- .jac[.n]
+  .ret <- diag(.d, nrow=length(.d)) %*% mat %*% diag(.d, nrow=length(.d))
+  dimnames(.ret) <- dimnames(mat)
+  .ret
+}

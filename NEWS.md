@@ -164,6 +164,12 @@
   up `dur()`/`f()`/`alag()` lines of the previously parsed model, and a
   `[COVARIATE] EQUATION:` its PK end lines.
 
+* Fixed the scale of the imported `thetaMat`: it was Monolix's
+  natural-scale covariance while the `ini()` estimates of log-, logit- and
+  probit-normal parameters are on the transformed scale, so `rxSolve()`
+  with `nStud > 1` drew their uncertainty on the wrong scale.  `thetaMat`
+  is now on the `ini()` scale for every Monolix version.
+
 * Fixed `predRtol` (and the pred line of the validation), which was
   relative to Monolix's `ipred` instead of its `pred`; the iwres line of
   the validation reported the pred median.
