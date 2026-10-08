@@ -268,9 +268,12 @@
 #' @author Matthew L. Fidler
 .dataDropIgnoredLines <- function(data, content) {
   .w <- which(names(data) %in% content$ignoreLine)
+  if (length(.w) == 0L) .w <- which(tolower(names(data)) %in% tolower(content$ignoreLine))
   if (length(.w) == 0L) return(data)
   .flag <- vapply(.w, function(i) {
-    .v <- suppressWarnings(as.numeric(as.character(data[[i]])))
+    .x <- data[[i]]
+    .v <- if (is.logical(.x) || is.numeric(.x)) as.numeric(.x) else
+      suppressWarnings(as.numeric(as.character(.x)))
     !is.na(.v) & .v != 0
   }, logical(nrow(data)))
   .flag <- if (is.matrix(.flag)) rowSums(.flag) > 0 else any(.flag)

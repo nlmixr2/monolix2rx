@@ -161,6 +161,10 @@ test_that("ignored columns named like rxode2 event columns are dropped", {
   expect_equal(.r$TIME, c(0, 2))
   expect_equal(names(.r), c("ID", "TIME", "AMT", "EVID", "DV"))
   expect_identical(.dataDropIgnoredLines(.d[1, ], .c), .d[1, names(.r)])
+  # lowercased user data and logical flags
+  .l <- stats::setNames(.d, tolower(names(.d)))
+  .l$mdv <- c(FALSE, TRUE, TRUE, NA)
+  expect_equal(suppressMessages(.dataDropIgnoredLines(.l, .c))$time, c(0, 2))
   # a used column is kept when an ignored one differs only by case
   .c <- .content("ID = {use=identifier}\nTIME = {use=time}\nAMT = {use=amount}\namt = {use=ignore}\nDV = {use=observation, name=y, type=continuous}")
   .d <- data.frame(ID=1L, TIME=0, AMT=100, amt=5, DV=NA)

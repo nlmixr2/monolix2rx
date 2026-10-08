@@ -170,7 +170,7 @@ three things to check first:
 | `iov-ka-v-unequal` | IOV on `ka`/`V`; occasions 2/5/6/7 of unequal length (6 without observations), drug on board between occasions |
 | `iov-correlation` | `correlation={level=id*occ, r(ka, Cl)}` |
 | `iov-ka-f-multi` | IOV on `Tlag` (with BSV), `ka` and logitNormal `p` |
-| `iov-ss` | SS restarting at each occasion, drug still on board at the second |
+| `iov-ss` | SS at each occasion with drug still on board at the second (reset vs. added dose: to confirm in run mode) |
 | `iov-time-varying-cov` | covariate (`lw70`) changing between occasions |
 | `iov-nested` | `OCC1`/`OCC2`, `varlevel={id, id*occ1, id*occ1*occ2}` (XFAIL) |
 | `iov-dde`, `iov-mixture` | combinations |

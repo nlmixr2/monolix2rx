@@ -155,7 +155,7 @@
     `RATE`, `EVID`, `DOSE`, ...) was still used by rxode2, which matches
     those names ignoring case; it is now dropped.
   - Lines flagged by a `use=ignoredline` column were kept (and an
-    `MDV`-named flag made the import fail); the flagged lines, doses
+    `MDV`-named flag could make the import fail); the flagged lines, doses
     included, and the flag column are now dropped.  The parsed `[CONTENT]`
     gained `ignoreLine`, the `use=ignoredline` columns (also still listed
     in `ignore`), and `as.character()` now writes `use=ignore` columns as
