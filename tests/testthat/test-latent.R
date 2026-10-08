@@ -69,3 +69,19 @@ test_that("latent probabilities on one line, quoted categories and fixed coeffic
                 list(sex=c("F", "M")))
   expect_true(grepl("beta_Cl_sex_F * (sex == 'F') + rxCov_Cl_sex_2 * (sex == 'M')", .d$rx, fixed=TRUE))
 })
+
+test_that("mixture models are not validated without the class per subject", {
+  skip_on_cran()
+  .f <- function() {
+    ini({ V_pop <- 1; p1 <- 0.4; b <- 0.1; omega_V ~ 0.1 })
+    model({
+      V <- exp(V_pop + omega_V)
+      d/dt(central) <- -central / V
+      Cc <- mix(central / V, p1, 2 * central / V)
+      Cc ~ prop(b)
+    })
+  }
+  .ui <- rxode2::rxUiDecompress(rxode2::rxode2(.f))
+  assign("monolixData", data.frame(id=1L, time=c(0, 1), amt=c(1, NA), dv=c(NA, 1)), envir=.ui)
+  expect_message(.validateModel(.ui), "not validated")
+})

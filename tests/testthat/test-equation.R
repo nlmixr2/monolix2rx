@@ -158,19 +158,9 @@ test_that("longitudinal PK equations keep dependency order", {
   expect_true(.wCu < .wK)
 })
 
-test_that("wsmm mixture not supported", {
-  expect_error(.equation("f = wsmm(f1, p, f2, 1-p)"),
-               "wsmm")
-})
-
-test_that("bsmm", {
-  expect_error(.equation("f = bsmm(f1, p, f2, 1-p)"),
-               "bsmm")
-})
-
-test_that("bsmm", {
-  expect_error(.equation("M = bsmm(M1,p1,M2,1-p1)"),
-               "bsmm")
+test_that("bsmm and wsmm are kept for the mixture rewrite", {
+  expect_equal(.equation("M = bsmm(M1,p1,M2,1-p1)")$rx, "M <- bsmm(M1, p1, M2, 1 - p1)")
+  expect_equal(.equation("f = wsmm(f1, p, f2, 1-p)")$rx, "f <- wsmm(f1, p, f2, 1 - p)")
 })
 
 test_that("EQUATION: lines before pkmodel() stay before its ODEs", {

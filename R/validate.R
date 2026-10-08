@@ -147,6 +147,12 @@
   .ind <- .parameterThetaEta(.ui, pop=FALSE)
   .model <- ui$monolixModelIwres
   .data <- ui$monolixData
+  if (!is.null(.data) && is.null(.data[["mixest"]]) &&
+        any(grepl("\\bmix[(]", vapply(.ui$lstExpr, deparse1, character(1))))) {
+    # rxode2 would draw each subject's class at random
+    .minfo("mixture model not validated: Monolix's class per subject is not imported")
+    return(invisible())
+  }
   if (any(names(.data) == "cens")) {
     .minfo("filtering out censored observations for validation")
     .data <- .data[.data$cens == 0, names(.data) != "cens"]

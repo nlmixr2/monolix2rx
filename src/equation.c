@@ -241,19 +241,12 @@ int equation_function_name(char *name,  D_ParseNode *pn) {
     sAppend(&curLine, "%s", v);
     return 1;
   } else if (!strcmp("bsmm_fun", name)) {
-    sClear(&sbTransErr);
-    sAppend(&sbTransErr, "bsmm() not supported in translation");
-    updateSyntaxCol();
-    trans_syntax_error_report_fn0(sbTransErr.s);
-    finalizeSyntaxError();
-    return 1;
+    // the arguments are walked; R rewrites bsmm() as mix() (R/mixture.R)
+    sAppendN(&curLine, "bsmm(", 5);
+    return 0;
   } else if (!strcmp("wsmm_fun", name)) {
-    sClear(&sbTransErr);
-    sAppend(&sbTransErr, "wsmm() not supported in translation");
-    updateSyntaxCol();
-    trans_syntax_error_report_fn0(sbTransErr.s);
-    finalizeSyntaxError();
-    return 1;
+    sAppendN(&curLine, "wsmm(", 5);
+    return 0;
   }
   return 0;
 }

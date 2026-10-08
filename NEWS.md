@@ -93,6 +93,17 @@
   probabilities in `ini()`.  Monolix's class per subject is not read yet,
   so these models are not validated.
 
+* Structural model mixtures in `EQUATION:` are translated:
+  `wsmm(f1, p1, f2, p2)` is the weighted prediction `p1*f1 + p2*f2`
+  (Monolix's definition), and `bsmm(f1, p1, f2, p2)` is
+  `mix(f1, p1_pop, f2)`.  A `bsmm()` probability must be a number or an
+  individual parameter without variability or covariates; its typical
+  value becomes the probability in `ini()` on its natural scale.
+
+* Fixed the validation of mixture models (`mix()`): it drew each
+  subject's class at random; it is now skipped until Monolix's class per
+  subject is imported.
+
 * Fixed categorical covariate effects with numeric categories:
   `coefficient={0, beta}` for categories `{1, 2}` was translated as
   `beta*lcat` instead of `beta*(lcat == 2)`.  Coefficients now follow the

@@ -118,41 +118,32 @@ individual, SS with delays.
 
 ### Mixtures (`09-mixture.R`, tag `mixture`)
 
-monolix2rx refuses `bsmm()`/`wsmm()` (`src/equation.c:250-259`).
+Monolix's own definitions (the Monolix methods document, "Mixture of
+models"): WSMM is the weighted prediction `f = p1*f1 + p2*f2` with the
+usual error model (not a likelihood mixture); BSMM puts each subject in
+one group with probability `pk`.  So:
 
-| case | Monolix form | target |
+- `wsmm(f1, p1, f2, p2)` -> `(p1)*(f1) + (p2)*(f2)`; `p` may vary by subject.
+- `bsmm(f1, p1, f2, p2)` -> `mix(f1, p1_pop, f2)`: rxode2 `mix()` needs
+  population probabilities, so `p1` must be a literal or an individual
+  parameter without variability or covariates; its typical value becomes
+  a natural-scale `ini()` parameter (`p1_pop <- c(0, 0.3, 1)`) and the
+  model line `p1 <- p1_pop`.  A probability with an eta is refused.
+- Latent covariates (`P(lcat=1)=plcat1`) -> `lcat <- mix(1, plcat1, 2)`.
+- Mixture models are not validated until Monolix's class per subject is
+  read (rxode2 would draw the classes at random).
+
+| case | Monolix form | status |
 |---|---|---|
-| `bsmm-latent-cov-cl` | latent categorical covariate (`P(lcat=1)=plcat1`) as a covariate effect on `Cl` | `mix(cl1, p1, cl2)` |
-| `bsmm-latent-3class` | three classes | `mix(a, p1, b, p2, c)` |
-| `bsmm-latent-iiv` | latent class on a parameter that also has an eta | `mix()` + eta |
-| `bsmm-structural` | `bsmm(M1, p1, M2, 1-p1)` in `EQUATION:` | `mix()` on the predictions |
-| `wsmm-two-pred` | `wsmm(f1, p, f2, 1-p)` | `ll()` + simulation path |
-| `wsmm-p-iiv` | logitNormal `p` with an eta | as above |
-| `wsmm-3comp` | three components | as above |
-| `wsmm-combined-err` | combined1 error (component SDs differ) | as above |
-| `wsmm-bsmm` | same simulation, wsmm and bsmm variants | |
+| `bsmm-latent-cov-cl` | latent categorical covariate on `Cl` | PASS |
+| `bsmm-structural` | `bsmm(C1, p1, C2, 1-p1)` | PASS |
+| `bsmm-3groups` | `bsmm(..., 1-p1-p2)`, three groups | PASS |
+| `wsmm-two-pred` | `wsmm(f1, p1, f2, 1-p1)`, `p1` with an eta | PASS |
+| `bsmm-p-iiv` | `bsmm()` probability with an eta | XFAIL (refused) |
 
-The true class is a hidden data column (`POP`) removed by `write=`.
-
-BSMM validation: IPRED needs Monolix's assigned class for each subject (read from
-`IndividualParameters/`); PRED starts `tol=list(pred=NA)` until the real
-run shows which class `popPred` uses.
-
-WSMM translation target (nlmixr2 generalized likelihood):
-
-```r
-g1 <- sqrt(a^2 + (b*f1)^2); g2 <- sqrt(a^2 + (b*f2)^2)
-ll(CONC) ~ log(p1*dnorm(DV, f1, g1) + (1 - p1)*dnorm(DV, f2, g2))
-ipred <- p1*f1 + (1 - p1)*f2              # Monolix's reported prediction: to confirm
-cmpSim <- rxbinom(1, p1)
-sim <- ifelse(cmpSim == 1, f1, f2) + ifelse(cmpSim == 1, g1, g2)*rxnorm()
-```
-
-WSMM translate checks: per-observation log-likelihood vs an independent
-mixture likelihood (1e-6); `ipred` vs the truth's mixture mean; a large
-simulation reproduces the component proportion (binomial CI) and each
-component's mean/SD; optional `fit` tag: an nlmixr2 focei fit recovers
-`p`.  The component is drawn per observation in `postSim=`.
+The true class is a hidden data column (`POP`) removed by `write=`, given
+to the import as `mixest`.  Run mode: IPRED needs Monolix's class per
+subject (`IndividualParameters/`, to locate on a real run).
 
 ### Inter-occasion variability (`10-iov.R`, tag `iov`)
 
@@ -198,7 +189,7 @@ per subject-occasion; `dfSub` counts subjects.
    record `known=` diagnoses, confirm the resaved import, freeze the mock's
    per-occasion and mixture output layouts.
    - 2.5 **Importer PRs**, each turning cases XFAIL -> PASS: `delay()`;
-     latent BSMM -> `mix()`; structural `bsmm()`; `wsmm()` -> `ll()` +
+     latent BSMM -> `mix()`; structural `bsmm()` -> `mix()`; `wsmm()` -> weighted prediction +
      simulation; IOV fixes (name match, per-occasion validation, several
      occasion columns).  Additive only to babelmixr2-facing fields.
 4. **Full case list**; record results per Monolix version.

@@ -149,10 +149,17 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
     stop("model translation did not parse into a rxode2/nlmixr2 model", call.=FALSE)
   }
   .model <- .mlxtranChangeVal(.model0, .mlxtran)
+  .mix <- .mixtureRewrite(.model, .mlxtran)
+  if (!is.null(.mix$prob) && length(.latent$prob) > 0L) {
+    stop("bsmm() and a latent covariate are two mixtures; rxode2 supports one",
+         call.=FALSE)
+  }
+  .model <- .mix$model
   .ini <- .def2ini(.mlxtran$MODEL$INDIVIDUAL$DEFINITION,
                    .mlxtran$PARAMETER$PARAMETER,
                    .mlxtran$MODEL$LONGITUDINAL$DEFINITION)
   .ini <- .latentIni(.ini, .latent$prob, .mlxtran$PARAMETER$PARAMETER)
+  .ini <- .mixtureIni(.ini, .mix$prob, .mlxtran$PARAMETER$PARAMETER)
   .ret <- function() {}
   if (gsub(" +", "", deparse1(.ini)) == "ini({})") {
     body(.ret) <- as.call(c(list(quote(`{`)), .model))
