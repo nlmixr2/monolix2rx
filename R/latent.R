@@ -18,9 +18,11 @@
     if (!grepl("P[(]", .code)) next
     .cat <- as.character(.d$err$categories)
     .p <- .latentProb(.code, .d$var, .cat)
-    .lit <- ifelse(is.na(suppressWarnings(as.numeric(.cat))),
-                   paste0("'", .cat, "'"), .cat)
+    .lit <- .catLiteral(.cat)
     .args <- c(rbind(.lit[-length(.lit)], .p), .lit[length(.lit)])
+    if (utils::packageVersion("rxode2") < "5.1.8") {
+      stop("latent covariates (mix()) need rxode2 >= 5.1.8", call.=FALSE)
+    }
     .model <- c(.model, paste0(.d$var, " <- mix(", paste(.args, collapse=", "), ")"))
     .prob <- c(.prob, .p)
   }
@@ -36,7 +38,8 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .latentProb <- function(code, var, cat) {
-  .code <- gsub("[[:space:]]", "", strsplit(code, "\n")[[1]])
+  # P() items are separated by new lines or commas
+  .code <- gsub("[[:space:]]", "", strsplit(code, "[\n,]")[[1]])
   .re <- paste0("^P[(]", var, "=['\"]?([^)'\"]*)['\"]?[)]=(.*)$")
   .code <- .code[grepl(.re, .code)]
   .p <- stats::setNames(sub(.re, "\\2", .code), sub(.re, "\\1", .code))

@@ -27,6 +27,7 @@
   .pkIni(TRUE)
   # lines before a pkmodel()/macro must stay before its ODEs
   .monolix2rx$pkLong <- TRUE
+  on.exit(.monolix2rx$pkLong <- FALSE)
   if (text!="") {
     .Call(`_monolix2rx_trans_equation`, text, "[LONGITUDINAL] EQUATION:")
   }

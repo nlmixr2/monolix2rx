@@ -89,7 +89,9 @@
 * Latent categorical covariates (between-subject mixtures,
   `lcat = {type=categorical, categories={1, 2}, P(lcat=1)=plcat1}` in
   `[COVARIATE] DEFINITION:`) are translated to rxode2's `mix()`
-  (`lcat <- mix(1, plcat1, 2)`) with the class probabilities in `ini()`.
+  (`lcat <- mix(1, plcat1, 2)`, rxode2 >= 5.1.8) with the class
+  probabilities in `ini()`.  Monolix's class per subject is not read yet,
+  so these models are not validated.
 
 * Fixed categorical covariate effects with numeric categories:
   `coefficient={0, beta}` for categories `{1, 2}` was translated as

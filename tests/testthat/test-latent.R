@@ -60,3 +60,12 @@ test_that("a latent covariate project imports and solves by class", {
   .cl <- tapply(.s$Cl, .s$id, unique)
   expect_equal(as.vector(.cl), c(1, exp(1)))
 })
+
+test_that("latent probabilities on one line, quoted categories and fixed coefficients", {
+  .m <- .latentMix(.covDef("lcat = {type=categorical, categories={1, 2, 3}, P(lcat=1)=p1, P(lcat=2)=p2}"))
+  expect_equal(.m$model, "lcat <- mix(1, p1, 2, p2, 3)")
+  expect_equal(.catLiteral(c("1", "it's", "M")), c("1", "'it\\'s'", "'M'"))
+  .d <- .indDef("Cl = {distribution=logNormal, typical=Cl_pop, covariate=sex, coefficient={beta_Cl_sex_F, 0.2}, sd=omega_Cl}",
+                list(sex=c("F", "M")))
+  expect_true(grepl("beta_Cl_sex_F * (sex == 'F') + rxCov_Cl_sex_2 * (sex == 'M')", .d$rx, fixed=TRUE))
+})

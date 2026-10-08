@@ -230,6 +230,10 @@ Notes for later cases:
   (`dde-hutchinson`; monolix2rx writes `x_0 <- 10; x(0) <- x_0`).  To fix
   in rxode2.
 
+- Delay models are solved with `dop853` even for `odeType=stiff`
+  (rxode2's own default is `dop853+ros4`); `.getDelay()` is not exported
+  for babelmixr2's control.
+
 ## Truth gaps to close with the importer work
 
 - BSMM (run mode): validation needs Monolix's estimated class per

@@ -82,10 +82,23 @@
 .indDefCatTerms <- function(coef, cov) {
   .cat <- .monolix2rx$indCat[[cov]]
   if (is.null(.cat) || length(.cat) != length(coef) || length(coef) < 2L) return(NULL)
-  .w <- !grepl("^rxCov_", coef)
-  .num <- !is.na(suppressWarnings(as.numeric(.cat)))
-  .lit <- ifelse(.num, .cat, paste0("'", .cat, "'"))
-  paste(paste0(coef[.w], " * (", cov, " == ", .lit[.w], ")"), collapse=" + ")
+  # fixed coefficients (rxCov_) of 0 are the reference: drop them from ini()
+  .zero <- grepl("^rxCov_", coef) & coef %in% names(.monolix2rx$defFixed) &
+    .monolix2rx$defFixed[coef] %in% 0
+  .monolix2rx$ignoredCoef <- c(.monolix2rx$ignoredCoef, coef[.zero])
+  paste(paste0(coef[!.zero], " * (", cov, " == ", .catLiteral(.cat[!.zero]), ")"),
+        collapse=" + ")
+}
+
+#' R literal of categories: numbers as is, others single quoted
+#'
+#' @param cat character categories
+#' @return character literals
+#' @noRd
+#' @author Matthew L. Fidler
+.catLiteral <- function(cat) {
+  .num <- !is.na(suppressWarnings(as.numeric(cat)))
+  ifelse(.num, cat, vapply(cat, encodeString, character(1), quote="'", USE.NAMES=FALSE))
 }
 
 #' Finalized the mlxtran `[individual]` definition:
