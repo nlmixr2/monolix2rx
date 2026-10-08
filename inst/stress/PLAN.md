@@ -90,7 +90,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `08-dde.R` | delay differential equations (below) |
 | `09-mixture.R` | BSMM and WSMM mixtures (below) |
 | `10-iov.R` | inter-occasion variability (below) |
-| `11-special.R` | parent/metabolite (YTYPE); count and ordered categorical observations (XFAIL: not translated); resaved project re-import (run mode) |
+| `11-special.R` | parent/metabolite (YTYPE); count and ordered categorical observations (XFAIL: not translated) |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -258,7 +258,8 @@ Notes for later cases:
   translation (`.handleSingleEndpoint()`); `disc-count-poisson` and
   `disc-categorical-ordinal` are XFAIL.  Translating them (rxode2
   `pois()`/ordinal `c(...)` or `ll()`) also needs a translate check other
-  than PRED/IPRED (the likelihood at the true parameters).
+  than PRED/IPRED (the likelihood at the true parameters); the cases set
+  `dryPred=FALSE` until then.
 
 ## Truth gaps to close with the importer work
 

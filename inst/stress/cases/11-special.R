@@ -90,6 +90,8 @@ kitCase(
   covers="count observation: log(P(Y=k)) = -lambda + k*log(lambda) - factln(k), lambda decaying in time",
   tags=c("discrete", "count"),
   known=.discKnown,
+  ## PRED of a random draw is not comparable; needs a likelihood check
+  dryPred=FALSE,
   sim=function() {
     ini({
       lambda0_pop <- 8; kdecay_pop <- 0.05
@@ -127,6 +129,8 @@ kitCase(
   covers="ordered categorical observation (categories {0, 1, 2}) with logit(P(Level<=k)) proportional odds",
   tags=c("discrete", "categorical"),
   known=.discKnown,
+  ## PRED of a random draw is not comparable; needs a likelihood check
+  dryPred=FALSE,
   sim=function() {
     ini({
       th1_pop <- -0.5; th2_pop <- 1.5; slope_pop <- 0.05
