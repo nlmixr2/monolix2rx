@@ -245,7 +245,12 @@
   .event <- c("id", "time", "evid", "amt", "rate", "dur", "ss", "ii", "addl",
               "cmt", "mdv", "dv", "dvid", "cens", "limit", "method", "dose",
               "value", "mixest", "mixunif")
-  .drop <- which(names(data) %in% content$ignore & tolower(names(data)) %in% .event)
+  # ignoredline columns flag rows; a used column is kept even when an
+  # ignored one differs from it only by case
+  .ignore <- setdiff(content$ignore, content$ignoreLine)
+  .used <- c(content$use1, content$cont, names(content$cat), content$reg)
+  .drop <- which(tolower(names(data)) %in% tolower(.ignore) & !(names(data) %in% .used) &
+                   tolower(names(data)) %in% .event)
   if (length(.drop) == 0L) return(data)
   .minfo(paste0("dropped ignored data column(s) '",
                 paste(names(data)[.drop], collapse="', '"),

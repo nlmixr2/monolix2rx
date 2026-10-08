@@ -13,6 +13,7 @@
     .monolix2rx$inpLst <- character(0)
     .monolix2rx$regLst <- character(0)
     .monolix2rx$ignoreLst <- character(0)
+    .monolix2rx$ignoreLineLst <- character(0)
     .monolix2rx$catLst2 <- NULL
     .monolix2rx$ind <- NULL
   }
@@ -120,6 +121,16 @@
 #' @author Matthew L. Fidler
 .indIgnore <- function(ignore) {
   .monolix2rx$ignoreLst <- c(.monolix2rx$ignoreLst, ignore)
+}
+
+#' Flag a column as an ignored-line flag (`use=ignoredline`)
+#'
+#' @param ignore column flagging the ignored lines
+#' @return nothing, called for side effect
+#' @noRd
+#' @author Matthew L. Fidler
+.indIgnoreLine <- function(ignore) {
+  .monolix2rx$ignoreLineLst <- c(.monolix2rx$ignoreLineLst, ignore)
 }
 
 #' As.character for regressor items

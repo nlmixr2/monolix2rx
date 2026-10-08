@@ -145,9 +145,21 @@ test_that("ignored columns named like rxode2 event columns are dropped", {
   expect_message(.r <- .dataDropIgnoredEvent(.d, .c), "SS', 'Dose'")
   # undeclared columns are kept: [CONTENT] does not list every declared column
   expect_equal(names(.r), c("ID", "TIME", "AMT", "NOTE", "II", "SEX", "DV"))
-  # lowercased user data and nested occasion columns are kept
+  # an ignored column in lowercased user data is also dropped
   .d <- data.frame(id=1L, time=0, amt=100, ss=1L, dv=NA)
-  expect_identical(.dataDropIgnoredEvent(.d, .c), .d)
+  expect_message(.r <- .dataDropIgnoredEvent(.d, .c), "'ss'")
+  expect_equal(names(.r), c("id", "time", "amt", "dv"))
+  # an ignoredline flag is not an ignored column
+  .c <- .content("ID = {use=identifier}\nTIME = {use=time}\nMDV = {use=ignoredline}\nEVID = {use=ignore}\nDV = {use=observation, name=y, type=continuous}")
+  expect_equal(.c$ignore, c("MDV", "EVID"))
+  expect_equal(.c$ignoreLine, "MDV")
+  .d <- data.frame(ID=1L, TIME=0, MDV=1L, EVID=1L, DV=NA)
+  expect_equal(names(suppressMessages(.dataDropIgnoredEvent(.d, .c))), c("ID", "TIME", "MDV", "DV"))
+  # a used column is kept when an ignored one differs only by case
+  .c <- .content("ID = {use=identifier}\nTIME = {use=time}\nAMT = {use=amount}\namt = {use=ignore}\nDV = {use=observation, name=y, type=continuous}")
+  .d <- data.frame(ID=1L, TIME=0, AMT=100, amt=5, DV=NA)
+  expect_equal(names(suppressMessages(.dataDropIgnoredEvent(.d, .c))), c("ID", "TIME", "AMT", "DV"))
+  # nested occasion columns are kept
   .c <- .content("ID = {use=identifier}\nTIME = {use=time}\nOCC = {use=occasion}\nOCC2 = {use=occasion}\nDV = {use=observation, name=y, type=continuous}")
   .d <- data.frame(ID=1L, TIME=0, OCC=1L, OCC2=1L, DV=NA)
   expect_identical(.dataDropIgnoredEvent(.d, .c), .d)

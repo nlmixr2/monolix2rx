@@ -112,6 +112,10 @@ int individual_process_ignore(const char *name, D_ParseNode *pn) {
     D_ParseNode *xpn = d_get_child(pn, 0);
     char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
     monolix2rxSingle(v, ".indIgnore");
+    // ignoredline flags rows, not the column
+    D_ParseNode *upn = d_get_child(pn, 5);
+    char *u = (char*)rc_dup_str(upn->start_loc.s, upn->end);
+    if (strstr(u, "ine") != NULL) monolix2rxSingle(v, ".indIgnoreLine");
     return 1;
   }
   return 0;

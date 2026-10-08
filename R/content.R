@@ -55,7 +55,8 @@
                ytype=.monolix2rx$ytype,
                ytypeQuote=.monolix2rx$ytypeQuote,
                name=.monolix2rx$name,
-               type=.monolix2rx$type)
+               type=.monolix2rx$type,
+               ignoreLine=.monolix2rx$ignoreLineLst)
   if (length(.lst$yname) != length(.lst$name) &&
         length(.lst$yname) != 0 && length(.lst$name) != 0) {
     stop("for 'observation' type the length of 'name' and 'yname' should match",

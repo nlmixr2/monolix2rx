@@ -153,7 +153,9 @@
     dose is now 1.
   - A `use=ignore` data column named like an rxode2 event column (`SS`,
     `RATE`, `EVID`, `DOSE`, ...) was still used by rxode2, which matches
-    those names ignoring case; it is now dropped.
+    those names ignoring case; it is now dropped.  The parsed `[CONTENT]`
+    gained `ignoreLine`, the `use=ignoredline` columns (also still listed
+    in `ignore`), which are kept.
 
 * Fixed `depot(target=Ac, ka)` into a `compartment()` macro: the depot
   ODE and its `ka` transfer were dropped (only `EQUATION:` states received

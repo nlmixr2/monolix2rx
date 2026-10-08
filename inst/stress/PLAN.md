@@ -259,6 +259,10 @@ Notes for later cases:
 - A project without `<MONOLIX> [SETTINGS] exportpath` stops the import
   (`R/parameterUpdate.R`), seen while writing the latent-covariate test.
 
+- `use=ignoredline` rows are not removed from the imported data (the
+  column is kept, so an `MDV`-named flag still hides observations from
+  rxode2); whether Monolix drops the whole line is to confirm.
+
 - `knownRun=` turns any run-mode failure into XFAIL, including a Monolix
   run that did not finish; it should match the expected reason.
 
