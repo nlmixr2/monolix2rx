@@ -127,9 +127,9 @@
   - Doses went to the Monolix compartment number instead of the rxode2
     compartment, so an `iv(adm=2, cmt=1)` dose next to `oral(adm=1, cmt=1)`
     went to the depot; they are now routed by compartment name.
-  - Only dose rows (an amount, and EVID 1 or 4 when there is an EVID
-    column) were routed; observation rows with an `ADM` value or `AMT=0`
-    could become doses.
+  - Observation rows with an `ADM` value or `AMT=0` could become doses;
+    only dose rows (an amount, and EVID 1 or 4 when there is an EVID
+    column) are routed now.
   - A second macro on one administration copied only a single dose, and
     copied it after the first route had changed it; it now copies every
     unmodified dose.
@@ -143,7 +143,11 @@
 
 * Fixed `depot(target=Ac, ka)` into a `compartment()` macro: the depot
   ODE and its `ka` transfer were dropped (only `EQUATION:` states received
-  them).
+  them), also when the compartment had no other flows.
+
+* Fixed PK state leaking between parses: an `EQUATION:` block could pick
+  up `dur()`/`f()`/`alag()` lines of the previously parsed model, and a
+  `[COVARIATE] EQUATION:` its PK end lines.
 
 * Fixed `predRtol` (and the pred line of the validation), which was
   relative to Monolix's `ipred` instead of its `pred`; the iwres line of

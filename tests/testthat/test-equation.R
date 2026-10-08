@@ -184,3 +184,16 @@ test_that("depot(target=) into a macro compartment", {
   .rx <- .equation("Cc = Ac/V", .pk("compartment(cmt=1, amount=Ac)\ndepot(target=Ac, ka, Tlag)\nelimination(cmt=1, k=Cl/V)"))$rx
   expect_equal(.rx[1:3], c("d/dt(Acd) <-  - ka*Acd", "alag(Acd) <- Tlag", "d/dt(Ac) <-  - Cl/V*Ac + ka*Acd"))
 })
+
+test_that("no PK state leaks into the next equation block", {
+  .equation("Cc = Ac/V", .pk("compartment(cmt=1, amount=Ac)\ndepot(target=Ac, Tk0)\nelimination(cmt=1, k)"))
+  .rx <- .equation("ddt_Ac = -k*Ac\nCc = Ac/V", .pk("depot(target=Ac, ka)"))$rx
+  expect_false(any(grepl("dur", .rx)))
+  expect_equal(.covEq("lw = log(WT/70)")$dplyr, "lw = log(WT / 70)")
+})
+
+test_that("depot(target=) into a compartment without other flows", {
+  .rx <- .equation("Cc = Ac/V", .pk("compartment(cmt=1, amount=Ac)\ndepot(target=Ac, ka)"))$rx
+  expect_true("d/dt(Ac) <- 0 + ka*Acd" %in% .rx)
+  expect_true("d/dt(Acd) <-  - ka*Acd" %in% .rx)
+})

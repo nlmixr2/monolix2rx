@@ -118,3 +118,18 @@ test_that("a depot named by target= keeps its depot compartment", {
   .pk <- .pk("compartment(cmt=1, amount=Ac)\ndepot(target=Ac, ka)\nelimination(cmt=1, k)")
   expect_equal(.equation("Cc = Ac/V", .pk)$admd$rxCmt, "Acd")
 })
+
+test_that("transit reset rows drop addl/ii/ss and NA evid doses are routed", {
+  .admd <- data.frame(adm=1L, admd=1L, cmt=1L, target=NA_character_, depot=TRUE,
+                      dur=FALSE, f=FALSE, tlag=FALSE, transit=TRUE, rxCmt="depot")
+  .d <- data.frame(id=1L, time=c(0, 1), amt=c(100, NA), evid=c(4L, 0L),
+                   ii=c(12, 0), addl=c(2L, 0L), dv=c(NA, 1))
+  .r <- .dataConvertAdm(.d, .admd)
+  expect_equal(.r$evid, c(3L, 7L, 0L))
+  expect_equal(.r$addl, c(0L, 2L, 0L))
+  expect_equal(.r$ii, c(0, 12, 0))
+  .d <- data.frame(id=1L, time=c(0, 1), amt=c(100, NA), evid=c(NA, 0L), dv=c(NA, 1))
+  .r <- .dataConvertAdm(.d, .admd)
+  expect_equal(.r$cmt, c("depot", NA))
+  expect_equal(.r$evid, c(7L, 0L))
+})

@@ -14,6 +14,7 @@
   .monolix2rx$equationLhs <- character(0)
   .monolix2rx$equationRhs <- character(0)
   .monolix2rx$odeType <- "nonStiff"
+  .monolix2rx$pk <- NULL
   .start <- .end <- character(0)
   if (is.null(pk)) pk <- .pk("")
   if (is.character(pk)) pk <- .pk(pk)
@@ -108,6 +109,12 @@
     lapply(e[c("lhsDepot", "dur", "f", "tlag")], names)
   })))
   .tgt <- setdiff(.tgt, .monolix2rx$state)
+  # a compartment with no other flows still needs an ODE to receive the depot
+  for (.s in intersect(.tgt, c(pk$compartment$amount, .pk2$compartment$amount))) {
+    if (length(.whichDdt(c(.monolix2rx$pk$pk, .pk3$pk), .s)) == 0L) {
+      .monolix2rx$pk$pk <- c(.monolix2rx$pk$pk, paste0("d/dt(", .s, ") <- 0"))
+    }
+  }
   for (.p in list(.monolix2rx$pk, .pk3)) {
     .monolix2rx$pk$pk <- .updateDdtEq(.tgt, .monolix2rx$pk$pk, .p)
     .pk3$pk <- .updateDdtEq(.tgt, .pk3$pk, .p)
@@ -159,37 +166,8 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .equationLine <- function(line, ddt) {
-  if (ddt != "") {
-    if (!is.null(.monolix2rx$pk$equation$lhsDepot[[ddt]])) {
-      .monolix2rx$equationLine <- c(.monolix2rx$equationLine,
-                                    paste0(.monolix2rx$pk$rhsDepot[[ddt]], " <- ", .monolix2rx$pk$lhsDepot[[ddt]]),
-                                    paste0(line, .monolix2rx$pk$rhsExtra[[ddt]]))
-      if (!is.null(.monolix2rx$pk$equation$fDepot[[ddt]])) {
-        .monolix2rx$equationLine <- c(.monolix2rx$equationLine,
-                                      .monolix2rx$pk$equation$fDepot[[ddt]])
-      }
-      if (!is.null(.monolix2rx$pk$equation$tlagDepot[[ddt]])) {
-        .monolix2rx$equationLine <- c(.monolix2rx$equationLine,
-                                      .monolix2rx$pk$equation$tlagDepot[[ddt]])
-      }
-    } else {
-      .monolix2rx$equationLine <- c(.monolix2rx$equationLine, line)
-    }
-    if (!is.null(.monolix2rx$pk$equation$dur[[ddt]])) {
-      .monolix2rx$equationLine <- c(.monolix2rx$equationLine,
-                                    .monolix2rx$pk$equation$dur[[ddt]])
-    }
-    if (!is.null(.monolix2rx$pk$equation$f[[ddt]])) {
-      .monolix2rx$equationLine <- c(.monolix2rx$equationLine,
-                                    .monolix2rx$pk$equation$f[[ddt]])
-    }
-    if (!is.null(.monolix2rx$pk$equation$tlag[[ddt]])) {
-      .monolix2rx$equationLine <- c(.monolix2rx$equationLine,
-                                    .monolix2rx$pk$equation$tlag[[ddt]])
-    }
-  } else {
-    .monolix2rx$equationLine <- c(.monolix2rx$equationLine, line)
-  }
+  # depot/dur/f/tlag lines are added afterwards by .updateDdtEq()
+  .monolix2rx$equationLine <- c(.monolix2rx$equationLine, line)
 }
 #' Add to the lhs variables of the equation object
 #'

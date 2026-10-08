@@ -363,7 +363,7 @@
   .amt <- data[["amt"]]
   if (is.null(.amt)) return(rep(FALSE, nrow(data)))
   .ret <- !is.na(.amt) & .amt != 0
-  if (!is.null(data[["evid"]])) .ret <- .ret & data$evid %in% c(1L, 4L)
+  if (!is.null(data[["evid"]])) .ret <- .ret & (is.na(data$evid) | data$evid %in% c(1L, 4L))
   .ret
 }
 
@@ -439,6 +439,7 @@
   .reset <- data[.r, ]
   .reset$evid <- 3L
   .reset$amt <- NA
+  for (.n in intersect(c("ii", "addl", "ss"), names(.reset))) .reset[[.n]] <- 0
   .reset$cmt <- NA_character_
   .ret <- rbind(data, .reset)
   .ret <- .ret[order(c(seq_len(nrow(data)), .r - 0.5)), ]
@@ -455,7 +456,9 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .dataEvid <- function(data) {
-  if (is.null(data[["evid"]])) data$evid <- ifelse(.dataIsDose(data), 1L, 0L)
+  .evid <- ifelse(.dataIsDose(data), 1L, 0L)
+  if (is.null(data[["evid"]])) data$evid <- .evid
+  data$evid[is.na(data$evid)] <- .evid[is.na(data$evid)]
   if (!is.null(data[["mdv"]])) {
     data$evid[data$evid == 0L & !is.na(data$mdv) & data$mdv == 1L] <- 2L
   }
