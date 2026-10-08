@@ -196,13 +196,18 @@ test_that("transfer() keeps the inflow of the receiving compartment", {
 })
 
 test_that("chained powers are right associative for rxode2", {
-  expect_equal(.equation("y = 2^x^2\nz = x^2 + y^3\nu = a^b^c^d")$rx,
-               c("y <- 2^(x^2)", "z <- x^2 + y^3", "u <- a^(b^(c^d))"))
+  expect_equal(.equation("y = 2^x^2\nz = x^2 + y^3\nu = a^b^c^d\nw = 2^-x^2")$rx,
+               c("y <- 2^(x^2)", "z <- x^2 + y^3", "u <- a^(b^(c^d))", "w <- 2^( - x^2)"))
 })
 
 test_that("dose keywords in PK macro arguments are translated", {
-  .rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, p=2/amtDose, Tlag=tDose)")$rx
+  .rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, p=2/amtDose, Tlag=0.1*tDose)")$rx
   expect_true("f(Ap) <- 2/dose()" %in% .rx)
-  expect_true("alag(Ap) <- tlast" %in% .rx)
+  expect_true("alag(Ap) <- 0.1 * tlast" %in% .rx)
+  .rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, p=invlogit(a^b^c), Tlag=normcdf(t))")$rx
+  expect_true("f(Ap) <- expit(a^(b^c))" %in% .rx)
+  expect_true("alag(Ap) <- pnorm(time)" %in% .rx)
+  expect_error(.equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, Tlag=inftDose)"),
+               "inftDose")
   expect_true("f(central) <- dose()/100" %in% .equation("", "Cc = pkmodel(V, Cl, p=amtDose/100)")$rx)
 })

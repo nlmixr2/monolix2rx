@@ -140,8 +140,9 @@
   occasion column in order.
 
 * Fixed `amtDose`, which became a parameter `dose` instead of rxode2's
-  last dose amount `dose()`; `amtDose`/`tDose` in `PK:` macro arguments
-  (like `depot(p=)`) were not translated at all.
+  last dose amount `dose()`.  `PK:` macro arguments (like `depot(p=)`)
+  were copied as written; their dose keywords, `t`, `~=`, Monolix
+  function names and chained powers are now translated.
 
 * Fixed chained powers: `a^b^c` was written unchanged, which rxode2 does
   not parse; it is now `a^(b^c)` (right associative, as in Monolix).

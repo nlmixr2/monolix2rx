@@ -279,9 +279,12 @@ Notes for later cases:
 
 - `amtDose` became a parameter `dose` (rxode2's last dose amount is
   `dose()`), and `amtDose`/`tDose` in `PK:` macro arguments were copied
-  untranslated (fixed; `ode-dose-keywords`, `pk-depot-p-amtdose`).  That
-  `amtDose` in `depot(p=)` is the amount of the dose being given, and
-  `tDose` at an observation tied with a dose, are to confirm in run mode.
+  untranslated (fixed; `ode-dose-keywords`, `pk-depot-p-amtdose`).  Other
+  Monolix syntax in macro arguments (`~=`, `t`, `invlogit()`...,
+  `a^b^c`) is now translated too, and `inftDose` there is an error.  In
+  `f()` rxode2's `dose()` is the dose being given.  Not covered: before
+  the first dose rxode2 gives NA (`dose0()`/`tlast0()` give 0), and an
+  observation tied with a dose; Monolix's values there are to confirm.
 - `a^b^c` was written unchanged and rxode2 does not parse it (fixed:
   `a^(b^c)`; `ode-math-functions-2`).
 

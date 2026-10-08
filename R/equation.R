@@ -140,17 +140,14 @@
                     }, character(1), USE.NAMES = FALSE)
   .cmtNum <- c(.cmtPre, .cmtNum, .cmtOther)
   .cmtNum <- .cmtNum[!is.na(.cmtNum)]
-  .rx <- c(.start,
-           .monolix2rx$pk$pk,
-           .end,
-           .eqPre,
-           .pk3$pk,
-           .monolix2rx$equationLine,
-           .monolix2rx$extraPred,
-           .monolix2rx$pk$equation$endLines)
-  # PK macro arguments are copied as written; translate the dose keywords
-  .rx <- gsub("\\bamtDose\\b", "dose()", .rx, perl=TRUE)
-  .rx <- gsub("\\btDose\\b", "tlast", .rx, perl=TRUE)
+  .rx <- .pkMacroRx(c(.start,
+                      .monolix2rx$pk$pk,
+                      .end,
+                      .eqPre,
+                      .pk3$pk,
+                      .monolix2rx$equationLine,
+                      .monolix2rx$extraPred,
+                      .monolix2rx$pk$equation$endLines))
   .ret <- list(monolix=text,
                rx=.rx,
                lhs=.monolix2rx$equationLhs,
@@ -159,6 +156,61 @@
                cmtPrefix=paste0("cmt(", .cmtNum, ")"))
   class(.ret) <- "monolix2rxEquation"
   .ret
+}
+
+#' Translate the Monolix expressions in PK macro lines
+#'
+#' PK macro arguments (like `depot(p=)`) are copied as written; lines
+#' with Monolix-only syntax are translated and the others kept as is.
+#'
+#' @param lines rxode2 lines from the PK macros
+#' @return translated lines
+#' @noRd
+#' @author Matthew L. Fidler
+.pkMacroRx <- function(lines) {
+  if (length(lines) == 0L) return(lines)
+  if (any(grepl("\\binftDose\\b", lines, perl=TRUE))) {
+    stop("'inftDose' Monolix declaration not supported in translation", call.=FALSE)
+  }
+  .fun <- c(invlogit="expit", norminv="qnorm", normcdf="pnorm", gammaln="lgamma",
+            factln="lfactorial")
+  .re <- paste0("~=|\\bt\\b|\\bamtDose\\b|\\btDose\\b|\\b(",
+                paste(names(.fun), collapse="|"), ")[(]")
+  vapply(lines, function(l) {
+    .i <- regexpr(" <- ", l, fixed=TRUE)
+    if (.i < 0) return(l)
+    .rhs <- substring(l, .i + 4)
+    if (!grepl(.re, .rhs, perl=TRUE)) {
+      # a chained power the walker did not write
+      if (!grepl("\\^.*\\^", .rhs)) return(l)
+      .e <- try(str2lang(.rhs), silent=TRUE)
+      if (inherits(.e, "try-error") || identical(.rxPowParen(.e), .e)) return(l)
+    }
+    .rhs <- gsub("~=", "!=", .rhs, fixed=TRUE)
+    .rhs <- gsub("\\bt\\b", "time", .rhs, perl=TRUE)
+    .rhs <- gsub("\\bamtDose\\b", "dose()", .rhs, perl=TRUE)
+    .rhs <- gsub("\\btDose\\b", "tlast", .rhs, perl=TRUE)
+    for (.n in names(.fun)) {
+      .rhs <- gsub(paste0("\\b", .n, "[(]"), paste0(.fun[[.n]], "("), .rhs, perl=TRUE)
+    }
+    paste0(substr(l, 1, .i - 1), " <- ", deparse1(.rxPowParen(str2lang(.rhs))))
+  }, character(1), USE.NAMES=FALSE)
+}
+
+#' Parenthesize chained powers, which rxode2 does not parse
+#'
+#' @param e expression
+#' @return expression with `a^b^c` as `a^(b^c)`
+#' @noRd
+#' @author Matthew L. Fidler
+.rxPowParen <- function(e) {
+  if (!is.call(e)) return(e)
+  e <- as.call(lapply(as.list(e), .rxPowParen))
+  if (identical(e[[1]], quote(`^`)) && is.call(e[[3]]) &&
+        identical(e[[3]][[1]], quote(`^`))) {
+    e[[3]] <- call("(", e[[3]])
+  }
+  e
 }
 
 #' Add an equation line
