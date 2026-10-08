@@ -19,11 +19,14 @@ DV = {use=observation, name=CONC, type=continuous}"
 ## [COVARIATE] section; `indExtra`: extra [INDIVIDUAL] DEFINITION lines;
 ## `pred`: the model output observed; `covParams`: population parameters
 ## used only in [COVARIATE] (latent class probabilities); `indDecl`:
-## [INDIVIDUAL] declarations (Monolix repeats categorical covariates there).
+## [INDIVIDUAL] declarations (Monolix repeats categorical covariates there);
+## `obsDist`/`obsExtra`: the observation distribution and extra fields
+## (like ", min=0, max=1").
 .mlxProject <- function(par, err="combined1(a, b)", errPar=c(a=0.05, b=0.1),
                         params=NULL, content=.mlxContent, indInput=NULL,
                         covariate=NULL, indExtra=NULL, pred="Cc",
-                        covParams=NULL, indDecl=NULL) {
+                        covParams=NULL, indDecl=NULL, obsDist="normal",
+                        obsExtra="") {
   .nm <- names(par)
   .in <- unlist(lapply(.nm, function(n) {
     c(paste0(n, "_pop"), if (!is.null(par[[n]]$sd)) paste0("omega_", n))
@@ -66,7 +69,7 @@ input = {", paste(names(errPar), collapse=", "), "}
 file = '{{MODEL}}'
 
 DEFINITION:
-CONC = {distribution=normal, prediction=", pred, ", errorModel=", err, "}
+CONC = {distribution=", obsDist, obsExtra, ", prediction=", pred, ", errorModel=", err, "}
 
 <FIT>
 data = CONC
