@@ -123,6 +123,13 @@
   gave `gamma ~ ... | occ2`, but the data's occasion column is `occ`
   (`id*occ*occ` is now `occ2`).
 
+* Added nested occasions (several `use=occasion` columns): only the last
+  column was kept, so `gamma1 | occ` used the inner level and the inner
+  level had no data column.  The first occasion column is now `occ` and
+  the k-th `occk`, numbering each combination of the first k columns, for
+  the `id*occ*...` levels.  The parsed `[CONTENT]` gained `occ`, every
+  occasion column in order.
+
 * Fixed `.getNbdoses()` and `.getStiff()`, which did not recognize the
   parsed project and always returned 7 and `FALSE`: the validation and
   `rxSolve()` now use the project's `nbdoses=` and `odeType=`.  The new

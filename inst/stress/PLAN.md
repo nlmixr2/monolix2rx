@@ -158,8 +158,11 @@ three things to check first:
 
 1. Fixed: `.def2iniRenameOcc()` named `id*occ` `occ2` while the data
    column is `occ`.
-2. Only one occasion column is mapped (`.use1Rx`), so nested occasions
-   have nowhere to go.
+2. Fixed: only one occasion column was mapped (`.use1Rx`).  Nested
+   occasions now become `occ`, `occ2`, ... (the k-th numbers the
+   combinations of the first k columns).  To confirm on Monolix: the
+   level names it writes (`id*occ1*occ2` or `id*occ*occ`; both are read
+   by depth) and that the first occasion column is the outer level.
 3. Monolix writes per-(subject, occasion) individual parameters; the
    validation solve expects one row per subject.
 
@@ -172,7 +175,7 @@ three things to check first:
 | `iov-ka-f-multi` | IOV on `Tlag` (with BSV), `ka` and logitNormal `p` |
 | `iov-ss` | SS at each occasion with drug still on board at the second (reset vs. added dose: to confirm in run mode) |
 | `iov-time-varying-cov` | covariate (`lw70`) changing between occasions |
-| `iov-nested` | `OCC1`/`OCC2`, `varlevel={id, id*occ1, id*occ1*occ2}` (XFAIL) |
+| `iov-nested` | `OCC1`/`OCC2`, `varlevel={id, id*occ1, id*occ1*occ2}` |
 | `iov-dde`, `iov-mixture` | combinations |
 
 Translate checks add: each omega level vs its truth matrix; the `ini()`

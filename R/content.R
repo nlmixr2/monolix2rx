@@ -25,6 +25,7 @@
         missingdependentvariable=NA_character_,
         infusiontime=NA_character_)
     .monolix2rx$contLst <- character(0)
+    .monolix2rx$occLst <- character(0)
     .monolix2rx$ssNbdoses <- 7L
     .monolix2rx$yname <- character(0)
     .monolix2rx$ynameQuote <- logical(0)
@@ -56,7 +57,8 @@
                ytypeQuote=.monolix2rx$ytypeQuote,
                name=.monolix2rx$name,
                type=.monolix2rx$type,
-               ignoreLine=.monolix2rx$ignoreLineLst)
+               ignoreLine=.monolix2rx$ignoreLineLst,
+               occ=.monolix2rx$occLst)
   if (length(.lst$yname) != length(.lst$name) &&
         length(.lst$yname) != 0 && length(.lst$name) != 0) {
     stop("for 'observation' type the length of 'name' and 'yname' should match",
@@ -75,6 +77,8 @@
 .contSetUse1 <- function(use1, name) {
   .indPushCat()
   .monolix2rx$use1[use1] <- name
+  # several occasion columns are nested levels; use1 keeps the last
+  if (use1 == "occasion") .monolix2rx$occLst <- c(.monolix2rx$occLst, name)
 }
 #' Set the steady state number of doses
 #'
@@ -168,8 +172,11 @@
 
 #' @export
 as.character.monolix2rxContent <- function(x, ...) {
-  .cur <- vapply(names(x$use1), function(n) {
+  .cur <- lapply(names(x$use1), function(n) {
     if (is.na(x$use1[n])) return(NA_character_)
+    if (n == "occasion" && length(x$occ) > 1L) {
+      return(paste0(x$occ, " = {use=occasion}"))
+    }
     .ret <- paste0(x$use1[n], " = {use=", n)
     if (n == "observation") {
       .name <- x$name
@@ -185,7 +192,8 @@ as.character.monolix2rxContent <- function(x, ...) {
                      .asCharacterSingleOrList("nbdoses", x$nbdoses))
     }
     paste0(.ret, "}")
-  }, character(1), USE.NAMES = FALSE)
+  })
+  .cur <- unlist(.cur)
   c(.cur[!is.na(.cur)],
     .asCharacterReg(x),
     .asCharacterIgnore(x),

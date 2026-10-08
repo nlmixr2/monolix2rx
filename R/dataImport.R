@@ -284,6 +284,38 @@
   data[!.flag, -.w, drop=FALSE]
 }
 
+#' Translate nested occasion columns
+#'
+#' With several `use=occasion` columns (nested levels, outermost first)
+#' the first becomes `occ` and the k-th `occk`, numbering each combination
+#' of the first k columns, so an inner eta is not shared across outer
+#' occasions.  These match the `id*occ*...` level names of `.def2iniRenameOcc()`.
+#'
+#' @param data data.frame as read
+#' @param content parsed `[CONTENT]`
+#' @return data with the occasion columns translated
+#' @noRd
+#' @author Matthew L. Fidler
+.dataRenameOcc <- function(data, content) {
+  .occ <- content$occ
+  if (length(.occ) < 2L) return(data)
+  .w <- match(.occ, names(data))
+  if (anyNA(.w)) {
+    stop("occasion column(s) missing from the data set: ",
+         paste(.occ[is.na(.w)], collapse=", "), call.=FALSE)
+  }
+  .cols <- lapply(.w, function(i) data[[i]])
+  .new <- lapply(seq_along(.cols), function(k) {
+    if (k == 1L) return(.cols[[1]])
+    .key <- do.call(paste, c(.cols[seq_len(k)], sep="\r"))
+    .ord <- do.call(order, .cols[seq_len(k)])
+    match(.key, unique(.key[.ord]))
+  })
+  for (.k in seq_along(.w)) data[[.w[.k]]] <- .new[[.k]]
+  names(data)[.w] <- c("occ", paste0("occ", seq_along(.w)[-1]))
+  data
+}
+
 #' Rename defined items from monolix to rxode2 reserved names
 #'
 #' This also makes sure the order of factors defined matches what
@@ -303,6 +335,7 @@
   .use1 <- .content$use1
   data <- .dataDropIgnoredLines(data, .content)
   data <- .dataDropIgnoredEvent(data, .content)
+  data <- .dataRenameOcc(data, .content)
   .orig <- names(data)
   names(data) <- vapply(
     names(data),

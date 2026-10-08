@@ -174,3 +174,21 @@ test_that("ignored columns named like rxode2 event columns are dropped", {
   .d <- data.frame(ID=1L, TIME=0, OCC=1L, OCC2=1L, DV=NA)
   expect_identical(.dataDropIgnoredEvent(.d, .c), .d)
 })
+
+test_that("nested occasion columns become occ and a combined occ2", {
+  .c <- .content("ID = {use=identifier}\nTIME = {use=time}\nP1 = {use=occasion}\nP2 = {use=occasion}\nDV = {use=observation, name=y, type=continuous}")
+  expect_equal(.c$occ, c("P1", "P2"))
+  expect_equal(.content(paste(as.character(.c), collapse="\n"))$occ, c("P1", "P2"))
+  .d <- data.frame(ID=1L, TIME=1:6, P1=c(1, 1, 2, 2, 2, 3), P2=c(1, 2, 1, 1, 2, 1), DV=1)
+  .r <- .dataRenameOcc(.d, .c)
+  expect_equal(names(.r), c("ID", "TIME", "occ", "occ2", "DV"))
+  expect_equal(.r$occ, .d$P1)
+  # the inner level is numbered per (P1, P2) combination
+  expect_equal(.r$occ2, c(1, 2, 3, 3, 4, 5))
+  # one occasion column is left to the use=occasion rename
+  .c1 <- .content("ID = {use=identifier}\nTIME = {use=time}\nOCC = {use=occasion}")
+  expect_equal(.c1$occ, "OCC")
+  expect_identical(.dataRenameOcc(.d, .c1), .d)
+  expect_error(.dataRenameOcc(.d[, -4], .c), "P2")
+  expect_equal(.def2iniRenameOcc(c("id", "id*occ1", "id*occ1*occ2")), c("id", "occ", "occ2"))
+})

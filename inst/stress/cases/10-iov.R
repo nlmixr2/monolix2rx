@@ -244,10 +244,11 @@ lw70 = log(WT/70)"))
 
 ## nested occasions: periods (OCC1) split into sub-occasions (OCC2); the
 ## truth indexes the inner level by a hidden period/sub-occasion column
+## (OCC12), numbered like the import's occ2 so the true etas line up
 kitVariant("iov-cl-basic", "iov-nested",
            "nested occasions OCC1/OCC2: Cl with varlevel={id, id*occ1, id*occ1*occ2}",
            tags=c("iov"),
-           known="nested occasions are mistranslated: only the last occasion column is mapped (to occ), so gamma1_Cl is bound to the inner level and gamma2_Cl to a missing occ2",
+           knownRun=.iovKnownRun,
            sim=function() {
              ini({
                ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3
