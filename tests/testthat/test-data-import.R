@@ -138,3 +138,13 @@ test_that("an EVID column with NA on a dose is filled", {
   .d <- data.frame(id=1L, time=c(0, 1), amt=c(100, NA), evid=c(NA, 0L), dv=c(NA, 1))
   expect_equal(.dataEvid(.d)$evid, c(1L, 0L))
 })
+
+test_that("ignored columns named like rxode2 event columns are dropped", {
+  .c <- .content("ID = {use=identifier}\nTIME = {use=time}\nAMT = {use=amount}\nSS = {use=ignore}\nRate = {use=ignore}\nWT = {use=covariate, type=continuous}\nDV = {use=observation, name=y, type=continuous}")
+  .d <- data.frame(ID=1L, TIME=0, AMT=100, SS=1L, Rate=10, II=24, WT=70, DV=NA)
+  expect_message(.r <- .dataDropIgnoredEvent(.d, .c), "SS', 'Rate', 'II")
+  expect_equal(names(.r), c("ID", "TIME", "AMT", "WT", "DV"))
+  .c <- .content("ID = {use=identifier}\nTIME = {use=time}\nAMT = {use=amount}\nSS = {use=steadystate}\nII = {use=interdoseinterval}\nDV = {use=observation, name=y, type=continuous}")
+  .d <- data.frame(ID=1L, TIME=0, AMT=100, SS=1L, II=24, DV=NA)
+  expect_identical(.dataDropIgnoredEvent(.d, .c), .d)
+})

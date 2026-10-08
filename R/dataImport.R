@@ -229,6 +229,27 @@
   }
   data
 }
+#' Drop ignored columns that rxode2 would read as event columns
+#'
+#' rxode2 matches its event columns (`ss`, `rate`, `evid`, ...) ignoring
+#' case, so an ignored `SS` column would still be used.
+#'
+#' @param data data.frame as read
+#' @param content parsed `[CONTENT]`
+#' @return data without those columns
+#' @noRd
+#' @author Matthew L. Fidler
+.dataDropIgnoredEvent <- function(data, content) {
+  .used <- c(content$use1, content$cont, names(content$cat), content$reg)
+  .reserved <- c(.use1Rx, "cmt", "dvid", "admd")
+  .drop <- which(!(names(data) %in% .used) & tolower(names(data)) %in% tolower(.reserved))
+  if (length(.drop) == 0L) return(data)
+  .minfo(paste0("dropped ignored data column(s) '",
+                paste(names(data)[.drop], collapse="', '"),
+                "' that rxode2 would read as event columns"))
+  data[, -.drop, drop=FALSE]
+}
+
 #' Rename defined items from monolix to rxode2 reserved names
 #'
 #' This also makes sure the order of factors defined matches what
@@ -246,6 +267,7 @@
 .dataRenameFromMlxtran <- function(data, mlxtran) {
   .content <- mlxtran$DATAFILE$CONTENT$CONTENT
   .use1 <- .content$use1
+  data <- .dataDropIgnoredEvent(data, .content)
   .orig <- names(data)
   names(data) <- vapply(
     names(data),

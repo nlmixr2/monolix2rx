@@ -239,6 +239,12 @@ Notes for later cases:
   (`dde-hutchinson`; monolix2rx writes `x_0 <- 10; x(0) <- x_0`).  To fix
   in rxode2 (nlmixr2/rxode2#1441).
 
+- rxode2 5.1.8 steady state with `delay()`: the undelayed states reach
+  steady state, but a state driven by the delay starts at its initial
+  condition and the delay history is 0 (`dde-ss`, `knownRun=`).  An
+  ignored `SS` column was still read by rxode2 (fixed: ignored columns
+  named like rxode2 event columns are dropped).
+
 - Delay models are solved with `dop853` even for `odeType=stiff`
   (rxode2's own default is `dop853+ros4`); `.getDelay()` is not exported
   for babelmixr2's control.
