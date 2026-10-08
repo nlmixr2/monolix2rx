@@ -228,7 +228,7 @@ Notes for later cases:
 - rxode2 5.1.8 `delay()` uses `x(0)` as the history only when it is a
   literal constant; a computed or parameter `x(0)` gives a history of 0
   (`dde-hutchinson`; monolix2rx writes `x_0 <- 10; x(0) <- x_0`).  To fix
-  in rxode2.
+  in rxode2 (nlmixr2/rxode2#1441).
 
 - Delay models are solved with `dop853` even for `odeType=stiff`
   (rxode2's own default is `dop853+ros4`); `.getDelay()` is not exported
