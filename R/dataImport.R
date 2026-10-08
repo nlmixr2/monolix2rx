@@ -245,10 +245,8 @@
   .event <- c("id", "time", "evid", "amt", "rate", "dur", "ss", "ii", "addl",
               "cmt", "mdv", "dv", "dvid", "cens", "limit", "method", "dose",
               "value", "mixest", "mixunif")
-  # an ignoredline MDV flag is kept: rxode2 then skips the flagged rows
-  # too; a used column is kept even when an ignored one differs only by case
-  .keep <- tolower(content$ignoreLine)
-  .ignore <- setdiff(tolower(content$ignore), .keep[.keep == "mdv"])
+  # a used column is kept even when an ignored one differs only by case
+  .ignore <- tolower(content$ignore)
   .used <- c(content$use1, content$cont, names(content$cat), content$reg)
   .drop <- which(tolower(names(data)) %in% .ignore & !(names(data) %in% .used) &
                    tolower(names(data)) %in% .event)
@@ -257,6 +255,30 @@
                 paste(names(data)[.drop], collapse="', '"),
                 "' that rxode2 would read as event columns"))
   data[, -.drop, drop=FALSE]
+}
+
+#' Drop the lines flagged by `use=ignoredline` columns, then the columns
+#'
+#' Monolix ignores a whole line (dose or observation) with a non-zero flag.
+#'
+#' @param data data.frame as read
+#' @param content parsed `[CONTENT]`
+#' @return data without the flagged lines and the flag columns
+#' @noRd
+#' @author Matthew L. Fidler
+.dataDropIgnoredLines <- function(data, content) {
+  .w <- which(names(data) %in% content$ignoreLine)
+  if (length(.w) == 0L) return(data)
+  .flag <- vapply(.w, function(i) {
+    .v <- suppressWarnings(as.numeric(as.character(data[[i]])))
+    !is.na(.v) & .v != 0
+  }, logical(nrow(data)))
+  .flag <- if (is.matrix(.flag)) rowSums(.flag) > 0 else any(.flag)
+  if (any(.flag)) {
+    .minfo(paste0("dropped ", sum(.flag), " line(s) flagged by '",
+                  paste(names(data)[.w], collapse="', '"), "' (use=ignoredline)"))
+  }
+  data[!.flag, -.w, drop=FALSE]
 }
 
 #' Rename defined items from monolix to rxode2 reserved names
@@ -276,6 +298,7 @@
 .dataRenameFromMlxtran <- function(data, mlxtran) {
   .content <- mlxtran$DATAFILE$CONTENT$CONTENT
   .use1 <- .content$use1
+  data <- .dataDropIgnoredLines(data, .content)
   data <- .dataDropIgnoredEvent(data, .content)
   .orig <- names(data)
   names(data) <- vapply(

@@ -85,12 +85,23 @@ kitVariant("pkmodel-oral-1cmt", "data-cens-limit",
              d$LIMIT <- ifelse(d$CENS == 1L, 0, NA_real_)
              d
            },
+           dryData=function(m, sim) {
+             .t <- sim$data[sim$data$EVID == 0 & sim$data$MDV == 0, ]
+             .d <- m$monolixData
+             .d <- .d[!is.na(.d$dv), ]
+             .m <- match(paste(.t$ID, .t$TIME), paste(.d$id, .d$time))
+             if (anyNA(.m)) return("observations missing")
+             .bad <- c(cens=!identical(as.integer(.d$cens[.m]), .t$CENS),
+                       limit=!isTRUE(all.equal(.d$limit[.m], .t$LIMIT)),
+                       dv=!isTRUE(all.equal(.d$dv[.m], .t$DV)))
+             if (any(.bad)) paste("differs from the data:", paste(names(.bad)[.bad], collapse=", "))
+           },
            mlxtran=.dataProject(content=paste0(.mlxContent, "
 CENS = {use=censored}
 LIMIT = {use=limit}")))
 
-## a time-varying regressor; the data column (CLCR) and the model
-## regressor (crcl) differ, Monolix matches them by order
+## two time-varying regressors; the data columns (REGA, REGB) and the
+## model regressors (crcl, alb) differ in name, Monolix matches them by order
 .regTruth <- function() {
   ini({
     ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3
@@ -101,7 +112,7 @@ LIMIT = {use=limit}")))
     ka <- ka_pop * exp(omega_ka)
     V <- V_pop * exp(omega_V)
     Cl <- Cl_pop * exp(omega_Cl)
-    Cli <- Cl * (CLCR / 100)^0.75
+    Cli <- Cl * (CLCR / 100)^0.75 * (ALB / 4)^0.5
     d/dt(depot) <- -ka * depot
     d/dt(central) <- ka * depot - Cli / V * central
     Cc <- central / V
@@ -113,30 +124,36 @@ LIMIT = {use=limit}")))
   .id <- seq_len(nSub)
   .d <- mlxBind(mlxDose(.id, c(0, 24), amt=100, cmt=1),
                 mlxObs(.id, c(pkTimes(24), 25, 26, 28, 32, 36, 48), cmt=2))
-  ## declining renal function, a step at 24 h
+  ## declining renal function with a step at 24 h; albumin rising
   .base <- 60 + 10 * (.d$ID %% 5)
   .d$CLCR <- signif(.base - 0.4 * .d$TIME - ifelse(.d$TIME >= 24, 15, 0), 6)
+  .d$ALB <- signif(3 + 0.02 * .d$TIME + 0.1 * (.d$ID %% 3), 6)
   .d
 }
 
 kitCase(
   name="data-regressor",
-  covers="time-varying regressor (use=regressor) on Cl, data column CLCR matched by order to model regressor crcl",
+  covers="two time-varying regressors (use=regressor) on Cl, data columns REGA/REGB matched by order to model regressors crcl/alb",
   tags=c("data", "regressor"),
   sim=.regTruth,
   data=.regData,
-  columns=c("ID", "TIME", "AMT", "DV", "CLCR"),
+  write=.writeDelim(c("ID", "TIME", "AMT", "DV", "REGA", "REGB"), ",", function(w) {
+    w$REGA <- w$CLCR
+    w$REGB <- w$ALB
+    w
+  }),
   model="DESCRIPTION: {{PROBLEM}}
 
 [LONGITUDINAL]
-input = {ka, V, Cl, crcl}
+input = {ka, V, Cl, crcl, alb}
 crcl = {use=regressor}
+alb = {use=regressor}
 
 PK:
 depot(target=Ad)
 
 EQUATION:
-Cli = Cl*(crcl/100)^0.75
+Cli = Cl*(crcl/100)^0.75*(alb/4)^0.5
 ddt_Ad = -ka*Ad
 ddt_Ac = ka*Ad - Cli/V*Ac
 Cc = Ac/V
@@ -144,7 +161,7 @@ Cc = Ac/V
 OUTPUT:
 output = Cc
 ",
-  mlxtran=.dataProject(content=paste0(.mlxContent, "\nCLCR = {use=regressor}")))
+  mlxtran=.dataProject(content=paste0(.mlxContent, "\nREGA = {use=regressor}\nREGB = {use=regressor}")))
 
 ## string categories with a reference that is not alphabetically first;
 ## the truth uses a 0/1 column, the file the strings
@@ -187,3 +204,24 @@ input = SEX
 
 SEX = {type=categorical, categories={'F', 'M'}}",
              indDecl="SEX = {type=categorical, categories={'F', 'M'}}"))
+
+## lines flagged by an ignoredline column (here named MDV) are dropped,
+## doses as well as observations
+kitVariant("pkmodel-oral-1cmt", "data-ignoredline",
+           "MDV = {use=ignoredline}: flagged dose and observation lines are ignored",
+           tags=c("data", "mdv"),
+           write=.writeDelim(c("ID", "TIME", "AMT", "DV", "MDV"), ",", function(w) {
+             w$MDV <- 0L
+             .x <- w[!duplicated(w$ID), ]
+             .x$TIME <- 6
+             .x$AMT <- 1000
+             .x$DV <- NA
+             .x$MDV <- 1L
+             .o <- .x
+             .o$TIME <- 7
+             .o$AMT <- NA
+             .o$DV <- 999
+             .w <- rbind(w, .x, .o)
+             .w[order(match(.w$ID, unique(w$ID)), .w$TIME), ]
+           }),
+           mlxtran=.dataProject(content=paste0(.mlxContent, "\nMDV = {use=ignoredline}")))

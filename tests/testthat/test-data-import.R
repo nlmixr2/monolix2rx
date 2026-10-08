@@ -154,12 +154,13 @@ test_that("ignored columns named like rxode2 event columns are dropped", {
   expect_equal(.c$ignore, c("MDV", "EVID"))
   expect_equal(.c$ignoreLine, "MDV")
   expect_equal(.content(paste(as.character(.c), collapse="\n"))$ignoreLine, "MDV")
-  .d <- data.frame(ID=1L, TIME=0, MDV=1L, EVID=1L, DV=NA)
-  expect_equal(names(suppressMessages(.dataDropIgnoredEvent(.d, .c))), c("ID", "TIME", "MDV", "DV"))
-  # other ignoredline flags named like event columns are dropped
-  .c <- .content("ID = {use=identifier}\nTIME = {use=time}\nE = {use=eventidentifier}\nEVID = {use=ignoredline}\nDV = {use=observation, name=y, type=continuous}")
-  .d <- data.frame(ID=1L, TIME=0, E=0L, EVID=1L, DV=1)
-  expect_equal(names(suppressMessages(.dataDropIgnoredEvent(.d, .c))), c("ID", "TIME", "E", "DV"))
+  # its flagged lines (doses or observations) and the flag are dropped
+  .d <- data.frame(ID=1L, TIME=c(0, 0, 1, 2), AMT=c(100, 50, NA, NA), MDV=c(0L, 1L, 1L, NA),
+                   EVID=1L, DV=c(NA, NA, 9, 1))
+  expect_message(.r <- .dataDropIgnoredLines(.d, .c), "2 line")
+  expect_equal(.r$TIME, c(0, 2))
+  expect_equal(names(.r), c("ID", "TIME", "AMT", "EVID", "DV"))
+  expect_identical(.dataDropIgnoredLines(.d[1, ], .c), .d[1, names(.r)])
   # a used column is kept when an ignored one differs only by case
   .c <- .content("ID = {use=identifier}\nTIME = {use=time}\nAMT = {use=amount}\namt = {use=ignore}\nDV = {use=observation, name=y, type=continuous}")
   .d <- data.frame(ID=1L, TIME=0, AMT=100, amt=5, DV=NA)

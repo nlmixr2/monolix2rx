@@ -83,7 +83,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `01-pk.R` | `lib:` models; `pkmodel()` parameterizations (`k`/`Cl`, `k12`/`Q`, `Tlag`, `p`, `Tk0`, `Ktr`/`Mtt`, `Vm`/`Km`); explicit macros (`compartment`, `oral`, `iv`, `depot(target, adm=)`, `peripheral`, `transfer`, `effect`, `elimination`, `empty`/`reset`) |
 | `02-ode.R` | `ddt_` systems: turnover with `_0`, Michaelis-Menten, `t` in equations, `t0`, `odeType=stiff`, if/else, math functions |
 | `03-dosing.R` | ADDL/II, SS (`nbSSDoses`), `infusionrate` and `infusiontime`, several ADM routes, EVID 3/4 washout, MDV, ties, first dose not at 0 |
-| `04-data.R` | delimiters, `header=` forms, ignored columns/lines, string IDs, `observationtype`/YTYPE, CENS/LIMIT, regressors, categorical covariates, 2024 `file={path=}`, data in a subdirectory |
+| `04-data.R` | delimiters, ignored columns and lines, string IDs, MDV, CENS/LIMIT (imported values checked), two regressors matched by order, string categories, 2024 `file={path=}`, data in a subdirectory |
 | `05-params.R` | logNormal/normal/logitNormal/probitNormal, covariate effects with transformed covariates, correlation blocks, `method=FIXED`, no-variability parameters, `[INDIVIDUAL]` vs `[POPULATION]` |
 | `06-error.R` | constant, proportional, combined1/2, `c` variants, logNormal/logitNormal observations, two endpoints |
 | `07-tasks.R` | FIM linearization vs SA, conditional mean vs mode, custom `exportpath`, `nbSSDoses`, `odeType` |
@@ -257,9 +257,14 @@ Notes for later cases:
 - A project without `<MONOLIX> [SETTINGS] exportpath` stops the import
   (`R/parameterUpdate.R`), seen while writing the latent-covariate test.
 
-- `use=ignoredline` rows are not removed from the imported data (the
-  column is kept, so an `MDV`-named flag still hides observations from
-  rxode2); whether Monolix drops the whole line is to confirm.
+- `use=ignoredline`: the import drops each flagged line (doses too) and
+  the flag column (`data-ignoredline`); that Monolix ignores the whole
+  line is to confirm in run mode.
+
+- Regressors: the import matches the data columns to the model's
+  `X = {use=regressor}` lines in their order; whether Monolix follows
+  those lines or the `input = {...}` order (they agree in
+  `data-regressor`) is to confirm.
 
 - `knownRun=` turns any run-mode failure into XFAIL, including a Monolix
   run that did not finish; it should match the expected reason.

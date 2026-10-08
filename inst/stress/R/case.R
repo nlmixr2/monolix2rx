@@ -36,6 +36,8 @@
 ## - `mixest`: data column with each subject's true mixture class (its
 ##   position in the categories), given to the imported model as mixest.
 ## - `dataFile`: the data file, relative to the project (default data.csv).
+## - `dryData`: function(m, sim) checking the imported data (`m$monolixData`)
+##   against the simulation; returns NULL or a failure message.
 
 .kitEnv <- new.env(parent=emptyenv())
 .kitEnv$cases <- list()
@@ -46,7 +48,7 @@ kitCase <- function(name, covers, tags=character(0), sim, data, mlxtran,
                     knownRun=NULL, est="default", dryPred=TRUE,
                     dryOmega=TRUE, nSub=NULL, nbSSDoses=7L,
                     minMonolix=NULL, solve=list(), mixest=NULL,
-                    dataFile="data.csv") {
+                    dataFile="data.csv", dryData=NULL) {
   stopifnot(is.character(name), length(name) == 1L,
             !grepl("[^A-Za-z0-9_-]", name))
   if (!is.null(.kitEnv$cases[[name]])) {
@@ -61,6 +63,7 @@ kitCase <- function(name, covers, tags=character(0), sim, data, mlxtran,
                                 nSub=nSub, nbSSDoses=nbSSDoses,
                                 minMonolix=minMonolix, solve=solve,
                                 mixest=mixest, dataFile=dataFile,
+                                dryData=dryData,
                                 file=if (is.null(.kitEnv$curFile)) NA_character_ else .kitEnv$curFile)
   invisible(name)
 }

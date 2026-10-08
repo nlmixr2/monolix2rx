@@ -77,6 +77,11 @@ kitRunCase <- function(case, outDir, mode="dry", nSub=20L, seed=42L,
         }
       }
     }
+    if (.res$dryImport && is.na(.res$dryError) && is.function(case$dryData)) {
+      .dd <- try(case$dryData(.dry$value, .sim), silent=TRUE)
+      if (inherits(.dd, "try-error")) .dd <- trimws(.dd)
+      if (!is.null(.dd)) .res$dryError <- paste("imported data:", .dd)
+    }
   } else {
     ## keep the translate results of the run being re-imported
     .prev <- file.path(.dir, "result.rds")
