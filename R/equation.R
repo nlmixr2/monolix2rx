@@ -180,20 +180,24 @@
     .i <- regexpr(" <- ", l, fixed=TRUE)
     if (.i < 0) return(l)
     .rhs <- substring(l, .i + 4)
-    if (!grepl(.re, .rhs, perl=TRUE)) {
-      # a chained power the walker did not write
-      if (!grepl("\\^.*\\^", .rhs)) return(l)
+    if (grepl(.re, .rhs, perl=TRUE)) {
+      .rhs <- gsub("~=", "!=", .rhs, fixed=TRUE)
+      .rhs <- gsub("\\bt\\b", "time", .rhs, perl=TRUE)
+      .rhs <- gsub("\\bamtDose\\b", "dose()", .rhs, perl=TRUE)
+      .rhs <- gsub("\\btDose\\b", "tlast", .rhs, perl=TRUE)
+      for (.n in names(.fun)) {
+        .rhs <- gsub(paste0("\\b", .n, "[(]"), paste0(.fun[[.n]], "("), .rhs, perl=TRUE)
+      }
+    }
+    # a chained power the walker did not write; otherwise keep the text
+    if (grepl("\\^.*\\^", .rhs)) {
       .e <- try(str2lang(.rhs), silent=TRUE)
-      if (inherits(.e, "try-error") || identical(.rxPowParen(.e), .e)) return(l)
+      if (!inherits(.e, "try-error")) {
+        .p <- .rxPowParen(.e)
+        if (!identical(.p, .e)) .rhs <- deparse1(.p)
+      }
     }
-    .rhs <- gsub("~=", "!=", .rhs, fixed=TRUE)
-    .rhs <- gsub("\\bt\\b", "time", .rhs, perl=TRUE)
-    .rhs <- gsub("\\bamtDose\\b", "dose()", .rhs, perl=TRUE)
-    .rhs <- gsub("\\btDose\\b", "tlast", .rhs, perl=TRUE)
-    for (.n in names(.fun)) {
-      .rhs <- gsub(paste0("\\b", .n, "[(]"), paste0(.fun[[.n]], "("), .rhs, perl=TRUE)
-    }
-    paste0(substr(l, 1, .i - 1), " <- ", deparse1(.rxPowParen(str2lang(.rhs))))
+    paste0(substr(l, 1, .i - 1), " <- ", .rhs)
   }, character(1), USE.NAMES=FALSE)
 }
 
@@ -206,9 +210,14 @@
 .rxPowParen <- function(e) {
   if (!is.call(e)) return(e)
   e <- as.call(lapply(as.list(e), .rxPowParen))
-  if (identical(e[[1]], quote(`^`)) && is.call(e[[3]]) &&
-        identical(e[[3]][[1]], quote(`^`))) {
-    e[[3]] <- call("(", e[[3]])
+  if (identical(e[[1]], quote(`^`)) && is.call(e[[3]])) {
+    .x <- e[[3]]
+    # a^b^c and a^-b^c (a signed power)
+    if (identical(.x[[1]], quote(`^`)) ||
+          (length(.x) == 2L && (identical(.x[[1]], quote(`-`)) || identical(.x[[1]], quote(`+`))) &&
+             is.call(.x[[2]]) && identical(.x[[2]][[1]], quote(`^`)))) {
+      e[[3]] <- call("(", .x)
+    }
   }
   e
 }

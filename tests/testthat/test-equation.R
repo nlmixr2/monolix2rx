@@ -203,10 +203,13 @@ test_that("chained powers are right associative for rxode2", {
 test_that("dose keywords in PK macro arguments are translated", {
   .rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, p=2/amtDose, Tlag=0.1*tDose)")$rx
   expect_true("f(Ap) <- 2/dose()" %in% .rx)
-  expect_true("alag(Ap) <- 0.1 * tlast" %in% .rx)
+  expect_true("alag(Ap) <- 0.1*tlast" %in% .rx)
   .rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, p=invlogit(a^b^c), Tlag=normcdf(t))")$rx
   expect_true("f(Ap) <- expit(a^(b^c))" %in% .rx)
   expect_true("alag(Ap) <- pnorm(time)" %in% .rx)
+  .rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, p=2^-x^2, Tlag=1e-3*t)")$rx
+  expect_true("f(Ap) <- 2^(-x^2)" %in% .rx)
+  expect_true("alag(Ap) <- 1e-3*time" %in% .rx)
   expect_error(.equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, Tlag=inftDose)"),
                "inftDose")
   expect_true("f(central) <- dose()/100" %in% .equation("", "Cc = pkmodel(V, Cl, p=amtDose/100)")$rx)
