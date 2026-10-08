@@ -190,5 +190,19 @@ test_that("nested occasion columns become occ and a combined occ2", {
   expect_equal(.c1$occ, "OCC")
   expect_identical(.dataRenameOcc(.d, .c1), .d)
   expect_error(.dataRenameOcc(.d[, -4], .c), "P2")
+  # lowercased user data, missing occasions and clashing columns
+  .l <- stats::setNames(.d, tolower(names(.d)))
+  expect_equal(.dataRenameOcc(.l, .c)$occ2, c(1, 2, 3, 3, 4, 5))
+  .n <- .d
+  .n$P1[2] <- NA
+  .n$P2[5] <- NA
+  expect_equal(.dataRenameOcc(.n, .c)$occ2, c(1, NA, 2, 2, NA, 3))
+  .x <- .d
+  .x$OCC2 <- 0
+  expect_error(.dataRenameOcc(.x, .c), "occ2")
+  .m <- list(DATAFILE=list(CONTENT=list(CONTENT=.c)),
+             MODEL=list(LONGITUDINAL=list(LONGITUDINAL=.longitudinal("input = {ka, occ2}\nocc2 = {use=regressor}"))))
+  .m$DATAFILE$CONTENT$CONTENT$reg <- "R1"
+  expect_error(.dataRenameRegressors(data.frame(ID=1, R1=2), .m), "occ2")
   expect_equal(.def2iniRenameOcc(c("id", "id*occ1", "id*occ1*occ2")), c("id", "occ", "occ2"))
 })

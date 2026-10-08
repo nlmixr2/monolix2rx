@@ -195,8 +195,9 @@
   .w <- sort(match(.dataReg, orig))
   .content <- mlxtran$DATAFILE$CONTENT$CONTENT
   # reserved in the rxode2 data set; cmt/admd are added by .dataConvertAdm()
+  .occ <- paste0("occ", seq_along(.content$occ)[-1])
   .reserved <- .modelReg[
-    tolower(.modelReg) %in% tolower(c(.use1Rx, "cmt", "admd"))
+    tolower(.modelReg) %in% tolower(c(.use1Rx, "cmt", "admd", .occ))
   ]
   if (length(.reserved) > 0L) {
     stop(
@@ -300,6 +301,7 @@
   .occ <- content$occ
   if (length(.occ) < 2L) return(data)
   .w <- match(.occ, names(data))
+  if (anyNA(.w)) .w <- match(tolower(.occ), tolower(names(data)))
   if (anyNA(.w)) {
     stop("occasion column(s) missing from the data set: ",
          paste(.occ[is.na(.w)], collapse=", "), call.=FALSE)
@@ -308,11 +310,19 @@
   .new <- lapply(seq_along(.cols), function(k) {
     if (k == 1L) return(.cols[[1]])
     .key <- do.call(paste, c(.cols[seq_len(k)], sep="\r"))
+    # a missing occasion at any level leaves the combination missing
+    .key[Reduce(`|`, lapply(.cols[seq_len(k)], is.na))] <- NA_character_
     .ord <- do.call(order, .cols[seq_len(k)])
-    match(.key, unique(.key[.ord]))
+    match(.key, unique(.key[.ord][!is.na(.key[.ord])]))
   })
+  .to <- c("occ", paste0("occ", seq_along(.w)[-1]))
+  .clash <- intersect(tolower(names(data)[-.w]), .to)
+  if (length(.clash) > 0L) {
+    stop("data column(s) '", paste(.clash, collapse="', '"),
+         "' clash with the translated occasion columns", call.=FALSE)
+  }
   for (.k in seq_along(.w)) data[[.w[.k]]] <- .new[[.k]]
-  names(data)[.w] <- c("occ", paste0("occ", seq_along(.w)[-1]))
+  names(data)[.w] <- .to
   data
 }
 
