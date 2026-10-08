@@ -197,12 +197,23 @@ test_that("nested occasion columns become occ and a combined occ2", {
   .n$P1[2] <- NA
   .n$P2[5] <- NA
   expect_equal(.dataRenameOcc(.n, .c)$occ2, c(1, NA, 2, 2, NA, 3))
+  # an exact match wins over another column differing only by case
+  .mx <- data.frame(ID=1L, p1=9, P1=c(1, 2), p2=c(1, 1))
+  expect_equal(.dataRenameOcc(.mx, .c)$occ, c(1, 2))
+  expect_error(.dataRenameOcc(data.frame(p1=1, p2=1), .content("P1 = {use=occasion}\np1 = {use=occasion}")),
+               "same data column")
+  # an unused column named like a translated one is dropped, a used one stops
   .x <- .d
+  .x$OCC <- 0
+  expect_message(.r <- .dataRenameOcc(.x, .c), "dropped unused")
+  expect_equal(names(.r), c("ID", "TIME", "occ", "occ2", "DV"))
+  .cx <- .content("ID = {use=identifier}\nTIME = {use=time}\nP1 = {use=occasion}\nP2 = {use=occasion}\nOCC2 = {use=covariate, type=continuous}")
+  .x$OCC <- NULL
   .x$OCC2 <- 0
-  expect_error(.dataRenameOcc(.x, .c), "occ2")
+  expect_error(.dataRenameOcc(.x, .cx), "clash with the translated occasion")
   .m <- list(DATAFILE=list(CONTENT=list(CONTENT=.c)),
              MODEL=list(LONGITUDINAL=list(LONGITUDINAL=.longitudinal("input = {ka, occ2}\nocc2 = {use=regressor}"))))
   .m$DATAFILE$CONTENT$CONTENT$reg <- "R1"
-  expect_error(.dataRenameRegressors(data.frame(ID=1, R1=2), .m), "occ2")
+  expect_error(.dataRenameRegressors(data.frame(ID=1, R1=2), .m), "clash with a translated data column")
   expect_equal(.def2iniRenameOcc(c("id", "id*occ1", "id*occ1*occ2")), c("id", "occ", "occ2"))
 })

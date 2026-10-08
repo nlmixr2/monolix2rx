@@ -195,7 +195,7 @@
   .w <- sort(match(.dataReg, orig))
   .content <- mlxtran$DATAFILE$CONTENT$CONTENT
   # reserved in the rxode2 data set; cmt/admd are added by .dataConvertAdm()
-  .occ <- paste0("occ", seq_along(.content$occ)[-1])
+  .occ <- if (length(.content$occ) > 1L) paste0("occ", seq_along(.content$occ)[-1])
   .reserved <- .modelReg[
     tolower(.modelReg) %in% tolower(c(.use1Rx, "cmt", "admd", .occ))
   ]
@@ -301,7 +301,12 @@
   .occ <- content$occ
   if (length(.occ) < 2L) return(data)
   .w <- match(.occ, names(data))
-  if (anyNA(.w)) .w <- match(tolower(.occ), tolower(names(data)))
+  .na <- is.na(.w)
+  .w[.na] <- match(tolower(.occ[.na]), tolower(names(data)))
+  if (anyDuplicated(.w[!is.na(.w)])) {
+    stop("occasion columns '", paste(.occ, collapse="', '"),
+         "' match the same data column ignoring case", call.=FALSE)
+  }
   if (anyNA(.w)) {
     stop("occasion column(s) missing from the data set: ",
          paste(.occ[is.na(.w)], collapse=", "), call.=FALSE)
@@ -316,13 +321,20 @@
     match(.key, unique(.key[.ord][!is.na(.key[.ord])]))
   })
   .to <- c("occ", paste0("occ", seq_along(.w)[-1]))
-  .clash <- intersect(tolower(names(data)[-.w]), .to)
-  if (length(.clash) > 0L) {
-    stop("data column(s) '", paste(.clash, collapse="', '"),
+  for (.k in seq_along(.w)) data[[.w[.k]]] <- .new[[.k]]
+  # an unused column named like a translated one is dropped; a used one stops
+  .clash <- which(tolower(names(data)) %in% .to & !(seq_along(data) %in% .w))
+  .used <- c(content$use1, content$cont, names(content$cat), content$reg)
+  if (any(names(data)[.clash] %in% .used)) {
+    stop("data column(s) '", paste(intersect(names(data)[.clash], .used), collapse="', '"),
          "' clash with the translated occasion columns", call.=FALSE)
   }
-  for (.k in seq_along(.w)) data[[.w[.k]]] <- .new[[.k]]
   names(data)[.w] <- .to
+  if (length(.clash) > 0L) {
+    .minfo(paste0("dropped unused data column(s) '", paste(names(data)[.clash], collapse="', '"),
+                  "' that share a translated occasion name"))
+    data <- data[, -.clash, drop=FALSE]
+  }
   data
 }
 
