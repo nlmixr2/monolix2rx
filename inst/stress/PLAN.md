@@ -219,6 +219,15 @@ Each one is a `known=` case until its fix lands (phase 2.5):
 
 Notes for later cases:
 
+- Fixed: the imported data routed doses by the Monolix compartment
+  number.  Without an ADM column nothing was routed (`data$adm` partially
+  matched `admd`).  `Tk0` doses had no `rate=-2` and transit doses no
+  `evid=7` (`macro-oral-iv-2cmt`, `pkmodel-tk0`, `pkmodel-oral-transit`).
+- `compartment(cmt=1, amount=Ac)` without a volume also emits
+  `Cc <- Ac/1`; it is harmless while the model defines `Cc` after it.
+- rxode2's `transit()` only follows the last dose (Savic); Monolix's
+  transit with overlapping doses is to confirm in run mode.
+
 - A stiff project with `delay()` needs `ros4`, not `liblsoda` (what
   `.getMethod()` and babelmixr2 pick for `odeType=stiff`).
 - rxode2's `minSS=n` is not the same as `n` explicit doses, and

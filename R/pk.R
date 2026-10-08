@@ -31,7 +31,8 @@
                             ke0=NA_character_)
 
     .monolix2rx$admd <- data.frame(adm=integer(0), admd=integer(0), cmt=integer(0), target=character(0),
-                                   depot=logical(0), dur=logical(0), f=logical(0), tlag=logical(0))
+                                   depot=logical(0), dur=logical(0), f=logical(0), tlag=logical(0),
+                                   transit=logical(0))
 
     .monolix2rx$pkCmt <- data.frame(cmt=integer(0),
                                     amount=character(0),
@@ -207,18 +208,22 @@
       .tlag <- FALSE
     }
   }
+  # transit doses are not added to the depot (rxode2 evid=7)
+  .transit <- all(c("Mtt", "Ktr") %in% names(df)) && !is.na(df$Mtt) && !is.na(df$Ktr)
   .admd <- .monolix2rx$admd[.monolix2rx$admd$adm == .adm, "admd"]
   if (length(.admd) == 0L) {
     df$admd <- 1L
     .monolix2rx$admd <- rbind(.monolix2rx$admd,
                               data.frame(adm=df$adm, admd=1L, cmt=.cmt, target=.target,
-                                         depot=.depot, dur=.dur, f=.f, tlag=.tlag))
+                                         depot=.depot, dur=.dur, f=.f, tlag=.tlag,
+                                         transit=.transit))
   } else {
     .admd <- max(.admd) + 1L
     df$admd <- .admd
     .monolix2rx$admd <- rbind(.monolix2rx$admd,
                               data.frame(adm=df$adm, admd=.admd, cmt=.cmt, target=.target,
-                                         depot=.depot, dur=.dur, f=.f, tlag=.tlag))
+                                         depot=.depot, dur=.dur, f=.f, tlag=.tlag,
+                                         transit=.transit))
   }
   df
 }

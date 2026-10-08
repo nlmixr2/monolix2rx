@@ -120,6 +120,21 @@
   floor (5 and 7) when `nbdoses` is smaller; babelmixr2, which calls
   `.getNbdoses()` directly, needs it for `nbdoses` below 6.
 
+* Fixed the dose routing of the imported data (`$monolixData`):
+  - Without an administration column the doses were not routed at all
+    (`data$adm` partially matched the new `admd` column).  They are now
+    `adm=1`, as in Monolix.
+  - Doses now go to the rxode2 compartment by name.  Before, the Monolix
+    compartment number was used, so an `iv(adm=2, cmt=1)` dose next to
+    `oral(adm=1, cmt=1)` went to the depot.
+  - A second macro on one administration copies every dose, not only a
+    single dose.
+  - `Tk0` (zero-order absorption) doses now get `rate=-2`, so `dur()`
+    applies.
+  - Transit doses (`Mtt`, `Ktr`) now get `evid=7`, so the dose only starts
+    `transit()` and is not also added to the depot.
+  - The administration table (`$admd`) has a new `transit` column.
+
 * Fixed `predRtol` (and the pred line of the validation), which was
   relative to Monolix's `ipred` instead of its `pred`; the iwres line of
   the validation reported the pred median.

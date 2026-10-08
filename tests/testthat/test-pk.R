@@ -141,7 +141,7 @@ elimination(cmt=1, k)")
   .ret2$elimination <- data.frame(cmt = 1L, V = NA_character_, k = "", Cl = NA_character_,
                                   Vm = NA_character_, Km = NA_character_)
   .ret2$admd <- data.frame(adm = 1L, admd = 1L, cmt = 1L, target = NA_character_,
-                           depot = FALSE, dur = FALSE, f = FALSE, tlag = FALSE)
+                           depot = FALSE, dur = FALSE, f = FALSE, tlag = FALSE, transit = FALSE)
 
   expect_equal(.ret, .ret2)
 
@@ -220,7 +220,7 @@ effect(cmt=1, ke0, concentration=Ce)")
                                   Cl = NA_character_, Vm = NA_character_, Km = NA_character_)
   .ret2$iv <- data.frame(adm =1L, admd=1L, cmt = 1L, Tlag = "0", p = "1")
   .ret2$effect <- data.frame(cmt = 1L, ke0 = "", concentration = "Ce")
-  .ret2$admd <- data.frame(adm = 1L, admd = 1L, cmt = 1L, target = NA_character_, depot = FALSE, dur = FALSE, f = FALSE, tlag = FALSE)
+  .ret2$admd <- data.frame(adm = 1L, admd = 1L, cmt = 1L, target = NA_character_, depot = FALSE, dur = FALSE, f = FALSE, tlag = FALSE, transit = FALSE)
 
   expect_equal(.ret, .ret2)
 
@@ -252,7 +252,7 @@ transfer(from=1, to=2, kt)")
                            Ktr = NA_character_, Mtt = NA_character_)
   .ret2$transfer <- data.frame(from = 1L, to = 2L, kt = "")
   .ret2$admd <- data.frame(adm = 1L, admd = 1L, cmt = 1L, target = NA_character_,
-                           depot = TRUE, dur = FALSE, f = FALSE, tlag = FALSE)
+                           depot = TRUE, dur = FALSE, f = FALSE, tlag = FALSE, transit = FALSE)
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
@@ -269,7 +269,7 @@ transfer(from=1, to=2, kt)")
                             p = "F", Tk0 = NA_character_, ka = NA_character_,
                             Ktr = NA_character_, Mtt = NA_character_)
   .ret2$admd <- data.frame(adm = 1L, admd = 1L, cmt = NA_integer_, target = "Ad",
-                           depot = FALSE, dur = FALSE, f = TRUE, tlag = TRUE)
+                           depot = FALSE, dur = FALSE, f = TRUE, tlag = TRUE, transit = FALSE)
 
   expect_equal(.ret, .ret2)
 
@@ -282,7 +282,7 @@ transfer(from=1, to=2, kt)")
   .ret2$depot <- data.frame(adm = 2L, admd=1L, target = "Ac", Tlag = "0",
                             p = "1", Tk0 = "", ka = NA_character_,
                             Ktr = NA_character_, Mtt = NA_character_)
-  .ret2$admd <- data.frame(adm = 2L, admd = 1L, cmt = NA_integer_, target = "Ac", depot = FALSE, dur = TRUE, f = FALSE, tlag = FALSE)
+  .ret2$admd <- data.frame(adm = 2L, admd = 1L, cmt = NA_integer_, target = "Ac", depot = FALSE, dur = TRUE, f = FALSE, tlag = FALSE, transit = FALSE)
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
@@ -295,7 +295,7 @@ transfer(from=1, to=2, kt)")
                             p = "0.3", Tk0 = NA_character_, ka = "",
                             Ktr = NA_character_, Mtt = NA_character_)
   .ret2$admd <- data.frame(adm = 1L, admd = 1L, cmt = NA_integer_, target = "Ac",
-                           depot = TRUE, dur = FALSE, f = TRUE, tlag = TRUE)
+                           depot = TRUE, dur = FALSE, f = TRUE, tlag = TRUE, transit = FALSE)
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
@@ -309,7 +309,7 @@ absorption(adm=1, cmt=1, Tlag=1, Tk0 = 2, p=0.75)")
                            Tk0 = "2", ka = NA_character_, Ktr = NA_character_,
                            Mtt = NA_character_)
   .ret2$admd <- data.frame(adm = 1L, admd = 1L, cmt = 1L, target = NA_character_,
-                           depot = FALSE, dur = TRUE, f = TRUE, tlag = TRUE)
+                           depot = FALSE, dur = TRUE, f = TRUE, tlag = TRUE, transit = FALSE)
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
@@ -323,7 +323,7 @@ absorption(type=1, cmt=1, Tlag=1, ka)")
                            p = "1", Tk0 = NA_character_,
                            ka = "", Ktr = NA_character_, Mtt = NA_character_)
   .ret2$admd <- data.frame(adm = 1L, admd = 1L, cmt = 1L, target = NA_character_,
-                           depot = TRUE, dur = FALSE, f = FALSE, tlag = TRUE)
+                           depot = TRUE, dur = FALSE, f = FALSE, tlag = TRUE, transit = FALSE)
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
@@ -343,7 +343,7 @@ absorption(adm=1, cmt=1, ka, p=1-F1, Tlag=Tk0)
                            target = c(NA_character_, NA_character_),
                            depot = c(FALSE, TRUE),
                            dur = c(TRUE, FALSE),
-                           f = c(TRUE, TRUE), tlag = c(FALSE, TRUE))
+                           f = c(TRUE, TRUE), tlag = c(FALSE, TRUE), transit = rep(FALSE, 2))
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
@@ -360,7 +360,7 @@ absorption(adm=1, cmt=1, Tk0, p=1-F1)")
                            Ktr = c(NA_character_, NA_character_), Mtt = c(NA_character_, NA_character_))
   .ret2$admd <- data.frame(adm = c(1L, 1L), admd = 1:2, cmt = c(1L, 1L),
                            target = c(NA_character_, NA_character_), depot = c(TRUE, FALSE),
-                           dur = c(FALSE, TRUE), f = c(TRUE, TRUE), tlag = c(FALSE, FALSE))
+                           dur = c(FALSE, TRUE), f = c(TRUE, TRUE), tlag = c(FALSE, FALSE), transit = rep(FALSE, 2))
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
@@ -401,7 +401,7 @@ elimination(cmt=3, k=1)
                            cmt = 1:3, target = c(NA_character_, NA_character_, NA_character_),
                            depot = c(FALSE, TRUE, TRUE), dur = c(TRUE, FALSE, FALSE),
                            f = c(FALSE, FALSE, FALSE),
-                           tlag = c(FALSE, TRUE, TRUE))
+                           tlag = c(FALSE, TRUE, TRUE), transit = c(FALSE, FALSE, TRUE))
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
@@ -422,7 +422,7 @@ iv(adm=1, cmt=1, Tlag=1, p=0.75)")
   .ret2 <- emptyObj()
   .ret2$iv <- data.frame(adm = 1L, admd=1L, cmt = 1L, Tlag = "1", p = "0.75")
   .ret2$admd <- data.frame(adm = 1L, admd = 1L, cmt = 1L, target = NA_character_,
-                           depot = FALSE, dur = FALSE, f = TRUE, tlag = TRUE)
+                           depot = FALSE, dur = FALSE, f = TRUE, tlag = TRUE, transit = FALSE)
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
@@ -452,7 +452,7 @@ elimination(cmt=2, k=1)
   .ret2$admd <- data.frame(adm = 1:2, admd = c(1L, 1L), cmt = 1:2,
                            target = c(NA_character_, NA_character_), depot = c(FALSE, FALSE),
                            dur = c(FALSE, FALSE), f = c(FALSE, FALSE),
-                           tlag = c(TRUE, TRUE))
+                           tlag = c(TRUE, TRUE), transit = rep(FALSE, 2))
 
   expect_equal(.ret, .ret2)
 
@@ -505,7 +505,7 @@ elimination(cmt=3,k=.25)
                            depot = c(FALSE, TRUE, FALSE, TRUE),
                            dur = c(TRUE, FALSE, TRUE, FALSE),
                            f = c(TRUE, TRUE, TRUE, TRUE),
-                           tlag = c(TRUE, TRUE, TRUE, TRUE))
+                           tlag = c(TRUE, TRUE, TRUE, TRUE), transit = rep(FALSE, 4))
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
@@ -527,7 +527,7 @@ elimination(cmt=3,k=.25)
   .ret2$empty <- data.frame(adm = 1L, admd=1L, target = "Ap")
   .ret2$admd <- data.frame(adm = 1L, admd = 1L, cmt = NA_integer_,
                            target = "Ap", depot = FALSE, dur = FALSE,
-                           f = FALSE, tlag = FALSE)
+                           f = FALSE, tlag = FALSE, transit = FALSE)
 
   expect_equal(.ret, .ret2)
 
@@ -542,7 +542,7 @@ elimination(cmt=3,k=.25)
                             Tk0 = NA_character_, ka = NA_character_,
                             Ktr = NA_character_, Mtt = NA_character_)
   .ret2$admd <- data.frame(adm = 1L, admd = 1L, cmt = NA_integer_, target = "Ap",
-                     depot = FALSE, dur = FALSE, f = TRUE, tlag = FALSE)
+                     depot = FALSE, dur = FALSE, f = TRUE, tlag = FALSE, transit = FALSE)
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
@@ -552,7 +552,7 @@ elimination(cmt=3,k=.25)
 
   .ret2 <- emptyObj()
   .ret2$reset <- data.frame(adm = 2L, admd=1L, target = "Ac")
-  .ret2$admd <- data.frame(adm = 2L, admd = 1L, cmt = NA_integer_, target = "Ac", depot = FALSE, dur = FALSE, f = FALSE, tlag = FALSE)
+  .ret2$admd <- data.frame(adm = 2L, admd = 1L, cmt = NA_integer_, target = "Ac", depot = FALSE, dur = FALSE, f = FALSE, tlag = FALSE, transit = FALSE)
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
@@ -565,7 +565,7 @@ empty(adm=3, target=Ap)")
   .ret2$empty <- data.frame(adm = c(3L, 3L), admd=c(1L, 2L), target = c("Ac", "Ap"))
   .ret2$admd <- data.frame(adm = c(3L, 3L), admd = 1:2, cmt = c(NA_integer_, NA_integer_),
                            target = c("Ac", "Ap"), depot = c(FALSE, FALSE), dur = c(FALSE, FALSE),
-                           f = c(FALSE, FALSE), tlag = c(FALSE, FALSE))
+                           f = c(FALSE, FALSE), tlag = c(FALSE, FALSE), transit = rep(FALSE, 2))
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),
@@ -578,7 +578,7 @@ empty(adm=3, target=Ap)")
   .ret2$reset <- data.frame(adm = 3L, admd=1L, target = "all")
   .ret2$admd <- data.frame(adm = 3L, admd = 1L, cmt = NA_integer_,
                            target = "all", depot = FALSE, dur = FALSE,
-                           f = FALSE, tlag = FALSE)
+                           f = FALSE, tlag = FALSE, transit = FALSE)
   expect_equal(.ret, .ret2)
 
   expect_equal(as.character(.ret),

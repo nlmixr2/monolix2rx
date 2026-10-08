@@ -531,11 +531,13 @@
   .ret$rxCmt <- vapply(seq_along(.ret$target),
                        function(i) {
                          .cur <- .ret$target[i]
-                         if (length(env$name) < i) {
+                         # env$name is indexed by the Monolix compartment
+                         .c <- .ret$cmt[i]
+                         if (is.na(.c) || length(env$name) < .c) {
                            return(.cur)
                          }
                          if (is.na(.cur)) {
-                           .cur <- env$name[[i]]
+                           .cur <- env$name[[.c]]
                            if (.ret$depot[i]) {
                              .cmtName <- paste0(.cur, env$depotPostfix)
                              if (.cmtName == paste0("central", env$depotPostfix)) {

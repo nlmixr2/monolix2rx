@@ -320,25 +320,91 @@
 .dataConvertAdm <- function(data, admd) {
   data$cmt <- NA_character_
   data$admd <- NA_integer_
+  # without an administration column every dose is adm 1; [[ ]] since
+  # data$adm partially matches admd
+  .adm <- data[["adm"]]
+  if (is.null(.adm) && !is.null(data[["amt"]])) {
+    .adm <- ifelse(is.na(data[["amt"]]), NA_integer_, 1L)
+  }
   .extra <- NULL
   for (i in seq_along(admd$adm)) {
     .cur <- admd[i, ]
+    .cmt <- if (is.null(.cur$rxCmt) || is.na(.cur$rxCmt)) .cur$cmt else .cur$rxCmt
     if (.cur$admd == 1L) {
-      .w <- which(data$adm == .cur$adm & is.na(data$admd))
+      .w <- which(.adm == .cur$adm & is.na(data$admd))
       data$admd[.w] <- 1L
-      data$cmt[.w] <- .cur$cmt
+      data$cmt[.w] <- .cmt
+      if (isTRUE(.cur$dur)) data <- .dataDurRate(data, .w)
+      if (isTRUE(.cur$transit)) data <- .dataTransitEvid(data, .w)
     } else {
       # add an extra item
-      .w <- which(data$adm == .cur$adm & data$admd == 1L)
-      if (length(.w) == 1L) {
+      .w <- which(.adm == .cur$adm & data$admd == 1L)
+      if (length(.w) > 0L) {
         .dE <- data[.w, ]
         .dE$admd <- .cur$admd
-        .dE$cmt[.w] <- .cur$cmt
-        .extra <- rbind(.extra, .dE)
+        .dE$cmt <- .cmt
+        if (isTRUE(.cur$dur)) .dE <- .dataDurRate(.dE, seq_along(.w))
+        if (isTRUE(.cur$transit)) .dE <- .dataTransitEvid(.dE, seq_along(.w))
+        .extra <- .dataBindFill(.extra, .dE)
       }
     }
   }
-  rbind(data, .extra)
+  .dataBindFill(data, .extra)
+}
+
+#' rbind when rate/evid were added to only one side
+#'
+#' @param a,b datasets (a may be NULL)
+#' @return rbind of a and b
+#' @noRd
+#' @author Matthew L. Fidler
+.dataBindFill <- function(a, b) {
+  if (is.null(a)) return(b)
+  if (is.null(b)) return(a)
+  .fill <- function(to, from) {
+    for (.n in setdiff(names(from), names(to))) {
+      to[[.n]] <- if (.n == "evid") ifelse(is.na(to[["amt"]]), 0L, 1L) else from[[.n]][NA_integer_]
+    }
+    to
+  }
+  a <- .fill(a, b)
+  b <- .fill(b, a)
+  rbind(a, b[, names(a)])
+}
+
+#' Zero-order absorption doses (Tk0) are modeled infusions
+#'
+#' @param data dataset
+#' @param w dose rows
+#' @return data with rate -2 on the dose rows without a rate
+#' @noRd
+#' @author Matthew L. Fidler
+.dataDurRate <- function(data, w) {
+  if (length(w) == 0L) return(data)
+  if (is.null(data[["rate"]])) data$rate <- NA_real_
+  .w <- w[is.na(data$rate[w]) | data$rate[w] == 0]
+  data$rate[.w] <- -2
+  data
+}
+
+#' Transit doses only start transit(); rxode2 evid=7 keeps them out of the depot
+#'
+#' @param data dataset
+#' @param w dose rows
+#' @return data with evid 7 on the dose rows
+#' @noRd
+#' @author Matthew L. Fidler
+.dataTransitEvid <- function(data, w) {
+  if (length(w) == 0L) return(data)
+  if (is.null(data[["evid"]])) {
+    data$evid <- ifelse(is.na(data[["amt"]]), 0L, 1L)
+    if (!is.null(data[["mdv"]])) {
+      data$evid[data$evid == 0L & !is.na(data$mdv) & data$mdv == 1L] <- 2L
+    }
+  }
+  .w <- w[is.na(data$evid[w]) | data$evid[w] == 1L]
+  data$evid[.w] <- 7L
+  data
 }
 
 #' Import a dataset from monolix (based on an imported model)
