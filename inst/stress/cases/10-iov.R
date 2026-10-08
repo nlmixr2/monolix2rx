@@ -131,3 +131,147 @@ kitVariant("iov-cl-basic", "iov-correlation",
              params=c(corr2_ka_Cl=0.5),
              indExtra="correlation = {level=id*occ, r(ka, Cl)=corr2_ka_Cl}",
              content=.iovContent))
+
+## IOV on an absorption lag (logNormal), ka (IOV only) and a logitNormal
+## bioavailability (IOV only)
+kitVariant("iov-cl-basic", "iov-ka-f-multi",
+           "IOV on Tlag (with BSV), ka and logitNormal p (IOV only) in pkmodel(Tlag, ka, p, V, Cl)",
+           tags=c("iov"),
+           knownRun=.iovKnownRun,
+           sim=function() {
+             ini({
+               Tlag_pop <- 0.5; ka_pop <- 1.2; p_pop <- 0.7; V_pop <- 30; Cl_pop <- 3
+               omega_Tlag ~ 0.04; omega_V ~ 0.04; omega_Cl ~ 0.09
+               gamma_Tlag ~ 0.04 | OCC
+               gamma_ka ~ 0.09 | OCC
+               gamma_p ~ 0.25 | OCC
+               a <- 0.05; b <- 0.1
+             })
+             model({
+               Tlag <- Tlag_pop * exp(omega_Tlag + gamma_Tlag)
+               ka <- ka_pop * exp(gamma_ka)
+               p <- expit(logit(p_pop) + gamma_p)
+               V <- V_pop * exp(omega_V)
+               Cl <- Cl_pop * exp(omega_Cl)
+               d/dt(depot) <- -ka * depot
+               alag(depot) <- Tlag
+               f(depot) <- p
+               d/dt(central) <- ka * depot - Cl / V * central
+               Cc <- central / V
+               Cc ~ add(a) + prop(b) + combined1()
+             })
+           },
+           model=.pkModel("Tlag, ka, p, V, Cl", "Cc = pkmodel(Tlag, ka, p, V, Cl)"),
+           mlxtran=.mlxProject(
+             list(Tlag=.mlxPar(0.5, 0.2, iov=0.2), ka=.mlxPar(1.2, iov=0.3),
+                  p=.mlxPar(0.7, dist="logitNormal", iov=0.5), V=.mlxPar(30, 0.2),
+                  Cl=.mlxPar(3, 0.3)),
+             content=.iovContent))
+
+## a steady-state dose opens each occasion
+kitVariant("iov-cl-basic", "iov-ss",
+           "steady-state dose (q24h) at the start of each of two occasions, IOV on Cl",
+           tags=c("iov", "ss"),
+           knownRun=.iovKnownRun,
+           data=function(nSub) {
+             .id <- seq_len(nSub)
+             mlxBind(mlxDose(.id, 0, amt=100, cmt=1, ss=1L, ii=24, OCC=1L),
+                     mlxObs(.id, pkTimes(24), cmt=2, OCC=1L),
+                     mlxDose(.id, 100, amt=100, cmt=1, ss=1L, ii=24, OCC=2L),
+                     mlxObs(.id, 100 + pkTimes(24), cmt=2, OCC=2L))
+           },
+           columns=c("ID", "TIME", "AMT", "SS", "II", "OCC", "DV"),
+           mlxtran=.mlxProject(
+             list(ka=.mlxPar(1.2, 0.3), V=.mlxPar(30, 0.2), Cl=.mlxPar(3, 0.3, iov=0.2)),
+             content=paste0(.mlxContent, "
+SS = {use=steadystate}
+II = {use=interdoseinterval}
+OCC = {use=occasion}")))
+
+## body weight measured again at the second occasion (constant within an
+## occasion, as Monolix needs for a covariate on a parameter with IOV)
+kitVariant("iov-cl-basic", "iov-time-varying-cov",
+           "covariate changing between occasions (lw70 on Cl) with IOV on Cl",
+           tags=c("iov", "covariate"),
+           knownRun=.iovKnownRun,
+           sim=function() {
+             ini({
+               ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3; beta_Cl_lw70 <- 0.75
+               omega_ka ~ 0.09; omega_V ~ 0.04; omega_Cl ~ 0.09
+               gamma_Cl ~ 0.04 | OCC
+               a <- 0.05; b <- 0.1
+             })
+             model({
+               lw70 <- log(WT / 70)
+               ka <- ka_pop * exp(omega_ka)
+               V <- V_pop * exp(omega_V)
+               Cl <- Cl_pop * exp(beta_Cl_lw70 * lw70 + omega_Cl + gamma_Cl)
+               d/dt(depot) <- -ka * depot
+               d/dt(central) <- ka * depot - Cl / V * central
+               Cc <- central / V
+               Cc ~ add(a) + prop(b) + combined1()
+             })
+           },
+           data=function(nSub) {
+             .id <- seq_len(nSub)
+             .wt <- round(stats::runif(nSub, 45, 110), 1)
+             mlxBind(mlxDose(.id, 0, amt=100, cmt=1, OCC=1L, WT=.wt),
+                     mlxObs(.id, pkTimes(48), cmt=2, OCC=1L, WT=.wt),
+                     mlxDose(.id, 100, amt=100, cmt=1, evid=4L, OCC=2L, WT=.wt * 0.8),
+                     mlxObs(.id, 100 + pkTimes(48), cmt=2, OCC=2L, WT=.wt * 0.8))
+           },
+           columns=c("ID", "TIME", "EVID", "AMT", "OCC", "WT", "DV"),
+           mlxtran=.mlxProject(
+             list(ka=.mlxPar(1.2, 0.3), V=.mlxPar(30, 0.2),
+                  Cl=.mlxPar(3, 0.3, iov=0.2, extra=", covariate=lw70, coefficient=beta_Cl_lw70")),
+             params=c(beta_Cl_lw70=0.75), indInput="lw70",
+             content=paste0(.iovContent, "\nWT = {use=covariate, type=continuous}"),
+             covariate="[COVARIATE]
+input = WT
+
+EQUATION:
+lw70 = log(WT/70)"))
+
+## nested occasions: periods (OCC1) split into sub-occasions (OCC2); the
+## truth indexes the inner level by a hidden period/sub-occasion column
+kitVariant("iov-cl-basic", "iov-nested",
+           "nested occasions OCC1/OCC2: Cl with varlevel={id, id*occ1, id*occ1*occ2}",
+           tags=c("iov"),
+           known="only one occasion column is mapped (.use1Rx); nested occasions are not translated",
+           sim=function() {
+             ini({
+               ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3
+               omega_ka ~ 0.09; omega_V ~ 0.04; omega_Cl ~ 0.09
+               gamma1_Cl ~ 0.04 | OCC1
+               gamma2_Cl ~ 0.01 | OCC12
+               a <- 0.05; b <- 0.1
+             })
+             model({
+               ka <- ka_pop * exp(omega_ka)
+               V <- V_pop * exp(omega_V)
+               Cl <- Cl_pop * exp(omega_Cl + gamma1_Cl + gamma2_Cl)
+               d/dt(depot) <- -ka * depot
+               d/dt(central) <- ka * depot - Cl / V * central
+               Cc <- central / V
+               Cc ~ add(a) + prop(b) + combined1()
+             })
+           },
+           data=function(nSub) {
+             .id <- seq_len(nSub)
+             .occ <- function(t0, o1, o2) {
+               mlxBind(mlxDose(.id, t0, amt=100, cmt=1, OCC1=o1, OCC2=o2, OCC12=2L * (o1 - 1L) + o2),
+                       mlxObs(.id, t0 + pkTimes(24), cmt=2, OCC1=o1, OCC2=o2, OCC12=2L * (o1 - 1L) + o2))
+             }
+             mlxBind(.occ(0, 1L, 1L), .occ(48, 1L, 2L), .occ(500, 2L, 1L), .occ(548, 2L, 2L))
+           },
+           columns=c("ID", "TIME", "AMT", "OCC1", "OCC2", "DV"),
+           mlxtran=sub("varlevel={id, id*occ}, sd={omega_Cl, gamma_Cl}",
+                       "varlevel={id, id*occ1, id*occ1*occ2}, sd={omega_Cl, gamma1_Cl, gamma2_Cl}",
+                       sub("gamma_Cl = {value=0.2, method=MLE}",
+                           "gamma1_Cl = {value=0.2, method=MLE}\ngamma2_Cl = {value=0.1, method=MLE}",
+                           sub("omega_Cl, gamma_Cl}", "omega_Cl, gamma1_Cl, gamma2_Cl}",
+                               .mlxProject(list(ka=.mlxPar(1.2, 0.3), V=.mlxPar(30, 0.2),
+                                                Cl=.mlxPar(3, 0.3, iov=0.2)),
+                                           content=paste0(.mlxContent, "
+OCC1 = {use=occasion}
+OCC2 = {use=occasion}")), fixed=TRUE), fixed=TRUE), fixed=TRUE))

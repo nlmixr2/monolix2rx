@@ -165,16 +165,14 @@ three things to check first:
 
 | case | covers |
 |---|---|
-| `iov-cl-basic` | `use=occasion`; `Cl` with `varlevel={id, id*occ}` |
-| `iov-ka-f-multi` | IOV on `ka`, `Tlag`, `p` with different distributions |
+| `iov-cl-basic` | `use=occasion`; `Cl` with `varlevel={id, id*occ}`; occasion 2 opens with an `EVID=4` washout |
 | `iov-only` | IOV without BSV (`varlevel=id*occ`) |
-| `iov-correlation` | `correlation={level=id*occ, r(ka, Cl)}` plus id-level correlation |
-| `iov-nested` | `OCC1`/`OCC2`, `varlevel={id, id*occ1, id*occ1*occ2}` (XFAIL) |
-| `iov-unequal-occ` | unequal occasion counts, values not starting at 1, an occasion without observations |
-| `iov-no-washout` | occasion change with drug on board, no reset |
-| `iov-washout` | occasion change on an `EVID=4` record |
+| `iov-ka-v-unequal` | IOV on `ka`/`V`; occasions 2/5/7 of unequal length, drug on board between occasions |
+| `iov-correlation` | `correlation={level=id*occ, r(ka, Cl)}` |
+| `iov-ka-f-multi` | IOV on `Tlag` (with BSV), `ka` and logitNormal `p` |
 | `iov-ss` | SS restarting at each occasion |
-| `iov-time-varying-cov` | covariate changing between occasions |
+| `iov-time-varying-cov` | covariate (`lw70`) changing between occasions |
+| `iov-nested` | `OCC1`/`OCC2`, `varlevel={id, id*occ1, id*occ1*occ2}` (XFAIL) |
 | `iov-dde`, `iov-mixture` | combinations |
 
 Translate checks add: each omega level vs its truth matrix; the `ini()`
