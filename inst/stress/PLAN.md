@@ -167,10 +167,10 @@ three things to check first:
 |---|---|
 | `iov-cl-basic` | `use=occasion`; `Cl` with `varlevel={id, id*occ}`; occasion 2 opens with an `EVID=4` washout |
 | `iov-only` | IOV without BSV (`varlevel=id*occ`) |
-| `iov-ka-v-unequal` | IOV on `ka`/`V`; occasions 2/5/7 of unequal length, drug on board between occasions |
+| `iov-ka-v-unequal` | IOV on `ka`/`V`; occasions 2/5/6/7 of unequal length (6 without observations), drug on board between occasions |
 | `iov-correlation` | `correlation={level=id*occ, r(ka, Cl)}` |
 | `iov-ka-f-multi` | IOV on `Tlag` (with BSV), `ka` and logitNormal `p` |
-| `iov-ss` | SS restarting at each occasion |
+| `iov-ss` | SS restarting at each occasion, drug still on board at the second |
 | `iov-time-varying-cov` | covariate (`lw70`) changing between occasions |
 | `iov-nested` | `OCC1`/`OCC2`, `varlevel={id, id*occ1, id*occ1*occ2}` (XFAIL) |
 | `iov-dde`, `iov-mixture` | combinations |

@@ -68,7 +68,7 @@ kitVariant("iov-cl-basic", "iov-only",
 ## occasions 2, 5, 7 with 2, 1 and 3 doses; drug carries over between
 ## occasions (no reset)
 kitVariant("iov-cl-basic", "iov-ka-v-unequal",
-           "IOV on ka and V, occasions 2/5/7 of unequal length, no washout between occasions",
+           "IOV on ka and V, occasions 2/5/6/7 of unequal length (6 has a dose and no observations), no washout between occasions",
            tags=c("iov"),
            knownRun=.iovKnownRun,
            sim=function() {
@@ -95,6 +95,7 @@ kitVariant("iov-cl-basic", "iov-ka-v-unequal",
                      mlxObs(.id, c(1, 2, 4, 8, 13, 14, 16, 20), cmt=2, OCC=2L),
                      mlxDose(.id, 24, amt=100, cmt=1, OCC=5L),
                      mlxObs(.id, c(25, 26, 28, 32, 40), cmt=2, OCC=5L),
+                     mlxDose(.id, 42, amt=50, cmt=1, OCC=6L),
                      mlxDose(.id, c(48, 60, 72), amt=100, cmt=1, OCC=7L),
                      mlxObs(.id, c(49, 50, 61, 62, 73, 74, 76, 80, 96), cmt=2, OCC=7L))
            },
@@ -168,17 +169,18 @@ kitVariant("iov-cl-basic", "iov-ka-f-multi",
                   Cl=.mlxPar(3, 0.3)),
              content=.iovContent))
 
-## a steady-state dose opens each occasion
+## a steady-state dose opens each occasion; the second comes 6 h after the
+## last sample of the first, so a reset and an added dose differ
 kitVariant("iov-cl-basic", "iov-ss",
-           "steady-state dose (q24h) at the start of each of two occasions, IOV on Cl",
+           "steady-state dose (q24h) at the start of each of two occasions (drug on board at the second), IOV on Cl",
            tags=c("iov", "ss"),
            knownRun=.iovKnownRun,
            data=function(nSub) {
              .id <- seq_len(nSub)
              mlxBind(mlxDose(.id, 0, amt=100, cmt=1, ss=1L, ii=24, OCC=1L),
                      mlxObs(.id, pkTimes(24), cmt=2, OCC=1L),
-                     mlxDose(.id, 100, amt=100, cmt=1, ss=1L, ii=24, OCC=2L),
-                     mlxObs(.id, 100 + pkTimes(24), cmt=2, OCC=2L))
+                     mlxDose(.id, 30, amt=100, cmt=1, ss=1L, ii=24, OCC=2L),
+                     mlxObs(.id, 30 + pkTimes(24), cmt=2, OCC=2L))
            },
            columns=c("ID", "TIME", "AMT", "SS", "II", "OCC", "DV"),
            mlxtran=.mlxProject(
@@ -232,12 +234,20 @@ input = WT
 EQUATION:
 lw70 = log(WT/70)"))
 
+## the edited project must really be nested
+.iovNested <- function(txt) {
+  for (.p in c("id*occ1*occ2", "gamma1_Cl = {value", "gamma2_Cl = {value", "omega_Cl, gamma1_Cl, gamma2_Cl}")) {
+    if (!grepl(.p, txt, fixed=TRUE)) stop("iov-nested project lacks '", .p, "'", call.=FALSE)
+  }
+  txt
+}
+
 ## nested occasions: periods (OCC1) split into sub-occasions (OCC2); the
 ## truth indexes the inner level by a hidden period/sub-occasion column
 kitVariant("iov-cl-basic", "iov-nested",
            "nested occasions OCC1/OCC2: Cl with varlevel={id, id*occ1, id*occ1*occ2}",
            tags=c("iov"),
-           known="only one occasion column is mapped (.use1Rx); nested occasions are not translated",
+           known="nested occasions are mistranslated: only the last occasion column is mapped (to occ), so gamma1_Cl is bound to the inner level and gamma2_Cl to a missing occ2",
            sim=function() {
              ini({
                ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3
@@ -265,7 +275,7 @@ kitVariant("iov-cl-basic", "iov-nested",
              mlxBind(.occ(0, 1L, 1L), .occ(48, 1L, 2L), .occ(500, 2L, 1L), .occ(548, 2L, 2L))
            },
            columns=c("ID", "TIME", "AMT", "OCC1", "OCC2", "DV"),
-           mlxtran=sub("varlevel={id, id*occ}, sd={omega_Cl, gamma_Cl}",
+           mlxtran=.iovNested(sub("varlevel={id, id*occ}, sd={omega_Cl, gamma_Cl}",
                        "varlevel={id, id*occ1, id*occ1*occ2}, sd={omega_Cl, gamma1_Cl, gamma2_Cl}",
                        sub("gamma_Cl = {value=0.2, method=MLE}",
                            "gamma1_Cl = {value=0.2, method=MLE}\ngamma2_Cl = {value=0.1, method=MLE}",
@@ -274,4 +284,4 @@ kitVariant("iov-cl-basic", "iov-nested",
                                                 Cl=.mlxPar(3, 0.3, iov=0.2)),
                                            content=paste0(.mlxContent, "
 OCC1 = {use=occasion}
-OCC2 = {use=occasion}")), fixed=TRUE), fixed=TRUE), fixed=TRUE))
+OCC2 = {use=occasion}")), fixed=TRUE), fixed=TRUE), fixed=TRUE)))
