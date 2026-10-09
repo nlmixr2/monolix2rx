@@ -92,6 +92,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `10-iov.R` | inter-occasion variability (below) |
 | `11-special.R` | parent/metabolite (YTYPE); count (Poisson, zero-inflated) and categorical (cumulative logit, P(Y=c), binary with PK) observations; a continuous and a discrete observation in one project |
 | `12-tte.R` | time-to-event (`type=event`): single exact event (Weibull), interval censored, repeated events, hazard driven by `pkmodel()`, observation starting after the first dose, concentrations and events in one project |
+| `13-covariates.R` | categorical transform grouping categories (`transform=`), several covariates on one parameter, an untransformed covariate, covariates on normal and logitNormal parameters |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -306,7 +307,10 @@ Notes for later cases:
   counts the hazard from time 0 (it was dropped; fixed).  A reset is
   found by `cumhaz` being exactly 0 after a positive value.  rxode2 applies
   a reset before a record at the same time, which then loses its interval
-  (every state is reset, so the hazard before it cannot be kept).
+  (every state is reset, so the hazard before it cannot be kept).  A
+  steady-state dose is not a reset: it moves `cumhaz` to its steady-state
+  value, so the next record's interval is wrong (no case; Monolix's
+  behavior is to confirm).
   To confirm in run mode: that Monolix integrates from the first record
   (`tte-late-start`), from time 0 without a start record, and across a
   washout (no case yet); that it writes no predictions for an event-only
@@ -315,6 +319,15 @@ Notes for later cases:
   rxode2 5.1.8 `lag(time)` aborts R (fixed in rxode2 main, #1434); the
   translation does not use it.  Fitting with `lag0()` recurrences in
   nlmixr2 is not checked.
+
+- `13-covariates.R`: a categorical transform (`[COVARIATE] DEFINITION:`
+  `transform=`) becomes string assignments (`tRACE <- "A"`) compared with
+  `tRACE == "B"`.  rxode2 5.1.8 numbers the literals in comparisons apart
+  from the assigned ones, so a comparison is only right when both appear
+  in the same order: `tRACE <- "A"; if (RACE == 2) tRACE <- "B";
+  isB <- (tRACE == "B")` gives isB = 1 for RACE 1.  The phenobarbital and
+  warfarin projects (`inst/cov`) agree by that luck; `cov-transform-group`
+  (reference first) does not (`known=`).
 
 ## Truth gaps to close with the importer work
 

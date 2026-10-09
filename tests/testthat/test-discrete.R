@@ -192,3 +192,20 @@ test_that("a missing event observation with other endpoints is not a record", {
   .s <- suppressMessages(rxode2::rxSolve(.m, .d, returnType="data.frame"))
   expect_equal(.s$Event_ll[.s$time == 4], log(0.1) - 0.4, tolerance=1e-6)
 })
+
+test_that("a reset with an observation type is not an event record", {
+  skip_if_not_installed("rxode2")
+  .m <- .eventProject(c("1,0,.,5,1,0", "1,0.5,.,0,2,3", "1,1,.,5,1,0", "1,2,.,0,2,0", "1,4,.,1,2,0"),
+                      c("ID", "TIME", "AMT", "DV", "YTYPE", "EVID"),
+                      c("ID = {use=identifier}", "TIME = {use=time}", "AMT = {use=amount}",
+                        "DV = {use=observation, name={y1, Event}, yname={'1', '2'}, type={continuous, event}}",
+                        "YTYPE = {use=observationtype}", "EVID = {use=eventidentifier}"),
+                      c("ddt_A = -A", "Cc = A/10", "h = 1/Te"),
+                      c("y1 = {distribution=normal, prediction=Cc, errorModel=constant(a)}",
+                        "Event = {type=event, hazard=h}"),
+                      fit="{Cc, Event}", err=TRUE)
+  .d <- .m$monolixData
+  expect_false(.d$cmt[.d$time == 0.5] %in% "Event")
+  .s <- suppressMessages(rxode2::rxSolve(.m, .d, returnType="data.frame"))
+  expect_equal(.s$Event_ll[.s$time %in% c(2, 4)], c(0, log(0.1) - 0.2), tolerance=1e-6)
+})
