@@ -86,18 +86,21 @@
   .zero <- grepl("^rxCov_", coef) & coef %in% names(.monolix2rx$defFixed) &
     .monolix2rx$defFixed[coef] %in% 0
   .monolix2rx$ignoredCoef <- c(.monolix2rx$ignoredCoef, coef[.zero])
-  paste(paste0(coef[!.zero], " * (", cov, " == ", .catLiteral(.cat[!.zero]), ")"),
+  # the data column is character when any category is not a number
+  paste(paste0(coef[!.zero], " * (", cov, " == ", .catLiteral(.cat, all=TRUE)[!.zero], ")"),
         collapse=" + ")
 }
 
 #' R literal of categories: numbers as is, others single quoted
 #'
 #' @param cat character categories
+#' @param all quote every category when any is not a number
 #' @return character literals
 #' @noRd
 #' @author Matthew L. Fidler
-.catLiteral <- function(cat) {
+.catLiteral <- function(cat, all=FALSE) {
   .num <- !is.na(suppressWarnings(as.numeric(cat)))
+  if (all && !all(.num)) .num[] <- FALSE
   ifelse(.num, cat, vapply(cat, encodeString, character(1), quote="'", USE.NAMES=FALSE))
 }
 

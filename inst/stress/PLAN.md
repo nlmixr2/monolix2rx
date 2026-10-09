@@ -92,7 +92,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `10-iov.R` | inter-occasion variability (below) |
 | `11-special.R` | parent/metabolite (YTYPE); count (Poisson, zero-inflated) and categorical (cumulative logit, P(Y=c), binary with PK) observations; a continuous and a discrete observation in one project |
 | `12-tte.R` | time-to-event (`type=event`): single exact event (Weibull), interval censored, repeated events, hazard driven by `pkmodel()`, observation starting after the first dose, concentrations and events in one project |
-| `13-covariates.R` | categorical transform grouping categories (`transform=`), several covariates on one parameter, an untransformed covariate, covariates on normal and logitNormal parameters |
+| `13-covariates.R` | categorical transform grouping categories (`transform=`), several covariates on one parameter, an untransformed covariate, covariates on normal and logitNormal parameters, categories mixing numbers and strings |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -327,7 +327,10 @@ Notes for later cases:
   in the same order: `tRACE <- "A"; if (RACE == 2) tRACE <- "B";
   isB <- (tRACE == "B")` gives isB = 1 for RACE 1.  The phenobarbital and
   warfarin projects (`inst/cov`) agree by that luck; `cov-transform-group`
-  (reference first) does not (`known=`).
+  (reference first) does not (`known=`; nlmixr2/rxode2#1456).
+  Categories mixing numbers and strings (`{'U', '1', '3'}`) compared the
+  numbers unquoted with the character data column, so a coefficient went to
+  another category (fixed; `cov-cat-mixed`).
 
 ## Truth gaps to close with the importer work
 

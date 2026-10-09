@@ -29,7 +29,7 @@ kitVariant("pkmodel-oral-1cmt", "cov-transform-group",
            tags=c("covariate", "categorical"),
            known=paste("rxode2 5.1.8 numbers the string literals of comparisons apart from the",
                        "assigned strings, so tRACE == \"B\" is true for tRACE <- \"A\" (the B, C",
-                       "coefficients compare against A, B)"),
+                       "coefficients compare against A, B; nlmixr2/rxode2#1456)"),
            sim=.covOral("Cl_pop * exp(beta_Cl_tRACE_B * (RACE == 3) + beta_Cl_tRACE_C * (RACE == 4) + omega_Cl)",
                         beta=c(beta_Cl_tRACE_B=-0.3, beta_Cl_tRACE_C=0.25)),
            data=function(nSub) {
@@ -171,3 +171,32 @@ input = FOOD
 
 FOOD = {type=categorical, categories={0, 1}}",
              indDecl="FOOD = {type=categorical, categories={0, 1}}"))
+
+## RACE is 1, 3 or 'U' (unknown, the reference): the data column is
+## character, and the first subject is 3 so the data's level order differs
+## from the categories
+kitVariant("pkmodel-oral-1cmt", "cov-cat-mixed",
+           "categorical covariate mixing numbers and a string (categories={'U', 1, 3}, reference 'U') on Cl",
+           tags=c("covariate", "categorical"),
+           sim=.covOral("Cl_pop * exp(beta_Cl_RACE_1 * (RACEN == 1) + beta_Cl_RACE_3 * (RACEN == 3) + omega_Cl)",
+                        beta=c(beta_Cl_RACE_1=-0.3, beta_Cl_RACE_3=0.25)),
+           data=function(nSub) {
+             .id <- seq_len(nSub)
+             mlxBind(mlxDose(.id, 0, amt=100, cmt=1),
+                     mlxObs(.id, pkTimes(48), cmt=2),
+                     cov=mlxCov(nSub, RACEN=function(n) rep_len(c(3L, 1L, 0L), n)))
+           },
+           write=.writeDelim(c("ID", "TIME", "AMT", "DV", "RACE"), ",", function(w) {
+             w$RACE <- ifelse(w$RACEN == 0L, "U", as.character(w$RACEN))
+             w
+           }),
+           mlxtran=.mlxProject(
+             list(ka=.mlxPar(1.2, 0.3), V=.mlxPar(30, 0.2),
+                  Cl=.mlxPar(3, 0.3, extra=", covariate=RACE, coefficient={0, beta_Cl_RACE_1, beta_Cl_RACE_3}")),
+             params=c(beta_Cl_RACE_1=-0.3, beta_Cl_RACE_3=0.25), indInput="RACE",
+             content=paste0(.mlxContent, "\nRACE = {use=covariate, type=categorical}"),
+             covariate="[COVARIATE]
+input = RACE
+
+RACE = {type=categorical, categories={'U', '1', '3'}}",
+             indDecl="RACE = {type=categorical, categories={'U', '1', '3'}}"))

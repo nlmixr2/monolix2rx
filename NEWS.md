@@ -159,6 +159,11 @@
   stopped the import: its results are read from the directory named like
   the project (Monolix's default).
 
+* Fixed a categorical covariate whose categories mix numbers and strings
+  (`categories={'U', '1', '3'}`): the numbers were compared unquoted with
+  the character data column, which rxode2 matches by level order, so a
+  coefficient could silently apply to another category.
+
 * Fixed a model without `EQUATION:` or `PK:` (only `DEFINITION:`), whose
   data set was not imported, so the import was not validated.
 
