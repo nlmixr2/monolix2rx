@@ -93,6 +93,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `11-special.R` | parent/metabolite (YTYPE); count (Poisson, zero-inflated) and categorical (cumulative logit, P(Y=c), binary with PK) observations; a continuous and a discrete observation in one project |
 | `12-tte.R` | time-to-event (`type=event`): single exact event (Weibull), interval censored, repeated events, hazard driven by `pkmodel()`, observation starting after the first dose, concentrations and events in one project |
 | `13-covariates.R` | categorical transform grouping categories (`transform=`), several covariates on one parameter, an untransformed covariate, covariates on normal and logitNormal parameters, categories mixing numbers and strings |
+| `14-pk-macros.R` | `elimination(Vm, Km)`, `oral(Tk0, Tlag, p)`, two `peripheral()` macros (three compartments), `effect()`, `iv(Tlag, p)` |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -330,7 +331,12 @@ Notes for later cases:
   (reference first) does not (`known=`; nlmixr2/rxode2#1456).
   Categories mixing numbers and strings (`{'U', '1', '3'}`) compared the
   numbers unquoted with the character data column, so a coefficient went to
-  another category (fixed; `cov-cat-mixed`).
+  another category (fixed; `cov-cat-mixed`).  The quoted numbers then
+  only match a character column: data passed to the imported model with a
+  numeric RACE column would compare by level number instead (the Monolix
+  data set is always character there, since it holds 'U').  Numeric labels
+  of a transform (`{'0'={1}, '1'={2}}`) were compared unquoted with the
+  assigned string (fixed; quoted, so subject to #1456).
 
 ## Truth gaps to close with the importer work
 

@@ -149,3 +149,14 @@ test_that("edge case cov", {
   expect_equal(as.character(.indDef("Tlag = {distribution=logNormal, typical=Tlag_pop, covariate={age, wt, sex}, coefficient={beta_Tlag_age, beta_Tlag_wt, {0, beta_Tlag_sex_1}}, sd=omega_Tlag}")),
                "Tlag = {distribution=lognormal, typical=Tlag_pop, covariate={age, wt, sex}, coefficient={beta_Tlag_age, beta_Tlag_wt, {0, beta_Tlag_sex_1}}, sd=omega_Tlag}")
 })
+
+test_that("categorical comparisons quote strings but not numeric data", {
+  .d <- "Cl = {distribution=logNormal, typical=Cl_pop, covariate=R, coefficient={0, b1, b3}, sd=omega_Cl}"
+  .rx <- function(cat) paste(.indDef(.d, cat)$rx, collapse="\n")
+  expect_match(.rx(list(R=c("2", "1", "3"))), "b1 * (R == 1) + b3 * (R == 3)", fixed=TRUE)
+  ## a string category makes the data column character
+  expect_match(.rx(list(R=c("U", "1", "3"))), "b1 * (R == '1') + b3 * (R == '3')", fixed=TRUE)
+  ## a transform assigns its labels as strings
+  expect_match(.rx(structure(list(R=c("0", "1", "3")), transform="R")),
+               "b1 * (R == '1') + b3 * (R == '3')", fixed=TRUE)
+})

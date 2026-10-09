@@ -67,6 +67,7 @@ test_that("latent probabilities on one line, quoted categories and fixed coeffic
   expect_equal(.catLiteral(c("1", "it's", "M")), c("1", "'it\\'s'", "'M'"))
   expect_equal(.catLiteral(c("1", "U"), all=TRUE), c("'1'", "'U'"))
   expect_equal(.catLiteral(c("1", "3"), all=TRUE), c("1", "3"))
+  expect_equal(.catLiteral(c("1", "3"), quote=TRUE), c("'1'", "'3'"))
   .d <- .indDef("Cl = {distribution=logNormal, typical=Cl_pop, covariate=sex, coefficient={beta_Cl_sex_F, 0.2}, sd=omega_Cl}",
                 list(sex=c("F", "M")))
   expect_true(grepl("beta_Cl_sex_F * (sex == 'F') + rxCov_Cl_sex_2 * (sex == 'M')", .d$rx, fixed=TRUE))

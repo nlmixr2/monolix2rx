@@ -69,6 +69,8 @@
   for (.c in list(model$COVARIATE$COVARIATE$cat, model$INDIVIDUAL$INDIVIDUAL$cat)) {
     for (.n in names(.c)) .ret[[.n]] <- as.character(.c[[.n]]$cat)
   }
+  # a transform assigns its labels as strings
+  attr(.ret, "transform") <- names(model$COVARIATE$DEFINITION$transform)
   .ret
 }
 
@@ -87,7 +89,9 @@
     .monolix2rx$defFixed[coef] %in% 0
   .monolix2rx$ignoredCoef <- c(.monolix2rx$ignoredCoef, coef[.zero])
   # the data column is character when any category is not a number
-  paste(paste0(coef[!.zero], " * (", cov, " == ", .catLiteral(.cat, all=TRUE)[!.zero], ")"),
+  .lit <- .catLiteral(.cat, all=TRUE,
+                      quote=cov %in% attr(.monolix2rx$indCat, "transform"))
+  paste(paste0(coef[!.zero], " * (", cov, " == ", .lit[!.zero], ")"),
         collapse=" + ")
 }
 
@@ -95,12 +99,13 @@
 #'
 #' @param cat character categories
 #' @param all quote every category when any is not a number
+#' @param quote quote every category
 #' @return character literals
 #' @noRd
 #' @author Matthew L. Fidler
-.catLiteral <- function(cat, all=FALSE) {
+.catLiteral <- function(cat, all=FALSE, quote=FALSE) {
   .num <- !is.na(suppressWarnings(as.numeric(cat)))
-  if (all && !all(.num)) .num[] <- FALSE
+  if (quote || (all && !all(.num))) .num[] <- FALSE
   ifelse(.num, cat, vapply(cat, encodeString, character(1), quote="'", USE.NAMES=FALSE))
 }
 

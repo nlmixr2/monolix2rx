@@ -162,7 +162,10 @@
 * Fixed a categorical covariate whose categories mix numbers and strings
   (`categories={'U', '1', '3'}`): the numbers were compared unquoted with
   the character data column, which rxode2 matches by level order, so a
-  coefficient could silently apply to another category.
+  coefficient could silently apply to another category.  Labels of a
+  categorical transform that are numbers (`categories={'0'={1}, '1'={2}}`)
+  were compared unquoted with the assigned string label; they are now
+  quoted.
 
 * Fixed a model without `EQUATION:` or `PK:` (only `DEFINITION:`), whose
   data set was not imported, so the import was not validated.
