@@ -61,6 +61,42 @@ tRACE =
 }",
              indDecl="tRACE = {type=categorical, categories={A, B, C}}"))
 
+## numeric labels compared unquoted: rxode2 reads them as level numbers,
+## which match while the labels are 1, 2, ... in their assigned order
+kitVariant("pkmodel-oral-1cmt", "cov-transform-numeric",
+           "categorical transform with numeric labels (categories={'1'={1, 2}, '2'={3}, '3'={4}}, reference='1') on Cl",
+           tags=c("covariate", "categorical"),
+           sim=.covOral("Cl_pop * exp(beta_Cl_tRACE_2 * (RACE == 3) + beta_Cl_tRACE_3 * (RACE == 4) + omega_Cl)",
+                        beta=c(beta_Cl_tRACE_2=-0.3, beta_Cl_tRACE_3=0.25)),
+           data=function(nSub) {
+             .id <- seq_len(nSub)
+             mlxBind(mlxDose(.id, 0, amt=100, cmt=1),
+                     mlxObs(.id, pkTimes(48), cmt=2),
+                     cov=mlxCov(nSub, RACE=function(n) rep_len(c(1L, 2L, 3L, 4L, 3L), n)))
+           },
+           columns=c("ID", "TIME", "AMT", "DV", "RACE"),
+           mlxtran=.mlxProject(
+             list(ka=.mlxPar(1.2, 0.3), V=.mlxPar(30, 0.2),
+                  Cl=.mlxPar(3, 0.3, extra=", covariate=tRACE, coefficient={0, beta_Cl_tRACE_2, beta_Cl_tRACE_3}")),
+             params=c(beta_Cl_tRACE_2=-0.3, beta_Cl_tRACE_3=0.25), indInput="tRACE",
+             content=paste0(.mlxContent, "\nRACE = {use=covariate, type=categorical}"),
+             covariate="[COVARIATE]
+input = RACE
+
+RACE = {type=categorical, categories={1, 2, 3, 4}}
+
+DEFINITION:
+tRACE =
+{
+  transform = RACE,
+  categories = {
+  '1' = {1, 2},
+  '2' = {3},
+  '3' = {4}  },
+  reference = '1'
+}",
+             indDecl="tRACE = {type=categorical, categories={'1', '2', '3'}}"))
+
 kitVariant("pkmodel-oral-1cmt", "cov-multi",
            "two covariates on Cl (covariate={lw70, SEX}, coefficient={beta, {0, beta}}) and one on V",
            tags=c("covariate", "categorical"),

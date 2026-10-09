@@ -335,8 +335,10 @@ Notes for later cases:
   only match a character column: data passed to the imported model with a
   numeric RACE column would compare by level number instead (the Monolix
   data set is always character there, since it holds 'U').  Numeric labels
-  of a transform (`{'0'={1}, '1'={2}}`) were compared unquoted with the
-  assigned string (fixed; quoted, so subject to #1456).
+  of a transform are compared unquoted (`tRACE == 2`), which rxode2 reads
+  as the level number: right when the labels are 1, 2, ... in their
+  assigned order (`cov-transform-numeric`), wrong otherwise
+  (`{'0'={1}, '1'={2}}`).  Quoting them cannot help until #1456 is fixed.
 
 ## Truth gaps to close with the importer work
 

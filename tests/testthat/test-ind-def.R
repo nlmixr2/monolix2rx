@@ -156,7 +156,4 @@ test_that("categorical comparisons quote strings but not numeric data", {
   expect_match(.rx(list(R=c("2", "1", "3"))), "b1 * (R == 1) + b3 * (R == 3)", fixed=TRUE)
   ## a string category makes the data column character
   expect_match(.rx(list(R=c("U", "1", "3"))), "b1 * (R == '1') + b3 * (R == '3')", fixed=TRUE)
-  ## a transform assigns its labels as strings
-  expect_match(.rx(structure(list(R=c("0", "1", "3")), transform="R")),
-               "b1 * (R == '1') + b3 * (R == '3')", fixed=TRUE)
 })
