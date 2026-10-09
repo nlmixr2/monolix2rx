@@ -84,8 +84,12 @@ if (any(.cont)) {
 }
 
 .re <- data.frame(id=.ids)
+## Monolix names the random effect after the parameter, not its sd= name
+.sdName <- monolix2rx:::.etaImportSd(.mlx)
 for (.e in .eta) {
-  .re[[paste0("eta_", sub("^omega_", "", .e), "_SAEM")]] <-
+  .pn <- names(.sdName)[match(.e, .sdName)]
+  if (is.na(.pn)) .pn <- sub("^omega_", "", .e)
+  .re[[paste0("eta_", .pn, "_SAEM")]] <-
     if (is.null(.sim$etas)) 0 else .sim$etas[[.e]][match(.ids, .sim$etas$id)]
 }
 .w(.re, "IndividualParameters", "estimatedRandomEffects.txt")

@@ -233,6 +233,11 @@
   relative to Monolix's `ipred` instead of its `pred`; the iwres line of
   the validation reported the pred median.
 
+* Fixed the imported random effects of a parameter whose `sd=` (or
+  `var=`) is not named `omega_<parameter>` (like `var=omega2_Cl` or a
+  fixed `sd=0.3`): Monolix's `eta_Cl` column became `omega_Cl`, which is
+  not an eta of the model, so the validation solve failed.
+
 # monolix2rx 0.0.6
 
 * Updated to add types for rstudio completion

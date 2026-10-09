@@ -94,6 +94,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `12-tte.R` | time-to-event (`type=event`): single exact event (Weibull), interval censored, repeated events, hazard driven by `pkmodel()`, observation starting after the first dose, concentrations and events in one project |
 | `13-covariates.R` | categorical transform grouping categories (`transform=`), several covariates on one parameter, an untransformed covariate, covariates on normal and logitNormal parameters, categories mixing numbers and strings |
 | `14-pk-macros.R` | `elimination(Vm, Km)`, `oral(Tk0, Tlag, p)`, two `peripheral()` macros (three compartments), `effect()`, `iv(Tlag, p)` |
+| `15-individual.R` | logitNormal with `min`/`max`, `var=` instead of `sd=`, a negative correlation in a three-way block, two correlation blocks listed out of order, a covariate on a correlated parameter, a regressor as an ODE input changing on regressor-only lines |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -339,6 +340,13 @@ Notes for later cases:
   as the level number: right when the labels are 1, 2, ... in their
   assigned order (`cov-transform-numeric`), wrong otherwise
   (`{'0'={1}, '1'={2}}`).  Quoting them cannot help until #1456 is fixed.
+- `15-individual.R`: the random effects (`eta_Cl_SAEM`) were renamed
+  `omega_Cl`, not the parameter's `sd=`/`var=` name, so `var=omega2_Cl`
+  failed validation (fixed; `param-var`).  The mock wrote the column from
+  the eta name; it now strips `omega2_` too.  Inter-occasion levels keep
+  the old naming.
+- `reg-ode-input`: whether Monolix's ODE solver restarts at regressor-only
+  lines (a small numerical difference) is to confirm in run mode.
 
 ## Truth gaps to close with the importer work
 
