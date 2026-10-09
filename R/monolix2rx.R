@@ -123,57 +123,67 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
     .cmt <- .mlxtran$MODEL$LONGITUDINAL$EQUATION$cmtPrefix
     .admd <- .mlxtran$MODEL$LONGITUDINAL$EQUATION$admd
   } else {
+    # no doses, but the data can still be imported
+    .admd <- .equation("")$admd
     .equation <- character(0)
   }
   if (length(.cmt) == 1L && .cmt == "cmt()") .cmt <- NULL
-  .latent <- .latentMix(.mlxtran)
-  .model <- c("model({",
-              .cmt,
-              .latent$model,
-              mlxtranTransformGetRxCode(.mlxtran),
-              .mlxtran$MODEL$INDIVIDUAL$DEFINITION$rx,
-              .equation,
-              vapply(seq_along(.mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint),
-                     function(i) {
-                       .handleSingleEndpoint(.mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint[[i]])
-                     }, character(1), USE.NAMES = FALSE),
-              "})")
-  if (length(.model) == 2L && all(.model == c("model({", "})"))) {
-    stop("there are not equations to translate in this mlxtran file",
-         call.=FALSE)
-  }
-  .model0 <- try(str2lang(paste0(.model, collapse="\n")), silent=TRUE)
-  if (inherits(.model0, "try-error")) {
-    message("Bad Model:\n")
-    message(paste(.model, collapse="\n"))
-    stop("model translation did not parse into a rxode2/nlmixr2 model", call.=FALSE)
-  }
-  .model <- .mlxtranChangeVal(.model0, .mlxtran)
-  .mix <- .mixtureRewrite(.model, .mlxtran)
-  if (!is.null(.mix$prob) && length(.latent$prob) > 0L) {
-    stop("bsmm() and a latent covariate are two mixtures; rxode2 supports one",
-         call.=FALSE)
-  }
-  .model <- .mix$model
-  .ini <- .def2ini(.mlxtran$MODEL$INDIVIDUAL$DEFINITION,
-                   .mlxtran$PARAMETER$PARAMETER,
-                   .mlxtran$MODEL$LONGITUDINAL$DEFINITION)
-  .ini <- .latentIni(.ini, .latent$prob, .mlxtran$PARAMETER$PARAMETER)
-  .ini <- .mixtureIni(.ini, .mix$prob, .mlxtran$PARAMETER$PARAMETER)
-  .ret <- function() {}
-  if (gsub(" +", "", deparse1(.ini)) == "ini({})") {
-    body(.ret) <- as.call(c(list(quote(`{`)), .model))
-  } else {
-    body(.ret) <- as.call(c(list(quote(`{`)), .ini, .model))
-  }
-  .ret <- eval(.ret, envir=envir)
-  ini <- rxode2::ini
-  model <- rxode2::model
-  lotri <- lotri::lotri
-  .ui <- try(.ret(), silent=TRUE)
-  if (inherits(.ui, "try-error")) {
-    print(.ret)
-    .ret()
+  .endpoints <- .mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint
+  .isEvent <- vapply(.endpoints, function(e) identical(e$dist, "event"), logical(1))
+  .eventCmt <- rep(0L, length(.endpoints))
+  # an event endpoint needs its own compartment number, known once parsed
+  for (.pass in 1:2) {
+    .latent <- .latentMix(.mlxtran)
+    .model <- c("model({",
+                .cmt,
+                .latent$model,
+                mlxtranTransformGetRxCode(.mlxtran),
+                .mlxtran$MODEL$INDIVIDUAL$DEFINITION$rx,
+                .equation,
+                vapply(seq_along(.endpoints),
+                       function(i) .handleSingleEndpoint(.endpoints[[i]], .eventCmt[i]),
+                       character(1), USE.NAMES = FALSE),
+                "})")
+    if (length(.model) == 2L && all(.model == c("model({", "})"))) {
+      stop("there are not equations to translate in this mlxtran file",
+           call.=FALSE)
+    }
+    .model0 <- try(str2lang(paste0(.model, collapse="\n")), silent=TRUE)
+    if (inherits(.model0, "try-error")) {
+      message("Bad Model:\n")
+      message(paste(.model, collapse="\n"))
+      stop("model translation did not parse into a rxode2/nlmixr2 model", call.=FALSE)
+    }
+    .model <- .mlxtranChangeVal(.model0, .mlxtran)
+    .mix <- .mixtureRewrite(.model, .mlxtran)
+    if (!is.null(.mix$prob) && length(.latent$prob) > 0L) {
+      stop("bsmm() and a latent covariate are two mixtures; rxode2 supports one",
+           call.=FALSE)
+    }
+    .model <- .mix$model
+    .ini <- .def2ini(.mlxtran$MODEL$INDIVIDUAL$DEFINITION,
+                     .mlxtran$PARAMETER$PARAMETER,
+                     .mlxtran$MODEL$LONGITUDINAL$DEFINITION)
+    .ini <- .latentIni(.ini, .latent$prob, .mlxtran$PARAMETER$PARAMETER)
+    .ini <- .mixtureIni(.ini, .mix$prob, .mlxtran$PARAMETER$PARAMETER)
+    .ret <- function() {}
+    if (gsub(" +", "", deparse1(.ini)) == "ini({})") {
+      body(.ret) <- as.call(c(list(quote(`{`)), .model))
+    } else {
+      body(.ret) <- as.call(c(list(quote(`{`)), .ini, .model))
+    }
+    .ret <- eval(.ret, envir=envir)
+    ini <- rxode2::ini
+    model <- rxode2::model
+    lotri <- lotri::lotri
+    .ui <- try(.ret(), silent=TRUE)
+    if (inherits(.ui, "try-error")) {
+      print(.ret)
+      .ret()
+    }
+    if (!any(.isEvent) || .pass == 2L) break
+    .eventCmt <- as.integer(.ui$predDf$cmt[match(vapply(.endpoints, function(e) e$var, character(1)),
+                                                 .ui$predDf$var)])
   }
   .ui <- rxode2::rxUiDecompress(.ui)
   .dfObs <- attr(.mlxtran, "dfObs")

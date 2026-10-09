@@ -1,14 +1,14 @@
 #' Handle a single endpoint and convert to rxode2
 #'
 #' @param endpoint The endpoint to convert to syntax
+#' @param cmt rxode2 compartment number of the endpoint (used by events)
 #' @return rxode2 syntax for the monolix endpoint
 #' @noRd
 #' @author Matthew L. Fidler
-.handleSingleEndpoint <- function(endpoint) {
+.handleSingleEndpoint <- function(endpoint, cmt=0L) {
   # $MODEL$LONGITUDINAL$DEFINITION$endpoint[[i]]
   if (endpoint$dist == "event") {
-    stop("'event' endpoint not supported in translation yet",
-         call.=FALSE)
+    return(.handleEventEndpoint(endpoint, cmt))
   } else if (endpoint$dist == "categorical") {
     return(.handleCategoricalEndpoint(endpoint))
   } else if (endpoint$dist == "count") {

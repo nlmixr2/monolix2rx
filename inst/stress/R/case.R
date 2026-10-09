@@ -30,7 +30,7 @@
 ##   verbatim as the [TASKS] section.
 ## - `dryPred`/`dryOmega`: FALSE skips that translate check.
 ## - `dryLik`: TRUE compares the per-observation log-likelihood at the
-##   true etas (discrete endpoints; set dryPred=FALSE); an endpoint name
+##   true etas (discrete and event endpoints; set dryPred=FALSE); an endpoint name
 ##   does that for its rows and leaves the others to the PRED check.
 ## - `nbSSDoses`: Monolix steady-state doses (default 7).
 ## - `minMonolix`: Monolix version needed (like "2024R1"); a failed run

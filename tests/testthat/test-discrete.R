@@ -77,3 +77,55 @@ test_that("a discrete endpoint has no prediction to alias", {
 Y = {type=categorical, categories={0, 1}, logit(P(Y=1)) = lp}")
   expect_equal(unname(.getMonolixPreds(.ld)), "Cc")
 })
+
+test_that("event endpoints become ll() of the hazard since the previous record", {
+  .e <- .longDef("Event = {type=event, hazard=h}")$endpoint[[1]]
+  .l <- strsplit(.handleSingleEndpoint(.e, 3L), "\n")[[1]]
+  expect_equal(.l[1:3], c("Event_haz <- h", "d/dt(Event_cumhaz) <- Event_haz",
+                          "Event_E <- (CMT == 3)"))
+  expect_true("  Event_ll <- log(Event_haz) - Event_dH" %in% .l)
+  expect_equal(.l[length(.l)], "ll(Event) ~ Event_ll")
+  .e <- .longDef("Event = {type=event, eventType=intervalCensored, maxEventNumber=1, hazard=1/Te}")$endpoint[[1]]
+  .l <- strsplit(.handleSingleEndpoint(.e, 2L), "\n")[[1]]
+  expect_equal(.l[1], "Event_haz <- 1 / Te")
+  expect_true("  Event_ll <- log(1 - exp(-Event_dH))" %in% .l)
+})
+
+test_that("an event hazard is not a prediction", {
+  .ld <- .longDef("y1 = {distribution=normal, prediction=Cc, errorModel=constant(a)}
+Event = {type=event, hazard=h}")
+  expect_equal(unname(.getMonolixPreds(.ld)), "Cc")
+})
+
+test_that("an event project imports with its records and likelihood", {
+  skip_if_not_installed("rxode2")
+  .dir <- withr::local_tempdir()
+  writeLines(c("ID,TIME,AMT,DV",
+               "1,0,.,0", "1,3,10,.", "1,5,.,1", "1,7,.,1", "1,10,.,0",
+               "2,2,.,0", "2,6,.,0"),
+             file.path(.dir, "data.csv"))
+  writeLines(c("[LONGITUDINAL]", "input = {Te}", "", "EQUATION:",
+               "ddt_A = -A", "h = 1/Te", "", "DEFINITION:",
+               "Event = {type=event, hazard=h}", "", "OUTPUT:", "output = Event"),
+             file.path(.dir, "model.txt"))
+  writeLines(c("<DATAFILE>", "", "[FILEINFO]", "file = 'data.csv'", "delimiter = comma",
+               "header = {ID, TIME, AMT, DV}", "", "[CONTENT]", "ID = {use=identifier}",
+               "TIME = {use=time}", "AMT = {use=amount}",
+               "DV = {use=observation, name=Event, type=event}", "", "<MODEL>", "",
+               "[INDIVIDUAL]", "input = {Te_pop}", "", "DEFINITION:",
+               "Te = {distribution=logNormal, typical=Te_pop, no-variability}", "",
+               "[LONGITUDINAL]", "file = 'model.txt'", "", "<FIT>", "data = Event",
+               "model = Event", "", "<PARAMETER>", "Te_pop = {value=10, method=MLE}"),
+             file.path(.dir, "run.mlxtran"))
+  .m <- suppressMessages(suppressWarnings(monolix2rx(file.path(.dir, "run.mlxtran"))))
+  .k <- .m$predDf$cmt
+  expect_true(paste0("Event_E <- (CMT == ", .k, ")") %in%
+                vapply(.m$lstExpr, deparse1, character(1)))
+  .d <- .m$monolixData
+  expect_equal(.d$cmt[is.na(.d$amt) | .d$amt == 0], rep("Event", 6))
+  expect_false(any(.d$cmt[!is.na(.d$amt) & .d$amt > 0] %in% "Event"))
+  .s <- suppressMessages(rxode2::rxSolve(.m, .d, returnType="data.frame"))
+  ## the first record starts the observation; the dose row is not a record
+  expect_equal(.s$Event_ll, c(0, log(0.1) - 0.5, log(0.1) - 0.2, -0.3, 0, -0.4),
+               tolerance=1e-6)
+})

@@ -301,8 +301,13 @@ kitDryMatrices <- function(m, case) {
   .zero <- function(x) if (is.null(x)) 0L else x
   .d$kitObs <- as.integer(.zero(.d$evid) %in% 0L & .zero(.d$mdv) %in% 0L)
   .d$kitLik <- as.integer(.kitEndpointRows(.d, ui, k))
-  ## the endpoint compartments and ids are not in the likelihood model
-  if (is.character(.d$cmt)) .d$cmt <- NULL
+  ## the endpoints are not in the likelihood model: number the
+  ## compartments like the full model (event endpoints test CMT)
+  if (is.character(.d$cmt)) {
+    .pd <- ui$predDf
+    .d$cmt <- ifelse(.d$cmt %in% .pd$var, .pd$cmt[match(.d$cmt, .pd$var)],
+                     match(.d$cmt, ui$state))
+  }
   .d$dvid <- NULL
   .s <- suppressMessages(do.call(rxode2::rxSolve,
                                  c(list(.mod, .p, .d, returnType="data.frame",
@@ -313,7 +318,7 @@ kitDryMatrices <- function(m, case) {
   .ret[.s$kitLik == 1L, ]
 }
 
-## Translate check for discrete endpoints: the imported model's
+## Translate check for discrete and event endpoints: the imported model's
 ## log-likelihood of each observation equals the truth's at the true etas
 kitDryLik <- function(m, sim, case) {
   .ui <- suppressMessages(rxode2::assertRxUi(case$sim))

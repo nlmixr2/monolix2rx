@@ -41,14 +41,14 @@ test_that("stress kit run and replay with the mock Monolix", {
                  "{mlxtran}")
   .out <- file.path(withr::local_tempdir(), "mock")
   .res <- suppressMessages(stressKit(monolix=.mock,
-                                     cases="^(pkmodel-oral-1cmt|tasks-no-exportpath|disc-mixed-continuous)$",
+                                     cases="^(pkmodel-oral-1cmt|tasks-no-exportpath|disc-mixed-continuous|tte-pk-joint)$",
                                      bundle=FALSE, out=.out))
   .stressBad(.res)
-  expect_equal(.res$status, rep("PASS", 3L))
+  expect_equal(.res$status, rep("PASS", 4L))
   expect_true(all(.res$resaved))
   expect_equal(.res$dfSub, .res$expSub)
   expect_true(all(is.finite(.res$ipredRtol)))
   .rep <- suppressMessages(stressReplay(.out))
   .stressBad(.rep)
-  expect_equal(.rep$mode, rep("import", 3L))
+  expect_equal(.rep$mode, rep("import", 4L))
 })

@@ -14,6 +14,14 @@
   `c(p0=0, p1=1, 2)` (fitting it needs nlmixr2/rxode2#1450 fixed).
   Markov dependence is still not supported.
 
+* Translated time-to-event observations (`type=event`), which stopped the
+  import: the hazard is integrated in a new state and each event record
+  gives `ll()` of an exact event, an interval censored event
+  (`eventType=intervalCensored`) or no event, from the hazard since the
+  previous record of the endpoint; the first record starts the
+  observation.  The records are found by their compartment, so the
+  imported data gives a single event endpoint's observations its `cmt`.
+
 * Dropped the re-exports (`rxode2()`, `rxode()`, `RxODE()`, `ini()`,
   `model()`, `model<-`, `rxRename()`, `rxSolve()`, `rxUiGet()`, `logit()`,
   `expit()`, `lotri()`, `autoplot()` and `%>%`).  Load `nlmixr2` (or
@@ -150,6 +158,9 @@
 * Fixed a project without `<MONOLIX> [SETTINGS] exportpath`, which
   stopped the import: its results are read from the directory named like
   the project (Monolix's default).
+
+* Fixed a model without `EQUATION:` or `PK:` (only `DEFINITION:`), whose
+  data set was not imported, so the import was not validated.
 
 * Fixed a project with continuous and discrete observations: the discrete
   endpoint (no prediction) translated to `NA <- Cc`, and the continuous

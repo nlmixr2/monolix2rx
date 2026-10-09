@@ -465,9 +465,11 @@ as.list.monolix2rxLongDef <- function(x, ...) {
   .ret <- vapply(seq_along(x$endpoint),
                  function(i) {
                    .ret <- x$endpoint[[i]]
-                   if (!checkmate::testCharacter(.ret$pred, len=1)) return(NA_character_)
+                   # an event's pred is its hazard
+                   if (identical(.ret$dist, "event") ||
+                         !checkmate::testCharacter(.ret$pred, len=1)) return(NA_character_)
                    .ret$pred
                  }, character(1), USE.NAMES = TRUE)
-  # discrete endpoints have no prediction
+  # discrete and event endpoints have no prediction
   .ret[!is.na(.ret)]
 }

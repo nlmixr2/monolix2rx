@@ -91,6 +91,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `09-mixture.R` | BSMM and WSMM mixtures (below) |
 | `10-iov.R` | inter-occasion variability (below) |
 | `11-special.R` | parent/metabolite (YTYPE); count (Poisson, zero-inflated) and categorical (cumulative logit, P(Y=c), binary with PK) observations; a continuous and a discrete observation in one project |
+| `12-tte.R` | time-to-event (`type=event`): single exact event (Weibull), interval censored, repeated events, hazard driven by `pkmodel()`, observation starting after the first dose, concentrations and events in one project |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -287,6 +288,25 @@ Notes for later cases:
   observation tied with a dose; Monolix's values there are to confirm.
 - `a^b^c` was written unchanged and rxode2 does not parse it (fixed:
   `a^(b^c)`; `ode-math-functions-2`).
+
+- Time-to-event observations (`type=event`) stopped the translation.
+  They become a cumulative hazard state and `ll()`: each record gives
+  the likelihood from the hazard since the previous record of the
+  endpoint (exact, interval censored or no event); the first record
+  starts the observation.  rxode2 `lag()` counts every record (doses,
+  other endpoints), so the previous record's hazard is carried by a
+  `lag0()` recurrence keyed on `CMT`; the endpoint's compartment number
+  comes from a first parse, and a single event endpoint's observation
+  rows get its `cmt` in the imported data.  The truth instead resets its
+  hazard with an EVID=5 replace just after each record.  A model with
+  only `DEFINITION:` (`hazard=1/Te`) did not import its data (fixed).
+  To confirm in run mode: that Monolix integrates from the first record
+  (`tte-late-start`; a project without a start record is not covered),
+  that it writes no predictions for an event-only project, and the
+  per-record likelihood split (only the sum is in Monolix's output).
+  rxode2 5.1.8 `lag(time)` aborts R (fixed in rxode2 main, #1434); the
+  translation does not use it.  Fitting with `lag0()` recurrences in
+  nlmixr2 is not checked.
 
 ## Truth gaps to close with the importer work
 

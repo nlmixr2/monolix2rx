@@ -181,3 +181,45 @@
                                       collapse=", "), ")")),
         collapse="\n")
 }
+
+#' Translate a time-to-event endpoint
+#'
+#' Each event record gives `log(h) - (H - Hp)` (an exact event),
+#' `log(1 - exp(-(H - Hp)))` (an interval censored event) or `-(H - Hp)`
+#' (no event), where `H` is the cumulative hazard and `Hp` its value at
+#' the previous record of the endpoint; the first record starts the
+#' observation.  The records are found by `CMT`, since rxode2 `lag()`
+#' counts every record.
+#'
+#' @param endpoint event endpoint
+#' @param cmt rxode2 compartment number of the endpoint
+#' @return rxode2 lines
+#' @noRd
+#' @author Matthew L. Fidler
+.handleEventEndpoint <- function(endpoint, cmt=0L) {
+  .var <- endpoint$var
+  .v <- function(x) paste0(.var, "_", x)
+  .haz <- .equation(paste0(.v("haz"), " = ", endpoint$pred))$rx
+  .ev <- if (identical(endpoint$err$eventType, "intervalCensored")) {
+    paste0("log(1 - exp(-", .v("dH"), "))")
+  } else {
+    paste0("log(", .v("haz"), ") - ", .v("dH"))
+  }
+  paste(c(.haz,
+          paste0("d/dt(", .v("cumhaz"), ") <- ", .v("haz")),
+          paste0(.v("E"), " <- (CMT == ", cmt, ")"),
+          paste0(.v("EH"), " <- ", .v("E"), " * ", .v("cumhaz")),
+          # cumulative hazard and number of the previous event records
+          paste0(.v("Hp"), " <- lag0(", .v("EH"), ") + (1 - lag0(", .v("E"), ")) * lag0(", .v("Hp"), ")"),
+          paste0(.v("n"), " <- lag0(", .v("E"), ") + lag0(", .v("n"), ")"),
+          paste0(.v("dH"), " <- ", .v("cumhaz"), " - ", .v("Hp")),
+          paste0("if (", .v("n"), " == 0) {"),
+          paste0("  ", .v("ll"), " <- 0"),
+          "} else if (DV == 0) {",
+          paste0("  ", .v("ll"), " <- -", .v("dH")),
+          "} else {",
+          paste0("  ", .v("ll"), " <- ", .ev),
+          "}",
+          paste0("ll(", .var, ") ~ ", .v("ll"))),
+        collapse="\n")
+}

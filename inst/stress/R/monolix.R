@@ -72,10 +72,12 @@ kitRunMonolix <- function(dir, cmd, timeout=3600, export=.kitExport) {
   }
   ## a killed or crashed run can leave partial results: the exit status
   ## must be 0 too (timeout exits 124)
-  ## no predictions are expected when every observation is discrete
+  ## no predictions are expected when every observation is discrete or
+  ## an event (continuous is the default type)
   .prj <- gsub("[[:space:]]", "", readLines("run.mlxtran", warn=FALSE))
   .obs <- grep("use=observation", .prj, fixed=TRUE, value=TRUE)
-  .disc <- length(.obs) > 0L && all(grepl("type=discrete", .obs, fixed=TRUE))
+  .disc <- length(.obs) > 0L && all(grepl("type=", .obs, fixed=TRUE)) &&
+    !any(grepl("continuous", .obs, fixed=TRUE))
   .ok <- identical(as.integer(.status), 0L) && !file.exists("monolix.failed") &&
     file.exists(file.path(export, "populationParameters.txt")) &&
     (.disc || length(Sys.glob(file.path(export, "predictions*.txt"))) > 0L)

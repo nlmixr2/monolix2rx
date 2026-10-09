@@ -76,7 +76,7 @@ test_that("test single endpoint handling", {
   tmp <- .longDef("Seizure = {type = event, eventType = intervalCensored, maxEventNumber = 1,
 rightCensoringTime = 120, intervalLength = 10, hazard = haz}")
 
-  expect_error(.handleSingleEndpoint(tmp$endpoint[[1]]))
+  expect_match(.handleSingleEndpoint(tmp$endpoint[[1]]), "ll(Seizure) ~ Seizure_ll", fixed=TRUE)
 
   tmp <- .longDef("State = {type = categorical, categories = {1,2,3}, dependence = Markov
 P(State_1=1) = a1

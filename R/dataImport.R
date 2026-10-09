@@ -402,7 +402,7 @@
 .dataConvertEndpoints <- function(data, ui) {
   .w <- which(names(data) == "rxMDvid")
   if (length(.w) != 1L) {
-    return(data)
+    return(.dataEventCmt(data, ui))
   } # no observationtype in the dataset
   if (is.null(ui$predDf)) {
     return(data[, -.w])
@@ -419,6 +419,23 @@
     data <- data[-which(is.na(data$cmt) & data$rxMDvid == .i), ]
   }
   data[, -.w]
+}
+
+#' A single event endpoint finds its records by cmt
+#'
+#' @param data dataset without an observation type column
+#' @param ui rxode2 ui converted from monolix
+#' @return data with the endpoint's cmt on the observation rows
+#' @noRd
+#' @author Matthew L. Fidler
+.dataEventCmt <- function(data, ui) {
+  .mlxtran <- .monolixGetMlxtran(ui)
+  .e <- .mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint
+  if (length(.e) != 1L || !identical(.e[[1]]$dist, "event")) return(data)
+  .obs <- if (is.null(data[["evid"]])) !.dataIsDose(data) else data$evid %in% 0L
+  if (!is.null(data[["mdv"]])) .obs <- .obs & !(data$mdv %in% 1L)
+  data$cmt[which(.obs & is.na(data$cmt))] <- .e[[1]]$var
+  data
 }
 
 #' This function converts the cmt dataset to an adm dataset (except the endpoint)
