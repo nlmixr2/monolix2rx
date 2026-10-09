@@ -411,9 +411,16 @@
   .dvid <- unique(data$rxMDvid)
   .dvid <- .dvid[!is.na(.dvid)]
   .dvid <- .dvid[!(.dvid %in% seq_along(ui$predDf$cond))]
+  .mlxtran <- .monolixGetMlxtran(ui)
+  .event <- vapply(.mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint,
+                   function(e) if (identical(e$dist, "event")) e$var else NA_character_,
+                   character(1))
   for (.i in seq_along(ui$predDf$cond)) {
     # only overwrite non-dosing events (ie make sure the cmt is NA)
-    data$cmt[which(is.na(data$cmt) & data$rxMDvid == .i)] <- ui$predDf$var[.i]
+    .r <- is.na(data$cmt) & data$rxMDvid == .i
+    # a missing observation is not an event record
+    if (ui$predDf$var[.i] %in% .event && !is.null(data[["dv"]])) .r <- .r & !is.na(data$dv)
+    data$cmt[which(.r)] <- ui$predDf$var[.i]
   }
   for (.i in .dvid) {
     data <- data[-which(is.na(data$cmt) & data$rxMDvid == .i), ]
@@ -434,6 +441,8 @@
   if (length(.e) != 1L || !identical(.e[[1]]$dist, "event")) return(data)
   .obs <- if (is.null(data[["evid"]])) !.dataIsDose(data) else data$evid %in% 0L
   if (!is.null(data[["mdv"]])) .obs <- .obs & !(data$mdv %in% 1L)
+  # a missing observation is not an event record
+  if (!is.null(data[["dv"]])) .obs <- .obs & !is.na(data$dv)
   data$cmt[which(.obs & is.na(data$cmt))] <- .e[[1]]$var
   data
 }

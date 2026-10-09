@@ -100,17 +100,20 @@ Event = {type=event, hazard=h}")
 test_that("an event project imports with its records and likelihood", {
   skip_if_not_installed("rxode2")
   .dir <- withr::local_tempdir()
-  writeLines(c("ID,TIME,AMT,DV",
-               "1,0,.,0", "1,3,10,.", "1,5,.,1", "1,7,.,1", "1,10,.,0",
-               "2,2,.,0", "2,6,.,0"),
+  writeLines(c("ID,TIME,AMT,DV,EVID",
+               "1,0,.,0,0", "1,3,10,.,1", "1,5,.,1,0", "1,7,.,1,0", "1,10,.,0,0",
+               "2,2,.,0,0", "2,6,.,0,0",
+               "3,0,.,0,0", "3,2,.,.,0", "3,5,.,1,0",
+               "4,0,.,0,0", "4,5,.,0,0", "4,6,10,.,4", "4,8,.,1,0",
+               "5,5,.,1,0", "5,10,.,0,0"),
              file.path(.dir, "data.csv"))
   writeLines(c("[LONGITUDINAL]", "input = {Te}", "", "EQUATION:",
                "ddt_A = -A", "h = 1/Te", "", "DEFINITION:",
                "Event = {type=event, hazard=h}", "", "OUTPUT:", "output = Event"),
              file.path(.dir, "model.txt"))
   writeLines(c("<DATAFILE>", "", "[FILEINFO]", "file = 'data.csv'", "delimiter = comma",
-               "header = {ID, TIME, AMT, DV}", "", "[CONTENT]", "ID = {use=identifier}",
-               "TIME = {use=time}", "AMT = {use=amount}",
+               "header = {ID, TIME, AMT, DV, EVID}", "", "[CONTENT]", "ID = {use=identifier}",
+               "TIME = {use=time}", "AMT = {use=amount}", "EVID = {use=eventidentifier}",
                "DV = {use=observation, name=Event, type=event}", "", "<MODEL>", "",
                "[INDIVIDUAL]", "input = {Te_pop}", "", "DEFINITION:",
                "Te = {distribution=logNormal, typical=Te_pop, no-variability}", "",
@@ -122,10 +125,19 @@ test_that("an event project imports with its records and likelihood", {
   expect_true(paste0("Event_E <- (CMT == ", .k, ")") %in%
                 vapply(.m$lstExpr, deparse1, character(1)))
   .d <- .m$monolixData
-  expect_equal(.d$cmt[is.na(.d$amt) | .d$amt == 0], rep("Event", 6))
-  expect_false(any(.d$cmt[!is.na(.d$amt) & .d$amt > 0] %in% "Event"))
+  .rec <- !is.na(.d$dv)
+  expect_equal(.d$cmt[.rec], rep("Event", sum(.rec)))
+  expect_false(any(.d$cmt[!.rec] %in% "Event"))
   .s <- suppressMessages(rxode2::rxSolve(.m, .d, returnType="data.frame"))
-  ## the first record starts the observation; the dose row is not a record
-  expect_equal(.s$Event_ll, c(0, log(0.1) - 0.5, log(0.1) - 0.2, -0.3, 0, -0.4),
+  .s <- .s[!is.na(.s$DV) | !"DV" %in% names(.s), ]
+  .ll <- stats::setNames(.s$Event_ll, paste(.s$id, .s$time))
+  ## the first record starts the observation; doses and a missing DV are
+  ## not records; the washout restarts the hazard; an event on the first
+  ## record counts from time 0
+  .h <- log(0.1)
+  expect_equal(unname(.ll[c("1 0", "1 5", "1 7", "1 10", "2 2", "2 6", "3 0", "3 5",
+                            "4 0", "4 5", "4 8", "5 5", "5 10")]),
+               c(0, .h - 0.5, .h - 0.2, -0.3, 0, -0.4, 0, .h - 0.5,
+                 0, -0.5, .h - 0.2, .h - 0.5, -0.5),
                tolerance=1e-6)
 })

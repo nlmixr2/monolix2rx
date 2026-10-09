@@ -305,8 +305,9 @@ kitDryMatrices <- function(m, case) {
   ## compartments like the full model (event endpoints test CMT)
   if (is.character(.d$cmt)) {
     .pd <- ui$predDf
+    .num <- suppressWarnings(as.integer(.d$cmt))
     .d$cmt <- ifelse(.d$cmt %in% .pd$var, .pd$cmt[match(.d$cmt, .pd$var)],
-                     match(.d$cmt, ui$state))
+                     ifelse(is.na(.num), match(.d$cmt, ui$state), .num))
   }
   .d$dvid <- NULL
   .s <- suppressMessages(do.call(rxode2::rxSolve,

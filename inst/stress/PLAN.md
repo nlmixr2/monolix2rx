@@ -300,10 +300,15 @@ Notes for later cases:
   rows get its `cmt` in the imported data.  The truth instead resets its
   hazard with an EVID=5 replace just after each record.  A model with
   only `DEFINITION:` (`hazard=1/Te`) did not import its data (fixed).
+  Rows with a missing DV are not event records.  An EVID=3/4 reset clears
+  the cumulative hazard state, so the hazard then counts from the reset
+  (it went negative before; fixed).  An event on a subject's first record
+  counts the hazard from time 0 (it was dropped; fixed).
   To confirm in run mode: that Monolix integrates from the first record
-  (`tte-late-start`; a project without a start record is not covered),
-  that it writes no predictions for an event-only project, and the
-  per-record likelihood split (only the sum is in Monolix's output).
+  (`tte-late-start`), from time 0 without a start record, and across a
+  washout (no case yet); that it writes no predictions for an event-only
+  project; and the per-record likelihood split (only the sum is in
+  Monolix's output).
   rxode2 5.1.8 `lag(time)` aborts R (fixed in rxode2 main, #1434); the
   translation does not use it.  Fitting with `lag0()` recurrences in
   nlmixr2 is not checked.

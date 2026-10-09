@@ -131,8 +131,10 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   .endpoints <- .mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint
   .isEvent <- vapply(.endpoints, function(e) identical(e$dist, "event"), logical(1))
   .eventCmt <- rep(0L, length(.endpoints))
-  # an event endpoint needs its own compartment number, known once parsed
-  for (.pass in 1:2) {
+  # an event endpoint needs its own compartment number, known once parsed;
+  # the second pass repeats the first pass's warnings
+  .muffle <- function(w) if (any(.isEvent) && .pass == 1L) invokeRestart("muffleWarning")
+  for (.pass in seq_len(if (any(.isEvent)) 2L else 1L)) withCallingHandlers({
     .latent <- .latentMix(.mlxtran)
     .model <- c("model({",
                 .cmt,
@@ -181,10 +183,11 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
       print(.ret)
       .ret()
     }
-    if (!any(.isEvent) || .pass == 2L) break
-    .eventCmt <- as.integer(.ui$predDf$cmt[match(vapply(.endpoints, function(e) e$var, character(1)),
-                                                 .ui$predDf$var)])
-  }
+    if (.pass == 1L) {
+      .eventCmt <- as.integer(.ui$predDf$cmt[match(vapply(.endpoints, function(e) e$var, character(1)),
+                                                   .ui$predDf$var)])
+    }
+  }, warning=.muffle)
   .ui <- rxode2::rxUiDecompress(.ui)
   .dfObs <- attr(.mlxtran, "dfObs")
   if (.dfObs > 0L) assign("dfObs", as.double(.dfObs), envir=.ui$meta)
