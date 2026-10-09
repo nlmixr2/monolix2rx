@@ -96,6 +96,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `14-pk-macros.R` | `elimination(Vm, Km)`, `oral(Tk0, Tlag, p)`, two `peripheral()` macros (three compartments), `effect()`, `iv(Tlag, p)` |
 | `15-individual.R` | logitNormal with `min`/`max`, `var=` instead of `sd=`, a negative correlation in a three-way block, two correlation blocks listed out of order, a covariate on a correlated parameter, a regressor as an ODE input changing on regressor-only lines |
 | `16-dosing.R` | steady-state infusion, SS with ADDL, an `EVID=3` reset with drug on board, an infusion through `iv(Tlag)`, SS with an absorption lag, left and right censoring without `LIMIT` |
+| `17-error-output.R` | error parameters not named `a`/`b`, a fixed error parameter, a logitNormal observation on (0, 100), `OUTPUT: table=`, an observed Imax effect |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -351,6 +352,12 @@ Notes for later cases:
   not matched (fixed; `data-cens-limit` and `data-cens-both` in the mock
   run).  Whether Monolix places lagged steady-state doses like rxode2
   (`dose-ss-tlag`) is to confirm in run mode.
+- `17-error-output.R`: the kit's likelihood check (`dryLik`) needs a
+  non-normal endpoint (rxode2's `.getQuotedDistributionAndLlikArgs()`
+  only handles the generalized likelihoods), so
+  `err-logitnormal-percent` checks the imported bounds (`predDf`
+  `trLow`/`trHi`) directly.  Whether Monolix accepts an input parameter
+  (`Cl`) in `OUTPUT: table=` (`out-table`) is to confirm in run mode.
 - `reg-ode-input`: whether Monolix's ODE solver restarts at regressor-only
   lines (a small numerical difference) is to confirm in run mode.
 
