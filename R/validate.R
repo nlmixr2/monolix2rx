@@ -153,8 +153,10 @@
     .minfo("mixture model not validated: Monolix's class per subject is not imported")
     return(invisible())
   }
+  .censObs <- NULL
   if (any(names(.data) == "cens")) {
     .minfo("filtering out censored observations for validation")
+    .censObs <- .data[.data$cens != 0 & !is.na(.data$dv), , drop=FALSE]
     .data <- .data[.data$cens == 0, names(.data) != "cens"]
     .minfo("done")
   }
@@ -211,6 +213,18 @@
                                 }
                                 n
                               }, character(1), USE.NAMES = FALSE)
+    if (NROW(.censObs) > 0L) {
+      # censored observations are left out on both sides; keyed by
+      # endpoint when the censored row has one
+      .cc <- if (is.null(.censObs$cmt)) rep(NA_character_, NROW(.censObs)) else as.character(.censObs$cmt)
+      .drop <- paste(.monolix$id, .monolix$time) %in%
+        paste(.censObs$id, .censObs$time)[is.na(.cc)]
+      if (!is.null(.monolix$cmt)) {
+        .drop <- .drop | paste(.monolix$id, .monolix$time, .monolix$cmt) %in%
+          paste(.censObs$id, .censObs$time, .cc)[!is.na(.cc)]
+      }
+      .monolix <- .monolix[!.drop, , drop=FALSE]
+    }
     .nMonolix <- length(.monolix[, 1])
 
     .monolix$rxMonolixRowN <- seq_along(.monolix[,1])

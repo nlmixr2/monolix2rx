@@ -238,6 +238,10 @@
   fixed `sd=0.3`): Monolix's `eta_Cl` column became `omega_Cl`, which is
   not an eta of the model, so the validation solve failed.
 
+* Fixed the validation of censored data: the censored observations were
+  left out of the rxode2 solve but not of Monolix's predictions, so they
+  were reported in `$monolixNotMatched`.
+
 # monolix2rx 0.0.6
 
 * Updated to add types for rstudio completion

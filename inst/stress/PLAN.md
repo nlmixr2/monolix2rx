@@ -95,6 +95,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `13-covariates.R` | categorical transform grouping categories (`transform=`), several covariates on one parameter, an untransformed covariate, covariates on normal and logitNormal parameters, categories mixing numbers and strings |
 | `14-pk-macros.R` | `elimination(Vm, Km)`, `oral(Tk0, Tlag, p)`, two `peripheral()` macros (three compartments), `effect()`, `iv(Tlag, p)` |
 | `15-individual.R` | logitNormal with `min`/`max`, `var=` instead of `sd=`, a negative correlation in a three-way block, two correlation blocks listed out of order, a covariate on a correlated parameter, a regressor as an ODE input changing on regressor-only lines |
+| `16-dosing.R` | steady-state infusion, SS with ADDL, an `EVID=3` reset with drug on board, an infusion through `iv(Tlag)`, SS with an absorption lag, left and right censoring without `LIMIT` |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -345,6 +346,11 @@ Notes for later cases:
   failed validation (fixed; `param-var`).  The mock wrote the column from
   the eta name; it now strips `omega2_` too.  Inter-occasion levels keep
   the old naming.
+- `16-dosing.R`: the validation left censored observations out of the
+  rxode2 solve only, so Monolix's predictions for them were reported as
+  not matched (fixed; `data-cens-limit` and `data-cens-both` in the mock
+  run).  Whether Monolix places lagged steady-state doses like rxode2
+  (`dose-ss-tlag`) is to confirm in run mode.
 - `reg-ode-input`: whether Monolix's ODE solver restarts at regressor-only
   lines (a small numerical difference) is to confirm in run mode.
 
