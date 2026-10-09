@@ -141,3 +141,54 @@ test_that("an event project imports with its records and likelihood", {
                  0, -0.5, .h - 0.2, .h - 0.5, -0.5),
                tolerance=1e-6)
 })
+
+.eventProject <- function(rows, header, content, eq, def, fit="Event", err=FALSE) {
+  .dir <- withr::local_tempdir(.local_envir=parent.frame())
+  writeLines(c(paste(header, collapse=","), rows), file.path(.dir, "data.csv"))
+  writeLines(c("[LONGITUDINAL]", "input = {Te}", "", "EQUATION:", eq, "", "DEFINITION:", def,
+               "", "OUTPUT:", paste0("output = ", fit)),
+             file.path(.dir, "model.txt"))
+  writeLines(c("<DATAFILE>", "", "[FILEINFO]", "file = 'data.csv'", "delimiter = comma",
+               paste0("header = {", paste(header, collapse=", "), "}"), "", "[CONTENT]", content,
+               "", "<MODEL>", "", "[INDIVIDUAL]", "input = {Te_pop}", "", "DEFINITION:",
+               "Te = {distribution=logNormal, typical=Te_pop, no-variability}", "",
+               "[LONGITUDINAL]", if (err) "input = {a}", "file = 'model.txt'", "", "<PARAMETER>",
+               "Te_pop = {value=10, method=MLE}", if (err) "a = {value=1, method=MLE}"),
+             file.path(.dir, "run.mlxtran"))
+  .ret <- suppressMessages(suppressWarnings(monolix2rx(file.path(.dir, "run.mlxtran"))))
+  # the import leaves its predictions for .equation() calls in later tests
+  .monolix2rx$endpointPred <- character(0)
+  .ret
+}
+
+test_that("solver noise in a washed out hazard is not a reset", {
+  skip_if_not_installed("rxode2")
+  .m <- .eventProject(c("1,0,100,.", paste0("1,", seq(1, 200, by=0.5), ",.,0")),
+                      c("ID", "TIME", "AMT", "DV"),
+                      c("ID = {use=identifier}", "TIME = {use=time}", "AMT = {use=amount}",
+                        "DV = {use=observation, name=Event, type=event}"),
+                      c("ddt_A = -3*A", "h = A/Te"), "Event = {type=event, hazard=h}")
+  .s <- suppressMessages(rxode2::rxSolve(.m, .m$monolixData, returnType="data.frame"))
+  expect_equal(sum(.s$Event_Z), 0)
+  ## the hazard from the first record (t=1) on
+  expect_equal(sum(.s$Event_ll), -(100 / 30) * exp(-3), tolerance=1e-5)
+})
+
+test_that("a missing event observation with other endpoints is not a record", {
+  skip_if_not_installed("rxode2")
+  .m <- .eventProject(c("1,0,100,.,.", "1,0,.,0,2", "1,1,.,5,1", "1,2,.,.,2", "1,4,.,1,2",
+                        "1,6,.,1,1"),
+                      c("ID", "TIME", "AMT", "DV", "YTYPE"),
+                      c("ID = {use=identifier}", "TIME = {use=time}", "AMT = {use=amount}",
+                        "DV = {use=observation, name={y1, Event}, yname={'1', '2'}, type={continuous, event}}",
+                        "YTYPE = {use=observationtype}"),
+                      c("ddt_A = -A", "Cc = A/10", "h = 1/Te"),
+                      c("y1 = {distribution=normal, prediction=Cc, errorModel=constant(a)}",
+                        "Event = {type=event, hazard=h}"),
+                      fit="{Cc, Event}", err=TRUE)
+  .d <- .m$monolixData
+  expect_equal(.d$evid[.d$time == 2], 2L)
+  expect_false(.d$cmt[.d$time == 2] %in% "Event")
+  .s <- suppressMessages(rxode2::rxSolve(.m, .d, returnType="data.frame"))
+  expect_equal(.s$Event_ll[.s$time == 4], log(0.1) - 0.4, tolerance=1e-6)
+})

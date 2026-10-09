@@ -209,9 +209,10 @@
           paste0("d/dt(", .v("cumhaz"), ") <- ", .v("haz")),
           paste0(.v("E"), " <- (CMT == ", cmt, ")"),
           paste0(.v("EH"), " <- ", .v("E"), " * ", .v("cumhaz")),
-          # a reset (EVID 3/4) clears cumhaz; the hazard restarts from it
+          # a reset (EVID 3/4) sets cumhaz to exactly 0; the hazard restarts
+          # from it (a decrease alone can be solver noise)
           paste0(.v("Hc"), " <- ", .v("cumhaz")),
-          paste0(.v("Z"), " <- (", .v("Hc"), " < lag0(", .v("Hc"), "))"),
+          paste0(.v("Z"), " <- (", .v("Hc"), " == 0) * (lag0(", .v("Hc"), ") > 0)"),
           # cumulative hazard and number of the previous event records
           paste0(.v("Hp"), " <- (1 - ", .v("Z"), ") * (lag0(", .v("EH"), ") + (1 - lag0(", .v("E"),
                  ")) * lag0(", .v("Hp"), "))"),

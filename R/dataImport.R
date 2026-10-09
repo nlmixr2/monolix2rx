@@ -418,8 +418,14 @@
   for (.i in seq_along(ui$predDf$cond)) {
     # only overwrite non-dosing events (ie make sure the cmt is NA)
     .r <- is.na(data$cmt) & data$rxMDvid == .i
-    # a missing observation is not an event record
-    if (ui$predDf$var[.i] %in% .event && !is.null(data[["dv"]])) .r <- .r & !is.na(data$dv)
+    if (ui$predDf$var[.i] %in% .event) {
+      # a missing or ignored observation is not an event record
+      if (is.null(data[["evid"]])) data <- .dataEvid(data)
+      .na <- if (is.null(data[["dv"]])) FALSE else is.na(data$dv)
+      .no <- .r & (data$evid %in% 2L | .na)
+      data$evid[which(.no)] <- 2L
+      .r <- .r & !.no
+    }
     data$cmt[which(.r)] <- ui$predDf$var[.i]
   }
   for (.i in .dvid) {

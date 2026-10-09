@@ -303,7 +303,10 @@ Notes for later cases:
   Rows with a missing DV are not event records.  An EVID=3/4 reset clears
   the cumulative hazard state, so the hazard then counts from the reset
   (it went negative before; fixed).  An event on a subject's first record
-  counts the hazard from time 0 (it was dropped; fixed).
+  counts the hazard from time 0 (it was dropped; fixed).  A reset is
+  found by `cumhaz` being exactly 0 after a positive value.  rxode2 applies
+  a reset before a record at the same time, which then loses its interval
+  (every state is reset, so the hazard before it cannot be kept).
   To confirm in run mode: that Monolix integrates from the first record
   (`tte-late-start`), from time 0 without a start record, and across a
   washout (no case yet); that it writes no predictions for an event-only
