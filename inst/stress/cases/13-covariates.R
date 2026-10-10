@@ -27,9 +27,10 @@
 kitVariant("pkmodel-oral-1cmt", "cov-transform-group",
            "categorical covariate grouped in [COVARIATE] DEFINITION: (transform=RACE, categories={A={1, 2}, B=3, C=4}, reference=A) on Cl",
            tags=c("covariate", "categorical"),
-           known=paste("rxode2 5.1.8 numbers the string literals of comparisons apart from the",
-                       "assigned strings, so tRACE == \"B\" is true for tRACE <- \"A\" (the B, C",
-                       "coefficients compare against A, B; nlmixr2/rxode2#1456)"),
+           known=if (utils::packageVersion("rxode2") < "5.1.8")
+                   paste("rxode2 < 5.1.8 numbers the string literals of comparisons apart from the",
+                         "assigned strings, so tRACE == \"B\" is true for tRACE <- \"A\" (the B, C",
+                         "coefficients compare against A, B; nlmixr2/rxode2#1456)"),
            sim=.covOral("Cl_pop * exp(beta_Cl_tRACE_B * (RACE == 3) + beta_Cl_tRACE_C * (RACE == 4) + omega_Cl)",
                         beta=c(beta_Cl_tRACE_B=-0.3, beta_Cl_tRACE_C=0.25)),
            data=function(nSub) {

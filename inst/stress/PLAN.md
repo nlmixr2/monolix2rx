@@ -245,10 +245,10 @@ Notes for later cases:
   `linCmt()` solves steady state analytically (ignores `minSS`): a tighter
   `dose-ss` tolerance or a `linCmt()` SS case will show both.
 
-- rxode2 5.1.8 `delay()` uses `x(0)` as the history only when it is a
-  literal constant; a computed or parameter `x(0)` gives a history of 0
-  (`dde-hutchinson`; monolix2rx writes `x_0 <- 10; x(0) <- x_0`).  To fix
-  in rxode2 (nlmixr2/rxode2#1441).
+- rxode2 before 5.1.8 `delay()` uses `x(0)` as the history only when it
+  is a literal constant; a computed or parameter `x(0)` gives a history
+  of 0 (`dde-hutchinson`; monolix2rx writes `x_0 <- 10; x(0) <- x_0`).
+  Fixed in rxode2 5.1.8 (nlmixr2/rxode2#1441); `known=` only before it.
 
 - rxode2 5.1.8 steady state with `delay()`: the undelayed states reach
   steady state, but a state driven by the delay starts at its initial
@@ -327,12 +327,13 @@ Notes for later cases:
 
 - `13-covariates.R`: a categorical transform (`[COVARIATE] DEFINITION:`
   `transform=`) becomes string assignments (`tRACE <- "A"`) compared with
-  `tRACE == "B"`.  rxode2 5.1.8 numbers the literals in comparisons apart
+  `tRACE == "B"`.  rxode2 before 5.1.8 numbers the literals in comparisons apart
   from the assigned ones, so a comparison is only right when both appear
   in the same order: `tRACE <- "A"; if (RACE == 2) tRACE <- "B";
   isB <- (tRACE == "B")` gives isB = 1 for RACE 1.  The phenobarbital and
   warfarin projects (`inst/cov`) agree by that luck; `cov-transform-group`
-  (reference first) does not (`known=`; nlmixr2/rxode2#1456).
+  (reference first) does not (`known=` before 5.1.8, where it is fixed;
+  nlmixr2/rxode2#1456).
   Categories mixing numbers and strings (`{'U', '1', '3'}`) compared the
   numbers unquoted with the character data column, so a coefficient went to
   another category (fixed; `cov-cat-mixed`).  The quoted numbers then
@@ -342,7 +343,7 @@ Notes for later cases:
   of a transform are compared unquoted (`tRACE == 2`), which rxode2 reads
   as the level number: right when the labels are 1, 2, ... in their
   assigned order (`cov-transform-numeric`), wrong otherwise
-  (`{'0'={1}, '1'={2}}`).  Quoting them cannot help until #1456 is fixed.
+  (`{'0'={1}, '1'={2}}`).  Quoting them is to revisit with rxode2 5.1.8 (#1456 fixed).
 - `15-individual.R`: the random effects (`eta_Cl_SAEM`) were renamed
   `omega_Cl`, not the parameter's `sd=`/`var=` name, so `var=omega2_Cl`
   failed validation (fixed; `param-var`).  The mock wrote the column from
