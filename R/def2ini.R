@@ -74,7 +74,7 @@
 .parsGetFixed <- function(pars, name) {
   .w <- which(pars$name == name)
   if (length(.w) == 1L) {
-    return(pars[.w, "method"] == "FIXED")
+    return(toupper(pars[.w, "method"]) == "FIXED")
   }
   FALSE
 }

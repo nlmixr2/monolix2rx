@@ -242,6 +242,18 @@
   left out of the rxode2 solve but not of Monolix's predictions, so they
   were reported in `$monolixNotMatched`.
 
+* Fixed a parameter fixed with a lowercase `method=fixed`, which was
+  imported as estimated.
+
+* Fixed `[LONGITUDINAL]` variables and states named like rxode2 keywords
+  (`rate`, `dur`, `time`, `TIME`, `ii`, `df`, ...), which rxode2 refused; they
+  are now written as `mlx_<name>`.  Such a name as a model input or
+  output is an error.
+
+* Fixed `X_0` initial conditions: a state with an underscore (`A_gut_0`)
+  had none, and a variable like `E_0` with no state `E` became `E(0)`,
+  which rxode2 refused.
+
 # monolix2rx 0.0.6
 
 * Updated to add types for rstudio completion

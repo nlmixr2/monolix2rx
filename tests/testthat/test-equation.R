@@ -214,3 +214,49 @@ test_that("dose keywords in PK macro arguments are translated", {
                "inftDose")
   expect_true("f(central) <- dose()/100" %in% .equation("", "Cc = pkmodel(V, Cl, p=amtDose/100)")$rx)
 })
+
+test_that("names rxode2 reserves are renamed in [LONGITUDINAL] equations", {
+  .e <- .equation("rate = max(Cl/V, 0)\nddt_ii = -rate*ii\nii_0 = 1\nCc = ii/V*t",
+                  "dur = 0.5\ndepot(target=ii, Tlag=dur)\ncompartment(cmt=1, amount=Ab)")
+  expect_equal(sort(.e$rename), c("dur", "ii", "rate"))
+  expect_equal(.e$monolix, "rate = max(Cl/V, 0)\nddt_ii = -rate*ii\nii_0 = 1\nCc = ii/V*t")
+  expect_true(all(c("mlx_dur <- 0.5", "mlx_rate <- max(Cl / V, 0)", "d/dt(mlx_ii) <-  - mlx_rate * mlx_ii",
+                    "alag(mlx_ii) <- mlx_dur", "mlx_ii(0) <- mlx_ii_0", "Cc <- mlx_ii / V * time") %in% .e$rx))
+  # a macro keyword argument keeps its name
+  expect_equal(c(.mlxRenameReserved("compartment(cmt=1, amount=cmt)")), "compartment(cmt=1, amount=mlx_cmt)")
+  # x_0 alone is a legal name; TIME is refused in any case
+  expect_equal(c(.mlxRenameReserved("y = rate_0 + ii_0")), "y = rate_0 + ii_0")
+  expect_equal(c(.mlxRenameReserved("TIME = t - 2 ; time")), "mlx_TIME = t - 2 ; time")
+  # print() keeps the Monolix names
+  expect_equal(as.character(.pk("dur = 0.5\ndepot(target=Ad, Tlag=dur)", TRUE)),
+               c("dur <- 0.5", "depot(adm = 1, target = Ad, Tlag = dur, p = 1)"))
+  # [COVARIATE] equations write data columns and keep their names
+  expect_equal(.covEq("rate = WT/70")$dplyr, "rate = WT / 70")
+})
+
+test_that("X_0 is an initial condition only for a state X", {
+  expect_equal(.equation("A_gut_0 = 10\nddt_A_gut = -A_gut\nCc = A_gut")$rx,
+               c("A_gut_0 <- 10", "A_gut(0) <- A_gut_0", "d/dt(A_gut) <-  - A_gut", "Cc <- A_gut"))
+  expect_equal(.equation("E_0 = 10\nCc = E_0")$rx, c("E_0 <- 10", "Cc <- E_0"))
+})
+
+test_that("a reserved name as a model input is an error", {
+  skip_on_cran()
+  .dir <- file.path(tempfile(), "theo")
+  dir.create(.dir, recursive = TRUE)
+  on.exit(unlink(dirname(.dir), recursive = TRUE))
+  file.copy(
+    list.files(system.file("theo", package = "monolix2rx"), full.names = TRUE),
+    .dir,
+    recursive = TRUE
+  )
+  .f <- file.path(.dir, "theophylline_project.mlxtran")
+  .l <- readLines(.f)
+  .l <- gsub("\\bCl\\b", "rate", .l, perl = TRUE)
+  .l <- gsub("oral1_1cpt_kaVCl.txt", "model.txt", .l, fixed = TRUE)
+  writeLines(.l, .f)
+  writeLines(c("[LONGITUDINAL]", "input = {ka, V, rate}", "", "PK:", "depot(target=Ac, ka)",
+               "", "EQUATION:", "ddt_Ac = -rate/V*Ac", "Cc = Ac/V", "", "OUTPUT:", "output = Cc"),
+             file.path(.dir, "model.txt"))
+  expect_error(suppressMessages(monolix2rx(.f)), "rxode2 reserves 'rate'")
+})

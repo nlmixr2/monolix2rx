@@ -78,19 +78,8 @@ void pushModel(void) {
     sClear(&curLine);
     return;
   }
+  // X(0) <- X_0 is added in R, once the states are known
   monolix2rxDouble(curLine.s, curDdt, ".equationLine");
-  // now check for X_0 = which will be followed by X(0) = X_0
-  char *v2 = curLine.s;
-  while (v2[0] != 0 && v2[0] != '_' && v2[0] != '=') {
-    v2++;
-  }
-  if (v2[0] == '_' && v2[1] == '0' && (v2[2] == ' ' || v2[2] == '=')) {
-    v2[0] = 0;
-    char *v = (char*)rc_dup_str(curLine.s, v2);
-    sClear(&curLine);
-    sAppend(&curLine, "%s(0) <- %s_0", v, v);
-    monolix2rxDouble(curLine.s, curDdt, ".equationLine");
-  }
   sClear(&curLine);
 }
 

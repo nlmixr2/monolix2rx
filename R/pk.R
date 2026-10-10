@@ -373,6 +373,7 @@
     .monolix2rx$equationLine <- character(0)
   }
   .pkIni(TRUE)
+  text <- .mlxRenameReserved(text)
   if (text != "") .Call(`_monolix2rx_trans_equation`, text, "[LONGITUDINAL] EQUATION:")
   .pkPushStatement()
   .validatePkModel(.monolix2rx$pkPars, .monolix2rx$pkCe)
@@ -390,6 +391,7 @@
                reset=.monolix2rx$pkReset,
                elimination=.monolix2rx$pkElimination,
                admd=.monolix2rx$admd)
+  if (!is.null(attr(text, "rename"))) .ret$rename <- attr(text, "rename")
   if (.monolix2rx$pkLong) {
     .ret <- c(.ret,
               list(preEq=.monolix2rx$preEq,
@@ -753,7 +755,12 @@ as.character.monolix2rxPk <- function(x, ...) {
     }
     .prnAdm <- TRUE
   }
-  c(x$preEq, .retf, x$postEq)
+  .ret <- c(x$preEq, .retf, x$postEq)
+  if (length(x$rename) > 0L) {
+    # the Monolix names, not the rxode2 ones
+    .ret <- gsub(paste0("\\bmlx_(", paste(x$rename, collapse="|"), ")"), "\\1", .ret, perl=TRUE)
+  }
+  .ret
 }
 #' @export
 print.monolix2rxPk <- function(x, ...) {

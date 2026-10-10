@@ -101,6 +101,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   }
   .admd <- NULL
   .cmt <- NULL
+  .rename <- NULL
   if (!is.null(.mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$file)) {
     withr::with_dir(.monolixGetPwd(.mlxtran), {
       if (!file.exists(.mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$file)) {
@@ -118,16 +119,26 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
     .equation <- .e$rx
     .cmt <- .e$cmtPrefix
     .admd <- .e$admd
+    .rename <- .e$rename
   } else if (!is.null(.mlxtran$MODEL$LONGITUDINAL$EQUATION)) {
     .equation <- .mlxtran$MODEL$LONGITUDINAL$EQUATION$rx # includes PK: macro
     .cmt <- .mlxtran$MODEL$LONGITUDINAL$EQUATION$cmtPrefix
     .admd <- .mlxtran$MODEL$LONGITUDINAL$EQUATION$admd
+    .rename <- .mlxtran$MODEL$LONGITUDINAL$EQUATION$rename
   } else {
     # no doses, but the data can still be imported
     .admd <- .equation("")$admd
     .equation <- character(0)
   }
   if (length(.cmt) == 1L && .cmt == "cmt()") .cmt <- NULL
+  .rename <- intersect(.rename, c(.mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$input,
+                                  .mlxtran$MODEL$LONGITUDINAL$OUTPUT$output,
+                                  .getMonolixPreds(.mlxtran)))
+  if (length(.rename) > 0L) {
+    stop("rxode2 reserves ", paste0("'", .rename, "'", collapse=", "),
+         "; as a model input or output it is not translated (rename it in the Monolix model)",
+         call.=FALSE)
+  }
   .endpoints <- .mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint
   .isEvent <- vapply(.endpoints, function(e) identical(e$dist, "event"), logical(1))
   .eventCmt <- rep(0L, length(.endpoints))

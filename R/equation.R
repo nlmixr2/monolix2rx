@@ -29,6 +29,8 @@
   # lines before a pkmodel()/macro must stay before its ODEs
   .monolix2rx$pkLong <- TRUE
   on.exit(.monolix2rx$pkLong <- FALSE)
+  .text <- text
+  text <- .mlxRenameReserved(text)
   if (text!="") {
     .Call(`_monolix2rx_trans_equation`, text, "[LONGITUDINAL] EQUATION:")
   }
@@ -148,12 +150,14 @@
                       .monolix2rx$equationLine,
                       .monolix2rx$extraPred,
                       .monolix2rx$pk$equation$endLines))
-  .ret <- list(monolix=text,
+  .rx <- .equationInitial(.rx)
+  .ret <- list(monolix=.text,
                rx=.rx,
                lhs=.monolix2rx$equationLhs,
                odeType=.monolix2rx$odeType,
                admd=.admd,
-               cmtPrefix=paste0("cmt(", .cmtNum, ")"))
+               cmtPrefix=paste0("cmt(", .cmtNum, ")"),
+               rename=unique(c(pk$rename, attr(text, "rename"))))
   class(.ret) <- "monolix2rxEquation"
   .ret
 }
@@ -242,6 +246,52 @@
 .equationLhs <- function(v) {
   .monolix2rx$equationLhs <- c(.monolix2rx$equationLhs, v)
 }
+#' Add the initial condition X(0) <- X_0 for each state X
+#'
+#' Monolix `X_0` is the initial condition only when `X` is a state.
+#'
+#' @param lines rxode2 lines
+#' @return lines with `X(0) <- X_0` after each `X_0` assignment
+#' @noRd
+#' @author Matthew L. Fidler
+.equationInitial <- function(lines) {
+  .ddt <- grep("^ *d/dt[(][^)]+[)] *<-", lines, value=TRUE)
+  .st <- unique(sub("^ *d/dt[(]([^)]+)[)].*$", "\\1", .ddt))
+  if (length(.st) == 0L) return(lines)
+  .re <- paste0("^( *)(", paste(.st, collapse="|"), ")_0 <- ")
+  unlist(lapply(lines, function(l) {
+    if (!grepl(.re, l)) return(l)
+    c(l, sub(paste0(.re, ".*$"), "\\1\\2(0) <- \\2_0", l))
+  }), use.names=FALSE)
+}
+#' Rename Monolix names that rxode2 reserves
+#'
+#' They become `mlx_<name>` in the Monolix text, before any parsing, so
+#' the equations, PK macros and compartments agree.  A macro keyword
+#' argument (`cmt=`) keeps its name.
+#'
+#' @param text Monolix [LONGITUDINAL] text
+#' @return text with the names renamed; the renamed names are in the
+#'   `"rename"` attribute
+#' @noRd
+#' @author Matthew L. Fidler
+.mlxRenameReserved <- function(text) {
+  .n <- .rxReservedNames
+  # comments and macro keyword arguments are skipped
+  .skip <- paste0(";[^\n]*(*SKIP)(*FAIL)|[(,]\\s*(?:", .n, ")\\s*=(?!=)(*SKIP)(*FAIL)|")
+  # a bare name or ddt_x renames x, and then also x_0
+  .m <- regmatches(text, gregexpr(paste0(.skip, "\\b(ddt_)?(", .n, ")\\b"), text, perl=TRUE))[[1]]
+  .m <- unique(sub("^ddt_", "", .m))
+  if (length(.m) == 0L) return(text)
+  .re <- paste0(.skip, "\\b(ddt_)?(", paste(.m, collapse="|"), ")(_0)?\\b")
+  .ret <- gsub(.re, "\\1mlx_\\2\\3", text, perl=TRUE)
+  attr(.ret, "rename") <- .m
+  .ret
+}
+# names rxode2 does not allow as model variables (a regex)
+.rxReservedNames <- paste0("(?i:id|evid|ii|time|amt)|rate|dur|cmt|ss|addl|tlast|newind|mtime|",
+                           "printf|print|Rprintf|dvid|df|ifelse|rxFlag|M_[A-Z0-9_]+")
+
 #' Add state information to the equation object
 #'
 #' @param v state to add

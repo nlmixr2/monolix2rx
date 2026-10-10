@@ -97,6 +97,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `15-individual.R` | logitNormal with `min`/`max`, `var=` instead of `sd=`, a negative correlation in a three-way block, two correlation blocks listed out of order, a covariate on a correlated parameter, a regressor as an ODE input changing on regressor-only lines |
 | `16-dosing.R` | steady-state infusion, SS with ADDL, an `EVID=3` reset with drug on board, an infusion through `iv(Tlag)`, SS with an absorption lag, left and right censoring without `LIMIT` |
 | `17-error-output.R` | error parameters not named `a`/`b`, a fixed error parameter, a logitNormal observation on (0, 100), `OUTPUT: table=`, an observed Imax effect |
+| `18-syntax.R` | `;` comments, a lowercase `method=fixed`, a fixed omega, `method=BAYES` with a `[POPULATION]` prior, a parameter named `F`, variables and states named like rxode2 keywords (also in `PK:` and a macro argument), `X_0` for a state with an underscore and for a plain variable |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -358,6 +359,20 @@ Notes for later cases:
   `err-logitnormal-percent` checks the imported bounds (`predDf`
   `trLow`/`trHi`) directly.  Whether Monolix accepts an input parameter
   (`Cl`) in `OUTPUT: table=` (`out-table`) is to confirm in run mode.
+- `18-syntax.R`: a lowercase `method=fixed` was imported as estimated
+  (fixed; `param-fixed-lowercase`).  Variables named like rxode2
+  keywords (`rate`, `dur`, `time`, `ii`, ...) were refused by rxode2;
+  the `[LONGITUDINAL]` text now renames them `mlx_<name>` before parsing,
+  except a macro keyword argument (`cmt=`); as a model input or output
+  they are an error (`name-rxode2-keywords`, `name-rxode2-keywords-pk`);
+  only `monolix2rx()` checks that, so `mlxtran(equation=TRUE)` alone
+  gives an `rx` that does not define such a prediction.
+  `X_0` was an initial condition only up to the first underscore, so
+  `A_c_0` had none, and `E_0` without a state `E` became `E(0)`, which
+  rxode2 refuses (fixed; `ode-init-underscore`, `ode-init-not-state`).
+  The `[POPULATION]` prior spelling in `param-bayes` and whether Monolix
+  accepts these names (`F`, `rate`, `time`, `ii`) are to confirm in run
+  mode.
 - `reg-ode-input`: whether Monolix's ODE solver restarts at regressor-only
   lines (a small numerical difference) is to confirm in run mode.
 
