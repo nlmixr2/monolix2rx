@@ -277,6 +277,13 @@
   `rxSolve()` refused, so nothing was validated.  They are now also put
   in the data's subject order, which is how `rxSolve()` assigns them.
 
+* Fixed the `PK:` macros `empty(adm, target)` and `reset(adm)`, whose
+  administrations were given as doses: an `empty()` line now empties its
+  target (rxode2 `evid=5` with amount 0) and a `reset()` line resets the
+  system (`evid=3`).  With them, a macro's `Tlag`, `p` or `Tk0` no longer
+  stopped the translation and applies to its own administration only.
+  In `EQUATION:` they are still not translated (a warning says so).
+
 # monolix2rx 0.0.6
 
 * Updated to add types for rstudio completion

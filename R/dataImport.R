@@ -461,7 +461,7 @@
 #' @return converted dataset for dosing endpoint (not observations)
 #' @noRd
 #' @author Matthew L. Fidler
-.dataConvertAdm <- function(data, admd) {
+.dataConvertAdm <- function(data, admd, pk=NULL) {
   data$cmt <- NA_character_
   data$admd <- NA_integer_
   .dose <- .dataIsDose(data)
@@ -476,12 +476,14 @@
   for (i in seq_along(admd$adm)) {
     .cur <- admd[i, ]
     .cmt <- if (is.null(.cur$rxCmt) || is.na(.cur$rxCmt)) .cur$cmt else .cur$rxCmt
+    .event <- .dataAdmEvent(.cur, pk)
     if (.cur$admd == 1L) {
       .w <- which(.adm == .cur$adm & is.na(data$admd))
       data$admd[.w] <- 1L
       data$cmt[.w] <- .cmt
       if (isTRUE(.cur$dur)) data <- .dataDurRate(data, .w)
       if (isTRUE(.cur$transit)) data <- .dataTransitEvid(data, .w)
+      if (!is.na(.event)) data <- .dataSetEvent(data, .w, .event)
     } else {
       .w <- which(.adm == .cur$adm)
       if (length(.w) > 0L) {
@@ -490,11 +492,56 @@
         .dE$cmt <- .cmt
         if (isTRUE(.cur$dur)) .dE <- .dataDurRate(.dE, seq_along(.w))
         if (isTRUE(.cur$transit)) .dE <- .dataTransitEvid(.dE, seq_along(.w))
+        if (!is.na(.event)) .dE <- .dataSetEvent(.dE, seq_along(.w), .event)
         .extra <- .dataBindFill(.extra, .dE)
       }
     }
   }
   .dataTransitReset(.dataBindFill(data, .extra))
+}
+
+#' rxode2 evid of an administration given by `empty()` or `reset()`
+#'
+#' @param cur one row of the admd table
+#' @param pk parsed PK macros (with `$empty` and `$reset`)
+#' @return 5 (replace: empty the target), 3 (reset) or NA (a dose)
+#' @noRd
+#' @author Matthew L. Fidler
+.dataAdmEvent <- function(cur, pk) {
+  .is <- function(df) {
+    !is.null(df) && any(df$adm == cur$adm & df$admd == cur$admd, na.rm=TRUE)
+  }
+  if (.is(pk$empty)) return(5L)
+  if (.is(pk$reset)) return(3L)
+  NA_integer_
+}
+
+#' The parsed `PK:` block (its `empty()` and `reset()` macros)
+#'
+#' @param mlxtran parsed mlxtran
+#' @return monolix2rxPk object or NULL
+#' @noRd
+#' @author Matthew L. Fidler
+.dataPkMacros <- function(mlxtran) {
+  mlxtran$MODEL$LONGITUDINAL$PK
+}
+
+#' Make rows an empty (evid 5 with amount 0) or reset (evid 3) event
+#'
+#' @param data dataset
+#' @param w rows to change
+#' @param evid 5 or 3
+#' @return dataset
+#' @noRd
+#' @author Matthew L. Fidler
+.dataSetEvent <- function(data, w, evid) {
+  if (length(w) == 0L) return(data)
+  if (is.null(data[["evid"]])) data$evid <- NA_integer_
+  data$evid[w] <- evid
+  data$amt[w] <- if (evid == 5L) 0 else NA_real_
+  for (.v in intersect(c("rate", "dur", "ss", "ii", "addl"), names(data))) data[[.v]][w] <- 0
+  if (evid == 3L) data$cmt[w] <- NA_character_
+  data
 }
 
 #' Monolix dose rows: an amount, and a dose event when there is an evid column
@@ -689,7 +736,7 @@ monolixDataImport <- function(ui, data, na.strings = c("NA", ".")) {
   }
   data <- .dataRenameFromMlxtran(data, .mlxtran)
   data <- .dataSplitDoseObs(data)
-  data <- .dataConvertAdm(data, ui$admd)
+  data <- .dataConvertAdm(data, ui$admd, .dataPkMacros(.mlxtran))
   if (!is.null(data[["mdv"]]) || !is.null(data[["evid"]])) data <- .dataEvid(data)
   data <- .dataConvertEndpoints(data, ui)
   .ld <- tolower(names(data))

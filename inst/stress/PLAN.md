@@ -103,6 +103,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `21-individual.R` | `if`/`elseif`/`else` in a `[COVARIATE] EQUATION:`, covariates on parameters without random effects, a model with no random effects |
 | `22-spelling.R` | lowercase distribution names, `[INDIVIDUAL] DEFINITION:` options in another order, numbers in exponent notation, empty fields for missing data, Windows (CRLF) line endings |
 | `23-data-records.R` | observation types given as strings, as codes other than 1/2 and listed in another order in `yname`; replicate samples; a subject without observations |
+| `24-macros.R` | `empty()` and `reset()` administrations (also next to a dose lag), a transit `oral()` macro, zero-order `depot(Tk0)`, `elimination(Cl)` with a volume, `peripheral(k1_2, k2_1)` |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -418,6 +419,18 @@ Notes for later cases:
   validation (`rxSolve()` refused the individual parameters' character
   `id`, and assigns them by position in the data's subject order); fixed
   (`data-string-id`, now in the CI mock test with `data-ytype-swapped`).
+- `24-macros.R`: `empty()` and `reset()` were parsed but their
+  administrations were given as ordinary doses (fixed; `macro-empty`,
+  `macro-reset`), and with a `Tlag`/`p`/`Tk0` on a `cmt=` macro the
+  translation stopped; the lag now applies to the dose's ADM only, since
+  rxode2 also delays an `evid=5` event (fixed; `macro-empty-tlag`).
+  Only the `PK:` block is read for them (in `EQUATION:` a warning), and
+  like any administration the line needs a nonzero amount; an `EVID=4`
+  or `ADDL` on such a line is dropped.  rxode2's `evid=3` resets to the
+  initial conditions (whether Monolix resets to them or to 0 is to
+  confirm).  To confirm in run mode: that Monolix ignores that
+  amount, and the order of an empty/reset and an observation at the same
+  time (the cases avoid ties).
 - `reg-ode-input`: whether Monolix's ODE solver restarts at regressor-only
   lines (a small numerical difference) is to confirm in run mode.
 

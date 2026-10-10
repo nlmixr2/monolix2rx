@@ -63,6 +63,37 @@ test_that("iv() on a second route doses its own compartment", {
   expect_true(.t$transit)
 })
 
+test_that("empty() and reset() administrations are not doses", {
+  .pk <- .pk("compartment(cmt=1, amount=Ac)\noral(adm=1, cmt=1, ka)\nempty(adm=2, target=Ac)\nreset(adm=3)\nelimination(cmt=1, k)")
+  .admd <- .equation("Cc = Ac/V", .pk)$admd
+  .d <- data.frame(id=1L, time=c(0, 1, 2, 3, 4), amt=c(100, NA, 1, 1, NA),
+                   adm=c(1L, 0L, 2L, 3L, 0L), dv=c(NA, 1, NA, NA, 2))
+  .r <- .dataConvertAdm(.d, .admd, .pk)
+  expect_equal(.r$evid, c(NA, NA, 5L, 3L, NA))
+  expect_equal(.r$amt, c(100, NA, 0, NA, NA))
+  expect_equal(.r$cmt, c("Acd", NA, "Ac", NA, NA))
+  # without the macros they are still routed as doses
+  expect_equal(.dataConvertAdm(.d, .admd)$amt, .d$amt)
+  # a dose and an empty on the same adm: the empty is a copy of the dose row
+  .pk2 <- .pk("compartment(cmt=1, amount=Ac)\niv(adm=1, cmt=1)\nempty(adm=1, target=Ac)\nelimination(cmt=1, k)")
+  .r <- .dataConvertAdm(.d[1:2, ], .equation("Cc = Ac/V", .pk2)$admd, .pk2)
+  expect_equal(.r$evid, c(1L, 0L, 5L))
+  expect_equal(.r$amt, c(100, NA, 0))
+  expect_equal(.r$cmt, c("Ac", NA, "Ac"))
+})
+
+test_that("a dose lag next to empty()/reset() applies to the dose's adm only", {
+  .rx <- function(txt) .equation("Cc = Ac/V", .pk(txt))$rx
+  expect_true("alag(Acd) <- +(ADM==1)*(Tlag)" %in%
+                .rx("compartment(cmt=1, amount=Ac)\noral(adm=1, cmt=1, ka, Tlag)\nreset(adm=2)\nelimination(cmt=1, k)"))
+  expect_true("alag(Ac) <- +(ADM==1)*(Tlag)" %in%
+                .rx("compartment(cmt=1, amount=Ac)\niv(adm=1, cmt=1, Tlag)\nempty(adm=2, target=Ac)\nelimination(cmt=1, k)"))
+  expect_true("alag(Acd) <- Tlag" %in%
+                .rx("compartment(cmt=1, amount=Ac)\noral(adm=1, cmt=1, ka, Tlag)\nelimination(cmt=1, k)"))
+  expect_warning(.equation("compartment(cmt=1, amount=Ac)\niv(cmt=1)\nempty(adm=2, target=Ac)\nCc = Ac"),
+                 "only translated in the PK: block")
+})
+
 test_that("a second macro on one adm copies every dose", {
   .admd <- data.frame(adm=1L, admd=1:2, cmt=1L, target=NA_character_, depot=c(TRUE, FALSE),
                       dur=c(FALSE, TRUE), f=FALSE, tlag=FALSE, transit=FALSE,

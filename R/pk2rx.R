@@ -190,15 +190,25 @@
       .depot <- TRUE
     }
   }
+  # empty()/reset() administrations are not doses
+  .ev <- rbind(pk$empty[, c("adm", "admd")], pk$reset[, c("adm", "admd")])
+  if (NROW(.ev) > 0L) {
+    .admd <- .admd[!(paste(.admd$adm, .admd$admd) %in% paste(.ev$adm, .ev$admd)), ]
+  }
   if (!is.na(.cmt)) {
-    .admd <- .admd[.admd$cmt == .cmt, ]
+    .admd <- .admd[which(.admd$cmt == .cmt), ]
   } else if (!is.na(.target)) {
-    .admd <- .admd[.admd$target == .target, ]
+    .admd <- .admd[which(.admd$target == .target), ]
   } else {
     stop("target/cmt not defined, cannot figure out dose", call.=FALSE)
   }
   .cur <- .admd[.admd$depot == .depot & .admd[[type]] == TRUE , ]
-  if (length(.cur$adm) == 1L) return(value)
+  if (length(.cur$adm) == 1L) {
+    if (NROW(.ev) == 0L) return(value)
+    # rxode2 would also delay (or scale) an empty/reset event
+    if (!(df$adm %in% .ev$adm)) return(paste0("+(ADM==", df$adm, ")*(", value, ")"))
+    return(paste0("+(ADM==", df$adm, " && ADMD==", df$admd, ")*(", value, ")"))
+  }
   .cur1 <- .cur[.cur$adm == df$adm, ]
   if (length(.cur1$adm) == 1L) {
     return(paste0("+(ADM==", df$adm, ")*(", value, ")"))

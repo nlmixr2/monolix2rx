@@ -57,6 +57,10 @@
                elimination=.monolix2rx$pkElimination,
                admd=.monolix2rx$admd)
   class(.pk2) <- "monolix2rxPk"
+  if (NROW(.pk2$empty) + NROW(.pk2$reset) > 0L) {
+    warning("empty()/reset() are only translated in the PK: block; in EQUATION: their administrations stay doses",
+            call.=FALSE)
+  }
   .lhs <- c(pk$Cc, pk$Ce, .monolix2rx$equationLhs, .pk2$Cc, .pk2$Ce)
   .rhs <- .monolix2rx$equationRhs
   .lhs <- .lhs[!is.na(.lhs)]
