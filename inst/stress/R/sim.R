@@ -79,7 +79,7 @@ kitWriteData <- function(case, d, file) {
     .kitMonolixRows(d)[, case$columns, drop=FALSE]
   if (is.character(.w)) {
     writeLines(.w, file)
-    return(strsplit(.w[1], "[,;\t ]+")[[1]])
+    return(strsplit(.w[1], "[,;\t \r]+")[[1]])
   }
   ## full precision, so the imported times equal the truth's
   .w[] <- lapply(.w, function(x) {

@@ -139,6 +139,12 @@
        stop("'", .monolix2rx$varName, "' needs a 'typical=' or 'mean=' declaration",
            call.=FALSE)
     }
+    if (.monolix2rx$dist == "logitnormal") {
+      # logitNormal bounds default to (0, 1); min=/max= may come before
+      # distribution=
+      if (is.infinite(.monolix2rx$min)) .monolix2rx$min <- 0
+      if (is.infinite(.monolix2rx$max)) .monolix2rx$max <- 1
+    }
     .ret <- list(distribution=.monolix2rx$dist)
     .rx <- paste0(.monolix2rx$varName, " <- ")
     .est <- .monolix2rx$varEst
@@ -470,14 +476,6 @@ as.list.monolix2rxIndDef <- function(x, ...) {
 #' @author Matthew L. Fidler
 .setDist <- function(dist) {
   .monolix2rx$dist <- tolower(dist)
-  if (.monolix2rx$dist == "logitnormal") {
-    # Set the defaults for min/max with logitNormal
-    if (is.infinite(.monolix2rx$min) &&
-          is.infinite(.monolix2rx$max)) {
-      .monolix2rx$min <- 0
-      .monolix2rx$max <- 1
-    }
-  }
 }
 #' Set population estimation variable
 #'

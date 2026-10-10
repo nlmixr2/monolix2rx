@@ -101,6 +101,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `19-data-layout.R` | data columns not named ID/TIME/AMT/DV, subjects in descending ID order, a dose and an observation on one line, observations at negative times, placebo subjects, a prediction not named `Cc` |
 | `20-covariates.R` | a categorical covariate on two parameters, an occasion column without inter-occasion variability, `min()` in a `[COVARIATE] EQUATION:`, a covariate computed from two covariates through an intermediate |
 | `21-individual.R` | `if`/`elseif`/`else` in a `[COVARIATE] EQUATION:`, covariates on parameters without random effects, a model with no random effects |
+| `22-spelling.R` | lowercase distribution names, `[INDIVIDUAL] DEFINITION:` options in another order, numbers in exponent notation, empty fields for missing data, Windows (CRLF) line endings |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -401,6 +402,11 @@ Notes for later cases:
   vector, so the validation was skipped (fixed; `param-no-iiv` in the
   mock run); without the file the ids now come from the data.  Whether Monolix runs such a model, and writes an `id`-only
   random effects file, is to confirm in run mode.
+- `22-spelling.R`: an `[INDIVIDUAL] DEFINITION:` line had to start with
+  `distribution=` (fixed; `param-option-order`); Monolix writes it first,
+  so whether Monolix accepts another order is to confirm in run mode,
+  as are lowercase distribution names (`param-dist-lowercase`) and empty
+  fields as missing values (`data-empty-missing`).
 - `reg-ode-input`: whether Monolix's ODE solver restarts at regressor-only
   lines (a small numerical difference) is to confirm in run mode.
 

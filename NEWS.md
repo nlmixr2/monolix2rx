@@ -269,6 +269,9 @@
   `$etaData` became a vector of ids (or was missing), so nothing was
   validated.
 
+* Fixed an `[INDIVIDUAL] DEFINITION:` line whose `distribution=` is not
+  the first option, which was a syntax error.
+
 # monolix2rx 0.0.6
 
 * Updated to add types for rstudio completion

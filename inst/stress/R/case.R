@@ -41,6 +41,7 @@
 ## - `dataFile`: the data file, relative to the project (default data.csv).
 ## - `exportpath`: the results directory written to [SETTINGS] (default
 ##   run); NA writes no [SETTINGS], so Monolix uses the project name (run).
+## - `crlf`: TRUE writes run.mlxtran and model.txt with Windows line endings.
 ## - `dryData`: function(m, sim) checking the imported data (`m$monolixData`)
 ##   against the simulation; returns NULL or a failure message.
 
@@ -54,7 +55,7 @@ kitCase <- function(name, covers, tags=character(0), sim, data, mlxtran,
                     dryOmega=TRUE, nSub=NULL, nbSSDoses=7L,
                     minMonolix=NULL, solve=list(), mixest=NULL,
                     dataFile="data.csv", dryData=NULL, dryLik=FALSE,
-                    exportpath="run") {
+                    exportpath="run", crlf=FALSE) {
   stopifnot(is.character(name), length(name) == 1L,
             !grepl("[^A-Za-z0-9_-]", name))
   if (!is.null(.kitEnv$cases[[name]])) {
@@ -70,7 +71,7 @@ kitCase <- function(name, covers, tags=character(0), sim, data, mlxtran,
                                 minMonolix=minMonolix, solve=solve,
                                 mixest=mixest, dataFile=dataFile,
                                 dryData=dryData, dryLik=dryLik,
-                                exportpath=exportpath,
+                                exportpath=exportpath, crlf=crlf,
                                 file=if (is.null(.kitEnv$curFile)) NA_character_ else .kitEnv$curFile)
   invisible(name)
 }

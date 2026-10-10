@@ -63,9 +63,11 @@ kitWriteProject <- function(case, header, dir, est="full") {
   if (est == "fixed" && identical(case$est, "default")) {
     .lines <- .kitFixParameters(.lines)
   }
-  writeLines(.lines, file.path(dir, "run.mlxtran"))
+  .eol <- if (isTRUE(case$crlf)) "\r\n" else "\n"
+  writeLines(.lines, file.path(dir, "run.mlxtran"), sep=.eol)
   if (!is.null(case$model)) {
-    writeLines(.kitExpand(case$model, .sub, case$name), file.path(dir, "model.txt"))
+    .model <- strsplit(.kitExpand(case$model, .sub, case$name), "\n", fixed=TRUE)[[1]]
+    writeLines(.model, file.path(dir, "model.txt"), sep=.eol)
   }
   invisible(file.path(dir, "run.mlxtran"))
 }

@@ -55,10 +55,11 @@ maxVal: 'max' '=' number;
 otherOptions: typicalOption | varOption | covariateOp | coeffOp | iovOp;
 logitOptions: otherOptions | minVal | maxVal ;
 
-logitNormalLine: identifier '=' '{' logitNormalDist (',' logitOptions)* '}';
+// distribution= need not come first (hand-written projects)
+logitNormalLine: identifier '=' '{' (logitOptions ',')* logitNormalDist (',' logitOptions)* '}';
 
 
-otherLine: identifier '=' '{' distribution (',' otherOptions)*  '}';
+otherLine: identifier '=' '{' (otherOptions ',')* distribution (',' otherOptions)*  '}';
 distLine: logitNormalLine | otherLine ;
 
 corrOp: 'r' '(' identifier ',' identifier ')' '=' identifier;
