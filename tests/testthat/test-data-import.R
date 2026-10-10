@@ -217,3 +217,24 @@ test_that("nested occasion columns become occ and a combined occ2", {
   expect_error(.dataRenameRegressors(data.frame(ID=1, R1=2), .m), "clash with a translated data column")
   expect_equal(.def2iniRenameOcc(c("id", "id*occ1", "id*occ1*occ2")), c("id", "occ", "occ2"))
 })
+
+test_that("a line with a dose and an observation becomes both", {
+  .d <- data.frame(id=1L, time=c(0, 12, 12, 24), amt=c(100, 100, NA, 100), dv=c(NA, 1.5, 2, NA),
+                   mdv=c(0L, 0L, 0L, 1L), ii=c(0, 12, 0, 0))
+  .d$dv[4] <- 3
+  .r <- .dataSplitDoseObs(.d)
+  expect_equal(.r$time, c(0, 12, 12, 12, 24))
+  expect_equal(.r$amt, c(100, 100, NA, NA, 100))
+  expect_equal(.r$dv, c(NA, NA, 1.5, 2, 3))
+  expect_equal(.r$ii, c(0, 12, 0, 0, 0))
+  expect_identical(.dataSplitDoseObs(.d[1, ]), .d[1, ])
+  # with an event id the observation of a dose line is ignored
+  .e <- data.frame(id=1L, time=c(0, 12, 24), amt=c(100, 100, NA), dv=c(NA, 0, 3), evid=c(1L, 4L, 0L))
+  expect_identical(.dataSplitDoseObs(.e), .e)
+  # the censoring stays with the observation
+  .c <- data.frame(id=1L, time=c(0, 1), amt=c(100, NA), dv=c(0.1, 2), cens=c(1L, 0L), limit=c(0, NA))
+  .r <- .dataSplitDoseObs(.c)
+  expect_equal(.r$cens, c(0L, 1L, 0L))
+  expect_equal(.r$limit, c(NA, 0, NA))
+  expect_equal(.r$dv, c(NA, 0.1, 2))
+})

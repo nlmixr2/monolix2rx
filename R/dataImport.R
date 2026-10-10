@@ -591,6 +591,33 @@
   .ret
 }
 
+#' Split a line holding both a dose and an observation
+#'
+#' Monolix uses both, the dose first; rxode2 reads such a line as a dose
+#' only.  With an event id the observation of a dose line is ignored.
+#'
+#' @param data dataset with rxode2 column names
+#' @return data with each shared line as an observation and a dose row
+#' @noRd
+#' @author Matthew L. Fidler
+.dataSplitDoseObs <- function(data) {
+  if (is.null(data[["dv"]])) return(data)
+  .both <- .dataIsDose(data) & !is.na(data$dv)
+  if (!is.null(data[["evid"]])) .both <- .both & is.na(data$evid)
+  if (!is.null(data[["mdv"]])) .both <- .both & (is.na(data$mdv) | data$mdv %in% 0L)
+  if (!any(.both)) return(data)
+  .obs <- data[.both, , drop=FALSE]
+  .obs$amt <- NA
+  for (.c in intersect(c("rate", "dur", "ss", "ii", "addl"), names(.obs))) .obs[[.c]] <- 0
+  if (!is.null(.obs[["evid"]])) .obs$evid <- 0L
+  data$dv[.both] <- NA
+  if (!is.null(data[["cens"]])) data$cens[.both] <- 0L
+  if (!is.null(data[["limit"]])) data$limit[.both] <- NA
+  .i <- c(seq_len(nrow(data)), which(.both) + 0.5)
+  .ret <- rbind(data, .obs)[order(.i), , drop=FALSE]
+  rownames(.ret) <- NULL
+  .ret
+}
 #' Monolix doses are the rows with an amount; MDV=1 only drops an observation
 #'
 #' Without an evid column rxode2 would read an MDV=1 row as a dose.
@@ -661,6 +688,7 @@ monolixDataImport <- function(ui, data, na.strings = c("NA", ".")) {
     return(NULL)
   }
   data <- .dataRenameFromMlxtran(data, .mlxtran)
+  data <- .dataSplitDoseObs(data)
   data <- .dataConvertAdm(data, ui$admd)
   if (!is.null(data[["mdv"]]) || !is.null(data[["evid"]])) data <- .dataEvid(data)
   data <- .dataConvertEndpoints(data, ui)

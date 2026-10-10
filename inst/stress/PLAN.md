@@ -98,6 +98,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `16-dosing.R` | steady-state infusion, SS with ADDL, an `EVID=3` reset with drug on board, an infusion through `iv(Tlag)`, SS with an absorption lag, left and right censoring without `LIMIT` |
 | `17-error-output.R` | error parameters not named `a`/`b`, a fixed error parameter, a logitNormal observation on (0, 100), `OUTPUT: table=`, an observed Imax effect |
 | `18-syntax.R` | `;` comments, a lowercase `method=fixed`, a fixed omega, `method=BAYES` with a `[POPULATION]` prior, a parameter named `F`, variables and states named like rxode2 keywords (also in `PK:` and a macro argument), `X_0` for a state with an underscore and for a plain variable |
+| `19-data-layout.R` | data columns not named ID/TIME/AMT/DV, subjects in descending ID order, a dose and an observation on one line, observations at negative times, placebo subjects, a prediction not named `Cc` |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -374,6 +375,13 @@ Notes for later cases:
   The `[POPULATION]` prior spelling in `param-bayes` and whether Monolix
   accepts these names (`F`, `rate`, `time`, `ii`) are to confirm in run
   mode.
+- `19-data-layout.R`: a line with both a dose and an observation lost
+  the observation (fixed; `data-dose-obs-line`, `data-dose-obs-line-iv`).
+  Monolix's data format documentation: a line may hold both, the dose is
+  given before the observation is made (rxode2 does the same whatever the
+  row order), and with an EVID column the observation of an EVID=1/3/4
+  line is ignored, so those lines are not split.  A censored shared line
+  keeps its censoring on the observation only.
 - `reg-ode-input`: whether Monolix's ODE solver restarts at regressor-only
   lines (a small numerical difference) is to confirm in run mode.
 

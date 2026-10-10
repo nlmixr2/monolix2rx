@@ -254,6 +254,9 @@
   had none, and a variable like `E_0` with no state `E` became `E(0)`,
   which rxode2 refused.
 
+* Fixed a data line with both a dose and an observation: the observation
+  was dropped.  The line is now split into an observation and a dose.
+
 # monolix2rx 0.0.6
 
 * Updated to add types for rstudio completion
