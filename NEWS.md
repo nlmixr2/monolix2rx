@@ -299,6 +299,11 @@
   endpoints use an alias (`rx_a_y2 <- a`), since rxode2 refuses one error
   parameter in two endpoints.
 
+* Fixed covariates missing on some of a subject's lines (a dose line):
+  the imported data now fills them with the subject's value (per
+  occasion), as Monolix does; rxode2 warned that the column was missing
+  for the subject.
+
 * Fixed `pkmodel()` or a PK macro (`compartment()`, `oral()`, ...)
   followed by an `if` in `EQUATION:`: the macro arguments' parentheses and
   commas were written before the `if`, so the model did not parse.

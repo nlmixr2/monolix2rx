@@ -106,6 +106,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `24-macros.R` | `empty()` and `reset()` administrations (also next to a dose lag), a transit `oral()` macro, zero-order `depot(Tk0)`, `elimination(Cl)` with a volume, `peripheral(k1_2, k2_1)` |
 | `25-error-models.R` | an error parameter shared by two endpoints, two observations of the same prediction, an additive error fixed at 0, autocorrelated residuals |
 | `26-functions.R` | `rem(t, 24)` in a circadian input, `sinh`/`cosh`/`tanh`/`atan2`/`asin`/`ceil`, the negations `~a` and `!a`, an explicit `odeType = nonStiff`, `mean=` instead of `typical=` |
+| `27-covariate-data.R` | covariates missing on dose lines (continuous and categorical) or given on the first line only, covariate columns no parameter uses, a regressor given only where it changes |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -456,6 +457,14 @@ Notes for later cases:
   macro argument punctuation before the `if` (fixed).  `mean=` is the mean of the transformed parameter, so the
   values in `param-mean-keyword` are on the log scale; whether a Monolix
   project (not only Simulx) accepts `mean=` is to confirm in run mode.
+- `27-covariate-data.R`: rxode2 filled a covariate missing on some lines
+  (it passed) but warned that the column was missing for the subject; the
+  import now fills a subject's missing covariate values with its value
+  (per occasion; a subject with several values is left to rxode2); the
+  cases check that the imported data has none missing.  To
+  confirm in run mode: that Monolix accepts missing covariate values on
+  dose lines and on all but the first line, and that it carries a sparse
+  regressor forward (`reg-sparse`).
 - `reg-ode-input`: whether Monolix's ODE solver restarts at regressor-only
   lines (a small numerical difference) is to confirm in run mode.
 

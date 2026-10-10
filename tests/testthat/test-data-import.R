@@ -269,3 +269,17 @@ test_that("a line with a dose and an observation becomes both", {
   expect_equal(.r$limit, c(NA, 0, NA))
   expect_equal(.r$dv, c(NA, 0.1, 2))
 })
+
+test_that("a subject's missing covariate values take its one value", {
+  .d <- data.frame(id=c(1, 1, 1, 2, 2, 3, 3), occ=c(1, 1, 2, 1, 1, 1, 1),
+                   WT=c(NA, 70, NA, NA, 80, 60, 65), SEX=c("F", NA, NA, NA, "M", NA, NA))
+  .c <- list(cont="WT", cat=list(SEX=c("F", "M")))
+  .r <- .dataFillCovariates(.d, .c)
+  # per occasion; several values are left as they are
+  expect_equal(.r$WT, c(70, 70, NA, 80, 80, 60, 65))
+  expect_equal(.r$SEX, c("F", "F", NA, "M", "M", NA, NA))
+  .d$occ <- NULL
+  expect_equal(.dataFillCovariates(.d, .c)$WT, c(70, 70, 70, 80, 80, 60, 65))
+  .d$SEX <- factor(.d$SEX, levels=c("M", "F"))
+  expect_equal(.dataFillCovariates(.d, .c)$SEX, factor(c("F", "F", "F", "M", "M", NA, NA), levels=c("M", "F")))
+})

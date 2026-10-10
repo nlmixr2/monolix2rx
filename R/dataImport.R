@@ -379,6 +379,7 @@
       data[[.n]] <- as.double(data[[.n]])
     }
   }
+  data <- .dataFillCovariates(data, .content)
   # Make sure the dvid matches what monolix specified
   if (
     any(names(data) == "rxMDvid") &&
@@ -390,6 +391,37 @@
     }
   }
   return(data)
+}
+
+#' Fill a subject's missing covariate values with its one value
+#'
+#' A Monolix covariate is constant within a subject (and occasion), so a
+#' missing value on some of its lines (a dose line) is that value.
+#' Groups with several values are left as they are.
+#'
+#' @param data dataset with the translated `id`/`occ` columns
+#' @param content parsed `[CONTENT]`
+#' @return data with the covariates filled
+#' @noRd
+#' @author Matthew L. Fidler
+.dataFillCovariates <- function(data, content) {
+  .cov <- intersect(c(content$cont, names(content$cat)), names(data))
+  if (length(.cov) == 0L || is.null(data[["id"]])) return(data)
+  .occ <- grep("^occ[0-9]*$", names(data), value=TRUE)
+  .g <- do.call(paste, c(lapply(c("id", .occ), function(n) data[[n]]), sep="\r"))
+  for (.n in .cov) {
+    .x <- data[[.n]]
+    .na <- is.na(.x)
+    if (!any(.na)) next
+    # tapply() would give a factor's codes
+    .lvl <- if (is.factor(.x)) levels(.x) else NULL
+    if (!is.null(.lvl)) .x <- as.character(.x)
+    .val <- tapply(.x[!.na], .g[!.na], function(v) if (length(unique(v)) == 1L) v[1] else NA)
+    .fill <- .na & .g %in% names(.val)
+    .x[.fill] <- .val[.g[.fill]]
+    data[[.n]] <- if (is.null(.lvl)) .x else factor(.x, levels=.lvl)
+  }
+  data
 }
 
 #' Convert the endpoint specification in monolix to rxode2
