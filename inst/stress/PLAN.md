@@ -108,6 +108,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `26-functions.R` | `rem(t, 24)` in a circadian input, `sinh`/`cosh`/`tanh`/`atan2`/`asin`/`ceil`, the negations `~a` and `!a`, an explicit `odeType = nonStiff`, `mean=` instead of `typical=` |
 | `27-covariate-data.R` | covariates missing on dose lines (continuous and categorical) or given on the first line only, covariate columns no parameter uses, a regressor given only where it changes |
 | `28-start-events.R` | `t_0 = 0` before the first record and no `t_0` with a late first record (also a late transit dose), `rightCensoringTime=`, repeated events with `maxEventNumber=3`, a negation after a sign or as an exponent |
+| `29-start-rem.R` | a non-zero `t_0` before the first record, the `t0` spelling with a comment, `rem()` of a negative covariate |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -483,6 +484,17 @@ Notes for later cases:
   is left as before: its hazard counts from time 0 when the first record
   is an event (an earlier decision), which this start would contradict;
   which one Monolix does is to confirm.
+- `29-start-rem.R`: a non-zero `t_0` was ignored with a warning, so the
+  system started at 0 (fixed; `ode-t0-nonzero`): the imported data starts
+  every subject whose records begin at or after `t_0` there; a `t_0` that
+  is not a number still starts at 0.  `t_0 = 0 ; comment` warned that it
+  was non-zero (fixed).  The model inlines covariate equations, so
+  `rem()` of a negative covariate was right there (`cov-rem-negative`);
+  `mlxtranGetMutate()` (not used by the import) used R's floored `%%`
+  (fixed; unit test).  To confirm in run mode: that Monolix starts at a
+  `t_0` before the first record, and what it does with records before a
+  non-zero `t_0` (the import leaves such a subject starting at 0; no
+  case).  A time-to-event project ignores `t_0` too.
   `rightCensoringTime=` (a simulation setting) and `maxEventNumber=3`
   needed no change.  `-~f` and `2^~f` were syntax errors (fixed;
   `fun-not-signed`).

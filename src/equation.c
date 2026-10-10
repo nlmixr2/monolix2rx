@@ -473,12 +473,13 @@ void wprint_parsetree_equation(D_ParserTables pt, D_ParseNode *pn, int depth, pr
           xpn = d_get_child(pn, 2);
           v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
           char *v2 = v;
-          while (v2[0] == ' ' || v2[0] == '0' || v2[0] == '.' || v2[0] == '\t' || v2[0] == '\n') {
+          while (v2[0] == ' ' || v2[0] == '0' || v2[0] == '.' || v2[0] == '\t' || v2[0] == '\n' ||
+                 v2[0] == '\r') {
             v2++;
           }
-          if (v2[0] != 0) {
-            Rf_warning("%s 't_0' or 't0' are assigned to a non-zero value (which is unsupported by rxode2), ignoring",
-                       v2);
+          if (v2[0] != 0 && v2[0] != ';') {
+            Rf_warning("'t_0 = %s': rxode2 starts at time 0; the imported Monolix data starts "
+                       "each subject at t_0 when it is a number", v);
           }
           return;
         }

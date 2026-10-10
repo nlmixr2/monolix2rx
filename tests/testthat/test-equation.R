@@ -96,6 +96,7 @@ ddt_dx = -x-dx", pk)
 
   expect_warning(.equation("t_0=0", pk), NA)
   expect_warning(.equation("t_0=10", pk))
+  expect_warning(.equation("t_0 = 0 ; start", pk), NA)
 
   .ret <- .equation("a=invlogit(b)", pk)
   expect_equal(.ret$rx, "a <- expit(b)")

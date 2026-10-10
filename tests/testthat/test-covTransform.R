@@ -161,3 +161,10 @@ test_that("if/else covariate equations start the model", {
   expect_equal(vapply(as.list(.r[[2]])[-(1:2)], deparse1, ""),
                c("hw2 <- 2 * hWT", "Cl <- exp(Cl_pop + b * hw2 + c * log(WT/70))"))
 })
+
+test_that("rem() in a covariate equation has the sign of its first argument on the data side", {
+  .m <- list(MODEL=list(COVARIATE=list(EQUATION=.covEq("r = rem(X, 7)"))))
+  .d <- eval(str2lang(paste("data.frame(X=c(-5, 5, 12)) |>", mlxtranGetMutate(.m))))
+  # like Monolix and rxode2's %% (C fmod), not R's %%
+  expect_equal(.d$r, c(-5, 5, 5))
+})

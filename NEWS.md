@@ -306,9 +306,14 @@
   was already moving at the first record.  The imported data now resets
   each subject whose first administration or observation is not at 0
   there (an `evid=2` and an `evid=3` row, with that record's covariates);
-  with `t_0` (or a time-to-event endpoint) the model starts at 0, as
-  before.  The validation compares
+  with `t_0 = 0` (or a time-to-event endpoint) the model starts at 0, as
+  before, and a numeric non-zero `t_0` (ignored before) starts every
+  subject there.  The validation compares
   Monolix's predictions with rxode2's observation rows only.
+
+* Fixed `rem()` in a `[COVARIATE] EQUATION:` in `mlxtranGetMutate()`:
+  R's `%%` gave a negative covariate the sign of the divisor; it now has
+  the sign of the covariate, like Monolix and the model.
 
 * Fixed covariates missing on some of a subject's lines (a dose line):
   the imported data now fills them with the subject's value (per

@@ -40,13 +40,20 @@ mlxtranGetMutate <- function(mlxtran) {
 
 #' Use pmin()/pmax() for min()/max() in a dplyr mutate
 #'
+#' Monolix's `rem(a, b)` (rxode2's `a %% b`, C `fmod`) has the sign of
+#' `a`; R's `%%` has the sign of `b`, so it becomes `a - b*trunc(a/b)`.
+#'
 #' @param x expression
-#' @return expression with min/max calls changed
+#' @return expression with min/max calls and `%%` changed
 #' @noRd
 #' @author Matthew L. Fidler
 .mutatePminmax <- function(x) {
   if (!is.call(x)) return(x)
   if (identical(x[[1]], quote(min))) x[[1]] <- quote(pmin)
   if (identical(x[[1]], quote(max))) x[[1]] <- quote(pmax)
-  as.call(c(x[[1]], lapply(as.list(x)[-1], .mutatePminmax)))
+  x <- as.call(c(x[[1]], lapply(as.list(x)[-1], .mutatePminmax)))
+  if (identical(x[[1]], quote(`%%`))) {
+    x <- bquote((.(x[[2]]) - .(x[[3]]) * trunc(.(x[[2]]) / .(x[[3]]))))
+  }
+  x
 }

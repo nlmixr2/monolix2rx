@@ -304,6 +304,12 @@ test_that("without t_0 a subject starts at its first dose or observation", {
   expect_equal(.r$evid, c(2L, 3L, 7L, 0L))
   # without a dv column every evid 0 row is a record
   expect_equal(nrow(.dataStartReset(data.frame(id=1, time=c(5, 10), amt=c(100, NA)), .mx)), 4L)
+  # a numeric t_0 starts every subject there; t_0 = 0 is rxode2's start
+  .mx$MODEL$LONGITUDINAL$EQUATION$monolix <- "t_0 = 12 ; start\nddt_R = X"
+  .r <- .dataStartReset(.d, .mx)
+  expect_equal(.r$time, c(0, 1, 12, 12, 24, 25))
+  expect_equal(.r$evid, c(1L, 0L, 2L, 3L, 1L, 0L))
+  .mx$MODEL$LONGITUDINAL$EQUATION$monolix <- "ddt_R = X"
   # an event endpoint keeps its start at time 0
   .ev <- .mx
   .ev$MODEL$LONGITUDINAL$DEFINITION$endpoint <- list(list(dist="event"))

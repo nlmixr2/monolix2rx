@@ -697,10 +697,11 @@
   rownames(.ret) <- NULL
   .ret
 }
-#' Start each subject at its first dose or observation unless the model sets t_0
+#' Start each subject where Monolix starts the system
 #'
 #' Without `t_0`, Monolix starts the system at a subject's first
-#' administration or observation; rxode2 starts at time 0.  An `evid=2` row (a reset as a
+#' administration or observation, and with `t_0` there; rxode2 starts at
+#' time 0 (the same as `t_0 = 0`).  An `evid=2` row (a reset as a
 #' subject's first record is ignored) and a reset (`evid=3`) at that time
 #' start the system there.
 #'
@@ -711,7 +712,16 @@
 #' @author Matthew L. Fidler
 .dataStartReset <- function(data, mlxtran) {
   .eq <- mlxtran$MODEL$LONGITUDINAL$EQUATION$monolix
-  if (is.null(.eq) || any(grepl("^[ \t]*t_?0[ \t]*=", strsplit(.eq, "\n")[[1]]))) return(data)
+  if (is.null(.eq)) return(data)
+  .re <- "^[ \t]*t_?0[ \t]*="
+  .t0 <- grep(.re, strsplit(.eq, "\n")[[1]], value=TRUE)
+  if (length(.t0) > 0L) {
+    # rxode2 starts at 0; another t_0 must be a number
+    .t0 <- suppressWarnings(as.numeric(trimws(sub(";.*$", "", sub(.re, "", .t0[length(.t0)])))))
+    if (is.na(.t0) || .t0 == 0) return(data)
+  } else {
+    .t0 <- NA_real_
+  }
   if (is.null(data[["id"]]) || is.null(data[["time"]]) || nrow(data) == 0L) return(data)
   # an event endpoint counts its hazard from time 0 when the first record
   # is an event (R/discreteEndpoint.R); which start Monolix uses there is
@@ -730,10 +740,12 @@
   .w <- .w[order(match(as.character(data$id[.w]), .ids), data$time[.w], method="radix")]
   # each subject's first record (its regressors and covariates at that time)
   .w <- .w[!duplicated(as.character(data$id[.w]))]
-  .w <- .w[data$time[.w] != 0]
+  # with t_0, the subjects whose records start at or after it
+  .w <- if (is.na(.t0)) .w[data$time[.w] != 0] else .w[data$time[.w] >= .t0]
   if (length(.w) == 0L) return(data)
   data$evid <- .evid
   .first <- data[.w, , drop=FALSE]
+  if (!is.na(.t0)) .first$time <- .t0
   for (.v in intersect(c("dv", "amt", "cmt", "rate", "dur", "ss", "ii", "addl", "mdv", "cens", "limit"),
                        names(.first))) {
     .first[[.v]] <- switch(.v, mdv=1, cens=0, rate=, dur=, ss=, ii=, addl=0, NA)
