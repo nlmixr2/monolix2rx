@@ -115,7 +115,19 @@ ddt_dx = -x-dx", pk)
     expect_error(.equation("ddt_x = ka*x-k*delay(x,tau)", pk), "rxode2 >= 5.1.7")
   }
 
-  expect_error(.equation("ddt_x = ka*x-k*rem(tau)", pk), "rem")
+  # Monolix's rem(a, b) has the sign of a, like rxode2's %% (C fmod)
+  expect_equal(.equation("ddt_x = ka*x-k*rem(t, tau)", pk)$rx,
+               "d/dt(x) <- ka * x - k * ((time) %% (tau))")
+  expect_error(.equation("ddt_x = ka*x-k*rem(tau)", pk))
+  expect_equal(.equation("a = sinh(b)", pk)$rx, "a <- sinh(b)")
+  expect_equal(.equation("if ~(t > 5)\n a = 1\nelse\n a = 2\nend", pk)$rx,
+               c("if ((!((time > 5)))) {", "a <- 1", "} else {", "a <- 2", "}"))
+  expect_equal(.equation("a = !b & c", pk)$rx, "a <- (!(b)) && c")
+  # the pkmodel() and PK macro argument text is not written before a following if
+  .if <- c("if (time > 1) {", "y <- 1", "} else {", "y <- 2", "}")
+  expect_equal(.equation("Cc = pkmodel(ka, V, Cl)\nif t > 1\n y = 1\nelse\n y = 2\nend", pk)$rx[4:8], .if)
+  .rx <- .equation("compartment(cmt=1, amount=Ac, volume=V)\noral(ka, cmt=1)\nperipheral(k12, k21)\nelimination(cmt=1, k)\nif t > 1\n y = 1\nelse\n y = 2\nend", pk)$rx
+  expect_equal(.rx[seq(length(.rx) - 4L, length(.rx))], .if)
 
 })
 
@@ -213,6 +225,10 @@ test_that("dose keywords in PK macro arguments are translated", {
   expect_error(.equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, Tlag=inftDose)"),
                "inftDose")
   expect_true("f(central) <- dose()/100" %in% .equation("", "Cc = pkmodel(V, Cl, p=amtDose/100)")$rx)
+  .rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, Tlag=rem(t, 2), p=(a ~= 1))")$rx
+  expect_true("alag(Ap) <- ((time)%%(2))" %in% .rx)
+  expect_true("f(Ap) <- (a != 1)" %in% .rx)
+  expect_error(.equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, p=~(a > 1))"), "negation")
 })
 
 test_that("names rxode2 reserves are renamed in [LONGITUDINAL] equations", {

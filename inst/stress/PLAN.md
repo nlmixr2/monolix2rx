@@ -105,6 +105,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `23-data-records.R` | observation types given as strings, as codes other than 1/2 and listed in another order in `yname`; replicate samples; a subject without observations |
 | `24-macros.R` | `empty()` and `reset()` administrations (also next to a dose lag), a transit `oral()` macro, zero-order `depot(Tk0)`, `elimination(Cl)` with a volume, `peripheral(k1_2, k2_1)` |
 | `25-error-models.R` | an error parameter shared by two endpoints, two observations of the same prediction, an additive error fixed at 0, autocorrelated residuals |
+| `26-functions.R` | `rem(t, 24)` in a circadian input, `sinh`/`cosh`/`tanh`/`atan2`/`asin`/`ceil`, the negations `~a` and `!a`, an explicit `odeType = nonStiff`, `mean=` instead of `typical=` |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -442,6 +443,19 @@ Notes for later cases:
   additive error.  The
   mock maps two observations of one prediction by position
   (`err-same-pred`).
+- `26-functions.R`: `rem(a, b)` (two arguments in Monolix's function
+  list; the grammar had one and the walker refused it), `sinh()` and the
+  negations `~a`/`!a` were syntax errors (fixed; `fun-rem-circadian`,
+  `fun-hyperbolic`, `fun-not-operator`).  `rem()` is rxode2's `%%` (C
+  `fmod`, the sign of the dividend, like Monolix's), also in a PK macro
+  argument; a negation there is an error (R parses `~a + b` as
+  `~(a + b)`).  In a `[COVARIATE] EQUATION:` the data side computes it
+  with R's floored `%%`, which differs for a negative covariate (no case).
+  A negation after a sign or as an exponent (`-~b`, `b^~c`) is still a
+  syntax error.  `pkmodel()` or a PK macro followed by an `if` wrote the
+  macro argument punctuation before the `if` (fixed).  `mean=` is the mean of the transformed parameter, so the
+  values in `param-mean-keyword` are on the log scale; whether a Monolix
+  project (not only Simulx) accepts `mean=` is to confirm in run mode.
 - `reg-ode-input`: whether Monolix's ODE solver restarts at regressor-only
   lines (a small numerical difference) is to confirm in run mode.
 

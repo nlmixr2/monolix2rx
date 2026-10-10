@@ -147,7 +147,10 @@ multiplicative_expression : unary_expression
 
 mult_part : ('*' | '/') unary_expression ;
 
-unary_expression : ('+' | '-')? (primary_expression | power_expression);
+unary_expression : ('+' | '-')? (primary_expression | power_expression) | not_expression;
+
+// Monolix negation: ~a or !a
+not_expression : ('!' | '~') unary_expression;
 
 exponent_expression : ('+' | '-')? (primary_expression | power_expression);
 
@@ -155,7 +158,10 @@ power_expression : primary_expression power_operator exponent_expression;
 
 power_operator   : '^';
 
-function: function1 | function2;
+function: function1 | function2 | rem_fun;
+
+// rem(a, b) is translated to rxode2's a %% b (C fmod, the sign of a)
+rem_fun: 'rem(' logical_or_expression ',' logical_or_expression ')';
 
 function2_name: 'atan2(' | 'min(' | 'max(' | 'delay(';
 
@@ -165,8 +171,8 @@ function1 : function1_name logical_or_expression? ')' ;
 function1_name: 'abs(' | 'sqrt(' | 'exp(' | 'log(' | 'log10(' | 'logit(' |
         'invlogit(' | 'probit(' | 'norminv(' | 'qnorm(' | 'normcdf(' |
         'pnorm(' | 'sin(' | 'cos(' | 'tan(' |  'asin(' |  'acos(' |
-        'atan(' |  'cosh(' | 'tanh(' | 'gammaln(' | 'lgamma(' |
-        'floor(' | 'ceil(' | 'factorial(' | 'factln(' | 'rem(';
+        'atan(' | 'sinh(' | 'cosh(' | 'tanh(' | 'gammaln(' | 'lgamma(' |
+        'floor(' | 'ceil(' | 'factorial(' | 'factln(';
 
 bsmm_item: logical_or_expression;
 bsmm_fun: 'bsmm(' bsmm_item  ',' bsmm_item (',' bsmm_item ',' bsmm_item)* ')';

@@ -180,6 +180,11 @@
   if (any(grepl("\\binftDose\\b", lines, perl=TRUE))) {
     stop("'inftDose' Monolix declaration not supported in translation", call.=FALSE)
   }
+  # a macro argument's ~a or !a is copied as written (the walker writes
+  # (!(a))), and R parses ~a + b as ~(a + b), unlike Monolix's (~a) + b
+  if (any(grepl("~(?!=)|(?<![(])!(?!=)", lines, perl=TRUE))) {
+    stop("a negation (~a or !a) in a PK macro argument is not supported in translation", call.=FALSE)
+  }
   .fun <- c(invlogit="expit", norminv="qnorm", normcdf="pnorm", gammaln="lgamma",
             factln="lfactorial")
   .re <- paste0("~=|\\bt\\b|\\bamtDose\\b|\\btDose\\b|\\b(",
@@ -197,16 +202,33 @@
         .rhs <- gsub(paste0("\\b", .n, "[(]"), paste0(.fun[[.n]], "("), .rhs, perl=TRUE)
       }
     }
-    # a chained power the walker did not write; otherwise keep the text
-    if (grepl("\\^.*\\^", .rhs)) {
+    # a chained power or rem() the walker did not write; otherwise keep
+    # the text
+    if (grepl("\\^.*\\^|\\brem[(]", .rhs, perl=TRUE)) {
       .e <- try(str2lang(.rhs), silent=TRUE)
       if (!inherits(.e, "try-error")) {
-        .p <- .rxPowParen(.e)
+        .p <- .rxPowParen(.rxRem(.e))
         if (!identical(.p, .e)) .rhs <- deparse1(.p)
       }
     }
     paste0(substr(l, 1, .i - 1), " <- ", .rhs)
   }, character(1), USE.NAMES=FALSE)
+}
+
+#' Translate Monolix rem(a, b) in an expression
+#'
+#' @param e expression
+#' @return expression with `rem(a, b)` as `((a) %% (b))`
+#' @noRd
+#' @author Matthew L. Fidler
+.rxRem <- function(e) {
+  if (!is.call(e)) return(e)
+  e <- as.call(lapply(as.list(e), .rxRem))
+  if (identical(e[[1]], quote(rem)) && length(e) == 3L) {
+    # rxode2's %% is C fmod (the sign of a), like Monolix's rem()
+    return(call("(", call("%%", call("(", e[[2]]), call("(", e[[3]]))))
+  }
+  e
 }
 
 #' Parenthesize chained powers, which rxode2 does not parse

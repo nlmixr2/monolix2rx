@@ -214,13 +214,6 @@ int equation_function_name(char *name,  D_ParseNode *pn) {
     } else if (!strcmp("factln(", v)) {
       sAppendN(&curLine, "lfactorial(", 11);
       return 1;
-    } else if (!strcmp("rem(", v)) {
-      sClear(&sbTransErr);
-      sAppend(&sbTransErr, "rem() not supported in translation");
-      updateSyntaxCol();
-      trans_syntax_error_report_fn0(sbTransErr.s);
-      finalizeSyntaxError();
-      return 1;
     }
     sAppend(&curLine, "%s", v);
     return 1;
@@ -243,6 +236,12 @@ int equation_function_name(char *name,  D_ParseNode *pn) {
 
 int equation_if(char *name,  D_ParseNode *pn, int i) {
   if (i == 0) {
+    if (!strcmp("if", name) || !strcmp("elseif", name) ||
+        !strcmp("else", name) || !strcmp("endit", name)) {
+      // a statement before it (a PK macro's arguments) may have left
+      // its punctuation; an assignment clears it the same way
+      sClear(&curLine);
+    }
     if (!strcmp("if", name)) {
       sAppendN(&curLine, "if (", 4);
       return 2;
@@ -493,6 +492,30 @@ void wprint_parsetree_equation(D_ParserTables pt, D_ParseNode *pn, int depth, pr
         continue;
       }
       D_ParseNode *xpn = d_get_child(pn, i);
+      // rem(a, b) becomes ((a) %% (b)); the 'rem(' and ')' terminals print nothing
+      if (!strcmp("rem_fun", name)) {
+        if (i == 0) {
+          sAppendN(&curLine, "((", 2);
+        } else if (i == 1) {
+          wprint_parsetree_equation(pt, xpn, depth, fn, client_data);
+        } else if (i == 2) {
+          sAppendN(&curLine, ") %% (", 6);
+        } else if (i == 3) {
+          wprint_parsetree_equation(pt, xpn, depth, fn, client_data);
+          sAppendN(&curLine, "))", 2);
+        }
+        continue;
+      }
+      // ~a and !a become (!(a))
+      if (!strcmp("not_expression", name)) {
+        if (i == 0) {
+          sAppendN(&curLine, "(!(", 3);
+        } else {
+          wprint_parsetree_equation(pt, xpn, depth, fn, client_data);
+          sAppendN(&curLine, "))", 2);
+        }
+        continue;
+      }
       // rxode2 does not chain ^, so a^b^c becomes a^(b^c)
       if (i == 2 && !strcmp("power_expression", name)) {
         char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);

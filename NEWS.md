@@ -83,6 +83,11 @@
   are not translated (the residuals stay independent); before, the
   coefficient was dropped silently.
 
+* Translated the Monolix functions `rem(a, b)` (to `a %% b`, with the sign
+  of `a` like Monolix) and `sinh()`, and the negations `~a` and `!a`, which
+  were syntax errors.  In a PK macro argument `rem()` is translated too and
+  a negation is an error.
+
 * Fixed implicit `ptrdiff_t` to `int` truncation in `rc_dup_str` (`src/shared.c`);
   pointer differences are now range-checked before conversion to `int`.
 
@@ -293,6 +298,10 @@
   with a duplicated parameter; `a` is now one estimate and the later
   endpoints use an alias (`rx_a_y2 <- a`), since rxode2 refuses one error
   parameter in two endpoints.
+
+* Fixed `pkmodel()` or a PK macro (`compartment()`, `oral()`, ...)
+  followed by an `if` in `EQUATION:`: the macro arguments' parentheses and
+  commas were written before the `if`, so the model did not parse.
 
 # monolix2rx 0.0.6
 

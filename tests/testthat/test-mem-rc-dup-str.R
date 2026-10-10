@@ -18,23 +18,23 @@ test_that("rc_dup_str copies whole NUL-terminated strings when e is NULL", {
   # rc_dup_str(firstErr.s, 0); the whole report, including the highlighted
   # source line and caret, must reach the R error message.
   .msg <- tryCatch(
-    capture.output(.equation("x = 1\ny = !", .pk(""))),
+    capture.output(.equation("x = 1\ny = *", .pk(""))),
     error = function(e) conditionMessage(e)
   )
   .Call(`_monolix2rx_r_parseFree`)
   expect_identical(.msg, paste0(
     "[LONGITUDINAL] EQUATION: syntax error:\n",
-    "\n:002: y = !\n          ^\n",
+    "\n:002: y = *\n          ^\n",
     "more errors could be listed above"
   ))
 })
 
 test_that("a later syntax error does not replace the first one's highlight", {
   .msg <- tryCatch(
-    capture.output(.equation("x = 1\ny = !\nz = )", .pk(""))),
+    capture.output(.equation("x = 1\ny = *\nz = )", .pk(""))),
     error = function(e) conditionMessage(e)
   )
   .Call(`_monolix2rx_r_parseFree`)
-  expect_match(.msg, ":002: y = !", fixed = TRUE)
+  expect_match(.msg, ":002: y = *", fixed = TRUE)
   expect_no_match(.msg, ":003:", fixed = TRUE)
 })
