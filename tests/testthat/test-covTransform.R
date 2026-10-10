@@ -151,3 +151,13 @@ test_that("a covariate equation can use an earlier one, and min() is per row", {
   .l <- .mlxtranChangeEquationInfoToParsedList(.m)
   expect_equal(vapply(.l, deparse1, ""), c(lw="log(WT) - 1", y="2 * (log(WT) - 1)"))
 })
+
+test_that("if/else covariate equations start the model", {
+  .m <- list(MODEL=list(COVARIATE=list(EQUATION=.covEq(
+    "lw = log(WT/70)\nif lw > 0\n  hWT = 1\nelse\n  hWT = 0\nend\nhw2 = 2*hWT"))))
+  .r <- .mlxtranChangeVal(quote(model({Cl <- exp(Cl_pop + b * hw2 + c * lw)})), .m)
+  # only the if/else and what uses it; lw stays inlined (a covariate of Cl)
+  expect_equal(deparse1(.r[[2]][[2]]), "if (log(WT/70) > 0) {     hWT <- 1 } else {     hWT <- 0 }")
+  expect_equal(vapply(as.list(.r[[2]])[-(1:2)], deparse1, ""),
+               c("hw2 <- 2 * hWT", "Cl <- exp(Cl_pop + b * hw2 + c * log(WT/70))"))
+})

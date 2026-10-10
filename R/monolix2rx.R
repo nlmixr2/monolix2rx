@@ -264,6 +264,11 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
                   crayon::blue$bold("$predIpredData"), ")"))
     .ui$predIpredData <- .predIpredData
   }
+  if (is.null(.etaData) && !is.null(.predIpredData) && !is.null(.monolixData) &&
+        !any(!is.na(.ui$iniDf$neta1))) {
+    # no random effects: the validation solves each subject at the thetas
+    .ui$etaData <- data.frame(id=unique(.monolixData$id))
+  }
   if (!is.null(.ui$monolixData) && (.dfObs <= 0L || .dfSub <= 0L)) {
     .trans <- rxode2::etTrans(.ui$monolixData, .ui)
     .lst <- attr(class(.trans), ".rxode2.lst")

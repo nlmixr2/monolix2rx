@@ -21,7 +21,7 @@ monolixEtaImport <- function(mlxtran, na.strings=c("NA", ".")) {
                           function(n) {
                             if (n == "id") return(TRUE)
                             grepl("_SAEM$", n)
-                          }, logical(1), USE.NAMES=FALSE)]
+                          }, logical(1), USE.NAMES=FALSE), drop=FALSE]
     .sd <- .etaImportSd(mlxtran)
     names(.ret) <- vapply(names(.ret),
                           function(n) {

@@ -30,3 +30,22 @@ test_that("a var= random effect is imported and validated", {
   expect_false("omega_Cl" %in% names(.rx$etaData))
   expect_true(.rx$ipredAtol < 0.05)
 })
+
+test_that("a project without random effects keeps a data frame of ids", {
+  skip_on_cran()
+  .dir <- file.path(tempfile(), "theo")
+  dir.create(.dir, recursive = TRUE)
+  on.exit(unlink(dirname(.dir), recursive = TRUE))
+  file.copy(
+    list.files(system.file("theo", package = "monolix2rx"), full.names = TRUE),
+    .dir,
+    recursive = TRUE
+  )
+  .f <- file.path(.dir, "tp", "IndividualParameters", "estimatedRandomEffects.txt")
+  .ids <- read.csv(.f)$id
+  writeLines(c("id", .ids), .f)
+  .eta <- monolixEtaImport(file.path(.dir, "theophylline_project.mlxtran"))
+  expect_true(is.data.frame(.eta))
+  expect_equal(names(.eta), "id")
+  expect_equal(.eta$id, .ids)
+})

@@ -5,6 +5,7 @@
 #'
 #' @param mlxtran A list containing the `MODEL` and `COVARIATE`
 #'   information from `mlxtran()`
+#' @param eq parsed assignments to use instead of the covariate equations
 #' @return A named list of parsed covariate equations or `NULL` if the
 #'   covariate information is not present.
 #' @noRd
@@ -14,15 +15,19 @@
 #' m <- mlxtran(file.path(system.file("cov", package="monolix2rx"), "warfarin_covariate3_project.mlxtran"))
 #' .mlxtranChangeEquationInfoToParsedList(m)
 #'
-.mlxtranChangeEquationInfoToParsedList <- function(mlxtran) {
-  .cov <- mlxtran$MODEL$COVARIATE$EQUATION
-  if (is.null(.cov)) {
-    return(NULL)
+.mlxtranChangeEquationInfoToParsedList <- function(mlxtran, eq=NULL) {
+  if (is.null(eq)) {
+    .cov <- mlxtran$MODEL$COVARIATE$EQUATION
+    if (is.null(.cov)) {
+      return(NULL)
+    }
+    if (is.null(.cov$dplyr)) {
+      return(NULL)
+    }
+    .e <- str2lang(paste0("{", paste(.cov$dplyr, collapse="\n"), "}"))
+  } else {
+    .e <- as.call(c(list(quote(`{`)), eq))
   }
-  if (is.null(.cov$dplyr)) {
-    return(NULL)
-  }
-  .e <- str2lang(paste0("{", paste(.cov$dplyr, collapse="\n"), "}"))
   .ret <- lapply(seq_along(.e)[-1],
                  function(i) {
                    .e[[i]][[3]]
@@ -117,6 +122,52 @@
 #'
 #' .mlxtranChangeVal(mod, mlxtran)
 .mlxtranChangeVal <- function(model, mlxtran) {
+  .cov <- mlxtran$MODEL$COVARIATE$EQUATION$dplyr
+  if (length(.cov) > 0L) {
+    .e <- as.list(str2lang(paste0("{", paste(.cov, collapse="\n"), "}")))[-1]
+    .isAssign <- vapply(.e, function(x) identical(x[[1]], quote(`=`)), logical(1))
+    if (!all(.isAssign)) {
+      # if/else cannot be inlined; it starts the model, with the
+      # assignments using what it assigns.  The others are still inlined
+      # so they stay covariates of the parameters.
+      .inModel <- !.isAssign
+      .set <- unique(unlist(lapply(.e[.inModel], .mlxtranAssigned)))
+      for (.i in which(.isAssign)) {
+        if (any(all.vars(.e[[.i]][[3]]) %in% .set)) {
+          .inModel[.i] <- TRUE
+          .set <- c(.set, deparse1(.e[[.i]][[2]]))
+        }
+      }
+      .lst <- .mlxtranChangeEquationInfoToParsedList(mlxtran, .e[!.inModel])
+      .lines <- lapply(.e[.inModel], .mlxtranAssignArrow)
+      model[[2]] <- as.call(c(list(quote(`{`)), .lines, as.list(model[[2]])[-1]))
+      return(.mlxtranChangeF(model, lst=.lst))
+    }
+  }
   .lst <- .mlxtranChangeEquationInfoToParsedList(mlxtran)
   .mlxtranChangeF(model, lst=.lst)
+}
+
+#' Names assigned anywhere in an expression
+#'
+#' @param x expression
+#' @return character vector of assigned names
+#' @noRd
+#' @author Matthew L. Fidler
+.mlxtranAssigned <- function(x) {
+  if (!is.call(x)) return(character(0))
+  .ret <- if (identical(x[[1]], quote(`=`)) || identical(x[[1]], quote(`<-`))) deparse1(x[[2]])
+  unique(c(.ret, unlist(lapply(as.list(x)[-1], .mlxtranAssigned))))
+}
+
+#' Write `=` assignments as `<-`
+#'
+#' @param x expression
+#' @return expression with `<-` assignments
+#' @noRd
+#' @author Matthew L. Fidler
+.mlxtranAssignArrow <- function(x) {
+  if (!is.call(x)) return(x)
+  if (identical(x[[1]], quote(`=`))) x[[1]] <- quote(`<-`)
+  as.call(c(x[[1]], lapply(as.list(x)[-1], .mlxtranAssignArrow)))
 }

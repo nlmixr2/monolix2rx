@@ -261,6 +261,14 @@
   (`lBMI = log(BMI/25)` after `BMI = WT/(HT/100)^2`): the model used the
   undefined `BMI`; a covariate assigned twice used its first value.
 
+* Fixed `if`/`else` in a `[COVARIATE] EQUATION:`, which left the covariate
+  undefined; the `if`/`else` (and what uses it) now starts the `model()`
+  block, and the other covariate equations are still inlined.
+
+* Fixed the validation of a project without random effects: the imported
+  `$etaData` became a vector of ids (or was missing), so nothing was
+  validated.
+
 # monolix2rx 0.0.6
 
 * Updated to add types for rstudio completion
