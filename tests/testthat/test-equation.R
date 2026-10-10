@@ -1,3 +1,7 @@
+# .equation() reads the endpoints a project import sets; an earlier test
+# file's import would add their lines here
+.monolix2rx$endpointPred <- character(0)
+
 test_that("equation tests", {
 
   pk <- .pk("")
@@ -123,6 +127,8 @@ ddt_dx = -x-dx", pk)
   expect_equal(.equation("if ~(t > 5)\n a = 1\nelse\n a = 2\nend", pk)$rx,
                c("if ((!((time > 5)))) {", "a <- 1", "} else {", "a <- 2", "}"))
   expect_equal(.equation("a = !b & c", pk)$rx, "a <- (!(b)) && c")
+  expect_equal(.equation("a = -~b", pk)$rx, "a <-  - (!(b))")
+  expect_equal(.equation("a = b^~c", pk)$rx, "a <- b^(!(c))")
   # the pkmodel() and PK macro argument text is not written before a following if
   .if <- c("if (time > 1) {", "y <- 1", "} else {", "y <- 2", "}")
   expect_equal(.equation("Cc = pkmodel(ka, V, Cl)\nif t > 1\n y = 1\nelse\n y = 2\nend", pk)$rx[4:8], .if)

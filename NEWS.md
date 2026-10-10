@@ -85,8 +85,9 @@
 
 * Translated the Monolix functions `rem(a, b)` (to `a %% b`, with the sign
   of `a` like Monolix) and `sinh()`, and the negations `~a` and `!a`, which
-  were syntax errors.  In a PK macro argument `rem()` is translated too and
-  a negation is an error.
+  were syntax errors (also after a sign or as an exponent, `-~a`, `b^~a`).
+  In a PK macro argument `rem()` is translated too and a negation is an
+  error.
 
 * Fixed implicit `ptrdiff_t` to `int` truncation in `rc_dup_str` (`src/shared.c`);
   pointer differences are now range-checked before conversion to `int`.
@@ -298,6 +299,16 @@
   with a duplicated parameter; `a` is now one estimate and the later
   endpoints use an alias (`rx_a_y2 <- a`), since rxode2 refuses one error
   parameter in two endpoints.
+
+* Fixed the start of a model without `t_0`: Monolix starts each subject
+  at its first administration or observation, while rxode2 starts at time
+  0, so a system that changes without doses (a response with production)
+  was already moving at the first record.  The imported data now resets
+  each subject whose first administration or observation is not at 0
+  there (an `evid=2` and an `evid=3` row, with that record's covariates);
+  with `t_0` (or a time-to-event endpoint) the model starts at 0, as
+  before.  The validation compares
+  Monolix's predictions with rxode2's observation rows only.
 
 * Fixed covariates missing on some of a subject's lines (a dose line):
   the imported data now fills them with the subject's value (per

@@ -147,12 +147,12 @@ multiplicative_expression : unary_expression
 
 mult_part : ('*' | '/') unary_expression ;
 
-unary_expression : ('+' | '-')? (primary_expression | power_expression) | not_expression;
+unary_expression : ('+' | '-')? (primary_expression | power_expression | not_expression);
 
 // Monolix negation: ~a or !a
 not_expression : ('!' | '~') unary_expression;
 
-exponent_expression : ('+' | '-')? (primary_expression | power_expression);
+exponent_expression : ('+' | '-')? (primary_expression | power_expression | not_expression);
 
 power_expression : primary_expression power_operator exponent_expression;
 

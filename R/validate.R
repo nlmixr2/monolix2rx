@@ -94,6 +94,8 @@
 }
 
 .subsetMonolix <- function(ui, data, iwres=NULL) {
+  # Monolix predicts observations only (not the evid 2 rows rxode2 returns)
+  if (is.data.frame(data) && !is.null(data[["evid"]])) data <- data[data$evid %in% 0L, , drop=FALSE]
   if (is.null(ui$predDf)) {
 
   } else if (length(ui$predDf$cond) == 1L) {

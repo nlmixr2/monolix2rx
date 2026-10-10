@@ -107,6 +107,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `25-error-models.R` | an error parameter shared by two endpoints, two observations of the same prediction, an additive error fixed at 0, autocorrelated residuals |
 | `26-functions.R` | `rem(t, 24)` in a circadian input, `sinh`/`cosh`/`tanh`/`atan2`/`asin`/`ceil`, the negations `~a` and `!a`, an explicit `odeType = nonStiff`, `mean=` instead of `typical=` |
 | `27-covariate-data.R` | covariates missing on dose lines (continuous and categorical) or given on the first line only, covariate columns no parameter uses, a regressor given only where it changes |
+| `28-start-events.R` | `t_0 = 0` before the first record and no `t_0` with a late first record (also a late transit dose), `rightCensoringTime=`, repeated events with `maxEventNumber=3`, a negation after a sign or as an exponent |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -465,6 +466,26 @@ Notes for later cases:
   confirm in run mode: that Monolix accepts missing covariate values on
   dose lines and on all but the first line, and that it carries a sparse
   regressor forward (`reg-sparse`).
+- `28-start-events.R`: rxode2 integrates from time 0, which is Monolix's
+  start with `t_0 = 0` (`ode-t0-before-data` passed as is).  Without
+  `t_0`, Monolix starts each subject at its first dose or observation
+  (Monolix documentation), so a response with production (`R_0 = 0`) and
+  data from t = 24 differed (fixed; `ode-no-t0-late-data`): the imported
+  data resets the subject there.  rxode2 ignores a reset (`evid=3`) that is
+  a subject's first record, so an `evid=2` row comes first (the truth does
+  the same).  The start is the first administration (transit `evid=7`
+  and `empty()`/`reset()` lines too; `transit-late-dose`) or
+  observation; the start rows take that record's regressors and
+  covariates and are not censored.  To confirm in run mode: the
+  per-subject start without `t_0` (Lixoft: "the first time value
+  encountered for each individual"), and whether a regressor-only line
+  starts it (the import assumes not).  A project with an event endpoint
+  is left as before: its hazard counts from time 0 when the first record
+  is an event (an earlier decision), which this start would contradict;
+  which one Monolix does is to confirm.
+  `rightCensoringTime=` (a simulation setting) and `maxEventNumber=3`
+  needed no change.  `-~f` and `2^~f` were syntax errors (fixed;
+  `fun-not-signed`).
 - `reg-ode-input`: whether Monolix's ODE solver restarts at regressor-only
   lines (a small numerical difference) is to confirm in run mode.
 

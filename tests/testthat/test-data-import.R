@@ -283,3 +283,36 @@ test_that("a subject's missing covariate values take its one value", {
   .d$SEX <- factor(.d$SEX, levels=c("M", "F"))
   expect_equal(.dataFillCovariates(.d, .c)$SEX, factor(c("F", "F", "F", "M", "M", NA, NA), levels=c("M", "F")))
 })
+
+test_that("without t_0 a subject starts at its first dose or observation", {
+  .mx <- list(MODEL=list(LONGITUDINAL=list(EQUATION=list(monolix="ddt_R = 1"))))
+  .d <- data.frame(id=c(2, 2, 1, 1), time=c(0, 1, 24, 25), amt=c(100, NA, 100, NA),
+                   dv=c(NA, 1, NA, 2), cmt=c("Ad", NA, "Ad", NA), WT=c(70, 70, 60, 60))
+  .r <- .dataStartReset(.d, .mx)
+  # subject 1 gets an evid 2 row (a reset as a first record is ignored) and a reset
+  expect_equal(.r$id, c(2, 2, 1, 1, 1, 1))
+  expect_equal(.r$time, c(0, 1, 24, 24, 24, 25))
+  expect_equal(.r$evid, c(1L, 0L, 2L, 3L, 1L, 0L))
+  expect_equal(.r$WT, c(70, 70, 60, 60, 60, 60))
+  .mx$MODEL$LONGITUDINAL$EQUATION$monolix <- "t_0 = 0\nddt_R = 1"
+  expect_equal(.dataStartReset(.d, .mx), .d)
+  .mx$MODEL$LONGITUDINAL$EQUATION$monolix <- "ddt_R = X"
+  # a transit dose (evid 7) starts the subject
+  .t <- data.frame(id=1, time=c(12, 13), amt=c(100, NA), dv=c(NA, 1), evid=c(7L, 0L))
+  .r <- .dataStartReset(.t, .mx)
+  expect_equal(.r$time, c(12, 12, 12, 13))
+  expect_equal(.r$evid, c(2L, 3L, 7L, 0L))
+  # without a dv column every evid 0 row is a record
+  expect_equal(nrow(.dataStartReset(data.frame(id=1, time=c(5, 10), amt=c(100, NA)), .mx)), 4L)
+  # an event endpoint keeps its start at time 0
+  .ev <- .mx
+  .ev$MODEL$LONGITUDINAL$DEFINITION$endpoint <- list(list(dist="event"))
+  expect_equal(.dataStartReset(.t, .ev), .t)
+  # the start rows take the regressor at the start time and are not censored
+  .r <- data.frame(id=1, time=c(0, 24, 25), amt=c(NA, 100, NA), dv=c(NA, NA, 3), X=c(1, 5, 5),
+                   evid=c(2L, 1L, 0L), cens=0, limit=NA)
+  .r <- .dataStartReset(.r, .mx)
+  expect_equal(.r$evid, c(2L, 2L, 3L, 1L, 0L))
+  expect_equal(.r$X, c(1, 5, 5, 5, 5))
+  expect_equal(.r$cens, rep(0, 5))
+})

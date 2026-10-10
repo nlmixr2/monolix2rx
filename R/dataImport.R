@@ -697,6 +697,59 @@
   rownames(.ret) <- NULL
   .ret
 }
+#' Start each subject at its first dose or observation unless the model sets t_0
+#'
+#' Without `t_0`, Monolix starts the system at a subject's first
+#' administration or observation; rxode2 starts at time 0.  An `evid=2` row (a reset as a
+#' subject's first record is ignored) and a reset (`evid=3`) at that time
+#' start the system there.
+#'
+#' @param data dataset with the rxode2 columns
+#' @param mlxtran parsed mlxtran (with the `EQUATION:` text)
+#' @return dataset
+#' @noRd
+#' @author Matthew L. Fidler
+.dataStartReset <- function(data, mlxtran) {
+  .eq <- mlxtran$MODEL$LONGITUDINAL$EQUATION$monolix
+  if (is.null(.eq) || any(grepl("^[ \t]*t_?0[ \t]*=", strsplit(.eq, "\n")[[1]]))) return(data)
+  if (is.null(data[["id"]]) || is.null(data[["time"]]) || nrow(data) == 0L) return(data)
+  # an event endpoint counts its hazard from time 0 when the first record
+  # is an event (R/discreteEndpoint.R); which start Monolix uses there is
+  # to confirm
+  if (any(vapply(mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint,
+                 function(e) identical(e$dist, "event"), logical(1)))) {
+    return(data)
+  }
+  .evid <- if (is.null(data[["evid"]])) .dataEvid(data)$evid else data$evid
+  # administrations (doses, transit doses, empty/reset lines) and observations
+  .noDv <- if (is.null(data[["dv"]])) rep(FALSE, nrow(data)) else is.na(data$dv)
+  .use <- !is.na(data$time) & !is.na(.evid) & .evid != 2L & !(.evid == 0L & .noDv)
+  if (!any(.use)) return(data)
+  .ids <- unique(as.character(data$id))
+  .w <- which(.use)
+  .w <- .w[order(match(as.character(data$id[.w]), .ids), data$time[.w], method="radix")]
+  # each subject's first record (its regressors and covariates at that time)
+  .w <- .w[!duplicated(as.character(data$id[.w]))]
+  .w <- .w[data$time[.w] != 0]
+  if (length(.w) == 0L) return(data)
+  data$evid <- .evid
+  .first <- data[.w, , drop=FALSE]
+  for (.v in intersect(c("dv", "amt", "cmt", "rate", "dur", "ss", "ii", "addl", "mdv", "cens", "limit"),
+                       names(.first))) {
+    .first[[.v]] <- switch(.v, mdv=1, cens=0, rate=, dur=, ss=, ii=, addl=0, NA)
+  }
+  .start <- rbind(transform(.first, evid=2L), transform(.first, evid=3L))
+  .start$rxStartOrder <- rep(c(1L, 2L), each=nrow(.first))
+  data$rxStartOrder <- 3L
+  data <- rbind(.start, data)
+  # by id (the data's order) and time; the start rows come first at their time
+  data <- data[order(match(as.character(data$id), .ids), data$time, data$rxStartOrder,
+                     method="radix"), , drop=FALSE]
+  data$rxStartOrder <- NULL
+  rownames(data) <- NULL
+  data
+}
+
 #' Monolix doses are the rows with an amount; MDV=1 only drops an observation
 #'
 #' Without an evid column rxode2 would read an MDV=1 row as a dose.
@@ -776,6 +829,7 @@ monolixDataImport <- function(ui, data, na.strings = c("NA", ".")) {
   if (length(.wt) == 0) {
     .minfo("added dummy time column")
     data$time <- seq_along(data[, 1])
+    return(data)
   } else {
     .wt0 <- which(is.na(data[, .wt]))
     if (length(.wt0) > 0) {
@@ -783,5 +837,5 @@ monolixDataImport <- function(ui, data, na.strings = c("NA", ".")) {
       data[.wt0, .wt] <- 0
     }
   }
-  data
+  .dataStartReset(data, .mlxtran)
 }
