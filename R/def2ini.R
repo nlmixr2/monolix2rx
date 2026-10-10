@@ -286,6 +286,8 @@
   lapply(seq_along(longDef$endpoint), function(i) {
     .env$err <- c(.env$err, longDef$endpoint[[i]]$err$typical)
   })
+  # an error parameter of several endpoints is one estimate
+  .env$err <- unique(.env$err)
 
   .env$omega <- list()
   .env$vl <- character(0)

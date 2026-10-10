@@ -79,6 +79,10 @@
   up to ~80x faster.  Setting `MONOLIX2RX_STRICT_AMBIGUITY` (as the tests
   do) makes any remaining grammar ambiguity an error (issue #51).
 
+* Added a warning for autocorrelated residuals (`autoCorrCoef=`), which
+  are not translated (the residuals stay independent); before, the
+  coefficient was dropped silently.
+
 * Fixed implicit `ptrdiff_t` to `int` truncation in `rc_dup_str` (`src/shared.c`);
   pointer differences are now range-checked before conversion to `int`.
 
@@ -283,6 +287,12 @@
   system (`evid=3`).  With them, a macro's `Tlag`, `p` or `Tk0` no longer
   stopped the translation and applies to its own administration only.
   In `EQUATION:` they are still not translated (a warning says so).
+
+* Fixed an error parameter shared by several endpoints
+  (`combined1(a, b1)` and `combined1(a, b2)`), which stopped the import
+  with a duplicated parameter; `a` is now one estimate and the later
+  endpoints use an alias (`rx_a_y2 <- a`), since rxode2 refuses one error
+  parameter in two endpoints.
 
 # monolix2rx 0.0.6
 

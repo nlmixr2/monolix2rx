@@ -139,7 +139,12 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
          "; as a model input or output it is not translated (rename it in the Monolix model)",
          call.=FALSE)
   }
-  .endpoints <- .mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint
+  .endpoints <- .endpointShareErr(.mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint)
+  .autocor <- unlist(lapply(.endpoints, function(e) e$autocor))
+  if (length(.autocor) > 0L) {
+    warning("autocorrelated residuals (autoCorrCoef=", paste(.autocor, collapse=", "),
+            ") are not translated; the residuals are independent", call.=FALSE)
+  }
   .isEvent <- vapply(.endpoints, function(e) identical(e$dist, "event"), logical(1))
   .eventCmt <- rep(0L, length(.endpoints))
   # an event endpoint needs its own compartment number, known once parsed;
@@ -153,6 +158,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
                 mlxtranTransformGetRxCode(.mlxtran),
                 .mlxtran$MODEL$INDIVIDUAL$DEFINITION$rx,
                 .equation,
+                attr(.endpoints, "alias"),
                 vapply(seq_along(.endpoints),
                        function(i) .handleSingleEndpoint(.endpoints[[i]], .eventCmt[i]),
                        character(1), USE.NAMES = FALSE),

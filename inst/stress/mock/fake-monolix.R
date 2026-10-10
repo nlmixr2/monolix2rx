@@ -63,10 +63,13 @@ if (length(.eta) && !is.null(.sim$etas)) {
 .end <- .mlx$MODEL$LONGITUDINAL$DEFINITION$endpoint
 .endVar <- vapply(.end, function(e) e$var, character(1))
 ## the truth's DVID of imported endpoint k: by its prediction name when
-## several endpoints are continuous (their order may differ)
+## several endpoints are continuous (their order may differ), by position
+## when two observe the same prediction
+.endPred <- vapply(.end, function(e) if (is.null(e$pred)) NA_character_ else e$pred, character(1))
 .truthDvid <- function(k) {
   if (sum(.cont) < 2L) return(.pd$dvid[k])
   .e <- .end[[match(as.character(.pd$cond[k]), .endVar)]]
+  if (sum(.endPred %in% .e$pred) > 1L) return(.pd$dvid[k])
   .dv <- match(.e$pred, .sim$endpoints)
   if (length(.dv) != 1L || is.na(.dv)) .fail("no truth endpoint for ", .pd$cond[k])
   .dv

@@ -100,3 +100,16 @@ logit(P(State <=2|State_p=3)) = a31+a32}")
                "rx_prd_cp <- rx_pred_cp\nrx_prd_cp ~ add(pkadd__err) + pow(prop__err, tc) + combined2()")
 
 })
+
+test_that("an error parameter of several endpoints is aliased after its first", {
+  .e <- function(var, typical) list(var=var, dist="normal", pred="Cc",
+                                    err=list(errName="combined1", typical=typical))
+  .r <- .endpointShareErr(list(.e("y1", c("a", "b1")), .e("y2", c("a", "b2")),
+                               .e("y3", c("a", "a"))))
+  expect_equal(attr(.r, "alias"), c("rx_a_y2 <- a", "rx_a_y3 <- a"))
+  expect_equal(.r[[1]]$err$typical, c("a", "b1"))
+  expect_equal(.r[[2]]$err$typical, c("rx_a_y2", "b2"))
+  expect_equal(.r[[3]]$err$typical, c("rx_a_y3", "rx_a_y3"))
+  expect_equal(attr(.endpointShareErr(list(.e("y1", c("a", "b")))), "alias"), character(0))
+  expect_null(.endpointShareErr(NULL))
+})

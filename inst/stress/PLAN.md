@@ -104,6 +104,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `22-spelling.R` | lowercase distribution names, `[INDIVIDUAL] DEFINITION:` options in another order, numbers in exponent notation, empty fields for missing data, Windows (CRLF) line endings |
 | `23-data-records.R` | observation types given as strings, as codes other than 1/2 and listed in another order in `yname`; replicate samples; a subject without observations |
 | `24-macros.R` | `empty()` and `reset()` administrations (also next to a dose lag), a transit `oral()` macro, zero-order `depot(Tk0)`, `elimination(Cl)` with a volume, `peripheral(k1_2, k2_1)` |
+| `25-error-models.R` | an error parameter shared by two endpoints, two observations of the same prediction, an additive error fixed at 0, autocorrelated residuals |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -431,6 +432,16 @@ Notes for later cases:
   confirm).  To confirm in run mode: that Monolix ignores that
   amount, and the order of an empty/reset and an observation at the same
   time (the cases avoid ties).
+- `25-error-models.R`: an error parameter shared by two endpoints stopped
+  the import (fixed; `err-shared-param`): rxode2 refuses it in two
+  endpoints, so the later ones use an alias.  `autoCorrCoef=` is not
+  translated (rxode2 has no autocorrelated residuals); it now warns
+  (`err-autocorr`; the predictions do not change).  Whether Monolix's
+  IWRES accounts for the autocorrelation is to confirm in run mode, as
+  are one error parameter in two observation models and a fixed 0
+  additive error.  The
+  mock maps two observations of one prediction by position
+  (`err-same-pred`).
 - `reg-ode-input`: whether Monolix's ODE solver restarts at regressor-only
   lines (a small numerical difference) is to confirm in run mode.
 
