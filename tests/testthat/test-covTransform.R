@@ -139,3 +139,15 @@ test_that("a covariate transform without a reference imports (#6)", {
   expect_true(grepl("else {\n    tSex <- \"F\"", .model, fixed = TRUE))
   expect_true(.rx$predAtol < 0.01)
 })
+
+test_that("a covariate equation can use an earlier one, and min() is per row", {
+  .m <- list(MODEL=list(COVARIATE=list(EQUATION=.covEq("BMI = WT/(HT/100)^2\nlBMI = log(min(BMI, 40)/25)"))))
+  .l <- .mlxtranChangeEquationInfoToParsedList(.m)
+  expect_equal(deparse1(.l$lBMI), "log(min(WT/(HT/100)^2, 40)/25)")
+  .d <- eval(str2lang(paste("data.frame(WT=c(50, 150), HT=180) |>", mlxtranGetMutate(.m))))
+  expect_equal(.d$lBMI, log(pmin(c(50, 150) / 1.8^2, 40) / 25))
+  # a name assigned again
+  .m <- list(MODEL=list(COVARIATE=list(EQUATION=.covEq("lw = log(WT)\nlw = lw - 1\ny = 2*lw"))))
+  .l <- .mlxtranChangeEquationInfoToParsedList(.m)
+  expect_equal(vapply(.l, deparse1, ""), c(lw="log(WT) - 1", y="2 * (log(WT) - 1)"))
+})

@@ -31,7 +31,13 @@
                         function(i) {
                           deparse1(.e[[i]][[2]])
                         },character(1), USE.NAMES=TRUE)
-  .ret
+  # a covariate defined from an earlier one (lBMI from BMI); a name
+  # assigned again keeps its last value
+  .cur <- list()
+  for (.i in seq_along(.ret)) {
+    .cur[[names(.ret)[.i]]] <- .mlxtranChangeF(.ret[[.i]], .cur)
+  }
+  .cur
 }
 
 #' Modify elements of an expression based on a lookup list

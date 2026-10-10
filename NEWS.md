@@ -257,6 +257,10 @@
 * Fixed a data line with both a dose and an observation: the observation
   was dropped.  The line is now split into an observation and a dose.
 
+* Fixed a `[COVARIATE] EQUATION:` covariate defined from an earlier one
+  (`lBMI = log(BMI/25)` after `BMI = WT/(HT/100)^2`): the model used the
+  undefined `BMI`; a covariate assigned twice used its first value.
+
 # monolix2rx 0.0.6
 
 * Updated to add types for rstudio completion

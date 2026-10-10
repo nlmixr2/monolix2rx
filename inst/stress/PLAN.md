@@ -99,6 +99,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `17-error-output.R` | error parameters not named `a`/`b`, a fixed error parameter, a logitNormal observation on (0, 100), `OUTPUT: table=`, an observed Imax effect |
 | `18-syntax.R` | `;` comments, a lowercase `method=fixed`, a fixed omega, `method=BAYES` with a `[POPULATION]` prior, a parameter named `F`, variables and states named like rxode2 keywords (also in `PK:` and a macro argument), `X_0` for a state with an underscore and for a plain variable |
 | `19-data-layout.R` | data columns not named ID/TIME/AMT/DV, subjects in descending ID order, a dose and an observation on one line, observations at negative times, placebo subjects, a prediction not named `Cc` |
+| `20-covariates.R` | a categorical covariate on two parameters, an occasion column without inter-occasion variability, `min()` in a `[COVARIATE] EQUATION:`, a covariate computed from two covariates through an intermediate |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -382,6 +383,16 @@ Notes for later cases:
   row order), and with an EVID column the observation of an EVID=1/3/4
   line is ignored, so those lines are not split.  A censored shared line
   keeps its censoring on the observation only.
+- `20-covariates.R`: a `[COVARIATE] EQUATION:` covariate defined from an
+  earlier one was inlined without the earlier one (fixed;
+  `cov-equation-bmi`).  `mlxtranGetMutate()` (not used by the import)
+  wrote `min()`/`max()` as column aggregates (fixed; unit test only, the
+  model gets the elementwise `min()`).  `if`/`else` in a
+  `[COVARIATE] EQUATION:` is not translated (the branches become bogus
+  entries and the assigned name stays undefined); no case yet.  Whether a new occasion resets
+  the system without EVID=3/4 is to confirm in run mode
+  (`data-occ-no-iov` leaves a week between them, so it does not depend
+  on it).
 - `reg-ode-input`: whether Monolix's ODE solver restarts at regressor-only
   lines (a small numerical difference) is to confirm in run mode.
 
