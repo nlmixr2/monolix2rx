@@ -28,6 +28,14 @@
     .n <- .n[.n != "id"]
     return(c(.theta, setNames(rep(0.0, length(.n)), .n)))
   }
+  # rxSolve() takes the rows in the order the subjects appear in the
+  # data and needs a numeric id (Monolix ids may be strings)
+  .sub <- unique(as.character(ui$monolixData$id))
+  .m <- match(as.character(.etaData$id), .sub)
+  if (!is.null(.etaData) && length(.sub) > 0L && !anyNA(.m) && !anyDuplicated(.m)) {
+    .etaData <- .etaData[order(.m), , drop=FALSE]
+    .etaData$id <- sort(.m)
+  }
   .nid <- length(.etaData$id)
   .id <- .etaData[,"id", drop=FALSE]
   .rest <- .etaData[, -which(names(.etaData) == "id"), drop = FALSE]

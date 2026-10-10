@@ -49,3 +49,13 @@ test_that("a project without random effects keeps a data frame of ids", {
   expect_equal(names(.eta), "id")
   expect_equal(.eta$id, .ids)
 })
+
+test_that("individual parameters follow the data's subject order with numeric ids", {
+  .ui <- list(theta=c(tka=1),
+              etaData=data.frame(id=c("S-2", "S-1"), eta.ka=c(0.2, 0.1)),
+              monolixData=data.frame(id=c("S-1", "S-1", "S-2"), time=c(0, 1, 0)))
+  .p <- .parameterThetaEta(.ui)
+  expect_equal(.p$id, 1:2)
+  expect_equal(.p$eta.ka, c(0.1, 0.2))
+  expect_equal(.p$tka, c(1, 1))
+})

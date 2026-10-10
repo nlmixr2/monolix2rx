@@ -128,7 +128,8 @@ II = {use=interdoseinterval}
 ADDL = {use=additionaldose}")))
 
 ## records what each tool does: the steady state of a delayed system
-## needs the history over the dosing interval
+## needs the history over the dosing interval (XPASS under the mock, whose
+## Monolix results are the rxode2 truth)
 kitVariant("dde-delayed-effect", "dde-ss",
            "steady-state dose (use=steadystate, q24h) through delay(Ac, tau)",
            tags=c("dde", "ss"),

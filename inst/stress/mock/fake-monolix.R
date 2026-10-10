@@ -54,13 +54,23 @@ if (length(.eta) && !is.null(.sim$etas)) {
 } else {
   .p <- c(.theta, stats::setNames(rep(0, length(.eta)), .eta))
 }
-## Monolix writes no predictions of discrete observations; one
-## continuous endpoint is supported
+## Monolix writes no predictions of discrete observations; with several
+## continuous endpoints one predictions_<observation>.txt each
 .pd <- .ui$predDf
 .cont <- !as.character(.pd$distribution) %in% c("pois", "ordinal", "LL")
-if (sum(.cont) > 1L) .fail("the mock handles one continuous endpoint only")
-.obs <- as.character(.pd$var[.cont])
 .t <- .sim$pred
+.tDvid <- .sim$data$DVID[match(.t$ROWID, .sim$data$ROWID)]
+.end <- .mlx$MODEL$LONGITUDINAL$DEFINITION$endpoint
+.endVar <- vapply(.end, function(e) e$var, character(1))
+## the truth's DVID of imported endpoint k: by its prediction name when
+## several endpoints are continuous (their order may differ)
+.truthDvid <- function(k) {
+  if (sum(.cont) < 2L) return(.pd$dvid[k])
+  .e <- .end[[match(as.character(.pd$cond[k]), .endVar)]]
+  .dv <- match(.e$pred, .sim$endpoints)
+  if (length(.dv) != 1L || is.na(.dv)) .fail("no truth endpoint for ", .pd$cond[k])
+  .dv
+}
 if (any(.cont)) {
   .s <- suppressMessages(rxode2::rxSolve(.ui$monolixModelIwres, .p, .ui$monolixData,
                                          returnType="data.frame", addDosing=FALSE,
@@ -69,18 +79,22 @@ if (any(.cont)) {
     paste(id, sprintf("%.12g", time),
           stats::ave(seq_along(id), id, time, FUN=seq_along), sep="|")
   }
-  .m <- match(.key(.t$ID, .t$TIME), .key(as.character(.s$id), .s$time))
-  if (nrow(.pd) > 1L) {
-    .keep <- .sim$data$DVID[match(.t$ROWID, .sim$data$ROWID)] %in% .pd$dvid[.cont]
-    .t <- .t[.keep, ]
-    .m <- .m[.keep]
+  for (.k in which(.cont)) {
+    .obs <- as.character(.pd$var[.k])
+    .tk <- .t
+    .sk <- .s
+    if (nrow(.pd) > 1L) {
+      .tk <- .t[.tDvid == .truthDvid(.k), ]
+      .sk <- .s[.s$CMT == .pd$cmt[.k], ]
+    }
+    .m <- match(.key(.tk$ID, .tk$TIME), .key(as.character(.sk$id), .sk$time))
+    .pred <- data.frame(id=.tk$ID, time=.tk$TIME,
+                        dv=.sim$data$DV[match(.tk$ROWID, .sim$data$ROWID)],
+                        popPred=.tk$simPred, indivPred_SAEM=.tk$simIpred,
+                        indWRes_SAEM=.sk$iwres[.m])
+    names(.pred)[3] <- .obs
+    .w(.pred, if (sum(.cont) > 1L) paste0("predictions_", .pd$cond[.k], ".txt") else "predictions.txt")
   }
-  .pred <- data.frame(id=.t$ID, time=.t$TIME,
-                      dv=.sim$data$DV[match(.t$ROWID, .sim$data$ROWID)],
-                      popPred=.t$simPred, indivPred_SAEM=.t$simIpred,
-                      indWRes_SAEM=.s$iwres[.m])
-  names(.pred)[3] <- .obs
-  .w(.pred, "predictions.txt")
 }
 
 .re <- data.frame(id=.ids)
@@ -99,7 +113,7 @@ for (.e in .eta) {
 .dvid <- if (nrow(.pd) > 1L) .sim$data$DVID[match(.sim$pred$ROWID, .sim$data$ROWID)] else 1L
 .nObs <- vapply(seq_len(nrow(.pd)), function(k) {
   paste0("Number of observations (", .pd$var[k], "): ",
-         if (nrow(.pd) > 1L) sum(.dvid == .pd$dvid[k]) else nrow(.sim$pred))
+         if (nrow(.pd) > 1L) sum(.dvid == .truthDvid(k)) else nrow(.sim$pred))
 }, character(1))
 .nDose <- sum(.sim$data$EVID %in% c(1L, 4L))
 writeLines(c(strrep("*", 80),

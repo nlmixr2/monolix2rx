@@ -272,6 +272,11 @@
 * Fixed an `[INDIVIDUAL] DEFINITION:` line whose `distribution=` is not
   the first option, which was a syntax error.
 
+* Fixed the validation of a data set with character subject ids
+  (`S-001`): the individual parameters kept the character `id`, which
+  `rxSolve()` refused, so nothing was validated.  They are now also put
+  in the data's subject order, which is how `rxSolve()` assigns them.
+
 # monolix2rx 0.0.6
 
 * Updated to add types for rstudio completion

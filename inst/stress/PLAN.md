@@ -102,6 +102,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `20-covariates.R` | a categorical covariate on two parameters, an occasion column without inter-occasion variability, `min()` in a `[COVARIATE] EQUATION:`, a covariate computed from two covariates through an intermediate |
 | `21-individual.R` | `if`/`elseif`/`else` in a `[COVARIATE] EQUATION:`, covariates on parameters without random effects, a model with no random effects |
 | `22-spelling.R` | lowercase distribution names, `[INDIVIDUAL] DEFINITION:` options in another order, numbers in exponent notation, empty fields for missing data, Windows (CRLF) line endings |
+| `23-data-records.R` | observation types given as strings, as codes other than 1/2 and listed in another order in `yname`; replicate samples; a subject without observations |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -407,6 +408,16 @@ Notes for later cases:
   so whether Monolix accepts another order is to confirm in run mode,
   as are lowercase distribution names (`param-dist-lowercase`) and empty
   fields as missing values (`data-empty-missing`).
+- `23-data-records.R`: the import maps each observation type through its
+  position in `yname` (string types, codes 5/2, and `yname={'2', '1'}`
+  all pass).  The mock wrote predictions for one continuous endpoint
+  only; it now writes `predictions_<observation>.txt` for each, so the
+  two-endpoint cases run under the mock.  Whether Monolix keeps a subject
+  without observations (`data-no-obs-subject`) is to confirm in run mode.
+  The full mock run showed that character subject ids stopped the
+  validation (`rxSolve()` refused the individual parameters' character
+  `id`, and assigns them by position in the data's subject order); fixed
+  (`data-string-id`, now in the CI mock test with `data-ytype-swapped`).
 - `reg-ode-input`: whether Monolix's ODE solver restarts at regressor-only
   lines (a small numerical difference) is to confirm in run mode.
 

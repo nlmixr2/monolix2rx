@@ -61,7 +61,9 @@ kitSimulate <- function(case, nSub, seed=42L) {
     .first <- !duplicated(.d$ID)
     .mix <- data.frame(id=as.character(.d$ID[.first]), mixest=as.integer(.d[[case$mixest]][.first]))
   }
-  list(data=.d, pred=.obs, etas=.etas, mix=.mix, seed=.seed)
+  ## the truth's endpoints in DVID order
+  .end <- if (!is.null(.ui$predDf)) as.character(.ui$predDf$var)
+  list(data=.d, pred=.obs, etas=.etas, mix=.mix, seed=.seed, endpoints=.end)
 }
 
 ## Monolix missing values: AMT only on doses, DV only on observations
