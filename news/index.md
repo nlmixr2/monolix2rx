@@ -108,6 +108,11 @@
   global parser state is intentionally not mutex-protected, consistent
   with R’s single-threaded execution model.
 
+- Added
+  [`aaaCranMonolix2rxThreads()`](../reference/aaaCranMonolix2rxThreads.md),
+  run first in the examples, which limits CRAN checks to 2 threads to
+  cut the example time.
+
 ## monolix2rx 0.0.6
 
 CRAN release: 2025-08-29

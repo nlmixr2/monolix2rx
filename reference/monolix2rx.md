@@ -206,8 +206,8 @@ rx
 #>         "ipred absolute difference compared to Monolix ipred: 95% percentile: (8.49e-05, 0.166); atol=0.0175", 
 #>         "pred relative difference compared to Monolix pred: 0%; 95% percentile: (0%,0%); rtol=1.21e-06", 
 #>         "pred absolute difference compared to Monolix pred: 95% percentile: (1.87e-08, 4.92e-05); atol=6.07e-06", 
-#>         "iwres relative difference compared to Monolix iwres: 0%; 95% percentile: (0.24%,204.01%); rtol=0.0794", 
-#>         "iwres absolute difference compared to Monolix pred: 95% percentile: (0.0026, 0.33); atol=0.0362")
+#>         "iwres relative difference compared to Monolix iwres: 0%; 95% percentile: (0.02%,196.82%); rtol=0.0735", 
+#>         "iwres absolute difference compared to Monolix pred: 95% percentile: (0.000196, 0.327); atol=0.0354")
 #>     ini({
 #>         Tlag_pop <- -0.259498000083172
 #>         ka_pop <- 0.356105897545116
