@@ -81,6 +81,9 @@
   parser state is intentionally not mutex-protected, consistent with R's
   single-threaded execution model.
 
+* Added `aaaCranMonolix2rxThreads()`, run first in the examples, which limits
+  CRAN checks to 2 threads to cut the example time.
+
 # monolix2rx 0.0.6
 
 * Updated to add types for rstudio completion
