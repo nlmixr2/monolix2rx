@@ -38,7 +38,7 @@
   .next <- .next[.next > .start]
   .end <- if (length(.next)) .next[1] - 1L else length(lines)
   .i <- seq(.start, .end)
-  lines[.i] <- gsub("method *= *MLE", "method=FIXED", lines[.i])
+  lines[.i] <- gsub("method *= *MLE", "method=FIXED", lines[.i], ignore.case=TRUE)
   lines
 }
 

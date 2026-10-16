@@ -97,3 +97,13 @@ model = ", .fit, "
 {{SETTINGS}}
 ")
 }
+
+## base case text with `from` replaced by `to` (each must occur)
+.kitSub <- function(name, field, from, to) {
+  .m <- .kitEnv$cases[[name]][[field]]
+  for (.i in seq_along(from)) {
+    if (!grepl(from[.i], .m, fixed=TRUE)) stop(name, ": the base ", field, " changed")
+    .m <- gsub(from[.i], to[.i], .m, fixed=TRUE)
+  }
+  .m
+}

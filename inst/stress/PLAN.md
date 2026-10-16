@@ -110,6 +110,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `28-start-events.R` | `t_0 = 0` before the first record and no `t_0` with a late first record (also a late transit dose), `rightCensoringTime=`, repeated events with `maxEventNumber=3`, a negation after a sign or as an exponent |
 | `29-start-rem.R` | a non-zero `t_0` before the first record, the `t0` spelling with a comment, `rem()` of a negative covariate |
 | `30-dose-keywords.R` | `amtDose`/`tDose` before the first dose and with a lag time, an `empty()` or `reset()` on a line at the same time as a dose, `acos()`/`tan()` |
+| `31-spellings-odes.R` | the camelCase `use=` spellings (`steadyState`, `interDoseInterval`, `eventIdentifier`, `missingDependentVariable`), `delimiter = semicolumn`, `probitnormal`, `method=Mle` (also fixed by `est="fixed"`), ODEs defined in both branches of an `if`/`else`, a negative binomial count |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -511,6 +512,13 @@ Notes for later cases:
   the reset or empty first whatever the row order, so these can only fail
   in run mode; a dose listed first (which Monolix may then remove) is not
   covered.
+- `31-spellings-odes.R`: the spellings, ODEs in an `if`/`else` and a
+  negative binomial count written with `gammaln()` needed no change.
+  Monolix 2024R1 documents `ddt_` inside `if`/`else` as not allowed
+  (`ode-ddt-in-if`, `knownRun=`; the import accepts it).  To confirm in
+  run mode: the camelCase `use=` values and `semicolumn` (no Lixoft
+  documentation found).  rxode2 simulates `nbinomMu()` with a truncated
+  size, so `disc-count-negbin` uses a whole size (4).
 - `reg-ode-input`: whether Monolix's ODE solver restarts at regressor-only
   lines (a small numerical difference) is to confirm in run mode.
 
