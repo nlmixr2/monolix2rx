@@ -250,7 +250,8 @@
 
 * Fixed the validation of censored data: the censored observations were
   left out of the rxode2 solve but not of Monolix's predictions, so they
-  were reported in `$monolixNotMatched`.
+  were reported in `$monolixNotMatched`; and a `CENS` of `.` on the dose
+  lines stopped the validation with "'id' cannot have NA values".
 
 * Fixed a parameter fixed with a lowercase `method=fixed`, which was
   imported as estimated.

@@ -1,4 +1,5 @@
-test_that("censored observations are left out of both validation sides", {
+for (.doseCens in c("0", ".")) {
+test_that(paste0("censored observations are left out of both validation sides, CENS=", .doseCens, " on doses"), {
   skip_on_cran()
   .dir <- file.path(tempfile(), "theo")
   dir.create(.dir, recursive = TRUE)
@@ -11,7 +12,7 @@ test_that("censored observations are left out of both validation sides", {
   .d <- file.path(.dir, "data", "theophylline_data.txt")
   .l <- readLines(.d)
   .obs <- c(FALSE, grepl("^[0-9]+\t[.]\t", .l[-1]))
-  .cens <- ifelse(.obs & seq_along(.l) %% 5 == 0, "1", "0")
+  .cens <- ifelse(.obs, ifelse(seq_along(.l) %% 5 == 0, "1", "0"), .doseCens)
   .cens[1] <- "CENS"
   writeLines(paste(.l, .cens, sep = "\t"), .d)
   .f <- file.path(.dir, "theophylline_project.mlxtran")
@@ -26,3 +27,4 @@ test_that("censored observations are left out of both validation sides", {
   expect_null(.rx$monolixNotMatched)
   expect_true(.rx$ipredAtol < 0.05)
 })
+}

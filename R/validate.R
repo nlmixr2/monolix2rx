@@ -158,8 +158,10 @@
   .censObs <- NULL
   if (any(names(.data) == "cens")) {
     .minfo("filtering out censored observations for validation")
-    .censObs <- .data[.data$cens != 0 & !is.na(.data$dv), , drop=FALSE]
-    .data <- .data[.data$cens == 0, names(.data) != "cens"]
+    # CENS can be "." (NA) on dose lines
+    .isCens <- !is.na(.data$cens) & .data$cens != 0
+    .censObs <- .data[.isCens & !is.na(.data$dv), , drop=FALSE]
+    .data <- .data[!.isCens, names(.data) != "cens"]
     .minfo("done")
   }
   if (!is.null(.data) &&

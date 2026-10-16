@@ -112,6 +112,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `30-dose-keywords.R` | `amtDose`/`tDose` before the first dose and with a lag time, an `empty()` or `reset()` on a line at the same time as a dose, `acos()`/`tan()` |
 | `31-spellings-odes.R` | the camelCase `use=` spellings (`steadyState`, `interDoseInterval`, `eventIdentifier`, `missingDependentVariable`), `delimiter = semicolumn`, `probitnormal`, `method=Mle` (also fixed by `est="fixed"`), ODEs defined in both branches of an `if`/`else`, a negative binomial count |
 | `32-macros-outputs.R` | `type=` instead of `adm=` in `oral()`/`iv()`, a bolus into a `peripheral()` compartment, a lowercase `lognormal` observation, a cumulative urine amount (an ODE state) observed with a concentration |
+| `33-infusions-ids.R` | `iv(cmt=1, Tlag, p)` with RATE and with infusion-time infusions, ADDL/II repeats of an infusion and of a lagged oral dose, `CENS` on the second `YTYPE` endpoint only, sparse numeric subject IDs |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -526,6 +527,12 @@ Notes for later cases:
   mode: `type=` in a macro (an older Lixoft page calls it an alias of
   `adm=`), an `iv()` dose into a `peripheral()` compartment and a
   lowercase observation distribution (no Lixoft documentation found).
+- `33-infusions-ids.R`: `data-cens-second-endpoint` writes `CENS` as `.` on
+  the dose lines, which stopped the validation (fixed).  To confirm in run mode: a
+  bioavailability on a RATE infusion (rxode2 keeps the rate and shortens
+  the infusion to `p*AMT/RATE`; Monolix may keep the duration instead) and
+  on an infusion-time infusion (rxode2 keeps the duration and scales the
+  rate; Monolix presumably does the same).
 - `reg-ode-input`: whether Monolix's ODE solver restarts at regressor-only
   lines (a small numerical difference) is to confirm in run mode.
 
