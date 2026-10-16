@@ -111,6 +111,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `29-start-rem.R` | a non-zero `t_0` before the first record, the `t0` spelling with a comment, `rem()` of a negative covariate |
 | `30-dose-keywords.R` | `amtDose`/`tDose` before the first dose and with a lag time, an `empty()` or `reset()` on a line at the same time as a dose, `acos()`/`tan()` |
 | `31-spellings-odes.R` | the camelCase `use=` spellings (`steadyState`, `interDoseInterval`, `eventIdentifier`, `missingDependentVariable`), `delimiter = semicolumn`, `probitnormal`, `method=Mle` (also fixed by `est="fixed"`), ODEs defined in both branches of an `if`/`else`, a negative binomial count |
+| `32-macros-outputs.R` | `type=` instead of `adm=` in `oral()`/`iv()`, a bolus into a `peripheral()` compartment, a lowercase `lognormal` observation, a cumulative urine amount (an ODE state) observed with a concentration |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -519,6 +520,12 @@ Notes for later cases:
   run mode: the camelCase `use=` values and `semicolumn` (no Lixoft
   documentation found).  rxode2 simulates `nbinomMu()` with a truncated
   size, so `disc-count-negbin` uses a whole size (4).
+- `32-macros-outputs.R`: `type=` for `adm=`, `iv(cmt=2)` into a
+  `peripheral()` compartment, `distribution=lognormal` in the observation
+  model and an observed ODE state needed no change.  To confirm in run
+  mode: `type=` in a macro (an older Lixoft page calls it an alias of
+  `adm=`), an `iv()` dose into a `peripheral()` compartment and a
+  lowercase observation distribution (no Lixoft documentation found).
 - `reg-ode-input`: whether Monolix's ODE solver restarts at regressor-only
   lines (a small numerical difference) is to confirm in run mode.
 
