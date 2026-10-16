@@ -155,6 +155,11 @@
                       .monolix2rx$extraPred,
                       .monolix2rx$pk$equation$endLines))
   .rx <- .equationInitial(.rx)
+  if (any(grepl("\\b(tlast0|dose0)[(]", .rx, perl=TRUE)) &&
+        any(grepl("^\\s*alag[(]", .rx, perl=TRUE))) {
+    warning("tDose/amtDose with a lag time: rxode2 updates them at the lagged dose time, Monolix at the dose time",
+            call.=FALSE)
+  }
   .ret <- list(monolix=.text,
                rx=.rx,
                lhs=.monolix2rx$equationLhs,
@@ -196,8 +201,8 @@
     if (grepl(.re, .rhs, perl=TRUE)) {
       .rhs <- gsub("~=", "!=", .rhs, fixed=TRUE)
       .rhs <- gsub("\\bt\\b", "time", .rhs, perl=TRUE)
-      .rhs <- gsub("\\bamtDose\\b", "dose()", .rhs, perl=TRUE)
-      .rhs <- gsub("\\btDose\\b", "tlast", .rhs, perl=TRUE)
+      .rhs <- gsub("\\bamtDose\\b", "dose0()", .rhs, perl=TRUE)
+      .rhs <- gsub("\\btDose\\b", "tlast0()", .rhs, perl=TRUE)
       for (.n in names(.fun)) {
         .rhs <- gsub(paste0("\\b", .n, "[(]"), paste0(.fun[[.n]], "("), .rhs, perl=TRUE)
       }

@@ -320,6 +320,12 @@
   occasion), as Monolix does; rxode2 warned that the column was missing
   for the subject.
 
+* Fixed `amtDose` and `tDose` before the first dose: rxode2's `dose()`
+  and `tlast` are missing there, while Monolix gives 0; they are now
+  `dose0()` and `tlast0()`, which also lets a `Tlag`, `Tk0` or `p` macro
+  argument using them solve at the first dose.  With a lag time rxode2 updates them at the
+  lagged dose, Monolix at the dose itself; the import now warns.
+
 * Fixed `pkmodel()` or a PK macro (`compartment()`, `oral()`, ...)
   followed by an `if` in `EQUATION:`: the macro arguments' parentheses and
   commas were written before the `if`, so the model did not parse.

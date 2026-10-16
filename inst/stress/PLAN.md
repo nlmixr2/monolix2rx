@@ -109,6 +109,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `27-covariate-data.R` | covariates missing on dose lines (continuous and categorical) or given on the first line only, covariate columns no parameter uses, a regressor given only where it changes |
 | `28-start-events.R` | `t_0 = 0` before the first record and no `t_0` with a late first record (also a late transit dose), `rightCensoringTime=`, repeated events with `maxEventNumber=3`, a negation after a sign or as an exponent |
 | `29-start-rem.R` | a non-zero `t_0` before the first record, the `t0` spelling with a comment, `rem()` of a negative covariate |
+| `30-dose-keywords.R` | `amtDose`/`tDose` before the first dose and with a lag time, an `empty()` or `reset()` on a line at the same time as a dose, `acos()`/`tan()` |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -300,9 +301,10 @@ Notes for later cases:
   untranslated (fixed; `ode-dose-keywords`, `pk-depot-p-amtdose`).  Other
   Monolix syntax in macro arguments (`~=`, `t`, `invlogit()`...,
   `a^b^c`) is now translated too, and `inftDose` there is an error.  In
-  `f()` rxode2's `dose()` is the dose being given.  Not covered: before
-  the first dose rxode2 gives NA (`dose0()`/`tlast0()` give 0), and an
-  observation tied with a dose; Monolix's values there are to confirm.
+  `f()` rxode2's `dose()` is the dose being given.  Before the first dose
+  see `30-dose-keywords.R`.  An observation tied with a dose sees the new
+  dose in rxode2 (`ode-dose-keywords-predose`); Monolix's value is to
+  confirm in run mode.
 - `a^b^c` was written unchanged and rxode2 does not parse it (fixed:
   `a^(b^c)`; `ode-math-functions-2`).
 
@@ -435,7 +437,7 @@ Notes for later cases:
   initial conditions (whether Monolix resets to them or to 0 is to
   confirm).  To confirm in run mode: that Monolix ignores that
   amount, and the order of an empty/reset and an observation at the same
-  time (the cases avoid ties).
+  time (the cases avoid ties; a tie with a dose is in `30-dose-keywords.R`).
 - `25-error-models.R`: an error parameter shared by two endpoints stopped
   the import (fixed; `err-shared-param`): rxode2 refuses it in two
   endpoints, so the later ones use an alias.  `autoCorrCoef=` is not
@@ -498,6 +500,17 @@ Notes for later cases:
   `rightCensoringTime=` (a simulation setting) and `maxEventNumber=3`
   needed no change.  `-~f` and `2^~f` were syntax errors (fixed;
   `fun-not-signed`).
+- `30-dose-keywords.R`: Monolix's `amtDose`/`tDose` are 0 before the
+  first dose and ignore `Tlag` (Monolix reserved keywords documentation);
+  rxode2's `dose()`/`tlast` were missing before it (fixed:
+  `dose0()`/`tlast0()`; `ode-dose-keywords-predose`).  rxode2 updates them
+  at the lagged dose time, so with a lag they differ between the dose and
+  its lagged time (`ode-dose-keywords-tlag`, `known=`; the import warns).
+  An `empty()`/`reset()` listed before a dose at the same time keeps the
+  dose (`macro-empty-dose-tie`, `macro-reset-dose-tie`).  rxode2 applies
+  the reset or empty first whatever the row order, so these can only fail
+  in run mode; a dose listed first (which Monolix may then remove) is not
+  covered.
 - `reg-ode-input`: whether Monolix's ODE solver restarts at regressor-only
   lines (a small numerical difference) is to confirm in run mode.
 

@@ -143,8 +143,8 @@ int equation_identifier_or_constant(char *name,  D_ParseNode *pn) {
     D_ParseNode *xpn = d_get_child(pn, 0);
     char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
     if (!strcmp("amtDose", v)) {
-      // the last dose amount is rxode2's dose() (a bare dose is a parameter)
-      sAppendN(&curLine, "dose()", 6);
+      // the last dose amount and time are 0 before the first dose, like dose0()/tlast0()
+      sAppendN(&curLine, "dose0()", 7);
       return 1;
     } else if (!strcmp("inftDose", v)) {
       sClear(&sbTransErr);
@@ -154,7 +154,7 @@ int equation_identifier_or_constant(char *name,  D_ParseNode *pn) {
       finalizeSyntaxError();
       return 1;
     } else if (!strcmp("tDose", v)) {
-      sAppendN(&curLine, "tlast", 5);
+      sAppendN(&curLine, "tlast0()", 8);
       return 1;
     } else if (!strcmp("t", v)) {
       sAppendN(&curLine, "time", 4);

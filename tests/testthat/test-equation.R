@@ -80,11 +80,11 @@ ddt_dx = -x-dx", pk)
 
   .ret <- .equation("a=amtDose", pk)
 
-  expect_equal(.ret$rx, "a <- dose()")
+  expect_equal(.ret$rx, "a <- dose0()")
 
   .ret <- .equation("a=tDose", pk)
 
-  expect_equal(.ret$rx, "a <- tlast")
+  expect_equal(.ret$rx, "a <- tlast0()")
 
   .ret <- .equation("a=t+3", pk)
   expect_equal(.ret$rx, "a <- time + 3")
@@ -220,9 +220,10 @@ test_that("chained powers are right associative for rxode2", {
 })
 
 test_that("dose keywords in PK macro arguments are translated", {
-  .rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, p=2/amtDose, Tlag=0.1*tDose)")$rx
-  expect_true("f(Ap) <- 2/dose()" %in% .rx)
-  expect_true("alag(Ap) <- 0.1*tlast" %in% .rx)
+  expect_warning(.rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, p=2/amtDose, Tlag=0.1*tDose)")$rx,
+                 "lag time")
+  expect_true("f(Ap) <- 2/dose0()" %in% .rx)
+  expect_true("alag(Ap) <- 0.1*tlast0()" %in% .rx)
   .rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, p=invlogit(a^b^c), Tlag=normcdf(t))")$rx
   expect_true("f(Ap) <- expit(a^(b^c))" %in% .rx)
   expect_true("alag(Ap) <- pnorm(time)" %in% .rx)
@@ -231,7 +232,11 @@ test_that("dose keywords in PK macro arguments are translated", {
   expect_true("alag(Ap) <- 1e-3*time" %in% .rx)
   expect_error(.equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, Tlag=inftDose)"),
                "inftDose")
-  expect_true("f(central) <- dose()/100" %in% .equation("", "Cc = pkmodel(V, Cl, p=amtDose/100)")$rx)
+  expect_true("f(central) <- dose0()/100" %in% .equation("", "Cc = pkmodel(V, Cl, p=amtDose/100)")$rx)
+  expect_warning(.equation("ddt_Ap = -k*Ap\nCc = Ap + tDose", "depot(adm=1, target=Ap, Tlag)"),
+                 "lag time")
+  expect_warning(.equation("Y = amtDose", "Cc = pkmodel(Tlag, ka, V, Cl)"), "lag time")
+  expect_no_warning(.equation("ddt_Ap = -k*Ap\nCc = Ap + tDose", "depot(adm=1, target=Ap)"))
   .rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, Tlag=rem(t, 2), p=(a ~= 1))")$rx
   expect_true("alag(Ap) <- ((time)%%(2))" %in% .rx)
   expect_true("f(Ap) <- (a != 1)" %in% .rx)
