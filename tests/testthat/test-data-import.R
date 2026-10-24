@@ -55,6 +55,35 @@ test_that("dose routing follows the administration table", {
   expect_equal(.r$rate, c(NA, NA, -2))
 })
 
+test_that("depot(target=central) doses its own centrald state, oral(cmt=) the depot", {
+  .r <- function(pk) .equation("Cc = central/V", .pk(pk))$admd$rxCmt
+  expect_equal(.r("depot(target=central, ka, p)"), "centrald")
+  expect_equal(.r("depot(target=Ac, ka)"), "Acd")
+  expect_equal(.r("compartment(cmt=1, amount=central)\noral(cmt=1, ka, p)\nelimination(cmt=1, k)"), "depot")
+})
+
+test_that("a RATE dose into a compartment with a bioavailability keeps its duration", {
+  .admd <- data.frame(adm=1L, admd=1L, cmt=1L, target=NA_character_, depot=FALSE,
+                      dur=FALSE, f=FALSE, tlag=FALSE, transit=FALSE, rxCmt="central")
+  .d <- data.frame(id=1L, time=c(0, 1, 12), amt=c(100, NA, 100), rate=c(40, NA, 0),
+                   dv=c(NA, 1, NA))
+  .r <- .dataConvertAdm(.d, .admd, fCmt="central")
+  expect_equal(.r$dur, c(2.5, 0, 0))
+  expect_equal(.r$rate, c(0, NA, 0))
+  # without a bioavailability the rate is kept
+  .r <- .dataConvertAdm(.d, .admd)
+  expect_null(.r$dur)
+  expect_equal(.r$rate, c(40, NA, 0))
+  .ui <- rxode2::rxode2(function() {
+    model({
+      d/dt(central) <- -central
+      f(central) <- 0.8
+      alag(central) <- 1
+    })
+  })
+  expect_equal(.dataFCmt(.ui), "central")
+})
+
 test_that("iv() on a second route doses its own compartment", {
   .pk <- .pk("compartment(cmt=1, amount=Ac)\noral(adm=1, cmt=1, ka)\niv(adm=2, cmt=1)\nperipheral(k12, k21)\nelimination(cmt=1, k)")
   .admd <- .equation("Cc = Ac/V", .pk)$admd

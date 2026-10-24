@@ -92,6 +92,7 @@ kitVariant("tte-repeated", "tte-repeated-max-events",
 ## -~f is -1 or 0 and 2^~f is 2 or 1
 kitVariant("pkmodel-oral-1cmt", "fun-not-signed",
            "a negation after a sign and as an exponent (-~f, 2^~f)",
+           knownRun="Monolix 2024R1 refuses a sign after an operator (0.5*-~f): a syntax error",
            tags=c("function"),
            model=.oralFunModel("if t > 12
   f = 1

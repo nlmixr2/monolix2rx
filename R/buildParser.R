@@ -273,7 +273,8 @@
     "ssAtol"=1e-08
   )
   .meth <- c("nonmemData"="NONMEM input data from nonmem2rx",
-             "etaData"="NONMEM etas input from nonmem2rx",
+             "etaData"="Monolix random effects (conditional modes when the run has them)",
+             "etaSaemData"="Monolix SAEM random effects",
              "ipredAtol"="50th percentile of the IPRED atol comparison between rxode2 and model import",
              "ipredRtol"="50th percentile of the IPRED rtol comparison between rxode2 and model import",
              "ipredCompare"="Dataset comparing ID, TIME and the IPREDs between rxode2 and model import",

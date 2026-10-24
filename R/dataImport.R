@@ -490,10 +490,12 @@
 #'
 #' @param data input monolix dataset to convert
 #' @param admd admd dataset from imported UI
+#' @param pk parsed PK macros
+#' @param fCmt compartments with a bioavailability
 #' @return converted dataset for dosing endpoint (not observations)
 #' @noRd
 #' @author Matthew L. Fidler
-.dataConvertAdm <- function(data, admd, pk=NULL) {
+.dataConvertAdm <- function(data, admd, pk=NULL, fCmt=character(0)) {
   data$cmt <- NA_character_
   data$admd <- NA_integer_
   .dose <- .dataIsDose(data)
@@ -513,6 +515,7 @@
       .w <- which(.adm == .cur$adm & is.na(data$admd))
       data$admd[.w] <- 1L
       data$cmt[.w] <- .cmt
+      if (.cmt %in% fCmt) data <- .dataRateToDur(data, .w)
       if (isTRUE(.cur$dur)) data <- .dataDurRate(data, .w)
       if (isTRUE(.cur$transit)) data <- .dataTransitEvid(data, .w)
       if (!is.na(.event)) data <- .dataSetEvent(data, .w, .event)
@@ -522,6 +525,7 @@
         .dE <- .orig[.w, ]
         .dE$admd <- .cur$admd
         .dE$cmt <- .cmt
+        if (.cmt %in% fCmt) .dE <- .dataRateToDur(.dE, seq_along(.w))
         if (isTRUE(.cur$dur)) .dE <- .dataDurRate(.dE, seq_along(.w))
         if (isTRUE(.cur$transit)) .dE <- .dataTransitEvid(.dE, seq_along(.w))
         if (!is.na(.event)) .dE <- .dataSetEvent(.dE, seq_along(.w), .event)
@@ -607,6 +611,38 @@
   .a <- .fill(a, b)
   .b <- .fill(b, .a)
   rbind(.a, .b[, names(.a)])
+}
+
+#' Compartments the model gives a bioavailability
+#'
+#' @param ui rxode2 ui
+#' @return character vector of compartment names
+#' @noRd
+#' @author Matthew L. Fidler
+.dataFCmt <- function(ui) {
+  .l <- vapply(ui$lstExpr, deparse1, character(1))
+  .re <- "^\\s*(f|F|bioavailability)[(]\\s*([^) ]+)\\s*[)]\\s*(<-|=).*$"
+  unique(sub(.re, "\\2", grep(.re, .l, value=TRUE, perl=TRUE), perl=TRUE))
+}
+
+#' Infusions given by a rate into a compartment with a bioavailability
+#'
+#' Monolix keeps the infusion duration AMT/RATE and scales the rate by
+#' the bioavailability; rxode2 keeps a data rate, so give the duration.
+#'
+#' @param data dataset
+#' @param w dose rows
+#' @return data with `dur` = `amt`/`rate` and `rate` 0 on those rows
+#' @noRd
+#' @author Matthew L. Fidler
+.dataRateToDur <- function(data, w) {
+  if (length(w) == 0L || is.null(data[["rate"]])) return(data)
+  .w <- w[!is.na(data$rate[w]) & data$rate[w] > 0 & !is.na(data$amt[w]) & data$amt[w] > 0]
+  if (length(.w) == 0L) return(data)
+  if (is.null(data[["dur"]])) data$dur <- 0
+  data$dur[.w] <- data$amt[.w] / data$rate[.w]
+  data$rate[.w] <- 0
+  data
 }
 
 #' Zero-order absorption doses (Tk0) are modeled infusions
@@ -833,7 +869,7 @@ monolixDataImport <- function(ui, data, na.strings = c("NA", ".")) {
   }
   data <- .dataRenameFromMlxtran(data, .mlxtran)
   data <- .dataSplitDoseObs(data)
-  data <- .dataConvertAdm(data, ui$admd, .dataPkMacros(.mlxtran))
+  data <- .dataConvertAdm(data, ui$admd, .dataPkMacros(.mlxtran), .dataFCmt(rxui))
   if (!is.null(data[["mdv"]]) || !is.null(data[["evid"]])) data <- .dataEvid(data)
   data <- .dataConvertEndpoints(data, ui)
   .ld <- tolower(names(data))

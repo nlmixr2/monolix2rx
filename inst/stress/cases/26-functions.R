@@ -102,6 +102,7 @@ kitVariant("ode-turnover", "ode-nonstiff-explicit",
 ## Simulx) accepts it is to confirm in run mode
 kitVariant("pkmodel-oral-1cmt", "param-mean-keyword",
            "[INDIVIDUAL] DEFINITION: mean= (the log-scale mean) instead of typical=",
+           knownRun="Monolix 2024R1 refuses mean= in a distribution: \"Expected a typical value\"",
            tags=c("params", "syntax"),
            mlxtran=local({
              .m <- gsub("typical=", "mean=",

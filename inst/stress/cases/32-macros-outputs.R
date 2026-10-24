@@ -11,6 +11,7 @@ kitVariant("macro-oral-iv-2cmt", "macro-type-alias",
 ## the second administration is a bolus into the peripheral compartment
 kitVariant("macro-oral-iv-2cmt", "macro-iv-peripheral",
            "iv(adm=2, cmt=2) into the compartment a peripheral() macro defines",
+           knownRun="Monolix 2024R1: Cannot find the compartment 2 (iv() before peripheral()); see macro-iv-peripheral-after",
            tags=c("pk", "macro", "adm"),
            data=function(nSub) {
              .id <- seq_len(nSub)

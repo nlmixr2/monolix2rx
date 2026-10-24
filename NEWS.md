@@ -22,6 +22,11 @@
   observation.  The records are found by their compartment, so the
   imported data gives a single event endpoint's observations its `cmt`.
 
+* Switched `$etaData` and the validation to Monolix's conditional modes
+  (`eta_*_mode`, `indivPred_mode`, `indWRes_mode`), which reproduce each
+  other where the `_SAEM` columns do not.  The SAEM random effects are
+  kept in `$etaSaemData`; a run without the modes still uses `_SAEM`.
+
 * Dropped the re-exports (`rxode2()`, `rxode()`, `RxODE()`, `ini()`,
   `model()`, `model<-`, `rxRename()`, `rxSolve()`, `rxUiGet()`, `logit()`,
   `expit()`, `lotri()`, `autoplot()` and `%>%`).  Load `nlmixr2` (or
@@ -247,6 +252,29 @@
   `var=`) is not named `omega_<parameter>` (like `var=omega2_Cl` or a
   fixed `sd=0.3`): Monolix's `eta_Cl` column became `omega_Cl`, which is
   not an eta of the model, so the validation solve failed.
+
+* Fixed PK macro and `pkmodel()` arguments given as expressions
+  (`Cl=a+b`, `V=V1*WT`, `k12=c-d`), which were pasted into the ODEs
+  without parentheses.
+
+* Fixed `depot(target=central, ka)`, whose doses went to a `depot`
+  compartment the model does not have instead of its `centrald` state.
+
+* Fixed the import of a run with occasions (an occasion column or an
+  `EVID=4` washout), whose `summary.txt` "Number of subjects-occasion"
+  line stopped the import; random effects Monolix repeats on each occasion
+  of a model without IOV are read once per subject.
+
+* Fixed the validation of a data set with a subject without observations,
+  which Monolix leaves out of its estimates.
+
+* Fixed a run without `exportpath` whose results are next to the project
+  (lixoftConnectors), which imported without the final estimates.
+
+* Fixed an infusion given by a `RATE` into a compartment with a
+  bioavailability: Monolix keeps the duration `AMT/RATE` and scales the
+  rate, while rxode2 kept the rate and shortened the infusion; such doses
+  are now imported with a `dur`.
 
 * Fixed the validation of censored data: the censored observations were
   left out of the rxode2 solve but not of Monolix's predictions, so they

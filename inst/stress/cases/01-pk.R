@@ -69,7 +69,7 @@ output = Cc
 ## IV bolus, two compartments
 kitCase(
   name="pkmodel-iv-2cmt",
-  covers="pkmodel(V, Cl, Q2=Q, V2) two-compartment IV bolus with clearances",
+  covers="pkmodel(V, k=Cl/V, k12=Q/V, k21=Q/V2) two-compartment IV bolus with clearances",
   tags=c("pk", "pkmodel"),
   sim=function() {
     ini({
@@ -99,7 +99,7 @@ kitCase(
 input = {V, Cl, Q, V2}
 
 EQUATION:
-Cc = pkmodel(V, Cl, Q2=Q, V2)
+Cc = pkmodel(V, k=Cl/V, k12=Q/V, k21=Q/V2)
 
 OUTPUT:
 output = Cc
@@ -295,7 +295,7 @@ kitCase(
 
 kitCase(
   name="pkmodel-iv-3cmt",
-  covers="pkmodel(V, Cl, Q2, V2, Q3, V3) three-compartment IV bolus",
+  covers="pkmodel(V, k=Cl/V, k12=Q2/V, k21=Q2/V2, k13=Q3/V, k31=Q3/V3) three-compartment IV bolus",
   tags=c("pk", "pkmodel"),
   sim=function() {
     ini({
@@ -322,7 +322,7 @@ kitCase(
     mlxBind(mlxDose(.id, 0, amt=100, cmt=1),
             mlxObs(.id, c(0.1, pkTimes(72), 120, 168), cmt=1))
   },
-  model=.pkModel("V, Cl, Q2, V2, Q3, V3", "Cc = pkmodel(V, Cl, Q2, V2, Q3, V3)"),
+  model=.pkModel("V, Cl, Q2, V2, Q3, V3", "Cc = pkmodel(V, k=Cl/V, k12=Q2/V, k21=Q2/V2, k13=Q3/V, k31=Q3/V3)"),
   mlxtran=.mlxProject(list(V=.mlxPar(10, 0.2), Cl=.mlxPar(2, 0.3), Q2=.mlxPar(4),
                            V2=.mlxPar(40, 0.2), Q3=.mlxPar(1), V3=.mlxPar(100))))
 
@@ -411,6 +411,7 @@ ADM = {use=administration}")))
 
 kitVariant("pkmodel-oral-1cmt", "macro-depot-target",
            "depot(target=Ac, ka) into a compartment() macro",
+           knownRun="Monolix 2024R1 refuses depot() into a compartment() amount: \"Conflicting first order depot definition\"",
            tags=c("pk", "macro"),
            model="DESCRIPTION: {{PROBLEM}}
 

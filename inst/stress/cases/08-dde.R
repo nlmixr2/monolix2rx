@@ -44,8 +44,9 @@ output = x
 TIME = {use=time}
 DV = {use=observation, name=CONC, type=continuous}"))
 
-## The delayed-effect model: oral PK, indirect response on delay(Ac, tau)/V.
-## `ode` is extra text at the start of EQUATION:
+## The delayed-effect model: oral PK, indirect response on delay(Ac, tau)/V
+## (Monolix needs delay() directly in the ddt_ equation).  `ode` is extra
+## text at the start of EQUATION:
 .ddeEffectModel <- function(ode="") {
   paste0("DESCRIPTION: {{PROBLEM}}
 
@@ -62,8 +63,7 @@ Ac_0 = 0
 R_0 = Kin/Kout
 ddt_Ad = -ka*Ad
 ddt_Ac = ka*Ad - Cl/V*Ac
-Cd = delay(Ac, tau)/V
-ddt_R = Kin*(1 - Imax*Cd/(Cd + IC50)) - Kout*R
+ddt_R = Kin*(1 - Imax*delay(Ac, tau)/(delay(Ac, tau) + IC50*V)) - Kout*R
 
 OUTPUT:
 output = R
@@ -166,8 +166,7 @@ elimination(cmt=1, k)
 EQUATION:
 t_0 = 0
 R_0 = Kin/Kout
-Cd = delay(Ac, tau)/V
-ddt_R = Kin*(1 - Imax*Cd/(Cd + IC50)) - Kout*R
+ddt_R = Kin*(1 - Imax*delay(Ac, tau)/(delay(Ac, tau) + IC50*V)) - Kout*R
 
 OUTPUT:
 output = R
@@ -200,7 +199,7 @@ kitVariant("dde-delayed-effect", "dde-delay-expr",
                R ~ add(a) + prop(b) + combined1()
              })
            },
-           model=sub("delay(Ac, tau)", "delay(Ac, 0.5*tau)", .ddeEffectModel(), fixed=TRUE),
+           model=gsub("delay(Ac, tau)", "delay(Ac, 0.5*tau)", .ddeEffectModel(), fixed=TRUE),
            mlxtran=.ddeEffectProject(tau=8))
 
 ## a delayed depot (a lag written as a delay) and a delayed effect
@@ -254,8 +253,7 @@ Ac_0 = 0
 R_0 = Kin/Kout
 ddt_Ad = -ka*Ad
 ddt_Ac = ka*delay(Ad, tlag) - Cl/V*Ac
-Cd = delay(Ac, tau)/V
-ddt_R = Kin*(1 - Imax*Cd/(Cd + IC50)) - Kout*R
+ddt_R = Kin*(1 - Imax*delay(Ac, tau)/(delay(Ac, tau) + IC50*V)) - Kout*R
 
 OUTPUT:
 output = R

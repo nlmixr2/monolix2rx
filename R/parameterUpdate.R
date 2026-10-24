@@ -15,12 +15,22 @@
 #'
 #' @param mlx parsed mlxtran object
 #' @return `exportpath`, or the project name Monolix uses without it
-#'   (NULL when unknown)
+#'   (`"."` when the results are next to the project; NULL when unknown)
 #' @noRd
 #' @author Matthew L. Fidler
 .mlxtranExportPath <- function(mlx) {
   .e <- mlx$MONOLIX$SETTINGS$GLOBAL$exportpath
-  if (is.null(.e)) .e <- attr(mlx, "exportDefault")
+  if (is.null(.e)) {
+    .e <- attr(mlx, "exportDefault")
+    # lixoftConnectors can write the results next to the project
+    # without the project directory the caller runs in it
+    .wd <- attr(mlx, "dirn")
+    if (is.null(.wd)) .wd <- "."
+    if (!is.null(.e) && !dir.exists(file.path(.wd, .e)) &&
+          file.exists(file.path(.wd, "populationParameters.txt"))) {
+      .e <- "."
+    }
+  }
   .e
 }
 #' Get the best mlxtran info or return NULL

@@ -56,7 +56,7 @@ kitRunMonolix <- function(dir, cmd, timeout=3600, export=.kitExport) {
   .old <- setwd(dir)
   on.exit(setwd(.old))
   unlink(c(export, "monolix.failed", "resave.failed", "run-resaved.mlxtran",
-           "run-resaved"), recursive=TRUE)
+           "run-resaved", "populationParameters.txt"), recursive=TRUE)
   .cmd <- gsub("{mlxtran}", "run.mlxtran", cmd, fixed=TRUE)
   .t0 <- Sys.time()
   if (.Platform$OS.type == "windows") {
@@ -78,6 +78,8 @@ kitRunMonolix <- function(dir, cmd, timeout=3600, export=.kitExport) {
   .obs <- grep("use=observation", .prj, fixed=TRUE, value=TRUE)
   .disc <- length(.obs) > 0L && all(grepl("type=", .obs, fixed=TRUE)) &&
     !any(grepl("continuous", .obs, fixed=TRUE))
+  ## lixoftConnectors can write the results next to the project
+  if (!dir.exists(export) && file.exists("populationParameters.txt")) export <- "."
   .ok <- identical(as.integer(.status), 0L) && !file.exists("monolix.failed") &&
     file.exists(file.path(export, "populationParameters.txt")) &&
     (.disc || length(Sys.glob(file.path(export, "predictions*.txt"))) > 0L)

@@ -86,6 +86,7 @@ kitVariant("ode-dose-keywords", "ode-dose-keywords-tlag",
 ## kept; rxode2 resets first in either order, so only run mode can fail
 kitVariant("pkmodel-oral-1cmt", "macro-reset-dose-tie",
            "reset(adm=3) and a dose on lines at the same time (reset first in the data)",
+           knownRun="Monolix 2024R1: \"Conflicting reset definition\" for empty()/reset() with compartment() macros",
            tags=c("pk", "macro", "dosing"),
            data=function(nSub) {
              .id <- seq_len(nSub)
@@ -104,7 +105,7 @@ kitVariant("pkmodel-oral-1cmt", "macro-reset-dose-tie",
 kitVariant("macro-empty-tlag", "macro-empty-dose-tie",
            "empty(adm=2, target=Ac) and an iv bolus into Ac on lines at the same time (empty first in the data)",
            tags=c("pk", "macro", "dosing"),
-           knownRun=NULL,
+           knownRun="Monolix 2024R1: \"Conflicting reset definition\" for empty()/reset() with compartment() macros",
            sim=function() {
              ini({
                V_pop <- 30; Cl_pop <- 3

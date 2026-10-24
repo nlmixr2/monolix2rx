@@ -146,9 +146,15 @@
   .tol <- .getRtolAtol(.ui)
   .method <- .getMethod(.ui)
   .pop <- .parameterThetaEta(.ui, pop=TRUE)
-  .ind <- .parameterThetaEta(.ui, pop=FALSE)
   .model <- ui$monolixModelIwres
   .data <- ui$monolixData
+  .keep <- as.character(.data$id) %in% as.character(.ui$etaData$id)
+  if (!is.null(.data) && any(.keep) && !all(.keep)) {
+    # Monolix estimates no random effects for a subject without observations
+    .minfo("leaving out subjects Monolix has no random effects for")
+    .data <- .data[.keep, , drop=FALSE]
+  }
+  .ind <- .parameterThetaEta(.ui, pop=FALSE, data=.data)
   if (!is.null(.data) && is.null(.data[["mixest"]]) &&
         any(grepl("\\bmix[(]", vapply(.ui$lstExpr, deparse1, character(1))))) {
     # rxode2 would draw each subject's class at random

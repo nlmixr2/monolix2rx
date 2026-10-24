@@ -64,6 +64,7 @@ RATE = {use=rate}")))
 kitCase(
   name="dose-ss",
   covers="steady-state dose (use=steadystate, nbdoses=10) with II, then a second regimen",
+  knownRun="Monolix 2024R1 PRED with nbdoses=10 fits 11 doses (10 before the current one) at the final estimates; rxode2 minSS does not reproduce that count",
   tags=c("dosing", "ss"),
   nbSSDoses=10L,
   sim=function() {

@@ -28,3 +28,24 @@ test_that(paste0("censored observations are left out of both validation sides, C
   expect_true(.rx$ipredAtol < 0.05)
 })
 }
+
+test_that("a subject without observations is left out of the validation", {
+  skip_on_cran()
+  .dir <- file.path(tempfile(), "theo")
+  dir.create(.dir, recursive = TRUE)
+  on.exit(unlink(dirname(.dir), recursive = TRUE))
+  file.copy(
+    list.files(system.file("theo", package = "monolix2rx"), full.names = TRUE),
+    .dir,
+    recursive = TRUE
+  )
+  # a dose-only subject, which Monolix gives no random effects
+  .d <- file.path(.dir, "data", "theophylline_data.txt")
+  .l <- readLines(.d)
+  writeLines(c(.l, "99\t4\t0\t.\t70\tM"), .d)
+  # rxode2 warns that it drops the subject
+  .rx <- suppressWarnings(suppressMessages(monolix2rx(file.path(.dir, "theophylline_project.mlxtran"))))
+  expect_true(99 %in% .rx$monolixData$id)
+  expect_null(.rx$monolixNotMatched)
+  expect_true(.rx$ipredAtol < 1e-4)
+})

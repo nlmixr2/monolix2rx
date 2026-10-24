@@ -93,6 +93,7 @@ kitVariant("pkmodel-oral-1cmt", "err-lognormal", "logNormal observation with con
                                err="constant(a)", errPar=c(a=0.2), obsDist="logNormal"))
 
 kitVariant("pkmodel-oral-1cmt", "err-combined1c", "combined1c(a, b, c): a + b*f^c",
+           knownRun="Monolix 2024R1: \"Unknown error model\" for combined1c(a, b, c)",
            tags=c("error"),
            sim=.oralErrTruth(quote(add(a) + pow(b, c) + combined1()),
                              list(quote(a <- 0.05), quote(b <- 0.1), quote(c <- 0.8))),
@@ -100,6 +101,7 @@ kitVariant("pkmodel-oral-1cmt", "err-combined1c", "combined1c(a, b, c): a + b*f^
                                err="combined1c(a, b, c)", errPar=c(a=0.05, b=0.1, c=0.8)))
 
 kitVariant("pkmodel-oral-1cmt", "err-combined2c", "combined2c(a, b, c): sqrt(a^2 + (b*f^c)^2)",
+           knownRun="Monolix 2024R1: \"Unknown error model\" for combined2c(a, b, c)",
            tags=c("error"),
            sim=.oralErrTruth(quote(add(a) + pow(b, c) + combined2()),
                              list(quote(a <- 0.05), quote(b <- 0.1), quote(c <- 0.8))),

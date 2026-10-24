@@ -256,16 +256,37 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
     .ui$monolixData <- .monolixData
     .ui$sticky <- "monolixData"
   }
+  # the etas and the predictions come from the same Monolix estimate
   .etaData <- try(monolixEtaImport(.ui))
   if (inherits(.etaData, "try-error")) .etaData <- NULL
+  .est <- if (is.null(.etaData)) "mode" else attr(.etaData, "est")
+  .predIpredData <- try(monolixPredIpred(.ui, est=.est))
+  if (inherits(.predIpredData, "try-error")) .predIpredData <- NULL
+  if (!is.null(.predIpredData) && !identical(attr(.predIpredData, "est"), .est)) {
+    .est <- attr(.predIpredData, "est")
+    if (!is.null(.etaData)) {
+      .etaData <- try(monolixEtaImport(.ui, est=.est))
+      if (inherits(.etaData, "try-error")) .etaData <- NULL
+    }
+  }
   if (!is.null(.etaData)) {
-    .minfo(paste0("imported monolix ETAS (_SAEM) imported to rxode2 compatible data (",
+    .est <- attr(.etaData, "est")
+    attr(.etaData, "est") <- NULL
+    .minfo(paste0("imported monolix ETAS (_", .est, ") imported to rxode2 compatible data (",
                   crayon::bold$blue("$etaData"), ")"))
     .ui$etaData <- .etaData
+    if (identical(.est, "mode")) {
+      .etaSaem <- try(monolixEtaImport(.ui, est="SAEM"))
+      if (!inherits(.etaSaem, "try-error") && !is.null(.etaSaem)) {
+        attr(.etaSaem, "est") <- NULL
+        .minfo(paste0("imported monolix ETAS (_SAEM) to ",
+                      crayon::bold$blue("$etaSaemData")))
+        .ui$etaSaemData <- .etaSaem
+      }
+    }
   }
-  .predIpredData <- try(monolixPredIpred(.ui))
-  if (inherits(.predIpredData, "try-error")) .predIpredData <- NULL
   if (!is.null(.predIpredData)) {
+    attr(.predIpredData, "est") <- NULL
     .minfo(paste0("imported monolix pred/ipred data to compare (",
                   crayon::blue$bold("$predIpredData"), ")"))
     .ui$predIpredData <- .predIpredData

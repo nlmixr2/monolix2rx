@@ -4,6 +4,7 @@
 ## if/else cannot be inlined into the parameter, so it starts the model
 kitVariant("pkmodel-oral-1cmt", "cov-equation-ifelse",
            "weight band from if/elseif/else in [COVARIATE] EQUATION: (hWT) on Cl, next to lw70 on V",
+           knownRun="Monolix 2024R1: \"Conditional assignments in [COVARIATE] block are only allowed in Simulx\"",
            tags=c("covariate"),
            sim=function() {
              ini({

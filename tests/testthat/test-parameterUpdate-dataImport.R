@@ -350,5 +350,5 @@ test_that("predictions are also read from predictions_<observation>.txt", {
   file.rename(file.path(.dir, "tp", "predictions.txt"),
               file.path(.dir, "tp", paste0("predictions_", monolixEndpoints(.mlx), ".txt")))
   .p <- monolixPredIpred(.mlx)
-  expect_equal(.p[, names(.ref)], .ref)
+  expect_equal(.p[, names(.ref)], .ref, ignore_attr = "est")
 })

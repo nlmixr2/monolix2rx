@@ -43,6 +43,7 @@ output = Cc
 ## compartment is emptied
 kitVariant("pkmodel-oral-1cmt", "macro-empty",
            "empty(adm=2, target=Ac): an ADM=2 line empties the central compartment, absorption continues",
+           knownRun="Monolix 2024R1: \"Conflicting reset definition\" for empty()/reset() with compartment() macros",
            tags=c("pk", "macro", "dosing"),
            data=function(nSub) {
              .id <- seq_len(nSub)
@@ -60,6 +61,7 @@ kitVariant("pkmodel-oral-1cmt", "macro-empty",
 ## compartment would differ
 kitVariant("pkmodel-oral-1cmt", "macro-reset",
            "reset(adm=3): an ADM=3 line resets every compartment (depot too) with drug on board, then a new dose",
+           knownRun="Monolix 2024R1: \"Conflicting reset definition\" for empty()/reset() with compartment() macros",
            tags=c("pk", "macro", "dosing"),
            data=function(nSub) {
              .id <- seq_len(nSub)
@@ -77,6 +79,7 @@ kitVariant("pkmodel-oral-1cmt", "macro-reset",
 ## event too); the truth lags ADM=1 only
 kitVariant("pkmodel-oral-1cmt", "macro-empty-tlag",
            "iv(adm=1, cmt=1, Tlag) and empty(adm=2, target=Ac) on the same compartment",
+           knownRun="Monolix 2024R1: \"Conflicting reset definition\" for empty()/reset() with compartment() macros",
            tags=c("pk", "macro", "dosing", "tlag"),
            sim=function() {
              ini({

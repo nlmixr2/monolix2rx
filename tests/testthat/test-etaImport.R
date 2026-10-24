@@ -59,3 +59,80 @@ test_that("individual parameters follow the data's subject order with numeric id
   expect_equal(.p$eta.ka, c(0.1, 0.2))
   expect_equal(.p$tka, c(1, 1))
 })
+
+test_that("the conditional modes are imported, the SAEM etas kept in $etaSaemData", {
+  skip_on_cran()
+  .dir <- file.path(tempfile(), "theo")
+  dir.create(.dir, recursive = TRUE)
+  on.exit(unlink(dirname(.dir), recursive = TRUE))
+  file.copy(
+    list.files(system.file("theo", package = "monolix2rx"), full.names = TRUE),
+    .dir,
+    recursive = TRUE
+  )
+  .f <- file.path(.dir, "theophylline_project.mlxtran")
+  .re <- read.csv(file.path(.dir, "tp", "IndividualParameters", "estimatedRandomEffects.txt"))
+  .rx <- suppressMessages(monolix2rx(.f))
+  expect_equal(.rx$etaData$omega_Cl, .re$eta_Cl_mode)
+  expect_equal(.rx$etaSaemData$omega_Cl, .re$eta_Cl_SAEM)
+  expect_null(attr(.rx$etaData, "est"))
+  expect_true(.rx$ipredAtol < 1e-4)
+  # without the modes in one of the files, both the etas and the ipred are SAEM
+  .noMode <- function(.p) {
+    .d <- read.csv(.p, check.names = FALSE)
+    write.csv(.d[, !grepl("_mode$", names(.d))], .p, row.names = FALSE, quote = FALSE)
+  }
+  .noMode(file.path(.dir, "tp", "predictions.txt"))
+  .rx <- suppressMessages(monolix2rx(.f))
+  expect_equal(.rx$etaData$omega_Cl, .re$eta_Cl_SAEM)
+  expect_null(.rx$etaSaemData)
+  expect_true(.rx$ipredAtol < 0.05)
+  .noMode(file.path(.dir, "tp", "IndividualParameters", "estimatedRandomEffects.txt"))
+  .rx <- suppressMessages(monolix2rx(.f))
+  expect_equal(.rx$etaData$omega_Cl, .re$eta_Cl_SAEM)
+  expect_true(.rx$ipredAtol < 0.05)
+})
+
+test_that("occasion rows repeating the random effects collapse to one per subject", {
+  skip_on_cran()
+  .dir <- file.path(tempfile(), "theo")
+  dir.create(.dir, recursive = TRUE)
+  on.exit(unlink(dirname(.dir), recursive = TRUE))
+  file.copy(
+    list.files(system.file("theo", package = "monolix2rx"), full.names = TRUE),
+    .dir,
+    recursive = TRUE
+  )
+  .p <- file.path(.dir, "tp", "IndividualParameters", "estimatedRandomEffects.txt")
+  .re <- read.csv(.p)
+  .occ <- rbind(cbind(.re[, 1, drop = FALSE], OCCevid = 1L, .re[, -1]),
+                cbind(.re[, 1, drop = FALSE], OCCevid = 2L, .re[, -1]))
+  write.csv(.occ[order(.occ$id), ], .p, row.names = FALSE, quote = FALSE)
+  .rx <- suppressMessages(monolix2rx(file.path(.dir, "theophylline_project.mlxtran")))
+  expect_equal(.rx$etaData$id, .re$id)
+  expect_equal(.rx$etaData$omega_Cl, .re$eta_Cl_mode)
+  expect_true(.rx$ipredAtol < 1e-4)
+})
+
+test_that("results written next to the project are found without an exportpath", {
+  skip_on_cran()
+  .dir <- file.path(tempfile(), "theo")
+  dir.create(.dir, recursive = TRUE)
+  on.exit(unlink(dirname(.dir), recursive = TRUE))
+  file.copy(
+    list.files(system.file("theo", package = "monolix2rx"), full.names = TRUE),
+    .dir,
+    recursive = TRUE
+  )
+  .f <- file.path(.dir, "theophylline_project.mlxtran")
+  .l <- readLines(.f)
+  .e <- grep("^exportpath", .l)
+  expect_length(.e, 1L)
+  writeLines(.l[-.e], .f)
+  file.copy(list.files(file.path(.dir, "tp"), full.names = TRUE), .dir, recursive = TRUE)
+  unlink(file.path(.dir, "tp"), recursive = TRUE)
+  .rx <- suppressMessages(monolix2rx(.f))
+  expect_false(is.null(.rx$etaData))
+  expect_true(.rx$ipredAtol < 1e-4)
+  expect_true(.rx$predAtol < 1e-4)
+})

@@ -288,3 +288,14 @@ test_that("a reserved name as a model input is an error", {
              file.path(.dir, "model.txt"))
   expect_error(suppressMessages(monolix2rx(.f)), "rxode2 reserves 'rate'")
 })
+
+test_that("macro argument expressions keep their own parentheses", {
+  expect_equal(.equation("Cc = pkmodel(V, Cl=a+b)")$rx[1],
+               "d/dt(central) <-  - (a+b)/V*central")
+  expect_equal(.equation("Cc = pkmodel(ka, V=V1*WT, Cl)")$rx[2:3],
+               c("d/dt(central) <-  + ka*depot - Cl/(V1*WT)*central",
+                 "Cc <- central/(V1*WT)"))
+  .p <- .pk("compartment(cmt=1, amount=Ac)\noral(cmt=1, ka=k1+k2)\nperipheral(k12=a+b, k21=c)\nelimination(cmt=1, k=c-d)")
+  expect_equal(.equation("Cc = Ac/V", .p)$rx[2],
+               "d/dt(Ac) <-  - (a+b)*Ac + c*cmt2 + (k1+k2)*Acd - (c-d)*Ac")
+})

@@ -53,6 +53,7 @@ ADDL = {use=additionaldose}")))
 ## EVID=3 resets without a dose; drug is still on board at the reset
 kitVariant("pkmodel-oral-1cmt", "dose-evid3-reset",
            "EVID=3 line (reset, no dose) with drug on board, then a new dose",
+           knownRun="Monolix 2024R1 PRED carries on through an EVID=3 line with AMT=., as without a reset; see dose-evid3-amt0",
            tags=c("dosing", "evid"),
            data=function(nSub) {
              .id <- seq_len(nSub)

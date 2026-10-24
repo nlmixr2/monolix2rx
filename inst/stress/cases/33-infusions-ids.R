@@ -1,23 +1,27 @@
 ## A bioavailability on infusions, ADDL repeats of an infusion and of a
 ## lagged oral dose, censoring on the second endpoint only, sparse IDs
 
-## rxode2 keeps a RATE and shortens the infusion to p*AMT/RATE; Monolix
-## may keep the duration instead (to confirm in run mode)
+## Monolix 2024R1 keeps the duration AMT/RATE and scales the rate by p
+## (the truth infuses by duration; the file gives the RATE)
 kitVariant("macro-iv-tlag-p", "macro-iv-p-rate",
-           "iv(cmt=1, Tlag, p) with RATE infusions: p scales the amount at a given rate",
+           "iv(cmt=1, Tlag, p) with RATE infusions: p scales the rate, the duration AMT/RATE is kept",
            tags=c("pk", "macro", "infusion"),
            data=function(nSub) {
              .id <- seq_len(nSub)
-             mlxBind(mlxDose(.id, c(0, 12), amt=100, rate=40, cmt=1),
+             mlxBind(mlxDose(.id, c(0, 12), amt=100, cmt=1, DUR=2.5),
                      mlxObs(.id, c(0.5, 1, 2, 2.5, 3, 3.5, 4, 6, 12.5, 13, 14, 15, 16, 20, 24), cmt=1))
            },
-           columns=c("ID", "TIME", "AMT", "RATE", "DV"),
+           write=function(d) {
+             d <- .kitMonolixRows(d)
+             d$RATE <- ifelse(is.na(d$AMT), NA, d$AMT / d$DUR)
+             d[, c("ID", "TIME", "AMT", "RATE", "DV")]
+           },
            mlxtran=.mlxProject(list(Tlag=.mlxPar(0.75, 0.3), p=.mlxPar(0.8, dist="logitNormal"),
                                     V=.mlxPar(10, 0.2), Cl=.mlxPar(2, 0.3)),
                                content=paste0(.mlxContent, "
 RATE = {use=rate}")))
 
-## with a duration rxode2 keeps the duration and scales the rate
+## with a duration rxode2 also keeps the duration and scales the rate
 kitVariant("macro-iv-p-rate", "macro-iv-p-tinf",
            "iv(cmt=1, Tlag, p) with infusions given by their duration (use=infusiontime)",
            tags=c("pk", "macro", "infusion"),
@@ -26,7 +30,7 @@ kitVariant("macro-iv-p-rate", "macro-iv-p-tinf",
              mlxBind(mlxDose(.id, c(0, 12), amt=100, cmt=1, DUR=2.5, TINF=2.5),
                      mlxObs(.id, c(0.5, 1, 2, 2.5, 3, 3.5, 4, 6, 12.5, 13, 14, 15, 16, 20, 24), cmt=1))
            },
-           columns=c("ID", "TIME", "AMT", "TINF", "DV"),
+           write=function(d) .kitMonolixRows(d)[, c("ID", "TIME", "AMT", "TINF", "DV")],
            mlxtran=.kitSub("macro-iv-p-rate", "mlxtran", "RATE = {use=rate}", "TINF = {use=infusiontime}"))
 
 kitVariant("dose-infusion-rate", "dose-addl-infusion",

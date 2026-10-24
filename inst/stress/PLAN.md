@@ -113,6 +113,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `31-spellings-odes.R` | the camelCase `use=` spellings (`steadyState`, `interDoseInterval`, `eventIdentifier`, `missingDependentVariable`), `delimiter = semicolumn`, `probitnormal`, `method=Mle` (also fixed by `est="fixed"`), ODEs defined in both branches of an `if`/`else`, a negative binomial count |
 | `32-macros-outputs.R` | `type=` instead of `adm=` in `oral()`/`iv()`, a bolus into a `peripheral()` compartment, a lowercase `lognormal` observation, a cumulative urine amount (an ODE state) observed with a concentration |
 | `33-infusions-ids.R` | `iv(cmt=1, Tlag, p)` with RATE and with infusion-time infusions, ADDL/II repeats of an infusion and of a lagged oral dose, `CENS` on the second `YTYPE` endpoint only, sparse numeric subject IDs |
+| `34-monolix-probes.R` | rewrites of what the first Monolix run refused: `empty()`/`reset()` on ODE states, `EVID=3` with `AMT=0`, `0.5*(-~f)`, `iv()` after `peripheral()`; `factorial()` of a non-integer |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -528,11 +529,32 @@ Notes for later cases:
   `adm=`), an `iv()` dose into a `peripheral()` compartment and a
   lowercase observation distribution (no Lixoft documentation found).
 - `33-infusions-ids.R`: `data-cens-second-endpoint` writes `CENS` as `.` on
-  the dose lines, which stopped the validation (fixed).  To confirm in run mode: a
-  bioavailability on a RATE infusion (rxode2 keeps the rate and shortens
-  the infusion to `p*AMT/RATE`; Monolix may keep the duration instead) and
-  on an infusion-time infusion (rxode2 keeps the duration and scales the
-  rate; Monolix presumably does the same).
+  the dose lines, which stopped the validation (fixed).  The first
+  Monolix 2024R1 run showed that a bioavailability on a RATE infusion keeps
+  the duration `AMT/RATE` and scales the rate; rxode2 keeps a data rate,
+  so the import now gives such doses as a duration (fixed).  To confirm in
+  run mode: an infusion-time infusion (rxode2 keeps the duration and
+  scales the rate; Monolix presumably does the same).
+- First Monolix 2024R1 run (152 PASS, 41 FAIL): Monolix refused the kit's
+  `pkmodel(Q2=Q)` (`pkmodel()` takes `k12`/`k21`/`k13`/`k31` only) and a
+  `delay()` assigned to a variable (it must be in the `ddt_` equation);
+  both were rewritten.  `knownRun=` records what Monolix refuses that the
+  import accepts: `depot()` into a `compartment()` amount, `empty()`/
+  `reset()` with `compartment()` macros ("Conflicting reset definition"),
+  `combined1c`/`combined2c` ("Unknown error model"; the GUI-saved syntax is
+  to find), `[COVARIATE]` `if`/`else` (Simulx only), a shared or zero
+  error parameter, `mean=`, `0.5*-~f`, `iv()` before `peripheral()` and
+  an `EVID=3` line with `AMT=.` (no reset).  `34-monolix-probes.R` tries
+  the accepted rewrites.  Import fixes from the run: the conditional modes,
+  a RATE infusion with a bioavailability, the "subjects-occasion" summary
+  line and repeated occasion etas, a subject without observations and
+  results next to the project.  Still open: `nbdoses=10` matches 11 doses
+  and rxode2's `minSS` cannot reproduce it, `factorial()` of a non-integer
+  (floor or round), and `dde-hutchinson` (PRED up to 8 %).
+- First Monolix 2024R1 run: `indivPred_SAEM` is not reproduced by the
+  `eta_*_SAEM` random effects (SAEM averages the parameters and the random
+  effects separately); the conditional modes reproduce `indivPred_mode`
+  to about 1e-6, so `$etaData` and the validation use the modes (fixed).
 - `reg-ode-input`: whether Monolix's ODE solver restarts at regressor-only
   lines (a small numerical difference) is to confirm in run mode.
 

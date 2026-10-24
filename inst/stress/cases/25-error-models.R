@@ -3,6 +3,7 @@
 ## the parent/metabolite project with one additive parameter for both
 kitVariant("two-endpoints-parent-metabolite", "err-shared-param",
            "two endpoints sharing their additive error parameter (combined1(a, b1) and combined1(a, b2))",
+           knownRun="Monolix 2024R1 refuses an error parameter shared by two observations: \"This input is already under use\"",
            tags=c("endpoints", "error"),
            sim=function() {
              ini({
@@ -43,6 +44,7 @@ YTYPE = {use=observationtype}"))
 ## two assays of the same concentration, each with its own error model
 kitVariant("two-endpoints-parent-metabolite", "err-same-pred",
            "two observations of the same prediction (two assays of Cc) with different error models",
+           knownRun="Monolix 2024R1 (lixoftConnectors) crashed loading two observations of the same prediction",
            tags=c("endpoints", "error"),
            sim=function() {
              ini({
@@ -84,6 +86,7 @@ YTYPE = {use=observationtype}"))
 ## a combined1 error whose additive part is fixed at 0
 kitVariant("pkmodel-oral-1cmt", "err-additive-fixed-zero",
            "combined1(a, b) with a fixed at 0 (proportional in effect)",
+           knownRun="Monolix 2024R1 refuses an initial value of 0 for an error parameter: \"It must be positive\"",
            tags=c("error"),
            sim=.oralErrTruth(quote(add(a) + prop(b) + combined1()),
                              list(quote(a <- fix(0)), quote(b <- 0.1))),

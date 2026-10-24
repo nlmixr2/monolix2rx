@@ -95,6 +95,9 @@ if (any(.cont)) {
                         dv=.sim$data$DV[match(.tk$ROWID, .sim$data$ROWID)],
                         popPred=.tk$simPred, indivPred_SAEM=.tk$simIpred,
                         indWRes_SAEM=.sk$iwres[.m])
+    ## the true etas are both the SAEM and the mode estimates
+    .pred$indivPred_mode <- .pred$indivPred_SAEM
+    .pred$indWRes_mode <- .pred$indWRes_SAEM
     names(.pred)[3] <- .obs
     .w(.pred, if (sum(.cont) > 1L) paste0("predictions_", .pd$cond[.k], ".txt") else "predictions.txt")
   }
@@ -109,6 +112,7 @@ for (.e in .eta) {
   .re[[paste0("eta_", .pn, "_SAEM")]] <-
     if (is.null(.sim$etas)) 0 else .sim$etas[[.e]][match(.ids, .sim$etas$id)]
 }
+for (.n in setdiff(names(.re), "id")) .re[[sub("_SAEM$", "_mode", .n)]] <- .re[[.n]]
 .w(.re, "IndividualParameters", "estimatedRandomEffects.txt")
 .w(data.frame(id=.ids), "IndividualParameters", "estimatedIndividualParameters.txt")
 
