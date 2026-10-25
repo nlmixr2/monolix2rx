@@ -50,19 +50,23 @@ SS = {use=steadystate, nbdoses=7}
 II = {use=interdoseinterval}
 ADDL = {use=additionaldose}")))
 
-## EVID=3 resets without a dose; drug is still on board at the reset
+## Monolix 2024R1 ignores an EVID=3 line with AMT=. (the truth carries
+## on); dose-evid3-amt0 resets
 kitVariant("pkmodel-oral-1cmt", "dose-evid3-reset",
-           "EVID=3 line (reset, no dose) with drug on board, then a new dose",
-           knownRun="Monolix 2024R1 PRED carries on through an EVID=3 line with AMT=., as without a reset; see dose-evid3-amt0",
+           "EVID=3 line with AMT=. (ignored, no reset) with drug on board, then a new dose",
            tags=c("dosing", "evid"),
            data=function(nSub) {
              .id <- seq_len(nSub)
              mlxBind(mlxDose(.id, 0, amt=100, cmt=1),
-                     mlxOther(.id, 8, cmt=1, evid=3L),
+                     mlxOther(.id, 8, cmt=1, evid=2L),
                      mlxDose(.id, 10, amt=100, cmt=1),
                      mlxObs(.id, c(1, 2, 4, 7.5, 9, 11, 12, 14, 18, 24), cmt=2))
            },
-           columns=c("ID", "TIME", "AMT", "EVID", "DV"),
+           write=function(d) {
+             .w <- .kitMonolixRows(d)
+             .w$EVID[.w$EVID == 2L] <- 3L
+             .w[, c("ID", "TIME", "AMT", "EVID", "DV")]
+           },
            mlxtran=.mlxProject(list(ka=.mlxPar(1.2, 0.3), V=.mlxPar(30, 0.2),
                                     Cl=.mlxPar(3, 0.3)),
                                content=paste0(.mlxContent, "

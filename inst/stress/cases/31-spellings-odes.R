@@ -3,7 +3,7 @@
 
 kitVariant("dose-ss", "dose-ss-camelcase",
            "SS = {use=steadyState, nbdoses=10} and II = {use=interDoseInterval}",
-           knownRun="Monolix 2024R1 PRED with nbdoses=10 fits 11 doses (10 before the current one) at the final estimates; rxode2 minSS does not reproduce that count",
+           knownRun="Monolix 2024R1 PRED with nbdoses=10 fits 11 doses (10 before the current one) at the final estimates; rxode2 minSS does not reproduce that count (nlmixr2/rxode2#1492)",
            tags=c("dosing", "ss", "syntax"),
            mlxtran=.kitSub("dose-ss", "mlxtran", c("use=steadystate", "use=interdoseinterval"),
                            c("use=steadyState", "use=interDoseInterval")))

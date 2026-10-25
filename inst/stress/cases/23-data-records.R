@@ -45,7 +45,7 @@ kitVariant("pkmodel-oral-1cmt", "data-replicate-obs",
                      mlxObs(.id, c(2, 8, 8), cmt=2))
            })
 
-## whether Monolix keeps such a subject is to confirm in run mode
+## Monolix 2024R1 leaves such a subject out (19 of 20 individuals)
 kitVariant("pkmodel-oral-1cmt", "data-no-obs-subject",
            "a subject with a dose and no observations",
            tags=c("data"),

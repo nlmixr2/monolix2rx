@@ -551,6 +551,15 @@ Notes for later cases:
   results next to the project.  Still open: `nbdoses=10` matches 11 doses
   and rxode2's `minSS` cannot reproduce it, `factorial()` of a non-integer
   (floor or round), and `dde-hutchinson` (PRED up to 8 %).
+- Second Monolix 2024R1 run (the probes): `empty()`/`reset()` work on ODE
+  states, `iv()` after `peripheral()`, `EVID=3` resets with `AMT=0` and
+  is ignored with `AMT=.` (the import now ignores it), `factorial()` and
+  `factln()` round their argument (the import now rounds), `-~f` is
+  refused even in parentheses, and Monolix counts only subjects with an
+  observation.  Untested: `EVID=3` without an amount column, `EVID=4`
+  with `AMT=.`.  `dde-hutchinson` and `dde-two-delays` still differ by 1-3 %
+  with the rxode2 solve converged; `delay()` of a `compartment()` amount
+  degenerates in Monolix; `nbdoses` is nlmixr2/rxode2#1492.
 - First Monolix 2024R1 run: `indivPred_SAEM` is not reproduced by the
   `eta_*_SAEM` random effects (SAEM averages the parameters and the random
   effects separately); the conditional modes reproduce `indivPred_mode`

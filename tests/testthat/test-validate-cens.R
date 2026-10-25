@@ -49,3 +49,34 @@ test_that("a subject without observations is left out of the validation", {
   expect_null(.rx$monolixNotMatched)
   expect_true(.rx$ipredAtol < 1e-4)
 })
+
+test_that("an EVID=3 line with a missing amount is ignored, with AMT=0 it resets", {
+  skip_on_cran()
+  .run <- function(amt) {
+    .dir <- file.path(tempfile(), "theo")
+    dir.create(.dir, recursive = TRUE)
+    on.exit(unlink(dirname(.dir), recursive = TRUE))
+    file.copy(
+      list.files(system.file("theo", package = "monolix2rx"), full.names = TRUE),
+      .dir,
+      recursive = TRUE
+    )
+    .d <- file.path(.dir, "data", "theophylline_data.txt")
+    .l <- readLines(.d)
+    .evid <- c("EVID", ifelse(grepl("^[0-9]+\t[.]\t", .l[-1]), "0", "1"))
+    # a reset line for subject 1 at t = 5
+    .l <- c(paste(.l, .evid, sep = "\t"), paste0("1\t", amt, "\t5\t.\t79.6\tM\t3"))
+    writeLines(.l, .d)
+    .f <- file.path(.dir, "theophylline_project.mlxtran")
+    .p <- readLines(.f)
+    .p <- sub("SEX}", "SEX, EVID}", .p, fixed = TRUE)
+    .p <- sub("SEX = {use=covariate, type=categorical}",
+              "SEX = {use=covariate, type=categorical}\nEVID = {use=eventidentifier}",
+              .p, fixed = TRUE)
+    writeLines(.p, .f)
+    .rx <- suppressMessages(monolix2rx(.f))
+    .rx$monolixData$evid[.rx$monolixData$id == 1 & .rx$monolixData$time == 5]
+  }
+  expect_equal(.run("."), 2L)
+  expect_equal(.run("0"), 3L)
+})

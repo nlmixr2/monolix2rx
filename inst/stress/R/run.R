@@ -128,7 +128,9 @@ kitRunCase <- function(case, outDir, mode="dry", nSub=20L, seed=42L,
     .sim <- file.path(.dir, "sim.rds")
     if (file.exists(.sim)) {
       .sim <- readRDS(.sim)
-      .res$expSub <- length(unique(.sim$data$ID))
+      ## Monolix counts only the subjects with an observation
+      .d <- .sim$data
+      .res$expSub <- length(unique(.d$ID[.d$EVID == 0 & .d$MDV == 0]))
       .res$expObs <- nrow(.sim$pred)
     }
     .imp <- kitImport(.dir)

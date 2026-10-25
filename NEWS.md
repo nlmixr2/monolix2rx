@@ -223,6 +223,8 @@
     gained `ignoreLine`, the `use=ignoredline` columns (also still listed
     in `ignore`), and `as.character()` now writes `use=ignore` columns as
     `use = ignore` instead of `use = ignoredline`.
+  - A data `EVID=3` line with a missing amount (`AMT = .`), which Monolix
+    2024R1 ignores, was imported as a reset; it is now `evid=2`.
 
 * Fixed `depot(target=Ac, ka)` into a `compartment()` macro: the depot
   ODE and its `ka` transfer were dropped (only `EQUATION:` states received
@@ -252,6 +254,9 @@
   `var=`) is not named `omega_<parameter>` (like `var=omega2_Cl` or a
   fixed `sd=0.3`): Monolix's `eta_Cl` column became `omega_Cl`, which is
   not an eta of the model, so the validation solve failed.
+
+* Fixed `factorial()` and `factln()` of a non-integer, which Monolix
+  2024R1 computes for the rounded argument; rxode2 gave `gamma(x + 1)`.
 
 * Fixed PK macro and `pkmodel()` arguments given as expressions
   (`Cl=a+b`, `V=V1*WT`, `k12=c-d`), which were pasted into the ODEs

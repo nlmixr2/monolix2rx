@@ -30,9 +30,16 @@ kitVariant("macro-reset", "macro-reset-ode",
            "reset(adm=3) with ODE states, the dose by depot(adm=1, target=Ad)",
            model=.macroEventOde("reset(adm=3)"))
 
-## Monolix ignored an EVID=3 line with AMT=.; the same line with AMT=0
+## Monolix ignored an EVID=3 line with AMT=.; with AMT=0 it resets
 kitVariant("dose-evid3-reset", "dose-evid3-amt0",
-           "EVID=3 line (reset, no dose) written with AMT=0 instead of AMT=.",
+           "EVID=3 line (reset, no dose) written with AMT=0",
+           data=function(nSub) {
+             .id <- seq_len(nSub)
+             mlxBind(mlxDose(.id, 0, amt=100, cmt=1),
+                     mlxOther(.id, 8, cmt=1, evid=3L),
+                     mlxDose(.id, 10, amt=100, cmt=1),
+                     mlxObs(.id, c(1, 2, 4, 7.5, 9, 11, 12, 14, 18, 24), cmt=2))
+           },
            write=function(d) {
              .w <- .kitMonolixRows(d)
              .w$AMT[.w$EVID == 3L] <- 0
@@ -41,6 +48,7 @@ kitVariant("dose-evid3-reset", "dose-evid3-amt0",
 
 kitVariant("fun-not-signed", "fun-not-parens",
            "a negation in parentheses after an operator and as an exponent (0.5*(-~f), 2^(~f))",
+           knownRun="Monolix 2024R1 refuses -~f, even in parentheses (a syntax error at (-~f))",
            model=.oralFunModel("if t > 12
   f = 1
 else
@@ -54,16 +62,15 @@ kitVariant("macro-iv-peripheral", "macro-iv-peripheral-after",
                          "peripheral(k12, k21)\niv(adm=2, cmt=2)"))
 
 ## x is in (1, 2): a floor gives 1! and log(2!), a rounding 2! and log(3!)
-## once Cc > 1; the truth floors
+## once Cc > 1; Monolix 2024R1 rounds
 kitVariant("pkmodel-oral-1cmt", "fun-factorial-fraction",
-           "factorial(x) and factln(1 + x) of a non-integer x in (1, 2)",
+           "factorial(x) and factln(1 + x) of a non-integer x in (1, 2): the argument is rounded",
            tags=c("function"),
-           known="rxode2 factorial() of a non-integer is gamma(x + 1); Monolix uses a whole number (this case tells a floor from a rounding)",
            model=.oralFunModel("x = 1 + Cc/(1 + Cc)
 Y = Cc + factorial(x) + factln(1 + x)"),
            sim=.oralErrTruth(quote(add(a) + prop(b) + combined1()),
                              list(quote(a <- 0.05), quote(b <- 0.1)),
                              out=quote(Y),
                              extra=list(quote(x <- 1 + Cc / (1 + Cc)),
-                                        quote(Y <- Cc + factorial(floor(x)) + lfactorial(floor(1 + x))))),
+                                        quote(Y <- Cc + factorial(round(x)) + lfactorial(round(1 + x))))),
            mlxtran=.mlxProject(.oralFunPars, pred="Y"))

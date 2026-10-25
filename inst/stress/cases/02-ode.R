@@ -411,7 +411,6 @@ output = Cc
 ## the less common functions and a chained power on a positive output
 kitCase(
   name="ode-math-functions-2",
-  knownRun="Monolix 2024R1 PRED fits factorial()/factln() of a whole number; rxode2 factorial() of a non-integer is gamma(x + 1) (see fun-factorial-fraction)",
   covers="log10, logit, invlogit, probit, normcdf, norminv, atan, atan2, tanh, cosh, floor, ceil, gammaln, factorial, factln, a^b^c, -x^2",
   tags=c("ode", "math"),
   sim=function() {
@@ -431,7 +430,7 @@ kitCase(
       x <- Cc / (1 + Cc)
       u1 <- log10(1 + Cc) + expit(logit(x)) + pnorm(probit(x)) + qnorm(0.5 + x / 4)
       u2 <- atan(Cc) + atan2(Cc, 2) + tanh(x) + cosh(x)
-      u3 <- floor(time / 12) / 10 + ceil(time / 12) / 20 + lgamma(1 + x) + factorial(x) + lfactorial(x)
+      u3 <- floor(time / 12) / 10 + ceil(time / 12) / 20 + lgamma(1 + x) + factorial(round(x)) + lfactorial(round(x))
       Y <- Cc + u1 + u2 + u3 + h^(x^2) - x^2
       Y ~ add(a) + prop(b) + combined1()
     })

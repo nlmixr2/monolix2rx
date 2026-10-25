@@ -207,17 +207,36 @@
         .rhs <- gsub(paste0("\\b", .n, "[(]"), paste0(.fun[[.n]], "("), .rhs, perl=TRUE)
       }
     }
-    # a chained power or rem() the walker did not write; otherwise keep
-    # the text
-    if (grepl("\\^.*\\^|\\brem[(]", .rhs, perl=TRUE)) {
+    # a chained power, rem() or factorial() the walker did not write;
+    # otherwise keep the text
+    if (grepl("\\^.*\\^|\\b(rem|l?factorial)[(]", .rhs, perl=TRUE)) {
       .e <- try(str2lang(.rhs), silent=TRUE)
       if (!inherits(.e, "try-error")) {
-        .p <- .rxPowParen(.rxRem(.e))
+        .p <- .rxPowParen(.rxFactorial(.rxRem(.e)))
         if (!identical(.p, .e)) .rhs <- deparse1(.p)
       }
     }
     paste0(substr(l, 1, .i - 1), " <- ", .rhs)
   }, character(1), USE.NAMES=FALSE)
+}
+
+#' Monolix factorial()/factln() of a rounded argument
+#'
+#' Monolix 2024R1 rounds the argument; rxode2's factorial(x) is gamma(x + 1).
+#'
+#' @param e expression
+#' @return expression with `factorial(round(a))` and `lfactorial(round(a))`
+#' @noRd
+#' @author Matthew L. Fidler
+.rxFactorial <- function(e) {
+  if (!is.call(e)) return(e)
+  e <- as.call(lapply(as.list(e), .rxFactorial))
+  if ((identical(e[[1]], quote(factorial)) || identical(e[[1]], quote(lfactorial))) &&
+        length(e) == 2L &&
+        !(is.call(e[[2]]) && identical(e[[2]][[1]], quote(round)))) {
+    e[[2]] <- call("round", e[[2]])
+  }
+  e
 }
 
 #' Translate Monolix rem(a, b) in an expression

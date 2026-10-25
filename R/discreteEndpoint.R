@@ -42,7 +42,11 @@
 #' @author Matthew L. Fidler
 .discreteRx <- function(stmt, var=NULL) {
   .rx <- .equation(paste(stmt, collapse="\n"))$rx
-  if (!is.null(var)) .rx <- gsub(paste0("\\b", var, "\\b"), "DV", .rx, perl=TRUE)
+  if (!is.null(var)) {
+    .rx <- gsub(paste0("\\b", var, "\\b"), "DV", .rx, perl=TRUE)
+    # a count is whole, so its factorial needs no rounding
+    .rx <- gsub("factorial(round(DV))", "factorial(DV)", .rx, fixed=TRUE)
+  }
   .rx
 }
 

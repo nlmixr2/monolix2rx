@@ -111,7 +111,7 @@ ddt_dx = -x-dx", pk)
   expect_equal(.ret$rx, "a <- lgamma(b)")
 
   .ret <- .equation("a=factln(b)", pk)
-  expect_equal(.ret$rx, "a <- lfactorial(b)")
+  expect_equal(.ret$rx, "a <- lfactorial(round(b))")
 
   if (utils::packageVersion("rxode2") >= "5.1.7") {
     expect_equal(.equation("ddt_x = ka*x-k*delay(x,tau)", pk)$rx,
@@ -298,4 +298,11 @@ test_that("macro argument expressions keep their own parentheses", {
   .p <- .pk("compartment(cmt=1, amount=Ac)\noral(cmt=1, ka=k1+k2)\nperipheral(k12=a+b, k21=c)\nelimination(cmt=1, k=c-d)")
   expect_equal(.equation("Cc = Ac/V", .p)$rx[2],
                "d/dt(Ac) <-  - (a+b)*Ac + c*cmt2 + (k1+k2)*Acd - (c-d)*Ac")
+})
+
+test_that("factorial() and factln() round their argument like Monolix", {
+  expect_equal(.equation("a=factorial(x) + 2*factln(1+x)")$rx,
+               "a <- factorial(round(x)) + 2 * lfactorial(round(1 + x))")
+  expect_equal(.covEq("y = factorial(WT/10) + factln(AGE)")$dplyr,
+               "y = factorial(round(WT/10)) + lfactorial(round(AGE))")
 })
