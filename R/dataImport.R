@@ -60,7 +60,13 @@
         semicolumn = ";"
       )
       .firstLine <- readLines(.file, n = 1)
-      .head <- strsplit(.firstLine, .sep, fixed = TRUE)[[1]]
+      if (identical(.sep, " ")) {
+        # a space-delimited file can align its columns with runs of spaces
+        .head <- strsplit(trimws(.firstLine), "[[:space:]]+")[[1]]
+        .sep <- ""
+      } else {
+        .head <- strsplit(.firstLine, .sep, fixed = TRUE)[[1]]
+      }
       if (all(.head == mlxtran$DATAFILE$FILEINFO$FILEINFO$header)) {
         # has header (and it matches)
         .data <- utils::read.table(

@@ -351,3 +351,26 @@ test_that("without t_0 a subject starts at its first dose or observation", {
   expect_equal(.r$X, c(1, 5, 5, 5, 5))
   expect_equal(.r$cens, rep(0, 5))
 })
+
+test_that("a space-delimited data set may align its columns with runs of spaces", {
+  skip_on_cran()
+  .dir <- file.path(tempfile(), "theo")
+  dir.create(.dir, recursive = TRUE)
+  on.exit(unlink(dirname(.dir), recursive = TRUE))
+  file.copy(
+    list.files(system.file("theo", package = "monolix2rx"), full.names = TRUE),
+    .dir,
+    recursive = TRUE
+  )
+  .d <- file.path(.dir, "data", "theophylline_data.txt")
+  .f <- do.call(rbind, strsplit(readLines(.d), "\t", fixed = TRUE))
+  .f <- apply(.f, 2, function(x) formatC(x, width = max(nchar(x)) + 2, flag = "-"))
+  writeLines(trimws(apply(.f, 1, paste, collapse = ""), "right"), .d)
+  .p <- file.path(.dir, "theophylline_project.mlxtran")
+  .l <- readLines(.p)
+  expect_true(any(grepl("delimiter = tab", .l, fixed = TRUE)))
+  writeLines(sub("delimiter = tab", "delimiter = space", .l, fixed = TRUE), .p)
+  .rx <- suppressMessages(monolix2rx(.p))
+  expect_equal(length(unique(.rx$monolixData$id)), 12L)
+  expect_true(.rx$ipredAtol < 1e-4)
+})

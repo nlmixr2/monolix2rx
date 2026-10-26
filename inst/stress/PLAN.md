@@ -115,6 +115,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `33-infusions-ids.R` | `iv(cmt=1, Tlag, p)` with RATE and with infusion-time infusions, ADDL/II repeats of an infusion and of a lagged oral dose, `CENS` on the second `YTYPE` endpoint only, sparse numeric subject IDs |
 | `34-monolix-probes.R` | rewrites of what the first Monolix run refused: `empty()`/`reset()` on ODE states, `EVID=3` with `AMT=0`, `0.5*(-~f)`, `iv()` after `peripheral()`; `factorial()` of a non-integer |
 | `35-run-probes.R` | a non-oscillating `delay()` model with the same delay and doses after `t_0` with two delays (to place the DDE differences), `EVID=4` with `AMT=.` |
+| `36-space-infusions.R` | `delimiter = space` with single spaces and with aligned columns, steady-state and ADDL RATE infusions into `pkmodel(p, V, Cl)` |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -572,6 +573,12 @@ Notes for later cases:
   solves).  Monolix ignores `EVID=4` with `AMT=.` (the import stopped; it
   now ignores it too).  `delay()` of a `compartment()` amount degenerates
   in Monolix; `nbdoses` is nlmixr2/rxode2#1492.
+- `36-space-infusions.R`: a space-delimited file aligned with runs of
+  spaces was not read (fixed; a single-space file can no longer mark a
+  missing value by an empty field, Monolix data uses `.`).  To confirm in
+  run mode: that Monolix also reads a run of spaces as one separator, and
+  that the RATE infusions with a bioavailability at steady state and with
+  ADDL keep their duration, as the single infusion does.
 - First Monolix 2024R1 run: `indivPred_SAEM` is not reproduced by the
   `eta_*_SAEM` random effects (SAEM averages the parameters and the random
   effects separately); the conditional modes reproduce `indivPred_mode`

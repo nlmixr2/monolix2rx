@@ -262,6 +262,10 @@
   models (it refuses `combined1c(a, b, c)`); the import failed on them.
   `as.character()` (and `print()`) now write this spelling.
 
+* Fixed a `delimiter = space` data set whose columns are aligned with runs
+  of spaces, which was not read; the header and the rows are now split on
+  any run of white space.
+
 * Fixed `factorial()` and `factln()` of a non-integer, which Monolix
   2024R1 computes for the rounded argument; rxode2 gave `gamma(x + 1)`.
 
