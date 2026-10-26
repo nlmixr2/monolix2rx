@@ -224,7 +224,8 @@
     in `ignore`), and `as.character()` now writes `use=ignore` columns as
     `use = ignore` instead of `use = ignoredline`.
   - A data `EVID=3` line with a missing amount (`AMT = .`), which Monolix
-    2024R1 ignores, was imported as a reset; it is now `evid=2`.
+    2024R1 ignores, was imported as a reset; it is now `evid=2`.  An
+    `EVID=4` line without an amount stopped the import; it is now `evid=3`.
 
 * Fixed `depot(target=Ac, ka)` into a `compartment()` macro: the depot
   ODE and its `ka` transfer were dropped (only `EQUATION:` states received

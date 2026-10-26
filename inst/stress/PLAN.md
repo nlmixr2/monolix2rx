@@ -114,6 +114,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `32-macros-outputs.R` | `type=` instead of `adm=` in `oral()`/`iv()`, a bolus into a `peripheral()` compartment, a lowercase `lognormal` observation, a cumulative urine amount (an ODE state) observed with a concentration |
 | `33-infusions-ids.R` | `iv(cmt=1, Tlag, p)` with RATE and with infusion-time infusions, ADDL/II repeats of an infusion and of a lagged oral dose, `CENS` on the second `YTYPE` endpoint only, sparse numeric subject IDs |
 | `34-monolix-probes.R` | rewrites of what the first Monolix run refused: `empty()`/`reset()` on ODE states, `EVID=3` with `AMT=0`, `0.5*(-~f)`, `iv()` after `peripheral()`; `factorial()` of a non-integer |
+| `35-run-probes.R` | a non-oscillating `delay()` model with the same delay and doses after `t_0` with two delays (to place the DDE differences), `EVID=4` with `AMT=.` |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -556,8 +557,12 @@ Notes for later cases:
   is ignored with `AMT=.` (the import now ignores it), `factorial()` and
   `factln()` round their argument (the import now rounds), `-~f` is
   refused even in parentheses, and Monolix counts only subjects with an
-  observation.  Untested: `EVID=3` without an amount column, `EVID=4`
-  with `AMT=.`.  `dde-hutchinson` and `dde-two-delays` still differ by 1-3 %
+  observation.  `EVID=3` without an amount column is untested (it
+  needs doses, so an amount column).
+- `35-run-probes.R`: Monolix's Hutchinson PRED grows more slowly than
+  rxode2 from the start with either history (`x_0` or 0); a variant with
+  the same delay and no oscillation tests the solver.  `EVID=4` with
+  `AMT=.` stopped the import and is now a reset (to confirm).  `dde-hutchinson` and `dde-two-delays` still differ by 1-3 %
   with the rxode2 solve converged; `delay()` of a `compartment()` amount
   degenerates in Monolix; `nbdoses` is nlmixr2/rxode2#1492.
 - First Monolix 2024R1 run: `indivPred_SAEM` is not reproduced by the

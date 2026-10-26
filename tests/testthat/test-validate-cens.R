@@ -50,9 +50,9 @@ test_that("a subject without observations is left out of the validation", {
   expect_true(.rx$ipredAtol < 1e-4)
 })
 
-test_that("an EVID=3 line with a missing amount is ignored, with AMT=0 it resets", {
+test_that("EVID=3 with a missing amount is ignored, with AMT=0 it resets; EVID=4 without one resets", {
   skip_on_cran()
-  .run <- function(amt) {
+  .run <- function(amt, evid = 3L) {
     .dir <- file.path(tempfile(), "theo")
     dir.create(.dir, recursive = TRUE)
     on.exit(unlink(dirname(.dir), recursive = TRUE))
@@ -65,7 +65,7 @@ test_that("an EVID=3 line with a missing amount is ignored, with AMT=0 it resets
     .l <- readLines(.d)
     .evid <- c("EVID", ifelse(grepl("^[0-9]+\t[.]\t", .l[-1]), "0", "1"))
     # a reset line for subject 1 at t = 5
-    .l <- c(paste(.l, .evid, sep = "\t"), paste0("1\t", amt, "\t5\t.\t79.6\tM\t3"))
+    .l <- c(paste(.l, .evid, sep = "\t"), paste0("1\t", amt, "\t5\t.\t79.6\tM\t", evid))
     writeLines(.l, .d)
     .f <- file.path(.dir, "theophylline_project.mlxtran")
     .p <- readLines(.f)
@@ -79,4 +79,6 @@ test_that("an EVID=3 line with a missing amount is ignored, with AMT=0 it resets
   }
   expect_equal(.run("."), 2L)
   expect_equal(.run("0"), 3L)
+  # an EVID=4 washout without an amount is a reset
+  expect_equal(.run(".", 4L), 3L)
 })
