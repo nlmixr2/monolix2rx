@@ -50,7 +50,7 @@ test_that("a subject without observations is left out of the validation", {
   expect_true(.rx$ipredAtol < 1e-4)
 })
 
-test_that("EVID=3 with a missing amount is ignored, with AMT=0 it resets; EVID=4 without one resets", {
+test_that("EVID=3 or EVID=4 with a missing amount is ignored, EVID=3 with AMT=0 resets", {
   skip_on_cran()
   .run <- function(amt, evid = 3L) {
     .dir <- file.path(tempfile(), "theo")
@@ -79,6 +79,6 @@ test_that("EVID=3 with a missing amount is ignored, with AMT=0 it resets; EVID=4
   }
   expect_equal(.run("."), 2L)
   expect_equal(.run("0"), 3L)
-  # an EVID=4 washout without an amount is a reset
-  expect_equal(.run(".", 4L), 3L)
+  # so is an EVID=4 line without an amount
+  expect_equal(.run(".", 4L), 2L)
 })

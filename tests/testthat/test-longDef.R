@@ -196,7 +196,7 @@ test_that("combined1()", {
     expect_equal(tmp$endpoint[[1]]$err$errName, paste0(.e, "c"))
     expect_equal(tmp$endpoint[[1]]$err$typical, c("a", "b", "c"))
     expect_equal(as.character(tmp),
-                 paste0("CONC = {distribution=normal, prediction=Cc, errorModel=", .e, "c(a, b, c)}"))
+                 paste0("CONC = {distribution=normal, prediction=Cc, errorModel=", .e, "(a, b, c)}"))
   }
 })
 

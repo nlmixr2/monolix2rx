@@ -868,11 +868,10 @@ monolixDataImport <- function(ui, data, na.strings = c("NA", ".")) {
     return(NULL)
   }
   data <- .dataRenameFromMlxtran(data, .mlxtran)
-  # Monolix 2024R1 ignores a data EVID=3 reset whose amount is missing;
-  # an EVID=4 line without an amount is a washout without a dose
+  # Monolix 2024R1 ignores a data EVID=3 or EVID=4 line whose amount is
+  # missing
   if (!is.null(data[["evid"]]) && !is.null(data[["amt"]])) {
-    data$evid[data$evid %in% 3L & is.na(data$amt)] <- 2L
-    data$evid[data$evid %in% 4L & is.na(data$amt)] <- 3L
+    data$evid[data$evid %in% c(3L, 4L) & is.na(data$amt)] <- 2L
   }
   data <- .dataSplitDoseObs(data)
   data <- .dataConvertAdm(data, ui$admd, .dataPkMacros(.mlxtran), .dataFCmt(rxui))

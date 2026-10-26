@@ -287,7 +287,9 @@ the grammar comment.  Known widenings:
   the `[FILEINFO]` data set and the `[LONGITUDINAL]` model file (issue #43).
 - 2024R1 saves the `combined1c`/`combined2c` error models as
   `errorModel=combined1(a, b, c)`/`combined2(a, b, c)` and refuses the
-  `c`-suffixed spelling; both parse to `combined1c`/`combined2c`.
+  `c`-suffixed spelling; both parse to `combined1c`/`combined2c`, and
+  `as.character()` writes the three-argument form (an exception to keeping
+  the old spelling, since Monolix refuses it).
 - A model file may be a library reference (`file='lib:oral1_1cpt_kaVCl.txt'`),
   resolved by `R/mlxtranLib.R` or, when the Monolix install is available, by
   `lixoftConnectors` (`R/lixoftConnectors.R`).

@@ -563,12 +563,15 @@ Notes for later cases:
   `errorModel=combined1(a, b, c)`/`combined2(a, b, c)`; the import now
   parses it, `err-combined1c`/`err-combined2c` write it, and
   `err-combined1c-spelling` keeps the refused `combined1c(...)` spelling.
-- `35-run-probes.R`: Monolix's Hutchinson PRED grows more slowly than
-  rxode2 from the start with either history (`x_0` or 0); a variant with
-  the same delay and no oscillation tests the solver.  `EVID=4` with
-  `AMT=.` stopped the import and is now a reset (to confirm).  `dde-hutchinson` and `dde-two-delays` still differ by 1-3 %
-  with the rxode2 solve converged; `delay()` of a `compartment()` amount
-  degenerates in Monolix; `nbdoses` is nlmixr2/rxode2#1492.
+- `35-run-probes.R` (third run), with the rxode2 solves converged: the
+  non-oscillating Hutchinson differs much less than `dde-hutchinson`
+  (median 0.3 % against 3 %), pointing at Monolix's DDE solver on the
+  oscillation; `dde-two-delays` agrees with the doses after `t_0`, so its
+  1-3 % comes from a dose at `t_0` into a delayed state (no depot history
+  of 0, the dose or its decay, nor a delay shift, reproduces it in local
+  solves).  Monolix ignores `EVID=4` with `AMT=.` (the import stopped; it
+  now ignores it too).  `delay()` of a `compartment()` amount degenerates
+  in Monolix; `nbdoses` is nlmixr2/rxode2#1492.
 - First Monolix 2024R1 run: `indivPred_SAEM` is not reproduced by the
   `eta_*_SAEM` random effects (SAEM averages the parameters and the random
   effects separately); the conditional modes reproduce `indivPred_mode`

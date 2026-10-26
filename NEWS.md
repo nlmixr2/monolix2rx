@@ -225,7 +225,8 @@
     `use = ignore` instead of `use = ignoredline`.
   - A data `EVID=3` line with a missing amount (`AMT = .`), which Monolix
     2024R1 ignores, was imported as a reset; it is now `evid=2`.  An
-    `EVID=4` line without an amount stopped the import; it is now `evid=3`.
+    `EVID=4` line without an amount, which stopped the import, is now
+    ignored the same way.
 
 * Fixed `depot(target=Ac, ka)` into a `compartment()` macro: the depot
   ODE and its `ka` transfer were dropped (only `EQUATION:` states received
@@ -259,6 +260,7 @@
 * Accepted `errorModel=combined1(a, b, c)` and `combined2(a, b, c)`, the
   spelling Monolix 2024R1 saves for the `combined1c`/`combined2c` error
   models (it refuses `combined1c(a, b, c)`); the import failed on them.
+  `as.character()` (and `print()`) now write this spelling.
 
 * Fixed `factorial()` and `factln()` of a non-integer, which Monolix
   2024R1 computes for the rounded argument; rxode2 gave `gamma(x + 1)`.

@@ -6,7 +6,7 @@ kitCase(
   name="dde-hutchinson",
   covers="delayed logistic growth without doses: x_0 history and t_0",
   tags=c("dde", "smoke"),
-  knownRun="Monolix 2024R1 IPRED differs by a median 3 % (95th percentile 13 %); the rxode2 solve is converged (rtol 1e-6 to 1e-12 changes it by < 1e-5)",
+  knownRun="Monolix 2024R1 IPRED differs by a median 3 % (95th percentile 13 %) with the rxode2 solve converged; without oscillation it differs much less (dde-hutchinson-damped, median 0.3 %), pointing at Monolix's DDE solver on the oscillation",
   known=if (utils::packageVersion("rxode2") < "5.1.8") "rxode2 < 5.1.8 delay() history is 0 when x(0) is not a literal constant (monolix2rx writes x(0) <- x_0); Monolix uses x_0 (nlmixr2/rxode2#1441)",
   solve=list(method="dop853"),
   sim=function() {
@@ -209,7 +209,7 @@ kitCase(
   name="dde-two-delays",
   covers="two delays on two states: delay(Ad, tlag) into the central compartment, delay(Ac, tau) on the effect",
   tags=c("dde"),
-  knownRun="Monolix 2024R1 PRED differs by a median 1 % (up to 3 % after the second dose); the rxode2 solve is converged (rtol 1e-6 to 1e-12 changes it by < 1e-5)",
+  knownRun="Monolix 2024R1 PRED differs by a median 1 % (up to 3 % after the second dose) with the rxode2 solve converged; with the doses after t_0 it agrees (dde-two-delays-late), and no depot history (0, the dose, its decay) nor delay shift reproduces it",
   solve=list(method="dop853"),
   sim=function() {
     ini({

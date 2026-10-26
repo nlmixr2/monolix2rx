@@ -1,5 +1,6 @@
 ## Probes for what the second Monolix 2024R1 run left open: where the DDE
-## differences come from, and an EVID=4 line without an amount
+## differences come from (oscillation in dde-hutchinson, a dose at t_0 in
+## dde-two-delays), and an EVID=4 line without an amount
 
 ## the same delay (tau = 2) with r*tau = 0.3 < 1/e, which does not
 ## oscillate: the history window is the same, so a difference that
@@ -39,19 +40,18 @@ kitVariant("dde-two-delays", "dde-two-delays-late",
                      mlxObs(.id, c(0.5, 1, 2.5, 4, 8, 12, 26.5, 27, 28, 30, 34, 48, 72, 96), cmt=3))
            })
 
-## the truth (and the import) reset at t = 6 without a dose; to confirm:
-## Monolix may ignore the line, as it does EVID=3 with AMT=.
+## Monolix 2024R1 ignores the line, as it does EVID=3 with AMT=.
 kitVariant("dose-evid4-reset", "dose-evid4-amt-missing",
-           "EVID=4 line with AMT=.: a washout without a dose",
+           "EVID=4 line with AMT=.: ignored, no washout",
            data=function(nSub) {
              .id <- seq_len(nSub)
              mlxBind(mlxDose(.id, 0, amt=100, cmt=1),
-                     mlxOther(.id, 6, cmt=1, evid=3L),
+                     mlxOther(.id, 6, cmt=1, evid=2L),
                      mlxDose(.id, 8, amt=100, cmt=1),
                      mlxObs(.id, c(1, 2, 4, 5.5, 7, 8.5, 10, 12, 18, 24), cmt=2))
            },
            write=function(d) {
              .w <- .kitMonolixRows(d)
-             .w$EVID[.w$EVID == 3L] <- 4L
+             .w$EVID[.w$EVID == 2L] <- 4L
              .w[, c("ID", "TIME", "AMT", "EVID", "DV")]
            })

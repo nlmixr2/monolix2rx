@@ -396,7 +396,11 @@ as.character.monolix2rxLongDef <- function(x, ...) {
                                                   .asCharacterSingleOrList("max", .lst$max)),
                                            ""),
                                     ", errorModel=",
-                                    .err$errName, "(", paste(.v, collapse=", "), ")",
+                                    # Monolix 2024R1 writes (and only reads) combined1c
+                                    # as combined1(a, b, c)
+                                    switch(.err$errName, combined1c="combined1", combined2c="combined2",
+                                           .err$errName),
+                                    "(", paste(.v, collapse=", "), ")",
                                     .asCharacterSingleOrList("autoCorrCoef", .lst$autocor),
                                     "}")
                    }
