@@ -267,7 +267,8 @@
   subject; the identifiers are read as text and become numbers only when
   no two merge (also in Excel/SAS data sets), and Monolix's random effects
   and predictions take the data's identifier type.  A quoted header
-  (`write.csv()`) now matches the project's header.
+  (`write.csv()`), or one with spaces after the delimiters, now matches
+  the project's header without a warning.
 
 * Fixed a `delimiter = space` data set whose columns are aligned with runs
   of spaces, which was not read; the header and the rows are now split on

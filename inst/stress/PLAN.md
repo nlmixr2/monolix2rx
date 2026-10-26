@@ -117,6 +117,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `35-run-probes.R` | a non-oscillating `delay()` model with the same delay and doses after `t_0` with two delays (to place the DDE differences), `EVID=4` with `AMT=.` |
 | `36-space-infusions.R` | `delimiter = space` with single spaces and with aligned columns, steady-state and ADDL RATE infusions into `pkmodel(p, V, Cl)` |
 | `37-data-format.R` | a quoted header with quoted identifiers, zero-padded identifiers, identifiers `1` and `01` as two subjects, a trailing delimiter on every line |
+| `38-data-text.R` | a UTF-8 byte order mark, blank lines, spaces after the commas of the header |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -583,6 +584,9 @@ Notes for later cases:
 - `37-data-format.R`: identifiers `1` and `01` merged into one subject
   (fixed).  To confirm in run mode: that Monolix reads a quoted header and
   a trailing delimiter on every line, and keeps `1` and `01` apart.
+- `38-data-text.R`: all three read; a header with spaces after the
+  commas warned that it did not match (fixed).  To confirm in run mode
+  that Monolix reads them.
 - First Monolix 2024R1 run: `indivPred_SAEM` is not reproduced by the
   `eta_*_SAEM` random effects (SAEM averages the parameters and the random
   effects separately); the conditional modes reproduce `indivPred_mode`

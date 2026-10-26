@@ -97,12 +97,14 @@
       # the identifier column is read as text (see .monolixIdType())
       .hdr <- mlxtran$DATAFILE$FILEINFO$FILEINFO$header
       .idName <- .monolixIdName(mlxtran)
-      .idClass <- function(cols, names = cols) {
+      .idClass <- function(cols, names = cols, byPos = FALSE) {
         .w <- which(names == .idName)
         if (is.na(.idName) || length(.w) != 1L) return(NA)
+        if (byPos) return(replace(rep(NA_character_, length(names)), .w, "character"))
         stats::setNames("character", cols[.w])
       }
-      .firstLine <- readLines(.file, n = 1)
+      # a UTF-8 byte order mark survives readLines() outside a UTF-8 locale
+      .firstLine <- sub("^\xef\xbb\xbf", "", readLines(.file, n = 1), useBytes = TRUE)
       if (identical(.sep, " ")) {
         # a space-delimited file can align its columns with runs of spaces
         .head <- strsplit(trimws(.firstLine), "[[:space:]]+")[[1]]
@@ -110,8 +112,9 @@
       } else {
         .head <- strsplit(.firstLine, .sep, fixed = TRUE)[[1]]
       }
-      # a quoted header (write.csv) names the same columns
-      .head <- gsub("^[\"']|[\"']$", "", .head)
+      # a quoted header (write.csv) or spaces after the delimiters name the
+      # same columns
+      .head <- trimws(gsub("^[\"']|[\"']$", "", trimws(.head)))
       if (all(.head == mlxtran$DATAFILE$FILEINFO$FILEINFO$header)) {
         # has header (and it matches)
         .data <- utils::read.table(
@@ -120,8 +123,10 @@
           sep = .sep,
           row.names = NULL,
           na.strings = na.strings,
-          colClasses = .idClass(.head)
+          colClasses = .idClass(paste0("V", seq_along(.head)), .head, byPos = TRUE)
         )
+        # read.table() keeps a space inside quotes (or a byte order mark)
+        names(.data) <- .head
         return(.monolixNaApply(.data, na.strings, mlxtran))
       } else {
         .num <- vapply(

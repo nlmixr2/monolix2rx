@@ -410,3 +410,22 @@ test_that("subjects 1 and 01 stay apart in the data and in Monolix's results", {
     expect_true(.rx$ipredAtol < 1e-4)
   }
 })
+
+test_that("a header with spaces after the delimiters matches without a warning", {
+  skip_on_cran()
+  .dir <- file.path(tempfile(), "theo")
+  dir.create(.dir, recursive = TRUE)
+  on.exit(unlink(dirname(.dir), recursive = TRUE))
+  file.copy(
+    list.files(system.file("theo", package = "monolix2rx"), full.names = TRUE),
+    .dir,
+    recursive = TRUE
+  )
+  .d <- file.path(.dir, "data", "theophylline_data.txt")
+  .l <- readLines(.d, warn = FALSE)
+  .l[1] <- gsub("\t", "\t ", .l[1], fixed = TRUE)
+  writeLines(.l, .d)
+  .m <- suppressMessages(mlxtran(file.path(.dir, "theophylline_project.mlxtran")))
+  expect_warning(.d2 <- .monolixDataLoad(.m), NA)
+  expect_equal(names(.d2), c("ID", "AMT", "TIME", "CONC", "WEIGHT", "SEX"))
+})
