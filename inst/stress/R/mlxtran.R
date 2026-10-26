@@ -38,6 +38,7 @@
   .next <- .next[.next > .start]
   .end <- if (length(.next)) .next[1] - 1L else length(lines)
   .i <- seq(.start, .end)
+  ## a MAP parameter keeps its prior and is still estimated
   lines[.i] <- gsub("method *= *MLE", "method=FIXED", lines[.i], ignore.case=TRUE)
   lines
 }
