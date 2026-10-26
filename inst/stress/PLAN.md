@@ -601,8 +601,8 @@ Notes for later cases:
 - `39-map-priors.R`: a GUI-saved 2024R1 project writes a prior as
   `[POPULATION] DEFINITION: ka_pop = {distribution=logNormal, typical=3,
   sd=0.25}` with `ka_pop = {value=1, method=MAP}`; the import already
-  parses it and reads the MAP estimates, but does not carry the prior
-  (rxode2's `ini()` `prior()`, which babelmixr2 writes as MAP, could).  The
+  parses it and reads the MAP estimates, and now writes the prior as an
+  `ini()` `prior()` on the imported theta (the inverse of babelmixr2).  The
   priors are centred on the truth, so the cases show the syntax imports.
   To confirm in run mode: the validation at the MAP estimates.
 - First Monolix 2024R1 run: `indivPred_SAEM` is not reproduced by the

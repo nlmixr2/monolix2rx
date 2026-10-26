@@ -22,6 +22,15 @@
   observation.  The records are found by their compartment, so the
   imported data gives a single event endpoint's observations its `cmt`.
 
+* Imported Monolix MAP priors (`[POPULATION] DEFINITION:` with
+  `method=MAP`) on typical values and covariate coefficients as `ini()`
+  priors on the imported theta (the `iniDf` `prior` column), the inverse
+  of babelmixr2: `ka_pop = {distribution=logNormal, typical=3, sd=0.25}`
+  becomes `prior(ka_pop) ~ dnorm(log(3), 0.25)`.  Omega and residual
+  error priors, and a prior whose distribution differs from its
+  parameter's, are skipped with a warning.  Uncertainty simulation of such
+  an import (`nStud > 1`) needs `usePrior = FALSE` (nlmixr2/rxode2#1502).
+
 * Switched `$etaData` and the validation to Monolix's conditional modes
   (`eta_*_mode`, `indivPred_mode`, `indWRes_mode`), which reproduce each
   other where the `_SAEM` columns do not.  The SAEM random effects are

@@ -1,7 +1,7 @@
 ## Bayesian priors (MAP): Monolix 2024R1 writes the prior in a [POPULATION]
 ## DEFINITION: block with literal numbers and the population parameter with
-## method=MAP.  The import reads Monolix's final (MAP) estimates and does
-## not carry the prior itself (rxode2's ini() prior() could).
+## method=MAP.  The import reads Monolix's final (MAP) estimates and writes
+## the prior as an ini() prior() on the imported theta.
 
 ## add `prior` lines to [POPULATION] and make `pars` MAP
 .mapProject <- function(base, prior, pars) {

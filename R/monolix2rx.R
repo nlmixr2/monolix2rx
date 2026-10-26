@@ -185,6 +185,13 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
                      .mlxtran$MODEL$LONGITUDINAL$DEFINITION)
     .ini <- .latentIni(.ini, .latent$prob, .mlxtran$PARAMETER$PARAMETER)
     .ini <- .mixtureIni(.ini, .mix$prob, .mlxtran$PARAMETER$PARAMETER)
+    # MAP priors ([POPULATION] DEFINITION:) as ini() priors
+    .theta <- vapply(as.list(.ini[[2]])[-1], function(e) {
+      if (is.call(e) && identical(e[[1]], quote(`<-`)) && is.name(e[[2]])) as.character(e[[2]]) else NA_character_
+    }, character(1))
+    .prior <- .popPrior(.mlxtran$MODEL$POPULATION$DEFINITION, .mlxtran$PARAMETER$PARAMETER,
+                        .mlxtran$MODEL$INDIVIDUAL$DEFINITION, .theta[!is.na(.theta)])
+    if (length(.prior) > 0L) .ini[[2]] <- as.call(c(as.list(.ini[[2]]), .prior))
     .ret <- function() {}
     if (gsub(" +", "", deparse1(.ini)) == "ini({})") {
       body(.ret) <- as.call(c(list(quote(`{`)), .model))
