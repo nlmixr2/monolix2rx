@@ -262,6 +262,13 @@
   models (it refuses `combined1c(a, b, c)`); the import failed on them.
   `as.character()` (and `print()`) now write this spelling.
 
+* Fixed numeric-looking subject identifiers that are equal as numbers
+  (`1` and `01`), which Monolix keeps apart and the import merged into one
+  subject; the identifiers are read as text and become numbers only when
+  no two merge (also in Excel/SAS data sets), and Monolix's random effects
+  and predictions take the data's identifier type.  A quoted header
+  (`write.csv()`) now matches the project's header.
+
 * Fixed a `delimiter = space` data set whose columns are aligned with runs
   of spaces, which was not read; the header and the rows are now split on
   any run of white space.

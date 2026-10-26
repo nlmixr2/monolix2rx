@@ -48,8 +48,15 @@ dir.create(file.path(.export, "IndividualParameters"), recursive=TRUE, showWarni
 .eta <- rownames(.ui$omega)
 .theta <- utils::getFromNamespace(".addRxerr", "monolix2rx")(.ui, .ui$theta)
 .ids <- unique(as.character(.ui$monolixData$id))
+## the truth's ids (Monolix writes them as text) and as the import reads
+## them (001 is 1, unless ids merge)
+.tIds <- unique(as.character(.sim$data$ID))
+.tImp <- as.character(utils::getFromNamespace(".monolixIdType", "monolix2rx")(.tIds))
+.toImp <- function(x) .tImp[match(as.character(x), .tIds)]
+.toTruth <- function(x) .tIds[match(x, .tImp)]
+.simId <- .toImp(.sim$etas$id)
 if (length(.eta) && !is.null(.sim$etas)) {
-  .p <- .sim$etas[match(.ids, .sim$etas$id), .eta, drop=FALSE]
+  .p <- .sim$etas[match(.ids, .simId), .eta, drop=FALSE]
   for (.n in names(.theta)) .p[[.n]] <- .theta[[.n]]
 } else {
   .p <- c(.theta, stats::setNames(rep(0, length(.eta)), .eta))
@@ -90,7 +97,7 @@ if (any(.cont)) {
       .tk <- .t[.tDvid == .truthDvid(.k), ]
       .sk <- .s[.s$CMT == .pd$cmt[.k], ]
     }
-    .m <- match(.key(.tk$ID, .tk$TIME), .key(as.character(.sk$id), .sk$time))
+    .m <- match(.key(.toImp(.tk$ID), .tk$TIME), .key(as.character(.sk$id), .sk$time))
     .pred <- data.frame(id=.tk$ID, time=.tk$TIME,
                         dv=.sim$data$DV[match(.tk$ROWID, .sim$data$ROWID)],
                         popPred=.tk$simPred, indivPred_SAEM=.tk$simIpred,
@@ -103,18 +110,18 @@ if (any(.cont)) {
   }
 }
 
-.re <- data.frame(id=.ids)
+.re <- data.frame(id=.toTruth(.ids))
 ## Monolix names the random effect after the parameter, not its sd= name
 .sdName <- monolix2rx:::.etaImportSd(.mlx)
 for (.e in .eta) {
   .pn <- names(.sdName)[match(.e, .sdName)]
   if (is.na(.pn)) .pn <- sub("^omega_", "", .e)
   .re[[paste0("eta_", .pn, "_SAEM")]] <-
-    if (is.null(.sim$etas)) 0 else .sim$etas[[.e]][match(.ids, .sim$etas$id)]
+    if (is.null(.sim$etas)) 0 else .sim$etas[[.e]][match(.ids, .simId)]
 }
 for (.n in setdiff(names(.re), "id")) .re[[sub("_SAEM$", "_mode", .n)]] <- .re[[.n]]
 .w(.re, "IndividualParameters", "estimatedRandomEffects.txt")
-.w(data.frame(id=.ids), "IndividualParameters", "estimatedIndividualParameters.txt")
+.w(data.frame(id=.toTruth(.ids)), "IndividualParameters", "estimatedIndividualParameters.txt")
 
 ## observations per endpoint
 .dvid <- if (nrow(.pd) > 1L) .sim$data$DVID[match(.sim$pred$ROWID, .sim$data$ROWID)] else 1L

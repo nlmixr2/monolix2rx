@@ -3,10 +3,13 @@
 #' @param mlxtran mlxtran file where data input is specified
 #' @param est Monolix estimate to import: `"mode"` (the conditional
 #'   modes, falling back to `"SAEM"` when the run has none) or `"SAEM"`
+#' @param idText keep the ids as Monolix wrote them (text) instead of
+#'   `.monolixIdType()`
 #' @inheritParams utils::read.table
 #' @author Matthew L Fidler
 #' @noRd
-monolixEtaImport <- function(mlxtran, na.strings=c("NA", "."), est=c("mode", "SAEM")) {
+monolixEtaImport <- function(mlxtran, na.strings=c("NA", "."), est=c("mode", "SAEM"),
+                             idText=FALSE) {
   est <- match.arg(est)
   mlxtran <- .monolixGetMlxtran(mlxtran)
   if (is.null(mlxtran)) return(NULL)
@@ -19,7 +22,9 @@ monolixEtaImport <- function(mlxtran, na.strings=c("NA", "."), est=c("mode", "SA
     if (inherits(.try, "try-error")) return(NULL)
     if (length(.try) != 1L) return(NULL)
     if (!.try) return(NULL)
-    .ret <- read.csv(.est, row.names=NULL, na.strings = na.strings)
+    .ret <- read.csv(.est, row.names=NULL, na.strings = na.strings,
+                     colClasses = c(id = "character"))
+    if (!idText) .ret$id <- .monolixIdType(.ret$id)
     .suf <- .monolixEstSuffix(names(.ret), "^eta_.*_", est)
     .ret <- .ret[, vapply(names(.ret),
                           function(n) {

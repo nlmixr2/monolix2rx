@@ -374,3 +374,39 @@ test_that("a space-delimited data set may align its columns with runs of spaces"
   expect_equal(length(unique(.rx$monolixData$id)), 12L)
   expect_true(.rx$ipredAtol < 1e-4)
 })
+
+test_that("identifiers become numbers only when no two merge", {
+  expect_equal(.monolixIdType(c("1", "2", "10")), c(1L, 2L, 10L))
+  expect_equal(.monolixIdType(c("001", "002")), c(1L, 2L))
+  expect_equal(.monolixIdType(c("1", "01", "2")), c("1", "01", "2"))
+  expect_equal(.monolixIdType(c("S-1", "S-2")), c("S-1", "S-2"))
+  expect_equal(.monolixIdType(c(1L, 2L)), c(1L, 2L))
+})
+
+test_that("subjects 1 and 01 stay apart in the data and in Monolix's results", {
+  skip_on_cran()
+  for (.quote in c(FALSE, TRUE)) {
+    .dir <- file.path(tempfile(), "theo")
+    dir.create(.dir, recursive = TRUE)
+    file.copy(
+      list.files(system.file("theo", package = "monolix2rx"), full.names = TRUE),
+      .dir,
+      recursive = TRUE
+    )
+    # subject 10 becomes 01, which Monolix keeps apart from 1
+    .d <- file.path(.dir, "data", "theophylline_data.txt")
+    .l <- sub("^10\t", "01\t", readLines(.d, warn = FALSE))
+    if (.quote) .l[1] <- paste0("\"", strsplit(.l[1], "\t", fixed = TRUE)[[1]], "\"", collapse = "\t")
+    writeLines(.l, .d)
+    for (.f in c(file.path(.dir, "tp", "predictions.txt"),
+                 file.path(.dir, "tp", "IndividualParameters", "estimatedRandomEffects.txt"))) {
+      writeLines(sub("^10,", "01,", readLines(.f, warn = FALSE)), .f)
+    }
+    .rx <- suppressMessages(monolix2rx(file.path(.dir, "theophylline_project.mlxtran")))
+    unlink(dirname(.dir), recursive = TRUE)
+    expect_true(is.character(.rx$monolixData$id))
+    expect_equal(length(unique(.rx$monolixData$id)), 12L)
+    expect_true(all(c("1", "01") %in% .rx$etaData$id))
+    expect_true(.rx$ipredAtol < 1e-4)
+  }
+})

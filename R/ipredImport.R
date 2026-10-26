@@ -7,11 +7,12 @@
 #' @param endpoint endpoint to read (or `NULL` for single endpoint)
 #' @param mlxtran parsed mlxtran object
 #' @param est `"mode"` or `"SAEM"` (see `.monolixEstSuffix()`)
+#' @param idText keep the ids as text
 #' @return A single ipred/pred dataset read in.  With endpoint
 #'   defined, add the endpoint as a `cmt` column
 #' @noRd
 #' @author Matthew L. Fidler
-.monolixPredIpredFile <- function(endpoint, mlxtran, na.strings, est="mode") {
+.monolixPredIpredFile <- function(endpoint, mlxtran, na.strings, est="mode", idText=FALSE) {
   if (!is.null(endpoint)) {
     .est <- file.path(.mlxtranExportPath(mlxtran),
                       paste0("predictions_", endpoint, ".txt"))
@@ -23,7 +24,9 @@
   if (inherits(.try, "try-error")) return(NULL)
   if (length(.try) != 1L) return(NULL)
   if (!.try) return(NULL)
-  .ret <- read.csv(.est, row.names=NULL, na.strings = na.strings)
+  .ret <- read.csv(.est, row.names=NULL, na.strings = na.strings,
+                   colClasses = c(id = "character"))
+  if (!idText) .ret$id <- .monolixIdType(.ret$id)
   .suf <- .monolixEstSuffix(names(.ret), c("^indivPred_", "^indWRes_"), est)
   # first subset to the right information
   .ret <- .ret[, vapply(names(.ret),
@@ -56,11 +59,14 @@
 #' @param mlxtran mlxtran file where data input is specified
 #' @param est `"mode"` or `"SAEM"`; every file is read with the same one,
 #'   SAEM when a file has no modes
+#' @param idText keep the ids as Monolix wrote them (text); otherwise
+#'   each file's ids go through `.monolixIdType()`
 #' @inheritParams utils::read.table
 #' @return the predictions with the attribute `est`
 #' @author Matthew L Fidler
 #' @noRd
-monolixPredIpred <- function(mlxtran, na.strings=c("NA", "."), est=c("mode", "SAEM")) {
+monolixPredIpred <- function(mlxtran, na.strings=c("NA", "."), est=c("mode", "SAEM"),
+                             idText=FALSE) {
   est <- match.arg(est)
   mlxtran <- .monolixGetMlxtran(mlxtran)
   withr::with_dir(.monolixGetPwd(mlxtran), {
@@ -72,12 +78,12 @@ monolixPredIpred <- function(mlxtran, na.strings=c("NA", "."), est=c("mode", "SA
     .end <- .all[!.disc]
     .read <- function(est) {
       if (length(.end) == 1) {
-        .ret <- .monolixPredIpredFile(NULL, mlxtran=mlxtran, na.strings=na.strings, est=est)
-        if (is.null(.ret)) .ret <- .monolixPredIpredFile(.end, mlxtran, na.strings=na.strings, est=est)
+        .ret <- .monolixPredIpredFile(NULL, mlxtran=mlxtran, na.strings=na.strings, est=est, idText=idText)
+        if (is.null(.ret)) .ret <- .monolixPredIpredFile(.end, mlxtran, na.strings=na.strings, est=est, idText=idText)
         if (!is.null(.ret) && length(.all) > 1L) .ret$cmt <- .end
         return(list(.ret))
       }
-      lapply(.end, function(e) .monolixPredIpredFile(e, mlxtran, na.strings=na.strings, est=est))
+      lapply(.end, function(e) .monolixPredIpredFile(e, mlxtran, na.strings=na.strings, est=est, idText=idText))
     }
     .l <- .read(est)
     .suf <- vapply(.l, function(d) if (is.null(d)) est else attr(d, "est"), character(1))

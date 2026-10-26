@@ -87,9 +87,19 @@ kitImportMetrics <- function(m) {
        nTheta=length(m$theta), nEta=NROW(m$omega))
 }
 
+## subject id as text; numeric-looking ids (001) as the number the
+## import makes of them, unless two would merge (1 and 01)
+.kitId <- function(id) {
+  id <- as.character(id)
+  .n <- suppressWarnings(as.numeric(id))
+  if (length(id) && !anyNA(.n) && length(unique(.n)) == length(unique(id))) id <- as.character(.n)
+  id
+}
+
 ## (id, time, repeat index) row key: monolix2rx drops undeclared data
 ## columns, so a ROWID column cannot be carried through the import
 .kitKey <- function(id, time) {
+  id <- .kitId(id)
   .k <- stats::ave(seq_along(id), id, time, FUN=seq_along)
   paste(id, sprintf("%.12g", time), .k, sep="|")
 }
@@ -112,7 +122,7 @@ kitImportSolve <- function(m, etas, case, mix=NULL) {
   .d <- m$monolixData
   if (is.null(.d)) stop("monolix2rx did not read the data", call.=FALSE)
   ## each subject's true mixture class
-  if (!is.null(mix)) .d$mixest <- mix$mixest[match(as.character(.d$id), mix$id)]
+  if (!is.null(mix)) .d$mixest <- mix$mixest[match(.kitId(.d$id), .kitId(mix$id))]
   if (is.null(etas) || nrow(.ini) == 0L) {
     .p <- c(.theta, stats::setNames(rep(0, nrow(.ini)), .ini$name))
   } else {
@@ -120,8 +130,8 @@ kitImportSolve <- function(m, etas, case, mix=NULL) {
     if (length(.miss)) stop("imported etas not in the truth: ",
                             paste(.miss, collapse=", "), call.=FALSE)
     ## one row per subject, in the data's subject order
-    .id <- unique(as.character(.d$id))
-    .p <- etas[match(.id, etas$id), .eta, drop=FALSE]
+    .id <- unique(.kitId(.d$id))
+    .p <- etas[match(.id, .kitId(etas$id)), .eta, drop=FALSE]
     if (anyNA(.p)) stop("subjects without true etas", call.=FALSE)
     for (.n in names(.theta)) .p[[.n]] <- .theta[[.n]]
     ## each row gets its occasion's eta as a data column
@@ -157,7 +167,7 @@ kitImportSolve <- function(m, etas, case, mix=NULL) {
     stop("the imported data has no occasion column '", level, "'", call.=FALSE)
   }
   .occ <- sub(.re, "\\1", .cols)
-  .row <- match(as.character(d$id), etas$id)
+  .row <- match(.kitId(d$id), .kitId(etas$id))
   .col <- match(as.character(d[[level]]), .occ)
   if (anyNA(.row) || anyNA(.col)) stop("rows without true occasion etas", call.=FALSE)
   as.matrix(etas[, .cols, drop=FALSE])[cbind(.row, .col)]

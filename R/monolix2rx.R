@@ -257,18 +257,31 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
     .ui$sticky <- "monolixData"
   }
   # the etas and the predictions come from the same Monolix estimate
-  .etaData <- try(monolixEtaImport(.ui))
+  .etaData <- try(monolixEtaImport(.ui, idText=TRUE))
   if (inherits(.etaData, "try-error")) .etaData <- NULL
   .est <- if (is.null(.etaData)) "mode" else attr(.etaData, "est")
-  .predIpredData <- try(monolixPredIpred(.ui, est=.est))
+  .predIpredData <- try(monolixPredIpred(.ui, est=.est, idText=TRUE))
   if (inherits(.predIpredData, "try-error")) .predIpredData <- NULL
   if (!is.null(.predIpredData) && !identical(attr(.predIpredData, "est"), .est)) {
     .est <- attr(.predIpredData, "est")
     if (!is.null(.etaData)) {
-      .etaData <- try(monolixEtaImport(.ui, est=.est))
+      .etaData <- try(monolixEtaImport(.ui, est=.est, idText=TRUE))
       if (inherits(.etaData, "try-error")) .etaData <- NULL
     }
   }
+  # Monolix writes the ids as text; they take the data's type, so 01 stays
+  # apart from 1 when the data keeps it apart
+  .idAs <- function(d) {
+    if (is.null(d) || is.null(d$id)) return(d)
+    if (is.null(.monolixData) || is.null(.monolixData$id)) {
+      d$id <- .monolixIdType(d$id)
+    } else if (is.numeric(.monolixData$id)) {
+      d$id <- utils::type.convert(d$id, as.is=TRUE)
+    }
+    d
+  }
+  .etaData <- .idAs(.etaData)
+  .predIpredData <- .idAs(.predIpredData)
   if (!is.null(.etaData)) {
     .est <- attr(.etaData, "est")
     attr(.etaData, "est") <- NULL
@@ -276,9 +289,10 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
                   crayon::bold$blue("$etaData"), ")"))
     .ui$etaData <- .etaData
     if (identical(.est, "mode")) {
-      .etaSaem <- try(monolixEtaImport(.ui, est="SAEM"))
+      .etaSaem <- try(monolixEtaImport(.ui, est="SAEM", idText=TRUE))
       if (!inherits(.etaSaem, "try-error") && !is.null(.etaSaem)) {
         attr(.etaSaem, "est") <- NULL
+        .etaSaem <- .idAs(.etaSaem)
         .minfo(paste0("imported monolix ETAS (_SAEM) to ",
                       crayon::bold$blue("$etaSaemData")))
         .ui$etaSaemData <- .etaSaem

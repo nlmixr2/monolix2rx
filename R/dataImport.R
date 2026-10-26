@@ -8,6 +8,8 @@
 #' @author Matthew L. Fidler
 .monolixNaApply <- function(data, na.strings, mlxtran) {
   .dat <- data
+  .id <- .monolixIdName(mlxtran)
+  if (!is.na(.id) && !is.null(.dat[[.id]])) .dat[[.id]] <- .monolixIdType(.dat[[.id]])
   for (v in names(.dat)) {
     if (tolower(v) %in% c("amt", "time", "dv") && is.character(.dat[[v]])) {
       .n <- suppressWarnings(as.numeric(.dat[[v]]))
@@ -23,6 +25,38 @@
     }
   }
   .dat
+}
+
+#' Monolix subject identifiers as numbers when that keeps them apart
+#'
+#' Monolix identifiers are strings, so `1` and `01` are two subjects; they
+#' become numbers (as `read.table()` makes them) only when no two merge.
+#'
+#' @param id identifier column
+#' @return numeric or character identifiers
+#' @noRd
+#' @author Matthew L. Fidler
+.monolixIdType <- function(id) {
+  if (!is.character(id)) return(id)
+  # a blank or NA id does not decide the type
+  .w <- !is.na(id) & trimws(id) != ""
+  .n <- suppressWarnings(as.numeric(id))
+  if (all(!is.na(.n[.w])) && length(unique(.n[.w])) == length(unique(id[.w]))) {
+    return(utils::type.convert(ifelse(.w, id, NA_character_), as.is=TRUE))
+  }
+  id
+}
+
+#' The data set's identifier column
+#'
+#' @param mlxtran parsed mlxtran
+#' @return column name, or NA
+#' @noRd
+#' @author Matthew L. Fidler
+.monolixIdName <- function(mlxtran) {
+  .u <- mlxtran$DATAFILE$CONTENT$CONTENT$use1
+  if (is.null(.u) || !any(names(.u) == "identifier")) return(NA_character_)
+  .u[["identifier"]]
 }
 
 #' Load data from a mlxtran defined dataset
@@ -48,7 +82,8 @@
       .ext <- tolower(regmatches(.file, regexpr("(?<=[.])[^./\\\\]+$", .file, perl=TRUE)))
       .data <- .monolixDataLoadBinary(.file, .ext,
                                       mlxtran$DATAFILE$FILEINFO$FILEINFO$header,
-                                      na.strings=na.strings)
+                                      na.strings=na.strings,
+                                      idName=.monolixIdName(mlxtran))
       if (!is.null(.data)) return(.monolixNaApply(.data, na.strings, mlxtran))
       .sep <- mlxtran$DATAFILE$FILEINFO$FILEINFO$delimiter
       .sep <- switch(
@@ -59,6 +94,14 @@
         semicolon = ";",
         semicolumn = ";"
       )
+      # the identifier column is read as text (see .monolixIdType())
+      .hdr <- mlxtran$DATAFILE$FILEINFO$FILEINFO$header
+      .idName <- .monolixIdName(mlxtran)
+      .idClass <- function(cols, names = cols) {
+        .w <- which(names == .idName)
+        if (is.na(.idName) || length(.w) != 1L) return(NA)
+        stats::setNames("character", cols[.w])
+      }
       .firstLine <- readLines(.file, n = 1)
       if (identical(.sep, " ")) {
         # a space-delimited file can align its columns with runs of spaces
@@ -67,6 +110,8 @@
       } else {
         .head <- strsplit(.firstLine, .sep, fixed = TRUE)[[1]]
       }
+      # a quoted header (write.csv) names the same columns
+      .head <- gsub("^[\"']|[\"']$", "", .head)
       if (all(.head == mlxtran$DATAFILE$FILEINFO$FILEINFO$header)) {
         # has header (and it matches)
         .data <- utils::read.table(
@@ -74,7 +119,8 @@
           header = TRUE,
           sep = .sep,
           row.names = NULL,
-          na.strings = na.strings
+          na.strings = na.strings,
+          colClasses = .idClass(.head)
         )
         return(.monolixNaApply(.data, na.strings, mlxtran))
       } else {
@@ -100,7 +146,8 @@
             header = TRUE,
             sep = .sep,
             row.names = NULL,
-            na.strings = na.strings
+            na.strings = na.strings,
+            colClasses = .idClass(make.names(.head, unique = TRUE), .hdr)
           )
           if (
             length(.data) != length(mlxtran$DATAFILE$FILEINFO$FILEINFO$header)
@@ -119,7 +166,8 @@
             header = FALSE,
             sep = .sep,
             row.names = NULL,
-            na.strings = na.strings
+            na.strings = na.strings,
+            colClasses = .idClass(paste0("V", seq_along(.hdr)), .hdr)
           )
           if (
             length(.data) != length(mlxtran$DATAFILE$FILEINFO$FILEINFO$header)
