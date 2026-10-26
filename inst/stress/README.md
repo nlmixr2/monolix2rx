@@ -54,7 +54,7 @@ is needed.
    ```r
    res <- stressKit()
    res <- stressKit(cases = "pkmodel")      # a few cases first
-   res <- stressKit(est = "fixed")          # population parameters fixed: faster
+   res <- stressKit(est = "fixed")          # MLE population parameters fixed: faster
    res[res$status %in% c("FAIL", "ERROR", "XPASS"), c("case", "status", "note")]
    ```
 

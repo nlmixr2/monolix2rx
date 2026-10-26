@@ -62,8 +62,9 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
    the mock.  Failure capture follows babelmixr2's `.lixoftCapture()`
    (`loadProject()` returns `FALSE` and prints `[ERROR]`).
 4. **Estimation presets**: `est="full"` (SAEM, conditional mode/mean, FIM,
-   log-likelihood) and `est="fixed"` (every population parameter
-   `method=FIXED`; individual parameters and predictions only).
+   log-likelihood) and `est="fixed"` (every MLE population parameter
+   `method=FIXED`, a MAP one stays estimated; individual parameters and
+   predictions only).
 5. **Version gating**: the Monolix version (from
    `getLixoftConnectorsState()`) gates cases with `minMonolix=` (SKIP on
    older Monolix, like the nonmem2rx `nm75` tag).
@@ -118,7 +119,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `36-space-infusions.R` | `delimiter = space` with single spaces and with aligned columns, steady-state and ADDL RATE infusions into `pkmodel(p, V, Cl)` |
 | `37-data-format.R` | a quoted header with quoted identifiers, zero-padded identifiers, identifiers `1` and `01` as two subjects, a trailing delimiter on every line |
 | `38-data-text.R` | a UTF-8 byte order mark, blank lines, spaces after the commas of the header |
-| `39-map-priors.R` | MAP priors in `[POPULATION] DEFINITION:` (log-normal on `ka_pop`, normal on `V_pop`/`Cl_pop`) with `method=MAP` |
+| `39-map-priors.R` | MAP priors in `[POPULATION] DEFINITION:` (log-normal on `ka_pop`, normal on a normal `V_pop`) with `method=MAP` |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -600,8 +601,10 @@ Notes for later cases:
 - `39-map-priors.R`: a GUI-saved 2024R1 project writes a prior as
   `[POPULATION] DEFINITION: ka_pop = {distribution=logNormal, typical=3,
   sd=0.25}` with `ka_pop = {value=1, method=MAP}`; the import already
-  parses it and reads the MAP estimates (rxode2 has no prior).  To confirm
-  in run mode that the validation agrees at the MAP estimates.
+  parses it and reads the MAP estimates, but does not carry the prior
+  (rxode2's `ini()` `prior()`, which babelmixr2 writes as MAP, could).  The
+  priors are centred on the truth, so the cases show the syntax imports.
+  To confirm in run mode: the validation at the MAP estimates.
 - First Monolix 2024R1 run: `indivPred_SAEM` is not reproduced by the
   `eta_*_SAEM` random effects (SAEM averages the parameters and the random
   effects separately); the conditional modes reproduce `indivPred_mode`
