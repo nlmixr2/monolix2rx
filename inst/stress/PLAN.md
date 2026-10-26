@@ -559,6 +559,10 @@ Notes for later cases:
   refused even in parentheses, and Monolix counts only subjects with an
   observation.  `EVID=3` without an amount column is untested (it
   needs doses, so an amount column).
+- A GUI-saved Monolix 2024R1 project writes `combined1c`/`combined2c` as
+  `errorModel=combined1(a, b, c)`/`combined2(a, b, c)`; the import now
+  parses it, `err-combined1c`/`err-combined2c` write it, and
+  `err-combined1c-spelling` keeps the refused `combined1c(...)` spelling.
 - `35-run-probes.R`: Monolix's Hutchinson PRED grows more slowly than
   rxode2 from the start with either history (`x_0` or 0); a variant with
   the same delay and no oscillation tests the solver.  `EVID=4` with

@@ -92,21 +92,27 @@ kitVariant("pkmodel-oral-1cmt", "err-lognormal", "logNormal observation with con
            mlxtran=.mlxProject(list(ka=.mlxPar(1.2, 0.3), V=.mlxPar(30, 0.2), Cl=.mlxPar(3, 0.3)),
                                err="constant(a)", errPar=c(a=0.2), obsDist="logNormal"))
 
-kitVariant("pkmodel-oral-1cmt", "err-combined1c", "combined1c(a, b, c): a + b*f^c",
-           knownRun="Monolix 2024R1: \"Unknown error model\" for combined1c(a, b, c)",
+## Monolix 2024R1 saves combined1c/combined2c as combined1(a, b, c) and
+## combined2(a, b, c)
+kitVariant("pkmodel-oral-1cmt", "err-combined1c", "combined1(a, b, c) (combined1c): a + b*f^c",
            tags=c("error"),
            sim=.oralErrTruth(quote(add(a) + pow(b, c) + combined1()),
                              list(quote(a <- 0.05), quote(b <- 0.1), quote(c <- 0.8))),
            mlxtran=.mlxProject(list(ka=.mlxPar(1.2, 0.3), V=.mlxPar(30, 0.2), Cl=.mlxPar(3, 0.3)),
-                               err="combined1c(a, b, c)", errPar=c(a=0.05, b=0.1, c=0.8)))
+                               err="combined1(a, b, c)", errPar=c(a=0.05, b=0.1, c=0.8)))
 
-kitVariant("pkmodel-oral-1cmt", "err-combined2c", "combined2c(a, b, c): sqrt(a^2 + (b*f^c)^2)",
-           knownRun="Monolix 2024R1: \"Unknown error model\" for combined2c(a, b, c)",
+kitVariant("err-combined1c", "err-combined1c-spelling",
+           "errorModel=combined1c(a, b, c), the older spelling (refused by Monolix 2024R1)",
+           knownRun="Monolix 2024R1: \"Unknown error model\" for combined1c(a, b, c); it writes combined1(a, b, c)",
+           mlxtran=.kitSub("err-combined1c", "mlxtran", "errorModel=combined1(a, b, c)",
+                           "errorModel=combined1c(a, b, c)"))
+
+kitVariant("pkmodel-oral-1cmt", "err-combined2c", "combined2(a, b, c) (combined2c): sqrt(a^2 + (b*f^c)^2)",
            tags=c("error"),
            sim=.oralErrTruth(quote(add(a) + pow(b, c) + combined2()),
                              list(quote(a <- 0.05), quote(b <- 0.1), quote(c <- 0.8))),
            mlxtran=.mlxProject(list(ka=.mlxPar(1.2, 0.3), V=.mlxPar(30, 0.2), Cl=.mlxPar(3, 0.3)),
-                               err="combined2c(a, b, c)", errPar=c(a=0.05, b=0.1, c=0.8)))
+                               err="combined2(a, b, c)", errPar=c(a=0.05, b=0.1, c=0.8)))
 
 ## an occupancy-like fraction observed on (0, 1)
 kitVariant("pkmodel-oral-1cmt", "err-logitnormal", "logitNormal observation on (0, 1) with constant(a) error",

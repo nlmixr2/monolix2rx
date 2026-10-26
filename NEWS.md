@@ -256,6 +256,10 @@
   fixed `sd=0.3`): Monolix's `eta_Cl` column became `omega_Cl`, which is
   not an eta of the model, so the validation solve failed.
 
+* Accepted `errorModel=combined1(a, b, c)` and `combined2(a, b, c)`, the
+  spelling Monolix 2024R1 saves for the `combined1c`/`combined2c` error
+  models (it refuses `combined1c(a, b, c)`); the import failed on them.
+
 * Fixed `factorial()` and `factln()` of a non-integer, which Monolix
   2024R1 computes for the rounded argument; rxode2 gave `gamma(x + 1)`.
 
