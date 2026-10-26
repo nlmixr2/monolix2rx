@@ -13,6 +13,7 @@ kitVariant("pkmodel-oral-1cmt", "data-space-delimiter",
 kitVariant("pkmodel-oral-1cmt", "data-space-aligned",
            "delimiter = space with columns aligned by runs of spaces",
            tags=c("data", "syntax"),
+           knownRun="Monolix 2024R1 refuses runs of spaces: \"Delimiter not detected\" (the import reads them)",
            write=function(d) {
              .l <- .writeDelim(c("ID", "TIME", "AMT", "DV"), "\t")(d)
              .f <- do.call(rbind, strsplit(.l, "\t", fixed=TRUE))

@@ -587,6 +587,15 @@ Notes for later cases:
 - `38-data-text.R`: all three read; a header with spaces after the
   commas warned that it did not match (fixed).  To confirm in run mode
   that Monolix reads them.
+- Fourth Monolix 2024R1 run (data formats, combined1c, probes): Monolix
+  reads a quoted header, zero-padded identifiers, `1` and `01` as two
+  subjects, a byte order mark, blank lines, spaces after the header commas
+  and single-space delimiters; `combined1(a, b, c)`/`combined2(a, b, c)`
+  pass; the steady-state and ADDL RATE infusions with a bioavailability
+  keep their duration; `EVID=4` with `AMT=.` is ignored.  Monolix refuses
+  columns aligned by runs of spaces ("Delimiter not detected") and a
+  trailing delimiter (more columns than header names); the import reads
+  both.
 - First Monolix 2024R1 run: `indivPred_SAEM` is not reproduced by the
   `eta_*_SAEM` random effects (SAEM averages the parameters and the random
   effects separately); the conditional modes reproduce `indivPred_mode`

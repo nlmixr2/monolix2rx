@@ -40,6 +40,7 @@ kitVariant("data-string-id", "data-id-numeric-collision",
 kitVariant("pkmodel-oral-1cmt", "data-trailing-delimiter",
            "every line (the header too) ends with a comma",
            tags=c("data", "syntax"),
+           knownRun="Monolix 2024R1 refuses it: \"Header names size = 4, number of columns of data file = 5\" (the import reads it)",
            write=function(d) paste0(.writeDelim(c("ID", "TIME", "AMT", "DV"), ",")(d), ","))
 
 kitVariant("data-id-numeric-collision", "data-id-collision-quoted",
