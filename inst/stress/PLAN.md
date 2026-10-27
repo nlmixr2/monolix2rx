@@ -577,7 +577,8 @@ Notes for later cases:
   of 0, the dose or its decay, nor a delay shift, reproduces it in local
   solves).  Monolix ignores `EVID=4` with `AMT=.` (the import stopped; it
   now ignores it too).  `delay()` of a `compartment()` amount degenerates
-  in Monolix; `nbdoses` is nlmixr2/rxode2#1492.
+  in Monolix; `nbdoses` is nlmixr2/rxode2#1492, worked around by writing
+  out a steady-state dose that starts its subject.
 - `36-space-infusions.R`: a space-delimited file aligned with runs of
   spaces was not read (fixed; a single-space file can no longer mark a
   missing value by an empty field, Monolix data uses `.`).  To confirm in

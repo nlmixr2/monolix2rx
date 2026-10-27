@@ -125,6 +125,7 @@
                   "dfSub = 0, ",
                   "dfObs = 0, ",
                   "thetaMat = NULL, ",
+                  "usePrior = NA, ",
                   "ssAtol = 1e-08, ",
                   "ssRtol = 1e-06, ",
                   "minSS = 10L, ",
@@ -173,11 +174,20 @@
                   call.=FALSE)
         }
       }
+      # rxode2 would simulate the MAP priors around estimates that are not
+      # their means (nlmixr2/rxode2#1502); the run's covariance is the
+      # uncertainty of the estimates
+      if (.usePriorAuto(usePrior) && nStud > 1L && !is.null(thetaMat) &&
+            any(!is.na(object$iniDf$prior))) {
+        usePrior <- FALSE
+        .minfo("using thetaMat from Monolix instead of the MAP priors (usePrior=FALSE)")
+      }
     }
     # The theta/omega comes from the ui
     if ((missing(events) && missing(params))) {
       if (!is.null(object$monolixData)) {
-        events <- object$monolixData
+        # Monolix's steady state as explicit doses (nlmixr2/rxode2#1492)
+        events <- .ssExpand(object$monolixData, .getNbdoses(object))
         .minfo(paste0("using Monolix's data for solving"))
       }
     }
@@ -229,9 +239,9 @@
     .formalArgs[.w] <- "..."
     .has3 <- TRUE
   }
-  .formalArgs <- c(paste(.formalArgs[seq(1, .w-1)], ", "),
-                   "..., ",
-                   "cores=cores,",
+  .formalArgs <- c(paste0("list(", paste(.formalArgs[seq(1, .w-1)], collapse=", "), "), "),
+                   "list(...), ",
+                   "list(cores=cores,",
                    "covsInterpolation = covsInterpolation, ",
                    "nStud = nStud, ",
                    "dfSub = dfSub, ",
@@ -241,10 +251,16 @@
                    "ssRtol = ssRtol, ",
                    "minSS = minSS, ",
                    "maxSS = maxSS, ",
-                   "envir = envir")
-
-  .formalArgs <- paste0("rxode2::rxSolve(", paste(.formalArgs, collapse=""), ")")
-  .args <- c(.args, .formalArgs, "}")
+                   "envir = envir), ",
+                   ".usePrior")
+  # usePrior only when set, and only to an rxode2 that has it
+  .usePrior <- paste0(".usePrior <- if (!.usePriorAuto(usePrior) && any(names(formals(rxode2::rxSolve)) == \"usePrior\")) ",
+                      "list(usePrior=usePrior) else list()")
+  # called by name so errors read rxSolve(...); the expanded steady-state
+  # doses' negative times are expected
+  .formalArgs <- paste0(".ssQuiet(do.call(\"rxSolve\", c(", paste(.formalArgs, collapse=""),
+                        "), quote=TRUE, envir=asNamespace(\"rxode2\")))")
+  .args <- c(.args, .usePrior, .formalArgs, "}")
   .args <- paste(.args, collapse="\n")
   .args <- c("# This is built from buildParser.R, edit there",
              "#'@export", deparse(str2lang(.args)))

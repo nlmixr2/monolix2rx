@@ -144,6 +144,7 @@ kitImportSolve <- function(m, etas, case, mix=NULL) {
   ## rows of the endpoint checked by likelihood instead
   .d$kitLik <- 0L
   if (is.character(case$dryLik)) .d$kitLik <- as.integer(.kitEndpointRows(.d, m, .kitLikIndex(m, case)))
+  .d <- .kitSsExpand(.d, .kitNbdoses(m))
   .s <- suppressMessages(do.call(rxode2::rxSolve,
                                  c(list(m$monolixModelIwres, .p, .d,
                                         returnType="data.frame", addDosing=FALSE,

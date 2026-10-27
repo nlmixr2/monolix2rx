@@ -70,7 +70,7 @@ test_that("a prior takes its parameter's scale; omega and residual priors are sk
   expect_equal(.popPrior(NULL, .pars), list())
 })
 
-test_that("an import with a MAP prior simulates uncertainty with usePrior=FALSE", {
+test_that("an import with a MAP prior simulates uncertainty from Monolix's thetaMat", {
   skip_on_cran()
   .dir <- file.path(tempfile(), "theo")
   dir.create(.dir, recursive = TRUE)
@@ -87,8 +87,16 @@ test_that("an import with a MAP prior simulates uncertainty with usePrior=FALSE"
   writeLines(.l, .p)
   .rx <- suppressMessages(monolix2rx(.p))
   .ev <- rxode2::et(amt = 320) |> rxode2::et(seq(0, 24, by = 4))
-  # rxode2 simulates the prior (whose mean is not the MAP estimate) unless
-  # told to use the imported thetaMat
-  expect_error(suppressWarnings(rxode2::rxSolve(.rx, .ev, nStud = 2, nSub = 2)))
-  expect_error(rxode2::rxSolve(.rx, .ev, nStud = 2, nSub = 2, usePrior = FALSE), NA)
+  # rxode2 would simulate the prior (whose mean is not the MAP estimate);
+  # the import's rxSolve() uses Monolix's thetaMat (nlmixr2/rxode2#1502)
+  expect_error(suppressMessages(rxode2::rxSolve(.rx, .ev, nStud = 2, nSub = 2)), NA)
+  expect_error(suppressMessages(rxode2::rxSolve(.rx, .ev, nStud = 2, nSub = 2, usePrior = FALSE)), NA)
+  # an explicit usePrior=TRUE is passed on (rxode2 then simulates the
+  # prior, which errors while nlmixr2/rxode2#1502 is open)
+  skip_if_not("usePrior" %in% names(formals(rxode2::rxSolve)))
+  .r <- try(suppressWarnings(suppressMessages(
+    rxode2::rxSolve(.rx, .ev, nStud = 2, nSub = 2, usePrior = TRUE))), silent = TRUE)
+  if (inherits(.r, "try-error")) expect_match(.r, "prior")
+  expect_true(.usePriorAuto(NA) && .usePriorAuto(NULL) && .usePriorAuto("auto") &&
+                !.usePriorAuto(FALSE) && !.usePriorAuto("false"))
 })

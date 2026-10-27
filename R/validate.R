@@ -147,7 +147,8 @@
   .method <- .getMethod(.ui)
   .pop <- .parameterThetaEta(.ui, pop=TRUE)
   .model <- ui$monolixModelIwres
-  .data <- ui$monolixData
+  # Monolix's steady state as explicit doses (nlmixr2/rxode2#1492)
+  .data <- .ssExpand(ui$monolixData, .getNbdoses(.ui))
   .keep <- as.character(.data$id) %in% as.character(.ui$etaData$id)
   if (!is.null(.data) && any(.keep) && !all(.keep)) {
     # Monolix estimates no random effects for a subject without observations
@@ -176,7 +177,7 @@
       length(.ind) > 0 &&
       length(.ind[, 1]) > 0) {
     .minfo("solving ipred problem")
-    .ipredSolve <- try(rxode2::rxSolve(.model, .ind, .data, returnType = "data.frame",
+    .ipredSolve <- try(.ssQuiet(rxode2::rxSolve(.model, .ind, .data, returnType = "data.frame",
                                        covsInterpolation="locf",
                                        #addlKeepsCov=TRUE, addlDropSs=TRUE, ssAtDoseTime=TRUE,
                                        #safeZero=TRUE, ss2cancelAllPending=TRUE,
@@ -185,12 +186,12 @@
                                        atol=.tol, rtol=.tol,
                                        ssAtol=100, ssRtol=100, omega=NULL,
                                        method=.delayMethod,
-                                       addDosing = FALSE))
+                                       addDosing = FALSE)))
 
     .ipredSolve <- .subsetMonolix(.ui, .ipredSolve, c("iwres", "ires"))
     .minfo("done")
     .minfo("solving pred problem")
-    .predSolve <- try(rxode2::rxSolve(.model, .pop, .data, returnType = "data.frame",
+    .predSolve <- try(.ssQuiet(rxode2::rxSolve(.model, .pop, .data, returnType = "data.frame",
                                       covsInterpolation="locf",
                                       #addlKeepsCov=TRUE, addlDropSs=TRUE, ssAtDoseTime=TRUE,
                                       #safeZero=TRUE, ss2cancelAllPending=TRUE,
@@ -199,7 +200,7 @@
                                       atol=.tol, rtol=.tol,
                                       ssAtol=100, ssRtol=100, omega=NULL,
                                       method=.delayMethod,
-                                      addDosing = FALSE), silent=TRUE)
+                                      addDosing = FALSE)), silent=TRUE)
     .predSolve <- .subsetMonolix(.ui, .predSolve)
     .nPredSolve <- length(.predSolve[, 1])
     .nIpredSolve <- length(.ipredSolve[, 1])
@@ -303,4 +304,97 @@
     .minfo("cannot find individual parameter estimates")
   }
   .ui
+}
+
+#' Monolix's steady state as explicit doses
+#'
+#' Monolix's `nbdoses=N` steady state is the state after the N doses
+#' before the steady-state dose and the dose itself; rxode2's `minSS`
+#' does not give a whole number of doses (nlmixr2/rxode2#1492).  A
+#' steady-state dose that starts its subject becomes those doses, given
+#' every `ii` before it (the subject's start reset moves to the first);
+#' a later steady-state dose keeps rxode2's `ss`.
+#'
+#' @param data imported data (`$monolixData`)
+#' @param nbdoses Monolix's number of steady-state doses
+#' @return data with the expanded doses
+#' @details The doses are at negative times; rxode2 then warns that the
+#'   compartments initialize at the first time, which is what is meant, so
+#'   `.ssQuiet()` muffles it.
+#' @noRd
+#' @author Matthew L. Fidler
+.ssExpand <- function(data, nbdoses) {
+  if (is.null(data) || is.null(data[["ss"]]) || is.null(data[["ii"]]) ||
+        length(nbdoses) != 1L || is.na(nbdoses) || nbdoses < 1L) {
+    return(data)
+  }
+  .evid <- if (is.null(data[["evid"]])) rep(NA_integer_, nrow(data)) else data$evid
+  .dose <- .dataIsDose(data) & (is.na(.evid) | .evid %in% c(1L, 4L))
+  .ss <- which(.dose & data$ss %in% 1L & !is.na(data$ii) & data$ii > 0)
+  if (length(.ss) == 0L) return(data)
+  .id <- as.character(data$id)
+  .reset <- .evid %in% 3L & is.na(data$amt)
+  .extra <- NULL
+  # ties sort a moved start reset first, then the new doses, then the rest
+  .key <- seq_len(nrow(data))
+  for (.w in .ss) {
+    .t <- data$time[.w]
+    # only a steady-state dose that starts its subject: no other dose or
+    # observation earlier, or at its time before it (other steady-state
+    # doses at that time, like a second route, start it too)
+    .same <- which(.id == .id[.w] & !.reset & seq_len(nrow(data)) != .w)
+    .other <- .same[data$time[.same] < .t |
+                      (data$time[.same] == .t & .same < .w & !(.same %in% .ss))]
+    .other <- .other[!(.evid[.other] %in% 2L)]
+    if (length(.other) > 0L) next
+    # a start reset before the dose (an earlier t_0) would clear the doses
+    if (any(.id == .id[.w] & .reset & data$time < .t)) next
+    .first <- .t - nbdoses * data$ii[.w]
+    .r <- which(.id == .id[.w] & .reset & data$time == .t)
+    data$time[.r] <- .first
+    .key[.r] <- -1L
+    .d <- data[rep(.w, nbdoses), , drop=FALSE]
+    .d$time <- .t - rev(seq_len(nbdoses)) * data$ii[.w]
+    .d$ss <- 0
+    if (!is.null(.d[["addl"]])) .d$addl <- 0
+    # an EVID=4 dose resets first: the first of its doses does, it does not
+    if (.evid[.w] %in% 4L) {
+      .d$evid <- 1L
+      .d$evid[1] <- 4L
+      data$evid[.w] <- 1L
+    }
+    .extra <- rbind(.extra, .d)
+    data$ss[.w] <- 0
+  }
+  if (is.null(.extra)) return(data)
+  .ret <- rbind(data, .extra)
+  .ret <- .ret[order(match(as.character(.ret$id), unique(.id)), .ret$time,
+                     c(.key, rep(0L, nrow(.extra))), method="radix"), , drop=FALSE]
+  rownames(.ret) <- NULL
+  .ret
+}
+
+#' Muffle rxode2's note on negative times from `.ssExpand()` doses
+#'
+#' @param expr expression to evaluate
+#' @return the value of `expr`
+#' @noRd
+#' @author Matthew L. Fidler
+.ssQuiet <- function(expr) {
+  withCallingHandlers(expr, warning=function(w) {
+    if (grepl("with negative times, compartments initialize", conditionMessage(w), fixed=TRUE)) {
+      invokeRestart("muffleWarning")
+    }
+  })
+}
+
+#' Is `usePrior` left to rxode2 ("auto")?
+#'
+#' @param usePrior the `rxSolve()` argument
+#' @return `TRUE` for `NA`, `NULL` or `"auto"`
+#' @noRd
+#' @author Matthew L. Fidler
+.usePriorAuto <- function(usePrior) {
+  is.null(usePrior) || (length(usePrior) == 1L &&
+                          (is.na(usePrior) || identical(tolower(as.character(usePrior)), "auto")))
 }

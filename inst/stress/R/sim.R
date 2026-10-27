@@ -14,7 +14,20 @@
   seed + sum(utf8ToInt(name) * seq_along(utf8ToInt(name))) %% 100000L
 }
 
+## Monolix's steady state (nbSSDoses doses before the steady-state dose)
+## as explicit doses, as monolix2rx solves it
+.kitSsExpand <- function(d, nbSSDoses) {
+  .nm <- names(d)
+  .lc <- tolower(.nm)
+  if (!all(c("id", "time", "amt", "ss", "ii") %in% .lc)) return(d)
+  names(d) <- ifelse(.lc %in% c("id", "time", "amt", "ss", "ii", "evid", "addl"), .lc, .nm)
+  d <- utils::getFromNamespace(".ssExpand", "monolix2rx")(d, nbSSDoses)
+  names(d) <- .nm[match(tolower(names(d)), .lc)]
+  d
+}
+
 .kitSolve <- function(ui, d, case, addDosing=FALSE, returnType="data.frame") {
+  d <- .kitSsExpand(d, case$nbSSDoses)
   .args <- c(list(ui, d, keep="ROWID", returnType=returnType,
                   addDosing=addDosing),
              .kitSolveOpts(case$nbSSDoses), case$solve)

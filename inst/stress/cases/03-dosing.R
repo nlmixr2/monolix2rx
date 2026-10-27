@@ -60,11 +60,12 @@ kitCase(
 RATE = {use=rate}")))
 
 ## a long half-life relative to II, so the number of steady-state doses
-## (nbdoses=10, not the default 7) changes the predictions
+## (nbdoses=10, not the default 7) changes the predictions; Monolix gives
+## the 10 doses before the steady-state dose and that dose, which the
+## import's validation writes out (rxode2's minSS cannot, nlmixr2/rxode2#1492)
 kitCase(
   name="dose-ss",
   covers="steady-state dose (use=steadystate, nbdoses=10) with II, then a second regimen",
-  knownRun="Monolix 2024R1 PRED with nbdoses=10 fits 11 doses (10 before the current one) at the final estimates; rxode2 minSS does not reproduce that count (nlmixr2/rxode2#1492)",
   tags=c("dosing", "ss"),
   nbSSDoses=10L,
   sim=function() {

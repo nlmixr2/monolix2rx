@@ -429,3 +429,49 @@ test_that("a header with spaces after the delimiters matches without a warning",
   expect_warning(.d2 <- .monolixDataLoad(.m), NA)
   expect_equal(names(.d2), c("ID", "AMT", "TIME", "CONC", "WEIGHT", "SEX"))
 })
+
+test_that("a steady-state dose that starts its subject becomes Monolix's nbdoses + 1 doses", {
+  .d <- data.frame(id = c(1, 1, 1, 1, 2, 2, 2), time = c(0, 0, 0.5, 24, 0, 5, 6),
+                   amt = c(NA, 100, NA, 200, 100, 100, NA), evid = c(3L, 1L, 0L, 1L, 1L, 1L, 0L),
+                   ss = c(0, 1, 0, 0, 0, 1, 0), ii = c(0, 12, 0, 0, 0, 12, 0),
+                   dv = c(NA, NA, 1, NA, NA, NA, 2))
+  .r <- .ssExpand(.d, 3L)
+  # subject 1: the start reset moves to the first dose, 3 doses before 0
+  expect_equal(.r$time[.r$id == 1], c(-36, -36, -24, -12, 0, 0.5, 24))
+  expect_equal(.r$evid[.r$id == 1], c(3L, 1L, 1L, 1L, 1L, 0L, 1L))
+  expect_equal(.r$ss[.r$id == 1], rep(0, 7))
+  # subject 2: a later steady-state dose keeps rxode2's ss
+  expect_equal(.r[.r$id == 2, "ss"], c(0, 1, 0))
+  expect_equal(.ssExpand(.d, NA), .d)
+})
+
+test_that("Monolix's nbdoses steady state matches explicit doses", {
+  .m <- rxode2::rxode2({
+    d/dt(central) <- -0.01 * central
+  })
+  .d <- data.frame(id = 1, time = c(0, 0.5), amt = c(100, NA), evid = c(1L, 0L),
+                   ss = c(1, 0), ii = c(12, 0), cmt = c("central", NA))
+  .s <- .ssQuiet(rxode2::rxSolve(.m, .ssExpand(.d, 10L), returnType = "data.frame"))
+  .r <- exp(-0.01 * 12)
+  expect_equal(.s$central[.s$time == 0.5], 100 * (1 - .r^11) / (1 - .r) * exp(-0.01 * 0.5),
+               tolerance = 1e-6)
+})
+
+test_that("steady-state doses at the start on two routes, after a t_0 reset, and with EVID=4", {
+  # two steady-state rows at the subject's start are both written out
+  .d <- data.frame(id = 1, time = c(0, 0, 1), amt = c(100, 50, NA), evid = c(1L, 1L, 0L),
+                   ss = c(1, 1, 0), ii = c(12, 12, 0), cmt = c("depot", "central", NA))
+  .r <- .ssExpand(.d, 2L)
+  expect_equal(sum(.r$evid == 1L), 6L)
+  expect_true(all(.r$ss == 0))
+  # a start reset before the dose (an earlier t_0) keeps rxode2's ss
+  .d <- data.frame(id = 1, time = c(-5, 0, 1), amt = c(NA, 100, NA), evid = c(3L, 1L, 0L),
+                   ss = c(0, 1, 0), ii = c(0, 12, 0))
+  expect_equal(.ssExpand(.d, 2L), .d)
+  # an EVID=4 steady-state dose: the first of its doses resets
+  .d <- data.frame(id = 1, time = c(0, 1), amt = c(100, NA), evid = c(4L, 0L),
+                   ss = c(1, 0), ii = c(12, 0))
+  .r <- .ssExpand(.d, 2L)
+  expect_equal(.r$time, c(-24, -12, 0, 1))
+  expect_equal(.r$evid, c(4L, 1L, 1L, 0L))
+})

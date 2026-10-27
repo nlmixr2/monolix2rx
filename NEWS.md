@@ -28,8 +28,17 @@
   of babelmixr2: `ka_pop = {distribution=logNormal, typical=3, sd=0.25}`
   becomes `prior(ka_pop) ~ dnorm(log(3), 0.25)`.  Omega and residual
   error priors, and a prior whose distribution differs from its
-  parameter's, are skipped with a warning.  Uncertainty simulation of such
-  an import (`nStud > 1`) needs `usePrior = FALSE` (nlmixr2/rxode2#1502).
+  parameter's, are skipped with a warning.  The import's `rxSolve()` keeps
+  simulating uncertainty (`nStud > 1`) from Monolix's `thetaMat` with
+  `usePrior = FALSE` unless `usePrior` is given (nlmixr2/rxode2#1502).
+
+* Matched Monolix's steady state (`nbdoses=N`: the N doses before the
+  steady-state dose and that dose) in the validation and in the import's
+  `rxSolve()` on Monolix's data: a steady-state dose that starts its
+  subject (on one or more routes, `EVID=1` or `4`) is written out as those
+  doses, since rxode2's `minSS` does not give a whole number of doses
+  (nlmixr2/rxode2#1492).  A later steady-state dose still uses rxode2's
+  `ss`.
 
 * Switched `$etaData` and the validation to Monolix's conditional modes
   (`eta_*_mode`, `indivPred_mode`, `indWRes_mode`), which reproduce each
