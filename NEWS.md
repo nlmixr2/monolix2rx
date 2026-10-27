@@ -1,5 +1,7 @@
 # monolix2rx 0.0.7
 
+* Required rxode2 >= 5.1.7, for `delay()` and `ini()` priors.
+
 * Added a Monolix stress kit (`inst/stress`, like the nonmem2rx and
   babelmixr2 kits): it simulates each case with rxode2, writes the Monolix
   project, runs Monolix and checks the `monolix2rx()` import; a translate

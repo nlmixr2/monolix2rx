@@ -113,12 +113,8 @@ ddt_dx = -x-dx", pk)
   .ret <- .equation("a=factln(b)", pk)
   expect_equal(.ret$rx, "a <- lfactorial(round(b))")
 
-  if (utils::packageVersion("rxode2") >= "5.1.7") {
-    expect_equal(.equation("ddt_x = ka*x-k*delay(x,tau)", pk)$rx,
-                 "d/dt(x) <- ka * x - k * delay(x, tau)")
-  } else {
-    expect_error(.equation("ddt_x = ka*x-k*delay(x,tau)", pk), "rxode2 >= 5.1.7")
-  }
+  expect_equal(.equation("ddt_x = ka*x-k*delay(x,tau)", pk)$rx,
+               "d/dt(x) <- ka * x - k * delay(x, tau)")
 
   # Monolix's rem(a, b) has the sign of a, like rxode2's %% (C fmod)
   expect_equal(.equation("ddt_x = ka*x-k*rem(t, tau)", pk)$rx,

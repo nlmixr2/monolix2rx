@@ -43,7 +43,7 @@ Imports:
     stringi,
     crayon,
     lotri,
-    rxode2 (>= 3.0.4)
+    rxode2 (>= 5.1.7)
 Suggests:
     devtools,
     testthat (>= 3.0.0),

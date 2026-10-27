@@ -118,7 +118,6 @@ test_that("predRtol is relative to the Monolix pred", {
 
 test_that("delay() models are solved with a dense method", {
   skip_on_cran()
-  skip_if(utils::packageVersion("rxode2") < "5.1.7")
   f <- .monolix2rx(system.file("theo/theophylline_project.mlxtran", package="monolix2rx"))
   expect_false(.getDelay(f))
   .mlx <- f$mlxtran
