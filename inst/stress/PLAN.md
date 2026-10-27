@@ -607,9 +607,12 @@ Notes for later cases:
   priors are centred on the truth, so the cases show the syntax imports.
   To confirm in run mode: the validation at the MAP estimates.
 - `40-map-shapes.R`: the import writes each as an `ini()` prior (normal
-  for the coefficient, numeric logit/probit means); to confirm in run mode
-  that Monolix accepts a prior on a covariate coefficient and on a bounded
-  logitNormal parameter.
+  for the coefficient, numeric logit/probit means).
+- Fifth Monolix 2024R1 run: all five MAP prior cases (39 and 40) pass;
+  Monolix accepts priors on a covariate coefficient and on a bounded
+  logitNormal parameter and keeps them, spelled as written
+  (`distribution=logitNormal, min=0.5, max=3, typical=1.2, sd=0.3`), in
+  the project it resaves.
 - First Monolix 2024R1 run: `indivPred_SAEM` is not reproduced by the
   `eta_*_SAEM` random effects (SAEM averages the parameters and the random
   effects separately); the conditional modes reproduce `indivPred_mode`
