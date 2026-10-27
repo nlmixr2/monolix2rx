@@ -311,17 +311,16 @@
 
 #' Does rxode2 give a fixed number of steady-state doses?
 #'
-#' rxode2 with nlmixr2/rxode2#1492 fixed takes `minSS = maxSS = n` as the
-#' n doses before a steady-state dose (Monolix `nbdoses = n`); an older one
-#' refuses `maxSS < 7`.
+#' rxode2 newer than 5.1.8 (nlmixr2/rxode2#1492 fixed) takes
+#' `minSS = maxSS = n` as the n doses before a steady-state dose (Monolix
+#' `nbdoses = n`).
 #'
-#' @return `TRUE` when it does (cached for the session)
+#' @return `TRUE` when it does (checked once per session)
 #' @noRd
 #' @author Matthew L. Fidler
 .rxSsFixedCount <- function() {
   if (is.null(.monolix2rx$ssFixedCount)) {
-    .monolix2rx$ssFixedCount <-
-      !inherits(try(rxode2::rxControl(minSS=2L, maxSS=2L), silent=TRUE), "try-error")
+    .monolix2rx$ssFixedCount <- utils::packageVersion("rxode2") > "5.1.8"
   }
   .monolix2rx$ssFixedCount
 }
