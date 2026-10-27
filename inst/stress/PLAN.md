@@ -120,6 +120,7 @@ tests/testthat/test-stress.R   translate mode on a sample + the mock run; skip_o
 | `37-data-format.R` | a quoted header with quoted identifiers, zero-padded identifiers, identifiers `1` and `01` as two subjects, a trailing delimiter on every line |
 | `38-data-text.R` | a UTF-8 byte order mark, blank lines, spaces after the commas of the header |
 | `39-map-priors.R` | MAP priors in `[POPULATION] DEFINITION:` (log-normal on `ka_pop`, normal on a normal `V_pop`) with `method=MAP` |
+| `40-map-shapes.R` | MAP priors on an untransformed covariate coefficient (normal), a bounded logitNormal and a probitNormal parameter; each checks the imported `ini()` prior |
 
 ### Delay differential equations (`08-dde.R`, tag `dde`)
 
@@ -605,6 +606,10 @@ Notes for later cases:
   `ini()` `prior()` on the imported theta (the inverse of babelmixr2).  The
   priors are centred on the truth, so the cases show the syntax imports.
   To confirm in run mode: the validation at the MAP estimates.
+- `40-map-shapes.R`: the import writes each as an `ini()` prior (normal
+  for the coefficient, numeric logit/probit means); to confirm in run mode
+  that Monolix accepts a prior on a covariate coefficient and on a bounded
+  logitNormal parameter.
 - First Monolix 2024R1 run: `indivPred_SAEM` is not reproduced by the
   `eta_*_SAEM` random effects (SAEM averages the parameters and the random
   effects separately); the conditional modes reproduce `indivPred_mode`

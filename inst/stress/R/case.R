@@ -42,7 +42,7 @@
 ## - `exportpath`: the results directory written to [SETTINGS] (default
 ##   run); NA writes no [SETTINGS], so Monolix uses the project name (run).
 ## - `crlf`: TRUE writes run.mlxtran and model.txt with Windows line endings.
-## - `dryData`: function(m, sim) checking the imported data (`m$monolixData`)
+## - `dryData`: function(m, sim) checking the import (`m$monolixData`, `m$iniDf`, ...)
 ##   against the simulation; returns NULL or a failure message.
 
 .kitEnv <- new.env(parent=emptyenv())
