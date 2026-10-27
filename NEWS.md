@@ -40,7 +40,10 @@
   subject (on one or more routes, `EVID=1` or `4`) is written out as those
   doses, since rxode2's `minSS` does not give a whole number of doses
   (nlmixr2/rxode2#1492).  A later steady-state dose still uses rxode2's
-  `ss`.
+  `ss`, exact with an rxode2 newer than 5.1.8 (#1492 fixed, which takes
+  `minSS = maxSS = N`).  The start is written out with either rxode2: it
+  also keeps steady-state doses on several routes, a lag longer than `ii`
+  and an `nbdoses` below what the regimen needs.
 
 * Switched `$etaData` and the validation to Monolix's conditional modes
   (`eta_*_mode`, `indivPred_mode`, `indWRes_mode`), which reproduce each
@@ -209,7 +212,8 @@
 * Fixed `.getNbdoses()` and `.getStiff()`, which did not recognize the
   parsed project and always returned 7 and `FALSE`: the validation and
   `rxSolve()` now use the project's `nbdoses=` and `odeType=`.  The new
-  `.getSsLimits()` gives the matching `minSS`/`maxSS`, raised to rxode2's
+  `.getSsLimits()` gives the matching `minSS`/`maxSS`: `minSS = maxSS =
+  nbdoses` with an rxode2 newer than 5.1.8, otherwise raised to rxode2's
   floor (5 and 7) when `nbdoses` is smaller; babelmixr2, which calls
   `.getNbdoses()` directly, needs it for `nbdoses` below 6.
 

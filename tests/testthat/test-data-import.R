@@ -445,13 +445,17 @@ test_that("a steady-state dose that starts its subject becomes Monolix's nbdoses
   expect_equal(.ssExpand(.d, NA), .d)
 })
 
-test_that("Monolix's nbdoses steady state matches explicit doses", {
+test_that("Monolix's nbdoses steady state matches its N + 1 doses, either rxode2", {
   .m <- rxode2::rxode2({
     d/dt(central) <- -0.01 * central
   })
   .d <- data.frame(id = 1, time = c(0, 0.5), amt = c(100, NA), evid = c(1L, 0L),
                    ss = c(1, 0), ii = c(12, 0), cmt = c("central", NA))
-  .s <- .ssQuiet(rxode2::rxSolve(.m, .ssExpand(.d, 10L), returnType = "data.frame"))
+  # the expanded doses with an older rxode2; minSS = maxSS = N with a fixed one
+  .l <- if (.rxSsFixedCount()) c(minSS = 10L, maxSS = 10L) else c(minSS = 10L, maxSS = 11L)
+  .s <- .ssQuiet(rxode2::rxSolve(.m, .ssExpand(.d, 10L), returnType = "data.frame",
+                                 minSS = .l[["minSS"]], maxSS = .l[["maxSS"]],
+                                 ssAtol = 100, ssRtol = 100, atol = 1e-12, rtol = 1e-12))
   .r <- exp(-0.01 * 12)
   expect_equal(.s$central[.s$time == 0.5], 100 * (1 - .r^11) / (1 - .r) * exp(-0.01 * 0.5),
                tolerance = 1e-6)
@@ -474,4 +478,20 @@ test_that("steady-state doses at the start on two routes, after a t_0 reset, and
   .r <- .ssExpand(.d, 2L)
   expect_equal(.r$time, c(-24, -12, 0, 1))
   expect_equal(.r$evid, c(4L, 1L, 1L, 0L))
+})
+
+test_that("steady-state doses on two routes at the start match the written-out doses", {
+  .m <- rxode2::rxode2({
+    d/dt(depot) <- -1.2 * depot
+    d/dt(central) <- 1.2 * depot - 0.1 * central
+  })
+  .d <- data.frame(id = 1, time = c(0, 0, 1, 5), amt = c(100, 50, NA, NA), evid = c(1L, 1L, 0L, 0L),
+                   ss = c(1, 1, 0, 0), ii = c(12, 12, 0, 0), cmt = c("depot", "central", NA, NA))
+  .x <- data.frame(id = 1, time = c(-36, -36, -24, -24, -12, -12, 0, 0, 1, 5),
+                   amt = c(rep(c(100, 50), 4), NA, NA), evid = c(rep(1L, 8), 0L, 0L),
+                   cmt = c(rep(c("depot", "central"), 4), NA, NA))
+  .opt <- list(returnType = "data.frame", atol = 1e-10, rtol = 1e-10)
+  .s <- .ssQuiet(do.call(rxode2::rxSolve, c(list(.m, .ssExpand(.d, 3L)), .opt)))
+  .e <- .ssQuiet(do.call(rxode2::rxSolve, c(list(.m, .x), .opt)))
+  expect_equal(.s$central, .e$central, tolerance = 1e-8)
 })

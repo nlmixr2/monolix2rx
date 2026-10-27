@@ -5,7 +5,11 @@
 ## of steady-state doses (nbSSDoses).
 
 .kitSolveOpts <- function(nbSSDoses=7L) {
-  list(covsInterpolation="locf", minSS=nbSSDoses, maxSS=nbSSDoses + 1L,
+  ## an rxode2 with nlmixr2/rxode2#1492 fixed counts minSS = maxSS doses
+  ## (later steady-state doses); the start is written out (.kitSsExpand())
+  .fixed <- utils::getFromNamespace(".rxSsFixedCount", "monolix2rx")()
+  list(covsInterpolation="locf", minSS=nbSSDoses,
+       maxSS=if (.fixed) nbSSDoses else nbSSDoses + 1L,
        ssAtol=100, ssRtol=100, atol=1e-10, rtol=1e-10)
 }
 

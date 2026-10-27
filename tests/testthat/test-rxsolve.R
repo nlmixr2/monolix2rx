@@ -25,7 +25,7 @@ test_that("solving makes sense", {
   expect_equal(s$env$.args$omega, f$omega)
 
   # the Monolix-style steady state limits are forwarded to the solve
-  expect_equal(s$env$.args$maxSS, .getNbdoses(f) + 1)
+  expect_equal(s$env$.args$maxSS, .getNbdoses(f) + if (.rxSsFixedCount()) 0 else 1)
   expect_equal(s$env$.args$minSS, .getNbdoses(f))
 
   # user-specified steady state limits are honored, not overwritten
@@ -85,15 +85,27 @@ test_that(".getNbdoses() reads nbdoses from the project (also from the decompres
   assign("mlxtran", .mlx, envir=.ui)
   expect_equal(.getNbdoses(.ui), 10L)
   expect_equal(.getNbdoses(NULL), 7L)
-  # rxode2 needs minSS >= 5 and maxSS >= 7
-  expect_equal(.getSsLimits(.ui), c(minSS=10L, maxSS=11L))
-  .mlx$DATAFILE$CONTENT$CONTENT$nbdoses <- 3L
-  assign("mlxtran", .mlx, envir=.ui)
-  expect_equal(.getSsLimits(.ui), c(minSS=5L, maxSS=7L))
+  if (.rxSsFixedCount()) {
+    # rxode2 with nlmixr2/rxode2#1492 fixed counts minSS = maxSS doses
+    expect_equal(.getSsLimits(.ui), c(minSS=10L, maxSS=10L))
+    .mlx$DATAFILE$CONTENT$CONTENT$nbdoses <- 3L
+    assign("mlxtran", .mlx, envir=.ui)
+    expect_equal(.getSsLimits(.ui), c(minSS=3L, maxSS=3L))
+    .min <- 3L
+    .max <- 3L
+  } else {
+    # an older rxode2 needs minSS >= 5 and maxSS >= 7
+    expect_equal(.getSsLimits(.ui), c(minSS=10L, maxSS=11L))
+    .mlx$DATAFILE$CONTENT$CONTENT$nbdoses <- 3L
+    assign("mlxtran", .mlx, envir=.ui)
+    expect_equal(.getSsLimits(.ui), c(minSS=5L, maxSS=7L))
+    .min <- 5L
+    .max <- 7L
+  }
   class(.ui) <- class(f)
   s <- .rxSolve(.ui, nStud=1)
-  expect_equal(s$env$.args$minSS, 5L)
-  expect_equal(s$env$.args$maxSS, 7L)
+  expect_equal(s$env$.args$minSS, .min)
+  expect_equal(s$env$.args$maxSS, .max)
 })
 
 test_that(".getStiff() reads odeType from the project (also from the decompressed ui)", {

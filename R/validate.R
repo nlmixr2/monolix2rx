@@ -22,9 +22,10 @@
 }
 #' rxode2 steady-state limits for Monolix's number of steady-state doses
 #'
-#' With `ssAtol`/`ssRtol` of 100 rxode2 stops at `minSS` doses, so
-#' `maxSS` can be raised to rxode2's floor without changing the solve;
-#' `minSS` below rxode2's floor of 5 cannot be reproduced.
+#' An rxode2 with nlmixr2/rxode2#1492 fixed counts `minSS = maxSS = n`
+#' doses before the steady-state dose; an older one needs `minSS >= 5` and
+#' `maxSS >= 7` and stops at `minSS` with `ssAtol`/`ssRtol` of 100, which
+#' is not a whole number of doses (`.ssExpand()` writes out the start).
 #'
 #' @inheritParams .getNbdoses
 #' @return named integer vector `minSS`, `maxSS`
@@ -33,6 +34,8 @@
 #' @author Matthew L. Fidler
 .getSsLimits <- function(x) {
   .nss <- .getNbdoses(x)
+  # an rxode2 with nlmixr2/rxode2#1492 fixed counts minSS = maxSS doses
+  if (.rxSsFixedCount()) return(c(minSS=.nss, maxSS=.nss))
   .min <- max(.nss, 5L)
   if (.min != .nss) {
     .minfo(paste0("Monolix uses ", .nss, " steady-state doses; rxode2 needs at least 5, so minSS=5"))
@@ -306,6 +309,23 @@
   .ui
 }
 
+#' Does rxode2 give a fixed number of steady-state doses?
+#'
+#' rxode2 with nlmixr2/rxode2#1492 fixed takes `minSS = maxSS = n` as the
+#' n doses before a steady-state dose (Monolix `nbdoses = n`); an older one
+#' refuses `maxSS < 7`.
+#'
+#' @return `TRUE` when it does (cached for the session)
+#' @noRd
+#' @author Matthew L. Fidler
+.rxSsFixedCount <- function() {
+  if (is.null(.monolix2rx$ssFixedCount)) {
+    .monolix2rx$ssFixedCount <-
+      !inherits(try(rxode2::rxControl(minSS=2L, maxSS=2L), silent=TRUE), "try-error")
+  }
+  .monolix2rx$ssFixedCount
+}
+
 #' Monolix's steady state as explicit doses
 #'
 #' Monolix's `nbdoses=N` steady state is the state after the N doses
@@ -313,7 +333,11 @@
 #' does not give a whole number of doses (nlmixr2/rxode2#1492).  A
 #' steady-state dose that starts its subject becomes those doses, given
 #' every `ii` before it (the subject's start reset moves to the first);
-#' a later steady-state dose keeps rxode2's `ss`.
+#' a later steady-state dose keeps rxode2's `ss` (exact with an rxode2
+#' that counts `minSS = maxSS` doses, `.getSsLimits()`).  The start is
+#' written out with either rxode2: it also keeps steady-state doses on
+#' several routes, a lag longer than `ii` and `nbdoses` below what the
+#' regimen needs, which rxode2's iteration does not.
 #'
 #' @param data imported data (`$monolixData`)
 #' @param nbdoses Monolix's number of steady-state doses
