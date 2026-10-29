@@ -406,6 +406,8 @@
 * Fixed `pkmodel()` or a PK macro (`compartment()`, `oral()`, ...)
   followed by an `if` in `EQUATION:`: the macro arguments' parentheses and
   commas were written before the `if`, so the model did not parse.
+* Added `aaaCranMonolix2rxThreads()`, run first in the examples, which limits
+  CRAN checks to 2 threads to cut the example time.
 
 # monolix2rx 0.0.6
 
