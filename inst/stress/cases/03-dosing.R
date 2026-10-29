@@ -31,7 +31,7 @@ output = Cc
 
 kitVariant("pkmodel-oral-1cmt", "dose-addl",
            "one dose record with ADDL/II (additionaldose, interdoseinterval)",
-           tags=c("dosing"),
+           tags="dosing",
            data=function(nSub) {
              .id <- seq_len(nSub)
              mlxBind(mlxDose(.id, 0, amt=100, cmt=1, ii=12, addl=5),

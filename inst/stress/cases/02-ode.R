@@ -470,7 +470,7 @@ output = Y
 kitCase(
   name="ode-init-parameter",
   covers="initial condition A_0 = A0 from an individual parameter with an eta, no doses",
-  tags=c("ode"),
+  tags="ode",
   sim=function() {
     ini({
       A0_pop <- 50; k_pop <- 0.1

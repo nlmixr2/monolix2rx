@@ -7,7 +7,7 @@
 ## shrinks against dde-hutchinson points at the solver
 kitVariant("dde-hutchinson", "dde-hutchinson-damped",
            "delayed logistic growth with r*tau below 1/e (no oscillation), tau = 2",
-           tags=c("dde"),
+           tags="dde",
            sim=function() {
              ini({
                r_pop <- 0.15; K_pop <- 100; tau_pop <- 2

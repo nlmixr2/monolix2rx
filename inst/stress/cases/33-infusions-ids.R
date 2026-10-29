@@ -98,7 +98,7 @@ kitVariant("two-endpoints-parent-metabolite", "data-cens-second-endpoint",
 ## numeric IDs with gaps and more digits than the subject count
 kitVariant("pkmodel-oral-1cmt", "data-id-sparse",
            "numeric subject IDs with gaps (7, 114, 221, ...)",
-           tags=c("data"),
+           tags="data",
            data=function(nSub) {
              .id <- 107L * seq_len(nSub) - 100L
              mlxBind(mlxDose(.id, 0, amt=100, cmt=1),

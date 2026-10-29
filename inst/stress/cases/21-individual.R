@@ -5,7 +5,7 @@
 kitVariant("pkmodel-oral-1cmt", "cov-equation-ifelse",
            "weight band from if/elseif/else in [COVARIATE] EQUATION: (hWT) on Cl, next to lw70 on V",
            knownRun="Monolix 2024R1: \"Conditional assignments in [COVARIATE] block are only allowed in Simulx\"",
-           tags=c("covariate"),
+           tags="covariate",
            sim=function() {
              ini({
                ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3
@@ -94,7 +94,7 @@ lw70 = log(WT/70)",
 ## whether Monolix estimates a model with no random effect is to confirm
 kitVariant("pkmodel-oral-1cmt", "param-no-iiv",
            "no random effects at all (every parameter no-variability)",
-           tags=c("params"),
+           tags="params",
            sim=function() {
              ini({
                ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3

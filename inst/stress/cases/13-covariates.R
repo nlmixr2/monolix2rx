@@ -125,7 +125,7 @@ lw70 = log(WT/70)",
 
 kitVariant("pkmodel-oral-1cmt", "cov-untransformed",
            "continuous covariate used as is (covariate=WT): log(Cl) is linear in WT",
-           tags=c("covariate"),
+           tags="covariate",
            sim=.covOral("Cl_pop * exp(beta_Cl_WT * WT + omega_Cl)", beta=c(beta_Cl_WT=0.01)),
            data=.covData,
            columns=c("ID", "TIME", "AMT", "DV", "WT"),

@@ -3,7 +3,7 @@
 
 kitVariant("pkmodel-oral-1cmt", "data-col-names",
            "data columns not named ID/TIME/AMT/DV (SUBJ, HOUR, DOSE, Y)",
-           tags=c("data"),
+           tags="data",
            write=function(d) {
              .w <- .kitMonolixRows(d)[, c("ID", "TIME", "AMT", "DV")]
              names(.w) <- c("SUBJ", "HOUR", "DOSE", "Y")
@@ -17,7 +17,7 @@ Y = {use=observation, name=CONC, type=continuous}"))
 ## Monolix keeps the order of the file; rxode2 sorts by id
 kitVariant("pkmodel-oral-1cmt", "data-id-unsorted",
            "subjects in descending ID order in the data file",
-           tags=c("data"),
+           tags="data",
            write=function(d) {
              .w <- .kitMonolixRows(d)[, c("ID", "TIME", "AMT", "DV")]
              .w[order(-.w$ID, seq_len(nrow(.w))), ]
@@ -70,7 +70,7 @@ kitVariant("pkmodel-iv-2cmt", "data-dose-obs-line-iv",
 
 kitVariant("pkmodel-oral-1cmt", "data-time-negative",
            "pre-dose observations at negative times (the dose at 0)",
-           tags=c("data"),
+           tags="data",
            data=function(nSub) {
              .id <- seq_len(nSub)
              mlxBind(mlxDose(.id, 0, amt=100, cmt=1),
@@ -89,7 +89,7 @@ kitVariant("ode-turnover", "data-placebo",
 
 kitVariant("pkmodel-oral-1cmt", "out-name-conc",
            "prediction not named Cc (Conc = pkmodel(...), output = Conc)",
-           tags=c("output"),
+           tags="output",
            sim=.oralErrTruth(quote(add(a) + prop(b) + combined1()),
                              list(quote(a <- 0.05), quote(b <- 0.1)),
                              out=quote(Conc), extra=list(quote(Conc <- Cc))),

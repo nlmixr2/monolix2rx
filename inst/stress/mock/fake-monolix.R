@@ -112,7 +112,7 @@ if (any(.cont)) {
 
 .re <- data.frame(id=.toTruth(.ids))
 ## Monolix names the random effect after the parameter, not its sd= name
-.sdName <- monolix2rx:::.etaImportSd(.mlx)
+.sdName <- utils::getFromNamespace(".etaImportSd", "monolix2rx")(.mlx)
 for (.e in .eta) {
   .pn <- names(.sdName)[match(.e, .sdName)]
   if (is.na(.pn)) .pn <- sub("^omega_", "", .e)

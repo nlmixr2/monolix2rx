@@ -2,7 +2,7 @@
 
 kitVariant("pkmodel-oral-1cmt", "err-custom-names",
            "combined1(a_CONC, b_CONC): error parameters not named a and b",
-           tags=c("error"),
+           tags="error",
            sim=.oralErrTruth(quote(add(a_CONC) + prop(b_CONC) + combined1()),
                              list(quote(a_CONC <- 0.05), quote(b_CONC <- 0.1))),
            mlxtran=.mlxProject(list(ka=.mlxPar(1.2, 0.3), V=.mlxPar(30, 0.2), Cl=.mlxPar(3, 0.3)),
@@ -10,7 +10,7 @@ kitVariant("pkmodel-oral-1cmt", "err-custom-names",
 
 kitVariant("pkmodel-oral-1cmt", "err-fixed",
            "combined2(a, b) with a fixed (method=FIXED)",
-           tags=c("error"),
+           tags="error",
            sim=.oralErrTruth(quote(add(a) + prop(b) + combined2()),
                              list(quote(a <- fix(0.05)), quote(b <- 0.1))),
            ## only a: est="fixed" fixes b too

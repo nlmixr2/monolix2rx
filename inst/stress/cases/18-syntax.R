@@ -2,7 +2,7 @@
 
 kitVariant("pkmodel-oral-1cmt", "syntax-comments",
            "; comments on their own lines and after statements in the model file",
-           tags=c("syntax"),
+           tags="syntax",
            model="DESCRIPTION: {{PROBLEM}}
 ; one compartment, first-order absorption
 
@@ -37,7 +37,7 @@ kitVariant("pkmodel-oral-1cmt", "param-fixed-lowercase",
 
 kitVariant("pkmodel-oral-1cmt", "param-omega-fixed",
            "random effect standard deviation fixed (omega_V method=FIXED)",
-           tags=c("params"),
+           tags="params",
            dryData=.fixedCheck("omega_V"),
            mlxtran=sub("omega_V = {value=0.2, method=MLE}", "omega_V = {value=0.2, method=FIXED}",
                        .mlxProject(list(ka=.mlxPar(1.2, 0.3), V=.mlxPar(30, 0.2), Cl=.mlxPar(3, 0.3))),

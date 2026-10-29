@@ -3,7 +3,7 @@
 ## R starts at 0 at t_0 = 12, before the first record (a dose at 24)
 kitVariant("ode-no-t0-late-data", "ode-t0-nonzero",
            "t_0 = 12 with the first data record at t = 24 (the system starts at t_0)",
-           tags=c("ode"),
+           tags="ode",
            data=function(nSub) {
              .id <- seq_len(nSub)
              mlxBind(mlxOther(.id, 12, cmt=3),

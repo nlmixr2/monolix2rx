@@ -37,7 +37,7 @@ YTYPE = {use=observationtype}")))
 
 kitVariant("pkmodel-oral-1cmt", "data-replicate-obs",
            "replicate samples (two or three observations at the same time)",
-           tags=c("data"),
+           tags="data",
            data=function(nSub) {
              .id <- seq_len(nSub)
              mlxBind(mlxDose(.id, 0, amt=100, cmt=1),
@@ -48,7 +48,7 @@ kitVariant("pkmodel-oral-1cmt", "data-replicate-obs",
 ## Monolix 2024R1 leaves such a subject out (19 of 20 individuals)
 kitVariant("pkmodel-oral-1cmt", "data-no-obs-subject",
            "a subject with a dose and no observations",
-           tags=c("data"),
+           tags="data",
            data=function(nSub) {
              .id <- seq_len(nSub)
              .obs <- .id[.id != 2L]

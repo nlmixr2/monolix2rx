@@ -150,7 +150,7 @@ output = Cc
 ## acos() and tan(), the trigonometric functions no other case uses
 kitVariant("pkmodel-oral-1cmt", "fun-acos-tan",
            "acos() and tan() in EQUATION:",
-           tags=c("function"),
+           tags="function",
            model=.oralFunModel("Y = Cc*(1 + 0.1*acos(0.5) + 0.2*tan(0.3))"),
            sim=.oralErrTruth(quote(add(a) + prop(b) + combined1()),
                              list(quote(a <- 0.05), quote(b <- 0.1)),

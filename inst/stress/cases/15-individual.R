@@ -27,7 +27,7 @@ kitVariant("pkmodel-oral-1cmt", "param-logit-bounds",
 ## var= gives the variance instead of the standard deviation
 kitVariant("pkmodel-oral-1cmt", "param-var",
            "random effect given as a variance (var=omega2_Cl) instead of sd=",
-           tags=c("params"),
+           tags="params",
            sim=function() {
              ini({
                ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3

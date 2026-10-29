@@ -6,7 +6,7 @@
 }
 
 kitVariant("pkmodel-oral-1cmt", "err-constant", "constant(a) error",
-           tags=c("error"),
+           tags="error",
            sim=function() {
              ini({
                ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3
@@ -26,7 +26,7 @@ kitVariant("pkmodel-oral-1cmt", "err-constant", "constant(a) error",
            mlxtran=.errProject("constant(a)", c(a=0.2)))
 
 kitVariant("pkmodel-oral-1cmt", "err-proportional", "proportional(b) error",
-           tags=c("error"),
+           tags="error",
            sim=function() {
              ini({
                ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3
@@ -46,7 +46,7 @@ kitVariant("pkmodel-oral-1cmt", "err-proportional", "proportional(b) error",
            mlxtran=.errProject("proportional(b)", c(b=0.15)))
 
 kitVariant("pkmodel-oral-1cmt", "err-combined2", "combined2(a, b) error",
-           tags=c("error"),
+           tags="error",
            sim=function() {
              ini({
                ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3
@@ -95,7 +95,7 @@ kitVariant("pkmodel-oral-1cmt", "err-lognormal", "logNormal observation with con
 ## Monolix 2024R1 saves combined1c/combined2c as combined1(a, b, c) and
 ## combined2(a, b, c)
 kitVariant("pkmodel-oral-1cmt", "err-combined1c", "combined1(a, b, c) (combined1c): a + b*f^c",
-           tags=c("error"),
+           tags="error",
            sim=.oralErrTruth(quote(add(a) + pow(b, c) + combined1()),
                              list(quote(a <- 0.05), quote(b <- 0.1), quote(c <- 0.8))),
            mlxtran=.mlxProject(list(ka=.mlxPar(1.2, 0.3), V=.mlxPar(30, 0.2), Cl=.mlxPar(3, 0.3)),
@@ -108,7 +108,7 @@ kitVariant("err-combined1c", "err-combined1c-spelling",
                            "errorModel=combined1c(a, b, c)"))
 
 kitVariant("pkmodel-oral-1cmt", "err-combined2c", "combined2(a, b, c) (combined2c): sqrt(a^2 + (b*f^c)^2)",
-           tags=c("error"),
+           tags="error",
            sim=.oralErrTruth(quote(add(a) + pow(b, c) + combined2()),
                              list(quote(a <- 0.05), quote(b <- 0.1), quote(c <- 0.8))),
            mlxtran=.mlxProject(list(ka=.mlxPar(1.2, 0.3), V=.mlxPar(30, 0.2), Cl=.mlxPar(3, 0.3)),

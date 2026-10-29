@@ -42,7 +42,7 @@ kitVariant("pkmodel-oral-1cmt", "iov-cl-basic",
 
 kitVariant("iov-cl-basic", "iov-only",
            "occasion variability without subject variability on Cl (varlevel=id*occ)",
-           tags=c("iov"),
+           tags="iov",
            knownRun=.iovKnownRun,
            sim=function() {
              ini({
@@ -69,7 +69,7 @@ kitVariant("iov-cl-basic", "iov-only",
 ## occasions (no reset)
 kitVariant("iov-cl-basic", "iov-ka-v-unequal",
            "IOV on ka and V, occasions 2/5/6/7 of unequal length (6 has a dose and no observations), no washout between occasions",
-           tags=c("iov"),
+           tags="iov",
            knownRun=.iovKnownRun,
            sim=function() {
              ini({
@@ -137,7 +137,7 @@ kitVariant("iov-cl-basic", "iov-correlation",
 ## bioavailability (IOV only)
 kitVariant("iov-cl-basic", "iov-ka-f-multi",
            "IOV on Tlag (with BSV), ka and logitNormal p (IOV only) in pkmodel(Tlag, ka, p, V, Cl)",
-           tags=c("iov"),
+           tags="iov",
            knownRun=.iovKnownRun,
            sim=function() {
              ini({
@@ -247,7 +247,7 @@ lw70 = log(WT/70)"))
 ## (OCC12), numbered like the import's occ2 so the true etas line up
 kitVariant("iov-cl-basic", "iov-nested",
            "nested occasions OCC1/OCC2: Cl with varlevel={id, id*occ1, id*occ1*occ2}",
-           tags=c("iov"),
+           tags="iov",
            knownRun=.iovKnownRun,
            sim=function() {
              ini({

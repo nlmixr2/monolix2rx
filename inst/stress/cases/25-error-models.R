@@ -87,7 +87,7 @@ YTYPE = {use=observationtype}"))
 kitVariant("pkmodel-oral-1cmt", "err-additive-fixed-zero",
            "combined1(a, b) with a fixed at 0 (proportional in effect)",
            knownRun="Monolix 2024R1 refuses an initial value of 0 for an error parameter: \"It must be positive\"",
-           tags=c("error"),
+           tags="error",
            sim=.oralErrTruth(quote(add(a) + prop(b) + combined1()),
                              list(quote(a <- fix(0)), quote(b <- 0.1))),
            mlxtran=local({
@@ -104,7 +104,7 @@ kitVariant("pkmodel-oral-1cmt", "err-additive-fixed-zero",
 ## the residuals (and the likelihood)
 kitVariant("pkmodel-oral-1cmt", "err-autocorr",
            "autocorrelated residuals (autoCorrCoef=r in [LONGITUDINAL] DEFINITION:)",
-           tags=c("error"),
+           tags="error",
            mlxtran=local({
              .m <- .mlxProject(list(ka=.mlxPar(1.2, 0.3), V=.mlxPar(30, 0.2), Cl=.mlxPar(3, 0.3)),
                                params=c(r=0.5))

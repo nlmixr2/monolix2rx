@@ -65,7 +65,7 @@ kitVariant("macro-iv-peripheral", "macro-iv-peripheral-after",
 ## once Cc > 1; Monolix 2024R1 rounds
 kitVariant("pkmodel-oral-1cmt", "fun-factorial-fraction",
            "factorial(x) and factln(1 + x) of a non-integer x in (1, 2): the argument is rounded",
-           tags=c("function"),
+           tags="function",
            model=.oralFunModel("x = 1 + Cc/(1 + Cc)
 Y = Cc + factorial(x) + factln(1 + x)"),
            sim=.oralErrTruth(quote(add(a) + prop(b) + combined1()),

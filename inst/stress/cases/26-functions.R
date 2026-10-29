@@ -58,7 +58,7 @@ kitVariant("ode-turnover", "fun-rem-circadian",
 
 kitVariant("pkmodel-oral-1cmt", "fun-hyperbolic",
            "sinh(), cosh(), tanh(), atan2(), asin() and ceil() in an output",
-           tags=c("function"),
+           tags="function",
            model=.oralFunModel("u = Cc/10
 Y = 10*tanh(u) + sinh(u) - cosh(u) + 1 + atan2(Cc, 10) + asin(u/(1 + u)) + ceil(t/1000)"),
            sim=.oralErrTruth(quote(add(a) + prop(b) + combined1()),
@@ -89,7 +89,7 @@ Y = Cc*(1 + 0.5*f)"),
 
 kitVariant("ode-turnover", "ode-nonstiff-explicit",
            "odeType = nonStiff written out (the default)",
-           tags=c("ode"),
+           tags="ode",
            model=local({
              .m <- sub("EQUATION:\n", "EQUATION:\nodeType = nonStiff\n",
                        .kitEnv$cases[["ode-turnover"]]$model, fixed=TRUE)

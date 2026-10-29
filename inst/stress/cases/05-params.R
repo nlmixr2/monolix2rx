@@ -10,7 +10,7 @@
 
 kitVariant("pkmodel-oral-1cmt", "cov-wt-lw70",
            "continuous covariate transformed in [COVARIATE] EQUATION: (lw70 = log(WT/70)) on V and Cl",
-           tags=c("covariate"),
+           tags="covariate",
            sim=function() {
              ini({
                ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3
@@ -45,7 +45,7 @@ lw70 = log(WT/70)"))
 
 kitVariant("pkmodel-oral-1cmt", "cov-sex-categorical",
            "categorical covariate (SEX 0/1, reference 0) on Cl",
-           tags=c("covariate"),
+           tags="covariate",
            sim=function() {
              ini({
                ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3; beta_Cl_SEX_1 <- -0.4
@@ -102,7 +102,7 @@ kitVariant("pkmodel-oral-1cmt", "param-corr",
 
 kitVariant("pkmodel-oral-1cmt", "param-normal-novar",
            "normal distribution (V) and a parameter without variability (ka)",
-           tags=c("params"),
+           tags="params",
            sim=function() {
              ini({
                ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3

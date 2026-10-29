@@ -61,7 +61,7 @@ kitVariant("cov-wt-lw70", "param-option-order",
 
 kitVariant("pkmodel-oral-1cmt", "syntax-exponent",
            "numbers in exponent notation (1.2e+00, 3E1, 3e0, 5.0E-02) in <PARAMETER> and the model file",
-           tags=c("syntax"),
+           tags="syntax",
            model="DESCRIPTION: {{PROBLEM}}
 
 [LONGITUDINAL]
@@ -81,7 +81,7 @@ output = Cc
 ## an empty field as missing, like "." (to confirm in run mode)
 kitVariant("pkmodel-oral-1cmt", "data-empty-missing",
            "missing AMT and DV written as empty fields instead of '.'",
-           tags=c("data"),
+           tags="data",
            write=function(d) {
              .w <- .kitMonolixRows(d)[, c("ID", "TIME", "AMT", "DV")]
              .w[] <- lapply(.w, function(x) {

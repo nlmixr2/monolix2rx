@@ -19,7 +19,7 @@
 
 kitVariant("pkmodel-oral-1cmt", "data-semicolon-ignore",
            "semicolon delimiter, an ignored text column and a dose-only AMT column with '.'",
-           tags=c("data"),
+           tags="data",
            write=.writeDelim(c("ID", "TIME", "AMT", "DV", "NOTE"), ";", function(w) {
              w$NOTE <- ifelse(is.na(w$AMT), "obs", "dose")
              w
@@ -39,7 +39,7 @@ kitVariant("pkmodel-oral-1cmt", "data-tab-subdir-path",
 ## reverse order
 kitVariant("pkmodel-oral-1cmt", "data-string-id",
            "character subject identifiers (S-001 ...) listed out of order",
-           tags=c("data"),
+           tags="data",
            data=function(nSub) {
              .id <- sprintf("S-%03d", seq_len(nSub))
              mlxBind(mlxDose(.id, 0, amt=100, cmt=1),

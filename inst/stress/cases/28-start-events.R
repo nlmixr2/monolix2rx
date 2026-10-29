@@ -6,7 +6,7 @@
 ## record (a dose at 24); starting at the first record would leave R at 0
 kitVariant("ode-turnover", "ode-t0-before-data",
            "t_0 = 0 with the first data record at t = 24 (the system evolves from t_0, not from the first record)",
-           tags=c("ode"),
+           tags="ode",
            sim=function() {
              ini({
                ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3
@@ -50,7 +50,7 @@ kitVariant("ode-turnover", "ode-t0-before-data",
 ## conditions there (rxode2 ignores a reset that is a subject's first record)
 kitVariant("ode-t0-before-data", "ode-no-t0-late-data",
            "no t_0 and the first data record at t = 24 (the system starts at the first dose or observation)",
-           tags=c("ode"),
+           tags="ode",
            data=function(nSub) {
              .id <- seq_len(nSub)
              mlxBind(mlxOther(.id, 24, cmt=3),
@@ -93,7 +93,7 @@ kitVariant("tte-repeated", "tte-repeated-max-events",
 kitVariant("pkmodel-oral-1cmt", "fun-not-signed",
            "a negation after a sign and as an exponent (-~f, 2^~f)",
            knownRun="Monolix 2024R1 refuses a sign after an operator (0.5*-~f): a syntax error",
-           tags=c("function"),
+           tags="function",
            model=.oralFunModel("if t > 12
   f = 1
 else

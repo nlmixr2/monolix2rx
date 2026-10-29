@@ -16,7 +16,7 @@ kitVariant("data-string-id", "data-quoted-header",
 
 kitVariant("data-string-id", "data-id-zero-padded",
            "zero-padded identifiers (001, 002, ...)",
-           tags=c("data"),
+           tags="data",
            data=function(nSub) {
              .id <- sprintf("%03d", seq_len(nSub))
              mlxBind(mlxDose(.id, 0, amt=100, cmt=1),
@@ -28,7 +28,7 @@ kitVariant("data-string-id", "data-id-zero-padded",
 ## identifier looks numeric, so read.table() makes numbers of them
 kitVariant("data-string-id", "data-id-numeric-collision",
            "identifiers 1 and 01 (equal as numbers) as two subjects",
-           tags=c("data"),
+           tags="data",
            data=function(nSub) {
              .id <- c("1", "01", as.character(seq_len(nSub - 2L) + 1L))
              mlxBind(mlxDose(.id, 0, amt=100, cmt=1),

@@ -3,7 +3,7 @@
 ## 03-dosing.R and odeType in 02-ode.R.
 
 .tasksCase <- function(name, covers, est="default", ...) {
-  kitVariant("pkmodel-oral-1cmt", name, covers, tags=c("tasks"), est=est, ...)
+  kitVariant("pkmodel-oral-1cmt", name, covers, tags="tasks", est=est, ...)
 }
 
 .tasksEst <- function(...) {

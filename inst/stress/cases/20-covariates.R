@@ -39,7 +39,7 @@ kitVariant("pkmodel-oral-1cmt", "data-occ-no-iov",
 ## min() is elementwise in Monolix; a dplyr min() is over the whole column
 kitVariant("pkmodel-oral-1cmt", "cov-equation-min",
            "covariate transform capped with min() in [COVARIATE] EQUATION: (log(min(WT, 90)/70))",
-           tags=c("covariate"),
+           tags="covariate",
            sim=.covOral("Cl_pop * exp(beta_Cl_lwc * log(min(WT, 90) / 70) + omega_Cl)",
                         beta=c(beta_Cl_lwc=0.75)),
            data=.covData,
@@ -57,7 +57,7 @@ lwc = log(min(WT, 90)/70)"))
 
 kitVariant("pkmodel-oral-1cmt", "cov-equation-bmi",
            "covariate computed from two covariates through an intermediate (BMI from WT and HT, then log(BMI/25))",
-           tags=c("covariate"),
+           tags="covariate",
            sim=.covOral("Cl_pop * exp(beta_Cl_lBMI * log(WT / (HT / 100)^2 / 25) + omega_Cl)",
                         beta=c(beta_Cl_lBMI=0.5)),
            data=function(nSub) {

@@ -176,7 +176,7 @@ output = R
 
 kitVariant("dde-delayed-effect", "dde-delay-expr",
            "delay time given by an expression: delay(Ac, 0.5*tau)",
-           tags=c("dde"),
+           tags="dde",
            sim=function() {
              ini({
                ka_pop <- 1.2; V_pop <- 30; Cl_pop <- 3
@@ -208,7 +208,7 @@ kitVariant("dde-delayed-effect", "dde-delay-expr",
 kitCase(
   name="dde-two-delays",
   covers="two delays on two states: delay(Ad, tlag) into the central compartment, delay(Ac, tau) on the effect",
-  tags=c("dde"),
+  tags="dde",
   knownRun="Monolix 2024R1 PRED differs by a median 1 % (up to 3 % after the second dose) with the rxode2 solve converged; with the doses after t_0 it agrees (dde-two-delays-late), and no depot history (0, the dose, its decay) nor delay shift reproduces it",
   solve=list(method="dop853"),
   sim=function() {
