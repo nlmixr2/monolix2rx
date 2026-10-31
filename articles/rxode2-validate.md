@@ -20,7 +20,8 @@ mod <- monolix2rx(pkgTheo)
 #> ℹ reading covariance from FisherInformation/covarianceEstimatesLin.txt
 #> ℹ done
 #> ℹ imported monolix and translated to rxode2 compatible data ($monolixData)
-#> ℹ imported monolix ETAS (_SAEM) imported to rxode2 compatible data ($etaData)
+#> ℹ imported monolix ETAS (_mode) imported to rxode2 compatible data ($etaData)
+#> ℹ imported monolix ETAS (_SAEM) to $etaSaemData
 #> ℹ imported monolix pred/ipred data to compare ($predIpredData)
 #> ℹ solving ipred problem
 #> ℹ done
@@ -56,9 +57,10 @@ print(mod)
 #>     dfObs <- 120
 #>     dfSub <- 12
 #>     thetaMat <- lotri({
-#>         ka_pop ~ 0.09785
-#>         V_pop ~ c(0.00082606, 0.00041937)
-#>         Cl_pop ~ c(-4.2833e-05, -6.7957e-06, 1.1318e-05)
+#>         ka_pop ~ 0.0416560546073138
+#>         V_pop ~ c(0.00118325511651798, 0.00202122030181813)
+#>         Cl_pop ~ c(-0.000695680378916356, -0.000371376957496329, 
+#>             0.00701317875319478)
 #>         omega_ka ~ c(omega_ka = 0.022259)
 #>         omega_V ~ c(omega_ka = -7.6443e-05, omega_V = 0.0014578)
 #>         omega_Cl ~ c(omega_ka = 3.062e-06, omega_V = -1.2912e-05, 
@@ -68,12 +70,12 @@ print(mod)
 #>         b ~ c(omega_ka = -1.3886e-05, omega_V = -3.1105e-05, 
 #>             omega_Cl = 5.2805e-05, a = -0.0026458, b = 0.00056232)
 #>     })
-#>     validation <- c("ipred relative difference compared to Monolix ipred: 0.04%; 95% percentile: (0%,0.52%); rtol=0.00038", 
-#>         "ipred absolute difference compared to Monolix ipred: 95% percentile: (0.000362, 0.00848); atol=0.00254", 
-#>         "pred relative difference compared to Monolix pred: 0%; 95% percentile: (0%,0%); rtol=6.6e-07", 
+#>     validation <- c("ipred relative difference compared to Monolix ipred: 0%; 95% percentile: (0%,0%); rtol=6.68e-07", 
+#>         "ipred absolute difference compared to Monolix ipred: 95% percentile: (1.8e-07, 1.38e-05); atol=3.41e-06", 
+#>         "pred relative difference compared to Monolix pred: 0%; 95% percentile: (0%,0%); rtol=6.78e-07", 
 #>         "pred absolute difference compared to Monolix pred: 95% percentile: (1.6e-07, 1.27e-05); atol=3.66e-06", 
-#>         "iwres relative difference compared to Monolix iwres: 0%; 95% percentile: (0.06%,32.22%); rtol=0.0153", 
-#>         "iwres absolute difference compared to Monolix pred: 95% percentile: (0.000403, 0.0138); atol=0.00305")
+#>         "iwres relative difference compared to Monolix iwres: 0%; 95% percentile: (0%,0.03%); rtol=6.93e-06", 
+#>         "iwres absolute difference compared to Monolix iwres: 95% percentile: (7.96e-08, 1.85e-05); atol=2.71e-06")
 #>     ini({
 #>         ka_pop <- 0.426994483535611
 #>         V_pop <- -0.786351566327091
@@ -136,17 +138,17 @@ modified returned `ui` object. For the rtol, atol as follows you have:
 ``` r
 
 mod$iwresAtol
-#>         50% 
-#> 0.003054349
+#>          50% 
+#> 2.712703e-06
 mod$iwresRtol
-#>        50% 
-#> 0.01526897
+#>          50% 
+#> 6.932171e-06
 mod$ipredAtol
-#>         50% 
-#> 0.002537436
+#>          50% 
+#> 3.410731e-06
 mod$ipredRtol
 #>          50% 
-#> 0.0003802867
+#> 6.679512e-07
 mod$predAtol
 #>          50% 
 #> 3.657152e-06
@@ -162,22 +164,22 @@ wish by looking at the `ipredCompare` and `predCompare` datasets:
 ``` r
 
 head(mod$iwresCompare)
-#>   id  time monolixIwres        iwres  cmt
-#> 1  1  0.25 -1.397760000 -1.395682322 CONC
-#> 2  1  0.57  0.000121543  0.003040162 CONC
-#> 3  1  1.12  1.928970000  1.932039320 CONC
-#> 4  1 12.12  0.440294000  0.431149277 CONC
-#> 5  1  2.02  0.196493000  0.198287572 CONC
-#> 6  1 24.37  0.713742000  0.699508374 CONC
+#>   id  time monolixIwres       iwres  cmt
+#> 1  1  0.25    -1.345150 -1.34514633 CONC
+#> 2  1  0.57     0.051476  0.05148996 CONC
+#> 3  1  1.12     1.949460  1.94947593 CONC
+#> 4  1 12.12     0.491487  0.49148044 CONC
+#> 5  1  2.02     0.183648  0.18365325 CONC
+#> 6  1 24.37     0.807985  0.80797726 CONC
 
 head(mod$ipredCompare)
 #>   id  time monolixIpred    ipred  cmt
-#> 1  1  0.25      3.72839 3.726960 CONC
-#> 2  1  0.57      6.56990 6.567599 CONC
-#> 3  1  1.12      8.74855 8.746027 CONC
-#> 4  1 12.12      5.61508 5.621679 CONC
-#> 5  1  2.02      9.47386 9.472175 CONC
-#> 6  1 24.37      2.85999 2.868060 CONC
+#> 1  1  0.25      3.69232 3.692315 CONC
+#> 2  1  0.57      6.52946 6.529448 CONC
+#> 3  1  1.12      8.73172 8.731712 CONC
+#> 4  1 12.12      5.57829 5.578292 CONC
+#> 5  1  2.02      9.48590 9.485900 CONC
+#> 6  1 24.37      2.80686 2.806866 CONC
 
 head(mod$predCompare)
 #>   id  time monolixPred  cmt     pred
@@ -203,13 +205,13 @@ to make the validation predictions (dosing and observations) by the
 ``` r
 
 head(mod$monolixData) # with nlme loaded you can also use getData(mod)
-#>   id  amt time    dv WEIGHT SEX  cmt admd
-#> 1  1 4.02 0.00    NA   79.6   M <NA>   NA
-#> 2  1   NA 0.25  2.84   79.6   M <NA>   NA
-#> 3  1   NA 0.57  6.57   79.6   M <NA>   NA
-#> 4  1   NA 1.12 10.50   79.6   M <NA>   NA
-#> 5  1   NA 2.02  9.66   79.6   M <NA>   NA
-#> 6  1   NA 3.82  8.58   79.6   M <NA>   NA
+#>   id  amt time    dv WEIGHT SEX   cmt admd
+#> 1  1 4.02 0.00    NA   79.6   M depot    1
+#> 2  1   NA 0.25  2.84   79.6   M  <NA>   NA
+#> 3  1   NA 0.57  6.57   79.6   M  <NA>   NA
+#> 4  1   NA 1.12 10.50   79.6   M  <NA>   NA
+#> 5  1   NA 2.02  9.66   79.6   M  <NA>   NA
+#> 6  1   NA 3.82  8.58   79.6   M  <NA>   NA
 ```
 
 ## Comparing visually

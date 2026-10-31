@@ -12,7 +12,7 @@ Get if the model object is stiff
 
 - x:
 
-  monolix2rx object
+  monolix2rx object, its parsed project or its rxUi
 
 ## Value
 

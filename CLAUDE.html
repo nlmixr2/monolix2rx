@@ -79,7 +79,7 @@
 <code class="sourceCode R"><span><span class="fu">dparser</span><span class="fu">::</span><span class="fu"><a href="https://nlmixr2.github.io/dparser-R/reference/mkdparse.html" class="external-link">mkdparse</a></span><span class="op">(</span><span class="st">"inst/mlxtranFileinfo.g"</span>, <span class="st">"src/"</span>, grammar_ident<span class="op">=</span><span class="st">"mlxtranFileinfo"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.rename</a></span><span class="op">(</span><span class="st">"src/mlxtranFileinfo.g.d_parser.c"</span>, <span class="st">"src/mlxtranFileinfo.g.d_parser.h"</span><span class="op">)</span></span>
 <span><span class="fu">pkgbuild</span><span class="fu">::</span><span class="fu"><a href="https://pkgbuild.r-lib.org/reference/compile_dll.html" class="external-link">compile_dll</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>The committed headers all carry <code>#line 7 "/home/matt/src/monolix2rx/src/..."</code>; normalize a regenerated header to that path rather than committing your own checkout/worktree path.</p>
+<p>Each committed header carries a <code>#line 7 "&lt;path&gt;/src/..."</code> with the path of the checkout it was generated in; restore that header’s committed path in a regenerated one rather than committing your own checkout/worktree path.</p>
 </div>
 <div class="section level3">
 <h3 id="tests">Tests<a class="anchor" aria-label="anchor" href="#tests"></a></h3>
@@ -301,6 +301,7 @@
 <h2 id="monolix-version-notes">Monolix Version Notes<a class="anchor" aria-label="anchor" href="#monolix-version-notes"></a></h2>
 <p>Monolix keeps extending the <code>.mlxtran</code> language, and a project saved by a newer Monolix must still import here. Accept the new spelling <em>in addition to</em> the old one, keep <code><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character()</a></code> on the old one, and note the Monolix version in the grammar comment. Known widenings:</p>
 <ul><li>2024: <code>file={path='data.csv'}</code> is equivalent to <code>file='data.csv'</code>, both for the <code>[FILEINFO]</code> data set and the <code>[LONGITUDINAL]</code> model file (issue #43).</li>
+<li>2024R1 saves the <code>combined1c</code>/<code>combined2c</code> error models as <code>errorModel=combined1(a, b, c)</code>/<code>combined2(a, b, c)</code> and refuses the <code>c</code>-suffixed spelling; both parse to <code>combined1c</code>/<code>combined2c</code>, and <code><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character()</a></code> writes the three-argument form (an exception to keeping the old spelling, since Monolix refuses it).</li>
 <li>A model file may be a library reference (<code>file='lib:oral1_1cpt_kaVCl.txt'</code>), resolved by <code>R/mlxtranLib.R</code> or, when the Monolix install is available, by <code>lixoftConnectors</code> (<code>R/lixoftConnectors.R</code>).</li>
 </ul></div>
 <div class="section level2">

@@ -12,7 +12,7 @@ Get the number of doses for steady state for monolix2rx
 
 - x:
 
-  monolix2rx object
+  monolix2rx object, its parsed project or its rxUi
 
 ## Value
 

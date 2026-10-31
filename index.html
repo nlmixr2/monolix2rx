@@ -102,7 +102,8 @@
 <span><span class="va">mlxtranFile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">pkgTheo</span>, <span class="st">"theophylline_project.mlxtran"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">rx</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/monolix2rx.html">monolix2rx</a></span><span class="op">(</span><span class="va">mlxtranFile</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ℹ updating model values to final parameter estimates</span></span>
+<span><span class="co">#&gt; ℹ integrated model file 'oral1_1cpt_kaVCl.txt' into mlxtran object</span></span>
+<span><span class="co">#&gt; ℹ updating model values to final parameter estimates from tp/populationParameters.txt</span></span>
 <span><span class="co">#&gt; ℹ done</span></span>
 <span><span class="co">#&gt; ℹ reading run info (# obs, doses, Monolix Version, etc) from summary.txt</span></span>
 <span><span class="co">#&gt; ℹ done</span></span>
@@ -111,7 +112,6 @@
 <span><span class="co">#&gt; ℹ imported monolix and translated to rxode2 compatible data ($monolixData)</span></span>
 <span><span class="co">#&gt; ℹ imported monolix ETAS (_SAEM) imported to rxode2 compatible data ($etaData)</span></span>
 <span><span class="co">#&gt; ℹ imported monolix pred/ipred data to compare ($predIpredData)</span></span>
-<span><span class="co">#&gt; using C compiler: ‘gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0’</span></span>
 <span><span class="co">#&gt; ℹ solving ipred problem</span></span>
 <span><span class="co">#&gt; ℹ done</span></span>
 <span><span class="co">#&gt; ℹ solving pred problem</span></span>
@@ -146,16 +146,25 @@
 <span><span class="co">#&gt;     dfObs &lt;- 120</span></span>
 <span><span class="co">#&gt;     dfSub &lt;- 12</span></span>
 <span><span class="co">#&gt;     thetaMat &lt;- lotri({</span></span>
-<span><span class="co">#&gt;         ka_pop + V_pop + Cl_pop ~ c(0.09785, 0.00082606, 0.00041937, </span></span>
-<span><span class="co">#&gt;             -4.2833e-05, -6.7957e-06, 1.1318e-05)</span></span>
-<span><span class="co">#&gt;         a + b ~ c(0.015333, -0.0026458, 0.00056232)</span></span>
+<span><span class="co">#&gt;         ka_pop ~ 0.0416560546073138</span></span>
+<span><span class="co">#&gt;         V_pop ~ c(0.00118325511651798, 0.00202122030181813)</span></span>
+<span><span class="co">#&gt;         Cl_pop ~ c(-0.000695680378916356, -0.000371376957496329, </span></span>
+<span><span class="co">#&gt;             0.00701317875319478)</span></span>
+<span><span class="co">#&gt;         omega_ka ~ c(omega_ka = 0.022259)</span></span>
+<span><span class="co">#&gt;         omega_V ~ c(omega_ka = -7.6443e-05, omega_V = 0.0014578)</span></span>
+<span><span class="co">#&gt;         omega_Cl ~ c(omega_ka = 3.062e-06, omega_V = -1.2912e-05, </span></span>
+<span><span class="co">#&gt;             omega_Cl = 0.0039578)</span></span>
+<span><span class="co">#&gt;         a ~ c(omega_ka = -0.0001227, omega_V = -6.5914e-05, omega_Cl = -0.00041194, </span></span>
+<span><span class="co">#&gt;             a = 0.015333)</span></span>
+<span><span class="co">#&gt;         b ~ c(omega_ka = -1.3886e-05, omega_V = -3.1105e-05, </span></span>
+<span><span class="co">#&gt;             omega_Cl = 5.2805e-05, a = -0.0026458, b = 0.00056232)</span></span>
 <span><span class="co">#&gt;     })</span></span>
 <span><span class="co">#&gt;     validation &lt;- c("ipred relative difference compared to Monolix ipred: 0.04%; 95% percentile: (0%,0.52%); rtol=0.00038", </span></span>
 <span><span class="co">#&gt;         "ipred absolute difference compared to Monolix ipred: 95% percentile: (0.000362, 0.00848); atol=0.00254", </span></span>
-<span><span class="co">#&gt;         "pred relative difference compared to Monolix pred: 0%; 95% percentile: (0%,0%); rtol=6.6e-07", </span></span>
+<span><span class="co">#&gt;         "pred relative difference compared to Monolix pred: 0%; 95% percentile: (0%,0%); rtol=6.78e-07", </span></span>
 <span><span class="co">#&gt;         "pred absolute difference compared to Monolix pred: 95% percentile: (1.6e-07, 1.27e-05); atol=3.66e-06", </span></span>
-<span><span class="co">#&gt;         "iwres relative difference compared to Monolix iwres: 0%; 95% percentile: (0.06%,32.22%); rtol=0.0153", </span></span>
-<span><span class="co">#&gt;         "iwres absolute difference compared to Monolix pred: 95% percentile: (0.000403, 0.0138); atol=0.00305")</span></span>
+<span><span class="co">#&gt;         "iwres relative difference compared to Monolix iwres: 1.53%; 95% percentile: (0.06%,32.22%); rtol=0.0153", </span></span>
+<span><span class="co">#&gt;         "iwres absolute difference compared to Monolix iwres: 95% percentile: (0.000403, 0.0138); atol=0.00305")</span></span>
 <span><span class="co">#&gt;     ini({</span></span>
 <span><span class="co">#&gt;         ka_pop &lt;- 0.426994483535611</span></span>
 <span><span class="co">#&gt;         V_pop &lt;- -0.786351566327091</span></span>
@@ -183,6 +192,7 @@
 <span><span class="co"># If you are only interseted in the parsing you can use `mlxtran`</span></span>
 <span></span>
 <span><span class="va">mlx</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/mlxtran.html">mlxtran</a></span><span class="op">(</span><span class="va">mlxtranFile</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ℹ integrated model file 'oral1_1cpt_kaVCl.txt' into mlxtran object</span></span>
 <span><span class="co">#&gt; ℹ reading run info (# obs, doses, Monolix Version, etc) from summary.txt</span></span>
 <span><span class="co">#&gt; ℹ done</span></span>
 <span><span class="co">#&gt; ℹ reading covariance from FisherInformation/covarianceEstimatesLin.txt</span></span>
@@ -224,7 +234,6 @@
 <span><span class="co">#&gt; [LONGITUDINAL]</span></span>
 <span><span class="co">#&gt; ; parsed: $MODEL$LONGITUDINAL$LONGITUDINAL</span></span>
 <span><span class="co">#&gt; input = {a, b, ka, V, Cl}</span></span>
-<span><span class="co">#&gt; file = 'oral1_1cpt_kaVCl.txt'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; DEFINITION:</span></span>
 <span><span class="co">#&gt; ; parsed: $MODEL$LONGITUDINAL$DEFINITION</span></span>

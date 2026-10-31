@@ -33,7 +33,8 @@ mod <- monolix2rx(pkgTheo)
 #> ℹ reading covariance from FisherInformation/covarianceEstimatesLin.txt
 #> ℹ done
 #> ℹ imported monolix and translated to rxode2 compatible data ($monolixData)
-#> ℹ imported monolix ETAS (_SAEM) imported to rxode2 compatible data ($etaData)
+#> ℹ imported monolix ETAS (_mode) imported to rxode2 compatible data ($etaData)
+#> ℹ imported monolix ETAS (_SAEM) to $etaSaemData
 #> ℹ imported monolix pred/ipred data to compare ($predIpredData)
 #> ℹ solving ipred problem
 #> ℹ done
@@ -69,9 +70,10 @@ print(mod)
 #>     dfObs <- 120
 #>     dfSub <- 12
 #>     thetaMat <- lotri({
-#>         ka_pop ~ 0.09785
-#>         V_pop ~ c(0.00082606, 0.00041937)
-#>         Cl_pop ~ c(-4.2833e-05, -6.7957e-06, 1.1318e-05)
+#>         ka_pop ~ 0.0416560546073138
+#>         V_pop ~ c(0.00118325511651798, 0.00202122030181813)
+#>         Cl_pop ~ c(-0.000695680378916356, -0.000371376957496329, 
+#>             0.00701317875319478)
 #>         omega_ka ~ c(omega_ka = 0.022259)
 #>         omega_V ~ c(omega_ka = -7.6443e-05, omega_V = 0.0014578)
 #>         omega_Cl ~ c(omega_ka = 3.062e-06, omega_V = -1.2912e-05, 
@@ -81,12 +83,12 @@ print(mod)
 #>         b ~ c(omega_ka = -1.3886e-05, omega_V = -3.1105e-05, 
 #>             omega_Cl = 5.2805e-05, a = -0.0026458, b = 0.00056232)
 #>     })
-#>     validation <- c("ipred relative difference compared to Monolix ipred: 0.04%; 95% percentile: (0%,0.52%); rtol=0.00038", 
-#>         "ipred absolute difference compared to Monolix ipred: 95% percentile: (0.000362, 0.00848); atol=0.00254", 
-#>         "pred relative difference compared to Monolix pred: 0%; 95% percentile: (0%,0%); rtol=6.6e-07", 
+#>     validation <- c("ipred relative difference compared to Monolix ipred: 0%; 95% percentile: (0%,0%); rtol=6.68e-07", 
+#>         "ipred absolute difference compared to Monolix ipred: 95% percentile: (1.8e-07, 1.38e-05); atol=3.41e-06", 
+#>         "pred relative difference compared to Monolix pred: 0%; 95% percentile: (0%,0%); rtol=6.78e-07", 
 #>         "pred absolute difference compared to Monolix pred: 95% percentile: (1.6e-07, 1.27e-05); atol=3.66e-06", 
-#>         "iwres relative difference compared to Monolix iwres: 0%; 95% percentile: (0.06%,32.22%); rtol=0.0153", 
-#>         "iwres absolute difference compared to Monolix pred: 95% percentile: (0.000403, 0.0138); atol=0.00305")
+#>         "iwres relative difference compared to Monolix iwres: 0%; 95% percentile: (0%,0.03%); rtol=6.93e-06", 
+#>         "iwres absolute difference compared to Monolix iwres: 95% percentile: (7.96e-08, 1.85e-05); atol=2.71e-06")
 #>     ini({
 #>         ka_pop <- 0.426994483535611
 #>         V_pop <- -0.786351566327091
@@ -131,7 +133,7 @@ modAuc <- mod %>%
   model(d/dt(AUC) <- Cc, append=TRUE)
 #> → significant model change detected
 #> → kept in model: '$monolixData'
-#> → removed from model: '$admd', '$etaData', '$ipredAtol', '$ipredCompare', '$ipredRtol', '$iwresAtol', '$iwresCompare', '$iwresRtol', '$mlxtran', '$predAtol', '$predCompare', '$predIpredData', '$predRtol'
+#> → removed from model: '$admd', '$etaData', '$etaSaemData', '$ipredAtol', '$ipredCompare', '$ipredRtol', '$iwresAtol', '$iwresCompare', '$iwresRtol', '$mlxtran', '$predAtol', '$predCompare', '$predIpredData', '$predRtol'
 
 modAuc
 #>  ── rxode2-based free-form 3-cmt ODE model ────────────────────────────────────── 
@@ -163,9 +165,10 @@ modAuc
 #>     dfObs <- 120
 #>     dfSub <- 12
 #>     thetaMat <- lotri({
-#>         ka_pop ~ 0.09785
-#>         V_pop ~ c(0.00082606, 0.00041937)
-#>         Cl_pop ~ c(-4.2833e-05, -6.7957e-06, 1.1318e-05)
+#>         ka_pop ~ 0.0416560546073138
+#>         V_pop ~ c(0.00118325511651798, 0.00202122030181813)
+#>         Cl_pop ~ c(-0.000695680378916356, -0.000371376957496329, 
+#>             0.00701317875319478)
 #>         omega_ka ~ c(omega_ka = 0.022259)
 #>         omega_V ~ c(omega_ka = -7.6443e-05, omega_V = 0.0014578)
 #>         omega_Cl ~ c(omega_ka = 3.062e-06, omega_V = -1.2912e-05, 
@@ -175,12 +178,12 @@ modAuc
 #>         b ~ c(omega_ka = -1.3886e-05, omega_V = -3.1105e-05, 
 #>             omega_Cl = 5.2805e-05, a = -0.0026458, b = 0.00056232)
 #>     })
-#>     validation <- c("ipred relative difference compared to Monolix ipred: 0.04%; 95% percentile: (0%,0.52%); rtol=0.00038", 
-#>         "ipred absolute difference compared to Monolix ipred: 95% percentile: (0.000362, 0.00848); atol=0.00254", 
-#>         "pred relative difference compared to Monolix pred: 0%; 95% percentile: (0%,0%); rtol=6.6e-07", 
+#>     validation <- c("ipred relative difference compared to Monolix ipred: 0%; 95% percentile: (0%,0%); rtol=6.68e-07", 
+#>         "ipred absolute difference compared to Monolix ipred: 95% percentile: (1.8e-07, 1.38e-05); atol=3.41e-06", 
+#>         "pred relative difference compared to Monolix pred: 0%; 95% percentile: (0%,0%); rtol=6.78e-07", 
 #>         "pred absolute difference compared to Monolix pred: 95% percentile: (1.6e-07, 1.27e-05); atol=3.66e-06", 
-#>         "iwres relative difference compared to Monolix iwres: 0%; 95% percentile: (0.06%,32.22%); rtol=0.0153", 
-#>         "iwres absolute difference compared to Monolix pred: 95% percentile: (0.000403, 0.0138); atol=0.00305")
+#>         "iwres relative difference compared to Monolix iwres: 0%; 95% percentile: (0%,0.03%); rtol=6.93e-06", 
+#>         "iwres absolute difference compared to Monolix iwres: 95% percentile: (7.96e-08, 1.85e-05); atol=2.71e-06")
 #>     ini({
 #>         ka_pop <- 0.426994483535611
 #>         V_pop <- -0.786351566327091
@@ -242,7 +245,7 @@ s <- rxSolve(modAuc, ev)
 #> ℹ using Monolix specified rtol=1e-06
 #> ℹ Since Monolix doesn't use ssRtol, set ssRtol=100
 #> ℹ Since Monolix doesn't use ssRtol, set ssAtol=100
-#> ℹ Since Monolix uses a set number of doses for steady state use maxSS=8, minSS=7
+#> ℹ Since Monolix uses a set number of doses for steady state use maxSS=7, minSS=7
 ```
 
 Note that since this derived from a `nonmem2rx` model, the default
