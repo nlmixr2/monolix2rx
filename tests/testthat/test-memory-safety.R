@@ -94,8 +94,8 @@ test_that("many syntax errors in one parse are reported without crashing", {
 test_that("a later parse reports its syntax error header after an earlier error", {
   # lastSyntaxErrorLine used to carry over, so the second report lost its
   # header and the source lines before the error.
-  capture.output(expect_error(.equation(strrep("x = !\n", 20L), .pk(""))))
-  .out <- capture.output(expect_error(.equation("y = 1\ny = !", .pk(""))))
+  capture.output(expect_error(.equation(strrep("x = *\n", 20L), .pk(""))))
+  .out <- capture.output(expect_error(.equation("y = 1\ny = *", .pk(""))))
   expect_true(any(grepl("^=+$", .out)))
   expect_true(any(grepl(":001: y = 1", .out, fixed = TRUE)))
 })
@@ -147,6 +147,6 @@ test_that("integer overflow protection: syntax error on a near-INT_MAX line", {
   # with an invalid RHS to force a syntax error on that line.
   giant_line <- strrep("x_var_abc", 200000000L)
   expect_error(
-    .equation(paste0(giant_line, " = !!!bad"), .pk(""))
+    .equation(paste0(giant_line, " = ***bad"), .pk(""))
   )
 })

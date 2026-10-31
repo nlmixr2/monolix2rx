@@ -24,10 +24,15 @@
                             k21=NA_character_,
                             k13=NA_character_,
                             k31=NA_character_,
+                            Q2=NA_character_,
+                            V2=NA_character_,
+                            Q3=NA_character_,
+                            V3=NA_character_,
                             ke0=NA_character_)
 
     .monolix2rx$admd <- data.frame(adm=integer(0), admd=integer(0), cmt=integer(0), target=character(0),
-                                   depot=logical(0), dur=logical(0), f=logical(0), tlag=logical(0))
+                                   depot=logical(0), dur=logical(0), f=logical(0), tlag=logical(0),
+                                   transit=logical(0))
 
     .monolix2rx$pkCmt <- data.frame(cmt=integer(0),
                                     amount=character(0),
@@ -203,25 +208,30 @@
       .tlag <- FALSE
     }
   }
+  # transit doses are not added to the depot (rxode2 evid=7)
+  .transit <- all(c("Mtt", "Ktr") %in% names(df)) && !is.na(df$Mtt) && !is.na(df$Ktr)
   .admd <- .monolix2rx$admd[.monolix2rx$admd$adm == .adm, "admd"]
   if (length(.admd) == 0L) {
     df$admd <- 1L
     .monolix2rx$admd <- rbind(.monolix2rx$admd,
                               data.frame(adm=df$adm, admd=1L, cmt=.cmt, target=.target,
-                                         depot=.depot, dur=.dur, f=.f, tlag=.tlag))
+                                         depot=.depot, dur=.dur, f=.f, tlag=.tlag,
+                                         transit=.transit))
   } else {
     .admd <- max(.admd) + 1L
     df$admd <- .admd
     .monolix2rx$admd <- rbind(.monolix2rx$admd,
                               data.frame(adm=df$adm, admd=.admd, cmt=.cmt, target=.target,
-                                         depot=.depot, dur=.dur, f=.f, tlag=.tlag))
+                                         depot=.depot, dur=.dur, f=.f, tlag=.tlag,
+                                         transit=.transit))
   }
   df
 }
 
 .pkPushPre <- function() {
   if(.monolix2rx$pkLong && length(.monolix2rx$equationLine) > 0) {
-    .monolix2rx$preEq <- .monolix2rx$equationLine
+    # lines between macros are kept too
+    .monolix2rx$preEq <- c(.monolix2rx$preEq, .monolix2rx$equationLine)
     .monolix2rx$equationLine <- character(0)
   }
 }
@@ -334,6 +344,16 @@
            call.=FALSE)
     }
   }
+  for (.i in 2:3) {
+    .q <- paste0(c("Q", "V", "k1", "k"), .i, c("", "", "", "1"))
+    if (is.na(pkmodel[.q[1]]) != is.na(pkmodel[.q[2]])) {
+      stop("pkmodel needs both '", .q[1], "' and '", .q[2], "'", call.=FALSE)
+    }
+    if (!is.na(pkmodel[.q[1]]) && (!is.na(pkmodel[.q[3]]) || !is.na(pkmodel[.q[4]]))) {
+      stop("pkmodel defines '", .q[1], "'/'", .q[2], "' and cannot also define '",
+           .q[3], "'/'", .q[4], "'", call.=FALSE)
+    }
+  }
   if (!is.na(Ce) && is.na(pkmodel["ke0"])) {
     stop("pkmodel ke0 not defined but Ce is defined",
          call.=FALSE)
@@ -353,6 +373,7 @@
     .monolix2rx$equationLine <- character(0)
   }
   .pkIni(TRUE)
+  text <- .mlxRenameReserved(text)
   if (text != "") .Call(`_monolix2rx_trans_equation`, text, "[LONGITUDINAL] EQUATION:")
   .pkPushStatement()
   .validatePkModel(.monolix2rx$pkPars, .monolix2rx$pkCe)
@@ -370,6 +391,7 @@
                reset=.monolix2rx$pkReset,
                elimination=.monolix2rx$pkElimination,
                admd=.monolix2rx$admd)
+  if (!is.null(attr(text, "rename"))) .ret$rename <- attr(text, "rename")
   if (.monolix2rx$pkLong) {
     .ret <- c(.ret,
               list(preEq=.monolix2rx$preEq,
@@ -733,7 +755,12 @@ as.character.monolix2rxPk <- function(x, ...) {
     }
     .prnAdm <- TRUE
   }
-  c(x$preEq, .retf, x$postEq)
+  .ret <- c(x$preEq, .retf, x$postEq)
+  if (length(x$rename) > 0L) {
+    # the Monolix names, not the rxode2 ones
+    .ret <- gsub(paste0("\\bmlx_(", paste(x$rename, collapse="|"), ")"), "\\1", .ret, perl=TRUE)
+  }
+  .ret
 }
 #' @export
 print.monolix2rxPk <- function(x, ...) {

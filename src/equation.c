@@ -78,19 +78,8 @@ void pushModel(void) {
     sClear(&curLine);
     return;
   }
+  // X(0) <- X_0 is added in R, once the states are known
   monolix2rxDouble(curLine.s, curDdt, ".equationLine");
-  // now check for X_0 = which will be followed by X(0) = X_0
-  char *v2 = curLine.s;
-  while (v2[0] != 0 && v2[0] != '_' && v2[0] != '=') {
-    v2++;
-  }
-  if (v2[0] == '_' && v2[1] == '0' && (v2[2] == ' ' || v2[2] == '=')) {
-    v2[0] = 0;
-    char *v = (char*)rc_dup_str(curLine.s, v2);
-    sClear(&curLine);
-    sAppend(&curLine, "%s(0) <- %s_0", v, v);
-    monolix2rxDouble(curLine.s, curDdt, ".equationLine");
-  }
   sClear(&curLine);
 }
 
@@ -154,7 +143,8 @@ int equation_identifier_or_constant(char *name,  D_ParseNode *pn) {
     D_ParseNode *xpn = d_get_child(pn, 0);
     char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
     if (!strcmp("amtDose", v)) {
-      sAppendN(&curLine, "dose", 4);
+      // the last dose amount and time are 0 before the first dose, like dose0()/tlast0()
+      sAppendN(&curLine, "dose0()", 7);
       return 1;
     } else if (!strcmp("inftDose", v)) {
       sClear(&sbTransErr);
@@ -164,7 +154,7 @@ int equation_identifier_or_constant(char *name,  D_ParseNode *pn) {
       finalizeSyntaxError();
       return 1;
     } else if (!strcmp("tDose", v)) {
-      sAppendN(&curLine, "tlast", 5);
+      sAppendN(&curLine, "tlast0()", 8);
       return 1;
     } else if (!strcmp("t", v)) {
       sAppendN(&curLine, "time", 4);
@@ -224,49 +214,34 @@ int equation_function_name(char *name,  D_ParseNode *pn) {
     } else if (!strcmp("factln(", v)) {
       sAppendN(&curLine, "lfactorial(", 11);
       return 1;
-    } else if (!strcmp("rem(", v)) {
-      sClear(&sbTransErr);
-      sAppend(&sbTransErr, "rem() not supported in translation");
-      updateSyntaxCol();
-      trans_syntax_error_report_fn0(sbTransErr.s);
-      finalizeSyntaxError();
-      return 1;
     }
     sAppend(&curLine, "%s", v);
     return 1;
   } else if (!strcmp("function2_name", name)) {
     D_ParseNode *xpn = d_get_child(pn, 0);
     char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
-    if (!strcmp("delay(", v)) {
-      sClear(&sbTransErr);
-      sAppend(&sbTransErr, "delay() not supported in translation");
-      updateSyntaxCol();
-      trans_syntax_error_report_fn0(sbTransErr.s);
-      finalizeSyntaxError();
-      return 1;
-    }
+    // delay(x, T) is rxode2's delay() (rxode2 >= 5.1.7)
     sAppend(&curLine, "%s", v);
     return 1;
   } else if (!strcmp("bsmm_fun", name)) {
-    sClear(&sbTransErr);
-    sAppend(&sbTransErr, "bsmm() not supported in translation");
-    updateSyntaxCol();
-    trans_syntax_error_report_fn0(sbTransErr.s);
-    finalizeSyntaxError();
-    return 1;
+    // the arguments are walked; R rewrites bsmm() as mix() (R/mixture.R)
+    sAppendN(&curLine, "bsmm(", 5);
+    return 0;
   } else if (!strcmp("wsmm_fun", name)) {
-    sClear(&sbTransErr);
-    sAppend(&sbTransErr, "wsmm() not supported in translation");
-    updateSyntaxCol();
-    trans_syntax_error_report_fn0(sbTransErr.s);
-    finalizeSyntaxError();
-    return 1;
+    sAppendN(&curLine, "wsmm(", 5);
+    return 0;
   }
   return 0;
 }
 
 int equation_if(char *name,  D_ParseNode *pn, int i) {
   if (i == 0) {
+    if (!strcmp("if", name) || !strcmp("elseif", name) ||
+        !strcmp("else", name) || !strcmp("endit", name)) {
+      // a statement before it (a PK macro's arguments) may have left
+      // its punctuation; an assignment clears it the same way
+      sClear(&curLine);
+    }
     if (!strcmp("if", name)) {
       sAppendN(&curLine, "if (", 4);
       return 2;
@@ -498,12 +473,13 @@ void wprint_parsetree_equation(D_ParserTables pt, D_ParseNode *pn, int depth, pr
           xpn = d_get_child(pn, 2);
           v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
           char *v2 = v;
-          while (v2[0] == ' ' || v2[0] == '0' || v2[0] == '.' || v2[0] == '\t' || v2[0] == '\n') {
+          while (v2[0] == ' ' || v2[0] == '0' || v2[0] == '.' || v2[0] == '\t' || v2[0] == '\n' ||
+                 v2[0] == '\r') {
             v2++;
           }
-          if (v2[0] != 0) {
-            Rf_warning("%s 't_0' or 't0' are assigned to a non-zero value (which is unsupported by rxode2), ignoring",
-                       v2);
+          if (v2[0] != 0 && v2[0] != ';') {
+            Rf_warning("'t_0 = %s': rxode2 starts at time 0; the imported Monolix data starts "
+                       "each subject at t_0 when it is a number", v);
           }
           return;
         }
@@ -517,6 +493,40 @@ void wprint_parsetree_equation(D_ParserTables pt, D_ParseNode *pn, int depth, pr
         continue;
       }
       D_ParseNode *xpn = d_get_child(pn, i);
+      // rem(a, b) becomes ((a) %% (b)); the 'rem(' and ')' terminals print nothing
+      if (!strcmp("rem_fun", name)) {
+        if (i == 0) {
+          sAppendN(&curLine, "((", 2);
+        } else if (i == 1) {
+          wprint_parsetree_equation(pt, xpn, depth, fn, client_data);
+        } else if (i == 2) {
+          sAppendN(&curLine, ") %% (", 6);
+        } else if (i == 3) {
+          wprint_parsetree_equation(pt, xpn, depth, fn, client_data);
+          sAppendN(&curLine, "))", 2);
+        }
+        continue;
+      }
+      // ~a and !a become (!(a))
+      if (!strcmp("not_expression", name)) {
+        if (i == 0) {
+          sAppendN(&curLine, "(!(", 3);
+        } else {
+          wprint_parsetree_equation(pt, xpn, depth, fn, client_data);
+          sAppendN(&curLine, "))", 2);
+        }
+        continue;
+      }
+      // rxode2 does not chain ^, so a^b^c becomes a^(b^c)
+      if (i == 2 && !strcmp("power_expression", name)) {
+        char *v = (char*)rc_dup_str(xpn->start_loc.s, xpn->end);
+        if (strchr(v, '^') != NULL) {
+          sAppendN(&curLine, "(", 1);
+          wprint_parsetree_equation(pt, xpn, depth, fn, client_data);
+          sAppendN(&curLine, ")", 1);
+          continue;
+        }
+      }
       // process other arguments
       wprint_parsetree_equation(pt, xpn, depth, fn, client_data);
     }

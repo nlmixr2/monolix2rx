@@ -8,6 +8,8 @@
 #' @author Matthew L. Fidler
 .monolixNaApply <- function(data, na.strings, mlxtran) {
   .dat <- data
+  .id <- .monolixIdName(mlxtran)
+  if (!is.na(.id) && !is.null(.dat[[.id]])) .dat[[.id]] <- .monolixIdType(.dat[[.id]])
   for (v in names(.dat)) {
     if (tolower(v) %in% c("amt", "time", "dv") && is.character(.dat[[v]])) {
       .n <- suppressWarnings(as.numeric(.dat[[v]]))
@@ -23,6 +25,38 @@
     }
   }
   .dat
+}
+
+#' Monolix subject identifiers as numbers when that keeps them apart
+#'
+#' Monolix identifiers are strings, so `1` and `01` are two subjects; they
+#' become numbers (as `read.table()` makes them) only when no two merge.
+#'
+#' @param id identifier column
+#' @return numeric or character identifiers
+#' @noRd
+#' @author Matthew L. Fidler
+.monolixIdType <- function(id) {
+  if (!is.character(id)) return(id)
+  # a blank or NA id does not decide the type
+  .w <- !is.na(id) & trimws(id) != ""
+  .n <- suppressWarnings(as.numeric(id))
+  if (all(!is.na(.n[.w])) && length(unique(.n[.w])) == length(unique(id[.w]))) {
+    return(utils::type.convert(ifelse(.w, id, NA_character_), as.is=TRUE))
+  }
+  id
+}
+
+#' The data set's identifier column
+#'
+#' @param mlxtran parsed mlxtran
+#' @return column name, or NA
+#' @noRd
+#' @author Matthew L. Fidler
+.monolixIdName <- function(mlxtran) {
+  .u <- mlxtran$DATAFILE$CONTENT$CONTENT$use1
+  if (is.null(.u) || !any(names(.u) == "identifier")) return(NA_character_)
+  .u[["identifier"]]
 }
 
 #' Load data from a mlxtran defined dataset
@@ -48,7 +82,8 @@
       .ext <- tolower(regmatches(.file, regexpr("(?<=[.])[^./\\\\]+$", .file, perl=TRUE)))
       .data <- .monolixDataLoadBinary(.file, .ext,
                                       mlxtran$DATAFILE$FILEINFO$FILEINFO$header,
-                                      na.strings=na.strings)
+                                      na.strings=na.strings,
+                                      idName=.monolixIdName(mlxtran))
       if (!is.null(.data)) return(.monolixNaApply(.data, na.strings, mlxtran))
       .sep <- mlxtran$DATAFILE$FILEINFO$FILEINFO$delimiter
       .sep <- switch(
@@ -59,8 +94,27 @@
         semicolon = ";",
         semicolumn = ";"
       )
-      .firstLine <- readLines(.file, n = 1)
-      .head <- strsplit(.firstLine, .sep, fixed = TRUE)[[1]]
+      # the identifier column is read as text (see .monolixIdType())
+      .hdr <- mlxtran$DATAFILE$FILEINFO$FILEINFO$header
+      .idName <- .monolixIdName(mlxtran)
+      .idClass <- function(cols, names = cols, byPos = FALSE) {
+        .w <- which(names == .idName)
+        if (is.na(.idName) || length(.w) != 1L) return(NA)
+        if (byPos) return(replace(rep(NA_character_, length(names)), .w, "character"))
+        stats::setNames("character", cols[.w])
+      }
+      # a UTF-8 byte order mark survives readLines() outside a UTF-8 locale
+      .firstLine <- sub("^\xef\xbb\xbf", "", readLines(.file, n = 1), useBytes = TRUE)
+      if (identical(.sep, " ")) {
+        # a space-delimited file can align its columns with runs of spaces
+        .head <- strsplit(trimws(.firstLine), "[[:space:]]+")[[1]]
+        .sep <- ""
+      } else {
+        .head <- strsplit(.firstLine, .sep, fixed = TRUE)[[1]]
+      }
+      # a quoted header (write.csv) or spaces after the delimiters name the
+      # same columns
+      .head <- trimws(gsub("^[\"']|[\"']$", "", trimws(.head)))
       if (all(.head == mlxtran$DATAFILE$FILEINFO$FILEINFO$header)) {
         # has header (and it matches)
         .data <- utils::read.table(
@@ -68,8 +122,11 @@
           header = TRUE,
           sep = .sep,
           row.names = NULL,
-          na.strings = na.strings
+          na.strings = na.strings,
+          colClasses = .idClass(paste0("V", seq_along(.head)), .head, byPos = TRUE)
         )
+        # read.table() keeps a space inside quotes (or a byte order mark)
+        names(.data) <- .head
         return(.monolixNaApply(.data, na.strings, mlxtran))
       } else {
         .num <- vapply(
@@ -94,7 +151,8 @@
             header = TRUE,
             sep = .sep,
             row.names = NULL,
-            na.strings = na.strings
+            na.strings = na.strings,
+            colClasses = .idClass(make.names(.head, unique = TRUE), .hdr)
           )
           if (
             length(.data) != length(mlxtran$DATAFILE$FILEINFO$FILEINFO$header)
@@ -113,7 +171,8 @@
             header = FALSE,
             sep = .sep,
             row.names = NULL,
-            na.strings = na.strings
+            na.strings = na.strings,
+            colClasses = .idClass(paste0("V", seq_along(.hdr)), .hdr)
           )
           if (
             length(.data) != length(mlxtran$DATAFILE$FILEINFO$FILEINFO$header)
@@ -195,8 +254,9 @@
   .w <- sort(match(.dataReg, orig))
   .content <- mlxtran$DATAFILE$CONTENT$CONTENT
   # reserved in the rxode2 data set; cmt/admd are added by .dataConvertAdm()
+  .occ <- if (length(.content$occ) > 1L) paste0("occ", seq_along(.content$occ)[-1])
   .reserved <- .modelReg[
-    tolower(.modelReg) %in% tolower(c(.use1Rx, "cmt", "admd"))
+    tolower(.modelReg) %in% tolower(c(.use1Rx, "cmt", "admd", .occ))
   ]
   if (length(.reserved) > 0L) {
     stop(
@@ -229,6 +289,114 @@
   }
   data
 }
+#' Drop ignored columns that rxode2 would read as event columns
+#'
+#' rxode2 matches its event columns (`ss`, `rate`, `evid`, `dose`, ...)
+#' ignoring case, so an ignored `SS` column would still be used.  Only
+#' `use=ignore` columns are dropped: `[CONTENT]` keeps one column per
+#' `use=` type, so the declared columns are not fully known.
+#'
+#' @param data data.frame as read
+#' @param content parsed `[CONTENT]`
+#' @return data without those columns
+#' @noRd
+#' @author Matthew L. Fidler
+.dataDropIgnoredEvent <- function(data, content) {
+  .event <- c("id", "time", "evid", "amt", "rate", "dur", "ss", "ii", "addl",
+              "cmt", "mdv", "dv", "dvid", "cens", "limit", "method", "dose",
+              "value", "mixest", "mixunif")
+  # a used column is kept even when an ignored one differs only by case
+  .ignore <- tolower(content$ignore)
+  .used <- c(content$use1, content$cont, names(content$cat), content$reg)
+  .drop <- which(tolower(names(data)) %in% .ignore & !(names(data) %in% .used) &
+                   tolower(names(data)) %in% .event)
+  if (length(.drop) == 0L) return(data)
+  .minfo(paste0("dropped ignored data column(s) '",
+                paste(names(data)[.drop], collapse="', '"),
+                "' that rxode2 would read as event columns"))
+  data[, -.drop, drop=FALSE]
+}
+
+#' Drop the lines flagged by `use=ignoredline` columns, then the columns
+#'
+#' Monolix ignores a whole line (dose or observation) with a non-zero flag.
+#'
+#' @param data data.frame as read
+#' @param content parsed `[CONTENT]`
+#' @return data without the flagged lines and the flag columns
+#' @noRd
+#' @author Matthew L. Fidler
+.dataDropIgnoredLines <- function(data, content) {
+  .w <- which(names(data) %in% content$ignoreLine)
+  if (length(.w) == 0L) .w <- which(tolower(names(data)) %in% tolower(content$ignoreLine))
+  if (length(.w) == 0L) return(data)
+  .flag <- vapply(.w, function(i) {
+    .x <- data[[i]]
+    .v <- if (is.logical(.x) || is.numeric(.x)) as.numeric(.x) else
+      suppressWarnings(as.numeric(as.character(.x)))
+    !is.na(.v) & .v != 0
+  }, logical(nrow(data)))
+  .flag <- if (is.matrix(.flag)) rowSums(.flag) > 0 else any(.flag)
+  if (any(.flag)) {
+    .minfo(paste0("dropped ", sum(.flag), " line(s) flagged by '",
+                  paste(names(data)[.w], collapse="', '"), "' (use=ignoredline)"))
+  }
+  data[!.flag, -.w, drop=FALSE]
+}
+
+#' Translate nested occasion columns
+#'
+#' With several `use=occasion` columns (nested levels, outermost first)
+#' the first becomes `occ` and the k-th `occk`, numbering each combination
+#' of the first k columns, so an inner eta is not shared across outer
+#' occasions.  These match the `id*occ*...` level names of `.def2iniRenameOcc()`.
+#'
+#' @param data data.frame as read
+#' @param content parsed `[CONTENT]`
+#' @return data with the occasion columns translated
+#' @noRd
+#' @author Matthew L. Fidler
+.dataRenameOcc <- function(data, content) {
+  .occ <- content$occ
+  if (length(.occ) < 2L) return(data)
+  .w <- match(.occ, names(data))
+  .na <- is.na(.w)
+  .w[.na] <- match(tolower(.occ[.na]), tolower(names(data)))
+  if (anyDuplicated(.w[!is.na(.w)])) {
+    stop("occasion columns '", paste(.occ, collapse="', '"),
+         "' match the same data column ignoring case", call.=FALSE)
+  }
+  if (anyNA(.w)) {
+    stop("occasion column(s) missing from the data set: ",
+         paste(.occ[is.na(.w)], collapse=", "), call.=FALSE)
+  }
+  .cols <- lapply(.w, function(i) data[[i]])
+  .new <- lapply(seq_along(.cols), function(k) {
+    if (k == 1L) return(.cols[[1]])
+    .key <- do.call(paste, c(.cols[seq_len(k)], sep="\r"))
+    # a missing occasion at any level leaves the combination missing
+    .key[Reduce(`|`, lapply(.cols[seq_len(k)], is.na))] <- NA_character_
+    .ord <- do.call(order, .cols[seq_len(k)])
+    match(.key, unique(.key[.ord][!is.na(.key[.ord])]))
+  })
+  .to <- c("occ", paste0("occ", seq_along(.w)[-1]))
+  for (.k in seq_along(.w)) data[[.w[.k]]] <- .new[[.k]]
+  # an unused column named like a translated one is dropped; a used one stops
+  .clash <- which(tolower(names(data)) %in% .to & !(seq_along(data) %in% .w))
+  .used <- c(content$use1, content$cont, names(content$cat), content$reg)
+  if (any(names(data)[.clash] %in% .used)) {
+    stop("data column(s) '", paste(intersect(names(data)[.clash], .used), collapse="', '"),
+         "' clash with the translated occasion columns", call.=FALSE)
+  }
+  names(data)[.w] <- .to
+  if (length(.clash) > 0L) {
+    .minfo(paste0("dropped unused data column(s) '", paste(names(data)[.clash], collapse="', '"),
+                  "' that share a translated occasion name"))
+    data <- data[, -.clash, drop=FALSE]
+  }
+  data
+}
+
 #' Rename defined items from monolix to rxode2 reserved names
 #'
 #' This also makes sure the order of factors defined matches what
@@ -246,6 +414,9 @@
 .dataRenameFromMlxtran <- function(data, mlxtran) {
   .content <- mlxtran$DATAFILE$CONTENT$CONTENT
   .use1 <- .content$use1
+  data <- .dataDropIgnoredLines(data, .content)
+  data <- .dataDropIgnoredEvent(data, .content)
+  data <- .dataRenameOcc(data, .content)
   .orig <- names(data)
   names(data) <- vapply(
     names(data),
@@ -267,6 +438,7 @@
       data[[.n]] <- as.double(data[[.n]])
     }
   }
+  data <- .dataFillCovariates(data, .content)
   # Make sure the dvid matches what monolix specified
   if (
     any(names(data) == "rxMDvid") &&
@@ -280,6 +452,37 @@
   return(data)
 }
 
+#' Fill a subject's missing covariate values with its one value
+#'
+#' A Monolix covariate is constant within a subject (and occasion), so a
+#' missing value on some of its lines (a dose line) is that value.
+#' Groups with several values are left as they are.
+#'
+#' @param data dataset with the translated `id`/`occ` columns
+#' @param content parsed `[CONTENT]`
+#' @return data with the covariates filled
+#' @noRd
+#' @author Matthew L. Fidler
+.dataFillCovariates <- function(data, content) {
+  .cov <- intersect(c(content$cont, names(content$cat)), names(data))
+  if (length(.cov) == 0L || is.null(data[["id"]])) return(data)
+  .occ <- grep("^occ[0-9]*$", names(data), value=TRUE)
+  .g <- do.call(paste, c(lapply(c("id", .occ), function(n) data[[n]]), sep="\r"))
+  for (.n in .cov) {
+    .x <- data[[.n]]
+    .na <- is.na(.x)
+    if (!any(.na)) next
+    # tapply() would give a factor's codes
+    .lvl <- if (is.factor(.x)) levels(.x) else NULL
+    if (!is.null(.lvl)) .x <- as.character(.x)
+    .val <- tapply(.x[!.na], .g[!.na], function(v) if (length(unique(v)) == 1L) v[1] else NA)
+    .fill <- .na & .g %in% names(.val)
+    .x[.fill] <- .val[.g[.fill]]
+    data[[.n]] <- if (is.null(.lvl)) .x else factor(.x, levels=.lvl)
+  }
+  data
+}
+
 #' Convert the endpoint specification in monolix to rxode2
 #'
 #' @param data dataset that monolix is currently converting
@@ -290,7 +493,7 @@
 .dataConvertEndpoints <- function(data, ui) {
   .w <- which(names(data) == "rxMDvid")
   if (length(.w) != 1L) {
-    return(data)
+    return(.dataEventCmt(data, ui))
   } # no observationtype in the dataset
   if (is.null(ui$predDf)) {
     return(data[, -.w])
@@ -299,9 +502,22 @@
   .dvid <- unique(data$rxMDvid)
   .dvid <- .dvid[!is.na(.dvid)]
   .dvid <- .dvid[!(.dvid %in% seq_along(ui$predDf$cond))]
+  .mlxtran <- .monolixGetMlxtran(ui)
+  .event <- vapply(.mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint,
+                   function(e) if (identical(e$dist, "event")) e$var else NA_character_,
+                   character(1))
   for (.i in seq_along(ui$predDf$cond)) {
     # only overwrite non-dosing events (ie make sure the cmt is NA)
-    data$cmt[which(is.na(data$cmt) & data$rxMDvid == .i)] <- ui$predDf$var[.i]
+    .r <- is.na(data$cmt) & data$rxMDvid == .i
+    if (ui$predDf$var[.i] %in% .event) {
+      # a missing or ignored observation, or a reset, is not an event record
+      if (is.null(data[["evid"]])) data <- .dataEvid(data)
+      .na <- if (is.null(data[["dv"]])) FALSE else is.na(data$dv)
+      .no <- .r & (!(data$evid %in% 0L) | .na)
+      data$evid[which(.no & data$evid %in% 0L)] <- 2L
+      .r <- .r & !.no
+    }
+    data$cmt[which(.r)] <- ui$predDf$var[.i]
   }
   for (.i in .dvid) {
     data <- data[-which(is.na(data$cmt) & data$rxMDvid == .i), ]
@@ -309,36 +525,354 @@
   data[, -.w]
 }
 
+#' A single event endpoint finds its records by cmt
+#'
+#' @param data dataset without an observation type column
+#' @param ui rxode2 ui converted from monolix
+#' @return data with the endpoint's cmt on the observation rows
+#' @noRd
+#' @author Matthew L. Fidler
+.dataEventCmt <- function(data, ui) {
+  .mlxtran <- .monolixGetMlxtran(ui)
+  .e <- .mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint
+  if (length(.e) != 1L || !identical(.e[[1]]$dist, "event")) return(data)
+  .obs <- if (is.null(data[["evid"]])) !.dataIsDose(data) else data$evid %in% 0L
+  if (!is.null(data[["mdv"]])) .obs <- .obs & !(data$mdv %in% 1L)
+  # a missing observation is not an event record
+  if (!is.null(data[["dv"]])) .obs <- .obs & !is.na(data$dv)
+  data$cmt[which(.obs & is.na(data$cmt))] <- .e[[1]]$var
+  data
+}
+
 #' This function converts the cmt dataset to an adm dataset (except the endpoint)
 #'
 #'
 #' @param data input monolix dataset to convert
 #' @param admd admd dataset from imported UI
+#' @param pk parsed PK macros
+#' @param fCmt compartments with a bioavailability
 #' @return converted dataset for dosing endpoint (not observations)
 #' @noRd
 #' @author Matthew L. Fidler
-.dataConvertAdm <- function(data, admd) {
+.dataConvertAdm <- function(data, admd, pk=NULL, fCmt=character(0)) {
   data$cmt <- NA_character_
   data$admd <- NA_integer_
+  .dose <- .dataIsDose(data)
+  # without an administration column every dose is adm 1; [[ ]] since
+  # data$adm partially matches admd
+  .adm <- data[["adm"]]
+  if (is.null(.adm)) .adm <- 1L
+  .adm <- ifelse(.dose, .adm, NA_integer_)
+  # later routes copy the doses before any route changed them
+  .orig <- data
   .extra <- NULL
   for (i in seq_along(admd$adm)) {
     .cur <- admd[i, ]
+    .cmt <- if (is.null(.cur$rxCmt) || is.na(.cur$rxCmt)) .cur$cmt else .cur$rxCmt
+    .event <- .dataAdmEvent(.cur, pk)
     if (.cur$admd == 1L) {
-      .w <- which(data$adm == .cur$adm & is.na(data$admd))
+      .w <- which(.adm == .cur$adm & is.na(data$admd))
       data$admd[.w] <- 1L
-      data$cmt[.w] <- .cur$cmt
+      data$cmt[.w] <- .cmt
+      if (.cmt %in% fCmt) data <- .dataRateToDur(data, .w)
+      if (isTRUE(.cur$dur)) data <- .dataDurRate(data, .w)
+      if (isTRUE(.cur$transit)) data <- .dataTransitEvid(data, .w)
+      if (!is.na(.event)) data <- .dataSetEvent(data, .w, .event)
     } else {
-      # add an extra item
-      .w <- which(data$adm == .cur$adm & data$admd == 1L)
-      if (length(.w) == 1L) {
-        .dE <- data[.w, ]
+      .w <- which(.adm == .cur$adm)
+      if (length(.w) > 0L) {
+        .dE <- .orig[.w, ]
         .dE$admd <- .cur$admd
-        .dE$cmt[.w] <- .cur$cmt
-        .extra <- rbind(.extra, .dE)
+        .dE$cmt <- .cmt
+        if (.cmt %in% fCmt) .dE <- .dataRateToDur(.dE, seq_along(.w))
+        if (isTRUE(.cur$dur)) .dE <- .dataDurRate(.dE, seq_along(.w))
+        if (isTRUE(.cur$transit)) .dE <- .dataTransitEvid(.dE, seq_along(.w))
+        if (!is.na(.event)) .dE <- .dataSetEvent(.dE, seq_along(.w), .event)
+        .extra <- .dataBindFill(.extra, .dE)
       }
     }
   }
-  rbind(data, .extra)
+  .dataTransitReset(.dataBindFill(data, .extra))
+}
+
+#' rxode2 evid of an administration given by `empty()` or `reset()`
+#'
+#' @param cur one row of the admd table
+#' @param pk parsed PK macros (with `$empty` and `$reset`)
+#' @return 5 (replace: empty the target), 3 (reset) or NA (a dose)
+#' @noRd
+#' @author Matthew L. Fidler
+.dataAdmEvent <- function(cur, pk) {
+  .is <- function(df) {
+    !is.null(df) && any(df$adm == cur$adm & df$admd == cur$admd, na.rm=TRUE)
+  }
+  if (.is(pk$empty)) return(5L)
+  if (.is(pk$reset)) return(3L)
+  NA_integer_
+}
+
+#' The parsed `PK:` block (its `empty()` and `reset()` macros)
+#'
+#' @param mlxtran parsed mlxtran
+#' @return monolix2rxPk object or NULL
+#' @noRd
+#' @author Matthew L. Fidler
+.dataPkMacros <- function(mlxtran) {
+  mlxtran$MODEL$LONGITUDINAL$PK
+}
+
+#' Make rows an empty (evid 5 with amount 0) or reset (evid 3) event
+#'
+#' @param data dataset
+#' @param w rows to change
+#' @param evid 5 or 3
+#' @return dataset
+#' @noRd
+#' @author Matthew L. Fidler
+.dataSetEvent <- function(data, w, evid) {
+  if (length(w) == 0L) return(data)
+  if (is.null(data[["evid"]])) data$evid <- NA_integer_
+  data$evid[w] <- evid
+  data$amt[w] <- if (evid == 5L) 0 else NA_real_
+  for (.v in intersect(c("rate", "dur", "ss", "ii", "addl"), names(data))) data[[.v]][w] <- 0
+  if (evid == 3L) data$cmt[w] <- NA_character_
+  data
+}
+
+#' Monolix dose rows: an amount, and a dose event when there is an evid column
+#'
+#' @param data dataset
+#' @return logical vector
+#' @noRd
+#' @author Matthew L. Fidler
+.dataIsDose <- function(data) {
+  .amt <- data[["amt"]]
+  if (is.null(.amt)) return(rep(FALSE, nrow(data)))
+  .ret <- !is.na(.amt) & .amt != 0
+  if (!is.null(data[["evid"]])) .ret <- .ret & (is.na(data$evid) | data$evid %in% c(1L, 4L))
+  .ret
+}
+
+#' rbind when rate/evid were added to only one side
+#'
+#' @param a,b datasets (a may be NULL)
+#' @return rbind of a and b
+#' @noRd
+#' @author Matthew L. Fidler
+.dataBindFill <- function(a, b) {
+  if (is.null(a)) return(b)
+  if (is.null(b)) return(a)
+  .fill <- function(.to, .from) {
+    if (!is.null(.from[["evid"]]) && is.null(.to[["evid"]])) .to <- .dataEvid(.to)
+    for (.n in setdiff(names(.from), names(.to))) .to[[.n]] <- .from[[.n]][NA_integer_]
+    .to
+  }
+  .a <- .fill(a, b)
+  .b <- .fill(b, .a)
+  rbind(.a, .b[, names(.a)])
+}
+
+#' Compartments the model gives a bioavailability
+#'
+#' @param ui rxode2 ui
+#' @return character vector of compartment names
+#' @noRd
+#' @author Matthew L. Fidler
+.dataFCmt <- function(ui) {
+  .l <- vapply(ui$lstExpr, deparse1, character(1))
+  .re <- "^\\s*(f|F|bioavailability)[(]\\s*([^) ]+)\\s*[)]\\s*(<-|=).*$"
+  unique(sub(.re, "\\2", grep(.re, .l, value=TRUE, perl=TRUE), perl=TRUE))
+}
+
+#' Infusions given by a rate into a compartment with a bioavailability
+#'
+#' Monolix keeps the infusion duration AMT/RATE and scales the rate by
+#' the bioavailability; rxode2 keeps a data rate, so give the duration.
+#'
+#' @param data dataset
+#' @param w dose rows
+#' @return data with `dur` = `amt`/`rate` and `rate` 0 on those rows
+#' @noRd
+#' @author Matthew L. Fidler
+.dataRateToDur <- function(data, w) {
+  if (length(w) == 0L || is.null(data[["rate"]])) return(data)
+  .w <- w[!is.na(data$rate[w]) & data$rate[w] > 0 & !is.na(data$amt[w]) & data$amt[w] > 0]
+  if (length(.w) == 0L) return(data)
+  if (is.null(data[["dur"]])) data$dur <- 0
+  data$dur[.w] <- data$amt[.w] / data$rate[.w]
+  data$rate[.w] <- 0
+  data
+}
+
+#' Zero-order absorption doses (Tk0) are modeled infusions
+#'
+#' @param data dataset
+#' @param w dose rows
+#' @return data with rate -2 on the dose rows without a rate
+#' @noRd
+#' @author Matthew L. Fidler
+.dataDurRate <- function(data, w) {
+  if (length(w) == 0L) return(data)
+  if (is.null(data[["rate"]])) data$rate <- NA_real_
+  .w <- w[is.na(data$rate[w]) | data$rate[w] == 0]
+  # a data infusion time wins
+  if (!is.null(data[["dur"]])) .w <- .w[is.na(data$dur[.w]) | data$dur[.w] == 0]
+  data$rate[.w] <- -2
+  data
+}
+
+#' Transit doses only start transit(); rxode2 evid=7 keeps them out of the depot
+#'
+#' @param data dataset
+#' @param w dose rows
+#' @return data with evid 7 on the dose rows
+#' @noRd
+#' @author Matthew L. Fidler
+.dataTransitEvid <- function(data, w) {
+  if (length(w) == 0L) return(data)
+  if (is.null(data[["evid"]])) data <- .dataEvid(data)
+  # EVID=4 also resets: .dataTransitReset() adds the reset before the dose
+  .w4 <- w[data$evid[w] %in% 4L]
+  if (length(.w4) > 0L) {
+    if (is.null(data[["rxTransitReset"]])) data$rxTransitReset <- FALSE
+    data$rxTransitReset[.w4] <- TRUE
+  }
+  .w <- w[is.na(data$evid[w]) | data$evid[w] %in% c(1L, 4L)]
+  data$evid[.w] <- 7L
+  data
+}
+
+#' Insert an evid=3 reset before each transit dose that was EVID=4
+#'
+#' @param data dataset
+#' @return data without the rxTransitReset column
+#' @noRd
+#' @author Matthew L. Fidler
+.dataTransitReset <- function(data) {
+  .r <- data[["rxTransitReset"]]
+  if (is.null(.r)) return(data)
+  .r <- which(!is.na(.r) & .r)
+  data$rxTransitReset <- NULL
+  if (length(.r) == 0L) return(data)
+  .reset <- data[.r, ]
+  .reset$evid <- 3L
+  .reset$amt <- NA
+  for (.n in intersect(c("ii", "addl", "ss"), names(.reset))) .reset[[.n]] <- 0
+  .reset$cmt <- NA_character_
+  .ret <- rbind(data, .reset)
+  .ret <- .ret[order(c(seq_len(nrow(data)), .r - 0.5)), ]
+  rownames(.ret) <- NULL
+  .ret
+}
+
+#' Split a line holding both a dose and an observation
+#'
+#' Monolix uses both, the dose first; rxode2 reads such a line as a dose
+#' only.  With an event id the observation of a dose line is ignored.
+#'
+#' @param data dataset with rxode2 column names
+#' @return data with each shared line as an observation and a dose row
+#' @noRd
+#' @author Matthew L. Fidler
+.dataSplitDoseObs <- function(data) {
+  if (is.null(data[["dv"]])) return(data)
+  .both <- .dataIsDose(data) & !is.na(data$dv)
+  if (!is.null(data[["evid"]])) .both <- .both & is.na(data$evid)
+  if (!is.null(data[["mdv"]])) .both <- .both & (is.na(data$mdv) | data$mdv %in% 0L)
+  if (!any(.both)) return(data)
+  .obs <- data[.both, , drop=FALSE]
+  .obs$amt <- NA
+  for (.c in intersect(c("rate", "dur", "ss", "ii", "addl"), names(.obs))) .obs[[.c]] <- 0
+  if (!is.null(.obs[["evid"]])) .obs$evid <- 0L
+  data$dv[.both] <- NA
+  if (!is.null(data[["cens"]])) data$cens[.both] <- 0L
+  if (!is.null(data[["limit"]])) data$limit[.both] <- NA
+  .i <- c(seq_len(nrow(data)), which(.both) + 0.5)
+  .ret <- rbind(data, .obs)[order(.i), , drop=FALSE]
+  rownames(.ret) <- NULL
+  .ret
+}
+#' Start each subject where Monolix starts the system
+#'
+#' Without `t_0`, Monolix starts the system at a subject's first
+#' administration or observation, and with `t_0` there; rxode2 starts at
+#' time 0 (the same as `t_0 = 0`).  An `evid=2` row (a reset as a
+#' subject's first record is ignored) and a reset (`evid=3`) at that time
+#' start the system there.
+#'
+#' @param data dataset with the rxode2 columns
+#' @param mlxtran parsed mlxtran (with the `EQUATION:` text)
+#' @return dataset
+#' @noRd
+#' @author Matthew L. Fidler
+.dataStartReset <- function(data, mlxtran) {
+  .eq <- mlxtran$MODEL$LONGITUDINAL$EQUATION$monolix
+  if (is.null(.eq)) return(data)
+  .re <- "^[ \t]*t_?0[ \t]*="
+  .t0 <- grep(.re, strsplit(.eq, "\n")[[1]], value=TRUE)
+  if (length(.t0) > 0L) {
+    # rxode2 starts at 0; another t_0 must be a number
+    .t0 <- suppressWarnings(as.numeric(trimws(sub(";.*$", "", sub(.re, "", .t0[length(.t0)])))))
+    if (is.na(.t0) || .t0 == 0) return(data)
+  } else {
+    .t0 <- NA_real_
+  }
+  if (is.null(data[["id"]]) || is.null(data[["time"]]) || nrow(data) == 0L) return(data)
+  # an event endpoint counts its hazard from time 0 when the first record
+  # is an event (R/discreteEndpoint.R); which start Monolix uses there is
+  # to confirm
+  if (any(vapply(mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint,
+                 function(e) identical(e$dist, "event"), logical(1)))) {
+    return(data)
+  }
+  .evid <- if (is.null(data[["evid"]])) .dataEvid(data)$evid else data$evid
+  # administrations (doses, transit doses, empty/reset lines) and observations
+  .noDv <- if (is.null(data[["dv"]])) rep(FALSE, nrow(data)) else is.na(data$dv)
+  .use <- !is.na(data$time) & !is.na(.evid) & .evid != 2L & !(.evid == 0L & .noDv)
+  if (!any(.use)) return(data)
+  .ids <- unique(as.character(data$id))
+  .w <- which(.use)
+  .w <- .w[order(match(as.character(data$id[.w]), .ids), data$time[.w], method="radix")]
+  # each subject's first record (its regressors and covariates at that time)
+  .w <- .w[!duplicated(as.character(data$id[.w]))]
+  # with t_0, the subjects whose records start at or after it
+  .w <- if (is.na(.t0)) .w[data$time[.w] != 0] else .w[data$time[.w] >= .t0]
+  if (length(.w) == 0L) return(data)
+  data$evid <- .evid
+  .first <- data[.w, , drop=FALSE]
+  if (!is.na(.t0)) .first$time <- .t0
+  for (.v in intersect(c("dv", "amt", "cmt", "rate", "dur", "ss", "ii", "addl", "mdv", "cens", "limit"),
+                       names(.first))) {
+    .first[[.v]] <- switch(.v, mdv=1, cens=0, rate=, dur=, ss=, ii=, addl=0, NA)
+  }
+  .start <- rbind(transform(.first, evid=2L), transform(.first, evid=3L))
+  .start$rxStartOrder <- rep(c(1L, 2L), each=nrow(.first))
+  data$rxStartOrder <- 3L
+  data <- rbind(.start, data)
+  # by id (the data's order) and time; the start rows come first at their time
+  data <- data[order(match(as.character(data$id), .ids), data$time, data$rxStartOrder,
+                     method="radix"), , drop=FALSE]
+  data$rxStartOrder <- NULL
+  rownames(data) <- NULL
+  data
+}
+
+#' Monolix doses are the rows with an amount; MDV=1 only drops an observation
+#'
+#' Without an evid column rxode2 would read an MDV=1 row as a dose.
+#'
+#' @param data dataset
+#' @return data with an evid column
+#' @noRd
+#' @author Matthew L. Fidler
+.dataEvid <- function(data) {
+  .evid <- ifelse(.dataIsDose(data), 1L, 0L)
+  if (is.null(data[["evid"]])) data$evid <- .evid
+  data$evid[is.na(data$evid)] <- .evid[is.na(data$evid)]
+  if (!is.null(data[["mdv"]])) {
+    data$evid[data$evid == 0L & !is.na(data$mdv) & data$mdv == 1L] <- 2L
+  }
+  data
 }
 
 #' Import a dataset from monolix (based on an imported model)
@@ -393,13 +927,21 @@ monolixDataImport <- function(ui, data, na.strings = c("NA", ".")) {
     return(NULL)
   }
   data <- .dataRenameFromMlxtran(data, .mlxtran)
-  data <- .dataConvertAdm(data, ui$admd)
+  # Monolix 2024R1 ignores a data EVID=3 or EVID=4 line whose amount is
+  # missing
+  if (!is.null(data[["evid"]]) && !is.null(data[["amt"]])) {
+    data$evid[data$evid %in% c(3L, 4L) & is.na(data$amt)] <- 2L
+  }
+  data <- .dataSplitDoseObs(data)
+  data <- .dataConvertAdm(data, ui$admd, .dataPkMacros(.mlxtran), .dataFCmt(rxui))
+  if (!is.null(data[["mdv"]]) || !is.null(data[["evid"]])) data <- .dataEvid(data)
   data <- .dataConvertEndpoints(data, ui)
   .ld <- tolower(names(data))
   .wt <- which(.ld == "time")
   if (length(.wt) == 0) {
     .minfo("added dummy time column")
     data$time <- seq_along(data[, 1])
+    return(data)
   } else {
     .wt0 <- which(is.na(data[, .wt]))
     if (length(.wt0) > 0) {
@@ -407,5 +949,5 @@ monolixDataImport <- function(ui, data, na.strings = c("NA", ".")) {
       data[.wt0, .wt] <- 0
     }
   }
-  data
+  .dataStartReset(data, .mlxtran)
 }

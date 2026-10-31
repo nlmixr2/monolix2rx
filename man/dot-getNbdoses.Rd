@@ -7,7 +7,7 @@
 .getNbdoses(x)
 }
 \arguments{
-\item{x}{monolix2rx object}
+\item{x}{monolix2rx object, its parsed project or its rxUi}
 }
 \value{
 Number of doses for monolix2rx object

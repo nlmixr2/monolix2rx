@@ -149,3 +149,22 @@ test_that("edge case cov", {
   expect_equal(as.character(.indDef("Tlag = {distribution=logNormal, typical=Tlag_pop, covariate={age, wt, sex}, coefficient={beta_Tlag_age, beta_Tlag_wt, {0, beta_Tlag_sex_1}}, sd=omega_Tlag}")),
                "Tlag = {distribution=lognormal, typical=Tlag_pop, covariate={age, wt, sex}, coefficient={beta_Tlag_age, beta_Tlag_wt, {0, beta_Tlag_sex_1}}, sd=omega_Tlag}")
 })
+
+test_that("categorical comparisons quote strings but not numeric data", {
+  .d <- "Cl = {distribution=logNormal, typical=Cl_pop, covariate=R, coefficient={0, b1, b3}, sd=omega_Cl}"
+  .rx <- function(cat) paste(.indDef(.d, cat)$rx, collapse="\n")
+  expect_match(.rx(list(R=c("2", "1", "3"))), "b1 * (R == 1) + b3 * (R == 3)", fixed=TRUE)
+  ## a string category makes the data column character
+  expect_match(.rx(list(R=c("U", "1", "3"))), "b1 * (R == '1') + b3 * (R == '3')", fixed=TRUE)
+})
+
+test_that("distribution= need not come first", {
+  .first <- .indDef("V = {distribution=logNormal, typical=V_pop, sd=omega_V, covariate=lw70, coefficient=beta_V_lw70}\nF = {distribution=logitNormal, typical=F_pop, sd=omega_F, max=100}")
+  .last <- .indDef("V = {covariate=lw70, coefficient=beta_V_lw70, sd=omega_V, distribution=logNormal, typical=V_pop}\nF = {max=100, typical=F_pop, sd=omega_F, distribution=logitNormal}")
+  expect_equal(as.character(.last), as.character(.first))
+  expect_equal(.last$rx, .first$rx)
+  expect_match(as.character(.last), "min=0, max=100", fixed=TRUE, all=FALSE)
+  expect_equal(as.character(.indDef("F = {typical=F_pop, min=0.5, distribution=logitNormal, sd=omega_F}")),
+               "F = {distribution=logitnormal, typical=F_pop, sd=omega_F, min=0.5, max=1}")
+  expect_error(.indDef("F = {min=0, typical=F_pop, sd=omega_F, distribution=normal}"))
+})

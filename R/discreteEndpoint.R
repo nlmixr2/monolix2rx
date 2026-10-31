@@ -1,0 +1,235 @@
+#' Split discrete definition code into statements
+#'
+#' @param code definition code lines
+#' @return statements; they are separated by new lines or by commas
+#'   outside parentheses
+#' @noRd
+#' @author Matthew L. Fidler
+.discreteStatements <- function(code) {
+  .lines <- unlist(strsplit(paste(code, collapse="\n"), "\n"))
+  .ret <- unlist(lapply(.lines, function(l) {
+    .ch <- strsplit(l, "")[[1]]
+    .depth <- cumsum((.ch == "(") - (.ch == ")"))
+    .cut <- which(.ch == "," & .depth == 0L)
+    if (length(.cut) == 0L) return(l)
+    substring(l, c(1L, .cut + 1L), c(.cut - 1L, nchar(l)))
+  }))
+  .ret <- trimws(.ret)
+  .ret[.ret != ""]
+}
+
+#' Note for an unsupported Markov definition
+#'
+#' @param ns statements without spaces
+#' @return message suffix
+#' @noRd
+#' @author Matthew L. Fidler
+.discreteMarkov <- function(ns) {
+  if (any(grepl("[|]|^dependence=|^transitionRate", ns))) {
+    " (Markov dependence is not supported)"
+  } else {
+    ""
+  }
+}
+
+#' Translate discrete definition statements to rxode2 lines
+#'
+#' @param stmt statements (the probability statements already rewritten
+#'   as assignments)
+#' @param var variable whose observed value replaces `k` (or NULL)
+#' @return rxode2 lines
+#' @noRd
+#' @author Matthew L. Fidler
+.discreteRx <- function(stmt, var=NULL) {
+  .rx <- .equation(paste(stmt, collapse="\n"))$rx
+  if (!is.null(var)) {
+    .rx <- gsub(paste0("\\b", var, "\\b"), "DV", .rx, perl=TRUE)
+    # a count is whole, so its factorial needs no rounding
+    .rx <- gsub("factorial(round(DV))", "factorial(DV)", .rx, fixed=TRUE)
+  }
+  .rx
+}
+
+#' Match a Poisson log-probability and return its rate
+#'
+#' @param e expression of DV
+#' @param isLog is `e` the log probability
+#' @return rate symbol or NULL
+#' @noRd
+#' @author Matthew L. Fidler
+.discretePoisLambda <- function(e, isLog=TRUE) {
+  .tmpl <- if (isLog) {
+    list(quote(-.L + DV * log(.L) - lfactorial(DV)),
+         quote(DV * log(.L) - .L - lfactorial(DV)),
+         quote(-.L + DV * log(.L) - lgamma(DV + 1)),
+         quote(DV * log(.L) - .L - lgamma(DV + 1)))
+  } else {
+    list(quote(exp(-.L) * .L^DV / factorial(DV)),
+         quote(.L^DV * exp(-.L) / factorial(DV)))
+  }
+  .bind <- function(e, t, env) {
+    if (identical(t, quote(.L))) {
+      if (is.null(env$L)) {
+        env$L <- e
+        return(TRUE)
+      }
+      return(identical(env$L, e))
+    }
+    if (is.call(t)) {
+      if (!is.call(e) || length(e) != length(t)) return(FALSE)
+      for (.i in seq_along(t)) if (!.bind(e[[.i]], t[[.i]], env)) return(FALSE)
+      return(TRUE)
+    }
+    identical(e, t)
+  }
+  .unparen <- function(x) {
+    if (!is.call(x)) return(x)
+    if (identical(x[[1]], quote(`(`))) return(.unparen(x[[2]]))
+    as.call(lapply(as.list(x), .unparen))
+  }
+  e <- .unparen(e)
+  for (.t in .tmpl) {
+    .env <- new.env(parent=emptyenv())
+    if (.bind(e, .t, .env) && is.name(.env$L)) return(.env$L)
+  }
+  NULL
+}
+
+#' Translate a count endpoint
+#'
+#' `log(P(Y=k)) = ...` or `P(Y=k) = ...` becomes `Y ~ pois(lambda)` when it
+#' is the Poisson probability and `ll(Y) ~ Y_logp` otherwise.
+#'
+#' @param endpoint count endpoint
+#' @return rxode2 lines
+#' @noRd
+#' @author Matthew L. Fidler
+.handleCountEndpoint <- function(endpoint) {
+  .var <- endpoint$var
+  .s <- .discreteStatements(endpoint$err$code)
+  .ns <- gsub("[[:space:]]", "", .s)
+  .reLog <- paste0("^log[(]P[(]", .var, "=k[)][)]=(.*)$")
+  .reP <- paste0("^P[(]", .var, "=k[)]=(.*)$")
+  .isLog <- grepl(.reLog, .ns)
+  .isP <- grepl(.reP, .ns)
+  if (!any(.isLog | .isP) || (any(.isLog) && any(.isP))) {
+    stop("count endpoint '", .var, "' needs log(P(", .var, "=k)) = or P(",
+         .var, "=k) =", .discreteMarkov(.ns), call.=FALSE)
+  }
+  .log <- any(.isLog)
+  .lhs <- paste0(.var, if (.log) "_logp" else "_p")
+  .w <- which(.isLog | .isP)
+  .s[.w] <- paste0(.lhs, " = ", sub(if (.log) .reLog else .reP, "\\1", .ns[.w]))
+  .rx <- .discreteRx(.s, "k")
+  if (length(.s) == 1L) {
+    .e <- str2lang(sub(paste0("^", .lhs, " <- "), "", .rx))
+    .l <- .discretePoisLambda(.e, .log)
+    if (!is.null(.l)) return(paste0(.var, " ~ pois(", deparse1(.l), ")"))
+    .rx <- paste0(.lhs, " <- ", deparse1(.e))
+  }
+  # rxode2 reads a sum after ll() ~ as error terms, so use a variable
+  paste(c(.rx,
+          paste0("ll(", .var, ") ~ ", if (.log) .lhs else paste0("log(", .lhs, ")"))),
+        collapse="\n")
+}
+
+#' Translate a categorical endpoint
+#'
+#' `P(Y=c) = ...` for all but one category, or the cumulative `P(Y<=c)`
+#' for all but the last, optionally under `logit()`/`probit()`/`log()`,
+#' becomes rxode2's ordinal `Y ~ c(p0=0, p1=1, 2)`.
+#'
+#' @param endpoint categorical endpoint
+#' @return rxode2 lines
+#' @noRd
+#' @author Matthew L. Fidler
+.handleCategoricalEndpoint <- function(endpoint) {
+  .var <- endpoint$var
+  .cat <- endpoint$err$categories
+  if (length(.cat) < 2L) {
+    stop("categorical endpoint '", .var, "' needs at least two categories", call.=FALSE)
+  }
+  .s <- .discreteStatements(endpoint$err$code)
+  .ns <- gsub("[[:space:]]", "", .s)
+  .reF <- paste0("^(logit|probit|log)[(]P[(]", .var, "(<=|=)([0-9]+)[)][)]=(.*)$")
+  .reP <- paste0("^()P[(]", .var, "(<=|=)([0-9]+)[)]=(.*)$")
+  .w <- which(grepl(.reF, .ns) | grepl(.reP, .ns))
+  .re <- ifelse(grepl(.reF, .ns[.w]), .reF, .reP)
+  .fun <- mapply(sub, .re, "\\1", .ns[.w], USE.NAMES=FALSE)
+  .op <- unique(mapply(sub, .re, "\\2", .ns[.w], USE.NAMES=FALSE))
+  .c <- as.integer(mapply(sub, .re, "\\3", .ns[.w], USE.NAMES=FALSE))
+  .rhs <- mapply(sub, .re, "\\4", .ns[.w], USE.NAMES=FALSE)
+  # cumulative: all but the last category; P(Y=c): all but one, which
+  # is the remainder
+  .cum <- identical(.op, "<=")
+  .rest <- if (.cum) .cat[length(.cat)] else setdiff(.cat, .c)
+  .need <- setdiff(.cat, .rest)
+  if (length(.op) != 1L || length(.rest) != 1L || !setequal(.c, .need)) {
+    stop("categorical endpoint '", .var, "' needs P(", .var, "=c) for all but one of the categories ",
+         paste(.cat, collapse=", "), " or P(", .var, "<=c) for all but the last",
+         .discreteMarkov(.ns), call.=FALSE)
+  }
+  .rhs <- ifelse(.fun == "logit", paste0("invlogit(", .rhs, ")"),
+                 ifelse(.fun == "probit", paste0("normcdf(", .rhs, ")"),
+                        ifelse(.fun == "log", paste0("exp(", .rhs, ")"), .rhs)))
+  .p <- paste0(.var, "_p", .need)
+  .s[.w] <- paste0(.var, if (.cum) "_le" else "_p", .c, " = ", .rhs)
+  .rx <- .discreteRx(.s)
+  if (.cum) {
+    .le <- paste0(.var, "_le", .need)
+    .prev <- c("", if (length(.le) > 1L) paste0(" - ", .le[-length(.le)]))
+    .rx <- c(.rx, paste0(.p, " <- ", .le, .prev))
+  }
+  paste(c(.rx,
+          paste0(.var, " ~ c(", paste(c(paste0(.p, "=", .need), .rest),
+                                      collapse=", "), ")")),
+        collapse="\n")
+}
+
+#' Translate a time-to-event endpoint
+#'
+#' Each event record gives `log(h) - (H - Hp)` (an exact event),
+#' `log(1 - exp(-(H - Hp)))` (an interval censored event) or `-(H - Hp)`
+#' (no event), where `H` is the cumulative hazard and `Hp` its value at
+#' the previous record of the endpoint (or 0 after a reset); a first
+#' record without an event starts the observation.  The records are found by `CMT`, since rxode2 `lag()`
+#' counts every record.
+#'
+#' @param endpoint event endpoint
+#' @param cmt rxode2 compartment number of the endpoint
+#' @return rxode2 lines
+#' @noRd
+#' @author Matthew L. Fidler
+.handleEventEndpoint <- function(endpoint, cmt=0L) {
+  .var <- endpoint$var
+  .v <- function(x) paste0(.var, "_", x)
+  .haz <- .equation(paste0(.v("haz"), " = ", endpoint$pred))$rx
+  .ev <- if (identical(endpoint$err$eventType, "intervalCensored")) {
+    paste0("log(1 - exp(-", .v("dH"), "))")
+  } else {
+    paste0("log(", .v("haz"), ") - ", .v("dH"))
+  }
+  paste(c(.haz,
+          paste0("d/dt(", .v("cumhaz"), ") <- ", .v("haz")),
+          paste0(.v("E"), " <- (CMT == ", cmt, ")"),
+          paste0(.v("EH"), " <- ", .v("E"), " * ", .v("cumhaz")),
+          # a reset (EVID 3/4) sets cumhaz to exactly 0; the hazard restarts
+          # from it (a decrease alone can be solver noise)
+          paste0(.v("Hc"), " <- ", .v("cumhaz")),
+          paste0(.v("Z"), " <- (", .v("Hc"), " == 0) * (lag0(", .v("Hc"), ") > 0)"),
+          # cumulative hazard and number of the previous event records
+          paste0(.v("Hp"), " <- (1 - ", .v("Z"), ") * (lag0(", .v("EH"), ") + (1 - lag0(", .v("E"),
+                 ")) * lag0(", .v("Hp"), "))"),
+          paste0(.v("n"), " <- lag0(", .v("E"), ") + lag0(", .v("n"), ")"),
+          paste0(.v("dH"), " <- ", .v("cumhaz"), " - ", .v("Hp")),
+          # a first record without an event only starts the observation
+          paste0("if (", .v("n"), " == 0 && DV == 0) {"),
+          paste0("  ", .v("ll"), " <- 0"),
+          "} else if (DV == 0) {",
+          paste0("  ", .v("ll"), " <- -", .v("dH")),
+          "} else {",
+          paste0("  ", .v("ll"), " <- ", .ev),
+          "}",
+          paste0("ll(", .var, ") ~ ", .v("ll"))),
+        collapse="\n")
+}

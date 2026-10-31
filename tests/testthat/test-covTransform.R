@@ -139,3 +139,32 @@ test_that("a covariate transform without a reference imports (#6)", {
   expect_true(grepl("else {\n    tSex <- \"F\"", .model, fixed = TRUE))
   expect_true(.rx$predAtol < 0.01)
 })
+
+test_that("a covariate equation can use an earlier one, and min() is per row", {
+  .m <- list(MODEL=list(COVARIATE=list(EQUATION=.covEq("BMI = WT/(HT/100)^2\nlBMI = log(min(BMI, 40)/25)"))))
+  .l <- .mlxtranChangeEquationInfoToParsedList(.m)
+  expect_equal(deparse1(.l$lBMI), "log(min(WT/(HT/100)^2, 40)/25)")
+  .d <- eval(str2lang(paste("data.frame(WT=c(50, 150), HT=180) |>", mlxtranGetMutate(.m))))
+  expect_equal(.d$lBMI, log(pmin(c(50, 150) / 1.8^2, 40) / 25))
+  # a name assigned again
+  .m <- list(MODEL=list(COVARIATE=list(EQUATION=.covEq("lw = log(WT)\nlw = lw - 1\ny = 2*lw"))))
+  .l <- .mlxtranChangeEquationInfoToParsedList(.m)
+  expect_equal(vapply(.l, deparse1, ""), c(lw="log(WT) - 1", y="2 * (log(WT) - 1)"))
+})
+
+test_that("if/else covariate equations start the model", {
+  .m <- list(MODEL=list(COVARIATE=list(EQUATION=.covEq(
+    "lw = log(WT/70)\nif lw > 0\n  hWT = 1\nelse\n  hWT = 0\nend\nhw2 = 2*hWT"))))
+  .r <- .mlxtranChangeVal(quote(model({Cl <- exp(Cl_pop + b * hw2 + c * lw)})), .m)
+  # only the if/else and what uses it; lw stays inlined (a covariate of Cl)
+  expect_equal(deparse1(.r[[2]][[2]]), "if (log(WT/70) > 0) {     hWT <- 1 } else {     hWT <- 0 }")
+  expect_equal(vapply(as.list(.r[[2]])[-(1:2)], deparse1, ""),
+               c("hw2 <- 2 * hWT", "Cl <- exp(Cl_pop + b * hw2 + c * log(WT/70))"))
+})
+
+test_that("rem() in a covariate equation has the sign of its first argument on the data side", {
+  .m <- list(MODEL=list(COVARIATE=list(EQUATION=.covEq("r = rem(X, 7)"))))
+  .d <- eval(str2lang(paste("data.frame(X=c(-5, 5, 12)) |>", mlxtranGetMutate(.m))))
+  # like Monolix and rxode2's %% (C fmod), not R's %%
+  expect_equal(.d$r, c(-5, 5, 5))
+})

@@ -307,6 +307,14 @@ test_that("mlxtran initial list", {
     expect_equal(attr(v4, "covSaTransformed"), attr(v7, "covSaTransformed"))
     expect_equal(attr(v4, "covSaUntransformed"), attr(v7, "covSaUntransformed"))
 
+    # EVID=4 occasions add a line the summary parser skips
+    writeLines(c(ver2021, append(di2, "Number of subjects-occasion: 90", after=2)),
+               file.path(v$MONOLIX$SETTINGS$GLOBAL$exportpath,"summary.txt"))
+    v8 <- .mlxtran(lines, update=TRUE)
+    expect_equal(attr(v8, "dfSub"), 45L)
+    expect_equal(attr(v8, "dfObs"), 176L)
+    expect_equal(attr(v8, "ndose"), 51L)
+
 
 
     unlink(file.path(v$MONOLIX$SETTINGS$GLOBAL$exportpath,

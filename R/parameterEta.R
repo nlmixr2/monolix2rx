@@ -17,16 +17,25 @@
 #' @param ui rxode2 ui imported from monolix
 #' @param pop boolean that indicates if this parameter is for a
 #'   population solve
+#' @param data data set the etas are solved with
 #' @return the theta/eta data frame used for validation
 #' @noRd
 #' @author Matthew L. Fidler
-.parameterThetaEta <- function(ui, pop=FALSE) {
+.parameterThetaEta <- function(ui, pop=FALSE, data=ui$monolixData) {
   .etaData <- ui$etaData
   .theta <- .addRxerr(ui, ui$theta)
   if (pop) {
     .n <- names(ui$etaData)
     .n <- .n[.n != "id"]
     return(c(.theta, setNames(rep(0.0, length(.n)), .n)))
+  }
+  # rxSolve() takes the rows in the order the subjects appear in the
+  # data and needs a numeric id (Monolix ids may be strings)
+  .sub <- unique(as.character(data$id))
+  .m <- match(as.character(.etaData$id), .sub)
+  if (!is.null(.etaData) && length(.sub) > 0L && !anyNA(.m) && !anyDuplicated(.m)) {
+    .etaData <- .etaData[order(.m), , drop=FALSE]
+    .etaData$id <- sort(.m)
   }
   .nid <- length(.etaData$id)
   .id <- .etaData[,"id", drop=FALSE]

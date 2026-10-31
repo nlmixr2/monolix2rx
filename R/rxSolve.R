@@ -6,8 +6,8 @@ rxSolve.monolix2rx <- function(object, params = NULL, events = NULL,
     hmax = NA_real_, hmaxSd = 0, hini = 0, maxordn = 12L, maxords = 5L, 
     order = 5L, ..., cores, covsInterpolation = c("locf", "linear", 
         "nocb", "midpoint"), nStud = 1L, dfSub = 0, dfObs = 0, 
-    thetaMat = NULL, ssAtol = 1e-08, ssRtol = 1e-06, minSS = 10L, 
-    maxSS = 10000L, envir = parent.frame()) {
+    thetaMat = NULL, usePrior = NA, ssAtol = 1e-08, ssRtol = 1e-06, 
+    minSS = 10L, maxSS = 10000L, envir = parent.frame()) {
     if (missing(cores)) {
         cores <- 0L
     }
@@ -50,12 +50,21 @@ rxSolve.monolix2rx <- function(object, params = NULL, events = NULL,
                   call. = FALSE)
             }
         }
+        if (.usePriorAuto(usePrior) && nStud > 1L && !is.null(thetaMat) && 
+            any(!is.na(object$iniDf$prior))) {
+            usePrior <- FALSE
+            .minfo("using thetaMat from Monolix instead of the MAP priors (usePrior=FALSE)")
+        }
     }
     if ((missing(events) && missing(params))) {
         if (!is.null(object$monolixData)) {
-            events <- object$monolixData
+            events <- .ssExpand(object$monolixData, .getNbdoses(object))
             .minfo(paste0("using Monolix's data for solving"))
         }
+    }
+    if (missing(method) && .getDelay(object)) {
+        method <- "dop853"
+        .minfo("delay() needs a dense solver: method=\"dop853\"")
     }
     .atol <- .rtol <- .getRtolAtol(object)
     if (missing(atol)) {
@@ -76,21 +85,27 @@ rxSolve.monolix2rx <- function(object, params = NULL, events = NULL,
         .minfo(paste0("Since Monolix doesn't use ssRtol, set ssAtol=", 
             ssAtol))
     }
-    .nss <- .getNbdoses(object)
     if (missing(maxSS) && missing(minSS)) {
-        maxSS <- .nss + 1
-        minSS <- .nss
+        .ss <- .getSsLimits(object)
+        maxSS <- .ss[["maxSS"]]
+        minSS <- .ss[["minSS"]]
         .minfo(paste0("Since Monolix uses a set number of doses for steady state use maxSS=", 
             maxSS, ", minSS=", minSS))
     }
     .cls <- class(object)
     class(object) <- .cls[-which(.cls == "monolix2rx")]
-    rxode2::rxSolve(object = object, params = params, events = events, 
-        inits = inits, scale = scale, method = method, sigdig = sigdig, 
-        atol = atol, rtol = rtol, maxsteps = maxsteps, hmin = hmin, 
-        hmax = hmax, hmaxSd = hmaxSd, hini = hini, maxordn = maxordn, 
-        maxords = maxords, order = order, ..., cores = cores, 
-        covsInterpolation = covsInterpolation, nStud = nStud, 
-        dfSub = dfSub, dfObs = dfObs, thetaMat = thetaMat, ssAtol = ssAtol, 
-        ssRtol = ssRtol, minSS = minSS, maxSS = maxSS, envir = envir)
+    .usePrior <- if (!.usePriorAuto(usePrior) && any(names(formals(rxode2::rxSolve)) == 
+        "usePrior")) 
+        list(usePrior = usePrior)
+    else list()
+    .ssQuiet(do.call("rxSolve", c(list(object = object, params = params, 
+        events = events, inits = inits, scale = scale, method = method, 
+        sigdig = sigdig, atol = atol, rtol = rtol, maxsteps = maxsteps, 
+        hmin = hmin, hmax = hmax, hmaxSd = hmaxSd, hini = hini, 
+        maxordn = maxordn, maxords = maxords, order = order), 
+        list(...), list(cores = cores, covsInterpolation = covsInterpolation, 
+            nStud = nStud, dfSub = dfSub, dfObs = dfObs, thetaMat = thetaMat, 
+            ssAtol = ssAtol, ssRtol = ssRtol, minSS = minSS, 
+            maxSS = maxSS, envir = envir), .usePrior), quote = TRUE, 
+        envir = asNamespace("rxode2")))
 }

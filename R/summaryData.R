@@ -5,7 +5,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .mlxtranSumary <- function(mlxtran) {
-  .exportPath <- mlxtran$MONOLIX$SETTINGS$GLOBAL$exportpath
+  .exportPath <- .mlxtranExportPath(mlxtran)
   .monolix2rx$dfSub <- 0L
   .monolix2rx$dfObs <- 0L
   .monolix2rx$obsLst <- list()
@@ -42,11 +42,9 @@
                .env$foundVersion <- TRUE
              }
            } else if (.env$foundDataInfo) {
-             .nc <- nchar(l)
-             if (.nc >= 6) {
-               if (substr(l, 1, 6) == "Number") {
-                 .env$diLine <- c(.env$diLine, l)
-               }
+             # other lines (subjects-occasion with occasions, ...) are skipped
+             if (grepl("^Number of (individuals|observations|doses)\\b", l)) {
+               .env$diLine <- c(.env$diLine, l)
              }
 
            } else {

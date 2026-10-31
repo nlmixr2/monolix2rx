@@ -74,7 +74,7 @@
 .parsGetFixed <- function(pars, name) {
   .w <- which(pars$name == name)
   if (length(.w) == 1L) {
-    return(pars[.w, "method"] == "FIXED")
+    return(toupper(pars[.w, "method"]) == "FIXED")
   }
   FALSE
 }
@@ -241,7 +241,8 @@
 #'
 #' @param vl occasion levels; in monolix they are defined like id*occ
 #'   and id*occ*occ instead of by a variable;
-#' @return This changes id*occ -> occ and id*occ->occ2 etc
+#' @return This changes id*occ -> occ (the data column of use=occasion)
+#'   and id*occ*occ -> occ2 etc
 #' @noRd
 #' @author Matthew L. Fidler
 .def2iniRenameOcc <- function(vl) {
@@ -249,7 +250,7 @@
          function(v) {
            .s <- strsplit(v, "[*]")[[1]]
            if (length(.s) == 1) return(v)
-           return(paste0("occ", ifelse(length(.s) == 1L, "", length(.s))))
+           paste0("occ", ifelse(length(.s) == 2L, "", length(.s) - 1L))
          }, character(1), USE.NAMES = FALSE)
 }
 
@@ -285,6 +286,8 @@
   lapply(seq_along(longDef$endpoint), function(i) {
     .env$err <- c(.env$err, longDef$endpoint[[i]]$err$typical)
   })
+  # an error parameter of several endpoints is one estimate
+  .env$err <- unique(.env$err)
 
   .env$omega <- list()
   .env$vl <- character(0)

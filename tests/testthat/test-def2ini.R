@@ -290,7 +290,7 @@ if (requireNamespace("rxode2", quietly=TRUE)) {
                  omega_ec50 ~ 0.500000000000001
                  omega_kout ~ 0.500000000000001
                  omega_e0 ~ 0.707106781186548
-                 gamma_ktr ~ 0.25 | occ2
+                 gamma_ktr ~ 0.25 | occ
                }))
 
   # try cases without omegas

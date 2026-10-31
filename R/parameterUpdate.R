@@ -11,6 +11,28 @@
   if (checkmate::testDirectoryExists(.wd)) return(.wd)
   getwd()
 }
+#' Monolix results directory of a project
+#'
+#' @param mlx parsed mlxtran object
+#' @return `exportpath`, or the project name Monolix uses without it
+#'   (`"."` when the results are next to the project; NULL when unknown)
+#' @noRd
+#' @author Matthew L. Fidler
+.mlxtranExportPath <- function(mlx) {
+  .e <- mlx$MONOLIX$SETTINGS$GLOBAL$exportpath
+  if (is.null(.e)) {
+    .e <- attr(mlx, "exportDefault")
+    # lixoftConnectors can write the results next to the project
+    # without the project directory the caller runs in it
+    .wd <- attr(mlx, "dirn")
+    if (is.null(.wd)) .wd <- "."
+    if (!is.null(.e) && !dir.exists(file.path(.wd, .e)) &&
+          file.exists(file.path(.wd, "populationParameters.txt"))) {
+      .e <- "."
+    }
+  }
+  .e
+}
 #' Get the best mlxtran info or return NULL
 #'
 #' @param x item to try to extract mlxtran info
@@ -120,9 +142,10 @@
 .parameterUpdate <- function(mlx) {
   mlx <- .monolixGetMlxtran(mlx)
   if (is.null(mlx)) return(invisible())
+  .exportPath <- .mlxtranExportPath(mlx)
+  if (is.null(.exportPath)) return(mlx)
   .wd <- .monolixGetPwd(mlx)
   withr::with_dir(.wd, {
-    .exportPath <- mlx$MONOLIX$SETTINGS$GLOBAL$exportpath
     .popParFile <- file.path(.exportPath, "populationParameters.txt")
     if (file.exists(.popParFile)) {
       .minfo(paste0("updating model values to final parameter estimates from ",

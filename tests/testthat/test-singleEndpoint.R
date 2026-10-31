@@ -76,7 +76,7 @@ test_that("test single endpoint handling", {
   tmp <- .longDef("Seizure = {type = event, eventType = intervalCensored, maxEventNumber = 1,
 rightCensoringTime = 120, intervalLength = 10, hazard = haz}")
 
-  expect_error(.handleSingleEndpoint(tmp$endpoint[[1]]))
+  expect_match(.handleSingleEndpoint(tmp$endpoint[[1]]), "ll(Seizure) ~ Seizure_ll", fixed=TRUE)
 
   tmp <- .longDef("State = {type = categorical, categories = {1,2,3}, dependence = Markov
 P(State_1=1) = a1
@@ -88,15 +88,28 @@ logit(P(State <=2|State_p=2)) = a21+a22
 logit(P(State <=1|State_p=3)) = a31
 logit(P(State <=2|State_p=3)) = a31+a32}")
 
-  expect_error(.handleSingleEndpoint(tmp$endpoint[[1]]))
+  expect_error(.handleSingleEndpoint(tmp$endpoint[[1]]), "Markov")
 
   tmp <- .longDef("y = {type=count, P(y=k) = exp(-lambda)*(lambda^k)/factorial(k)}")
 
-  expect_error(.handleSingleEndpoint(tmp$endpoint[[1]]))
+  expect_equal(.handleSingleEndpoint(tmp$endpoint[[1]]), "y ~ pois(lambda)")
 
   tmp <- .longDef("rx_prd_cp={distribution = normal, prediction = rx_pred_cp, errorModel=combined2c(pkadd__err,prop__err, tc)}")
 
   expect_equal(.handleSingleEndpoint(tmp$endpoint[[1]]),
                "rx_prd_cp <- rx_pred_cp\nrx_prd_cp ~ add(pkadd__err) + pow(prop__err, tc) + combined2()")
 
+})
+
+test_that("an error parameter of several endpoints is aliased after its first", {
+  .e <- function(var, typical) list(var=var, dist="normal", pred="Cc",
+                                    err=list(errName="combined1", typical=typical))
+  .r <- .endpointShareErr(list(.e("y1", c("a", "b1")), .e("y2", c("a", "b2")),
+                               .e("y3", c("a", "a"))))
+  expect_equal(attr(.r, "alias"), c("rx_a_y2 <- a", "rx_a_y3 <- a"))
+  expect_equal(.r[[1]]$err$typical, c("a", "b1"))
+  expect_equal(.r[[2]]$err$typical, c("rx_a_y2", "b2"))
+  expect_equal(.r[[3]]$err$typical, c("rx_a_y3", "rx_a_y3"))
+  expect_equal(attr(.endpointShareErr(list(.e("y1", c("a", "b")))), "alias"), character(0))
+  expect_null(.endpointShareErr(NULL))
 })

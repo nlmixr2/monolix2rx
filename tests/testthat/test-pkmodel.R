@@ -181,3 +181,19 @@ compartment(cmt=1, amount=Ac, volume=V, concentration=Cc)")
                  "d/dt(cmt3) <-  + k13*central - k31*cmt3"))
 
 })
+
+test_that("pkmodel() peripheral clearances Q2/V2 and Q3/V3", {
+  .ret <- .pk("Cc = pkmodel(V, Cl, Q2=Q, V2)")
+  expect_equal(as.character(.ret), "Cc = pkmodel(V, Cl, Q2 = Q, V2)")
+  expect_equal(.pkmodel2macro(.ret, TRUE),
+               c("compartment(cmt=1, volume=V, concentration=Cc)",
+                 "iv(adm=1, cmt=1)",
+                 "peripheral(k12 = (Q)/V, k21 = (Q)/V2)",
+                 "elimination(cmt=1, Cl)"))
+  .ret <- .pk("Cc = pkmodel(V=Vc, Cl, Q2, V2, Q3, V3)")
+  expect_equal(.pkmodel2macro(.ret, TRUE)[3:4],
+               c("peripheral(k12 = Q2/(Vc), k21 = Q2/V2)",
+                 "peripheral(k13 = Q3/(Vc), k31 = Q3/V3)"))
+  expect_error(.pk("Cc = pkmodel(V, Cl, Q2)"), "both 'Q2' and 'V2'")
+  expect_error(.pk("Cc = pkmodel(V, Cl, Q2, V2, k12, k21)"), "cannot also define")
+})

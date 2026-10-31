@@ -29,3 +29,9 @@ prop__err={value=0.1, method=MLE}")
                "ktr_pop = 1")
 
 })
+
+test_that("a lowercase method=fixed fixes the parameter", {
+  .par <- .parameter("V_pop = {value=30, method=fixed}\nCl_pop = {value=3, method=MLE}")
+  expect_true(.parsGetFixed(.par, "V_pop"))
+  expect_false(.parsGetFixed(.par, "Cl_pop"))
+})

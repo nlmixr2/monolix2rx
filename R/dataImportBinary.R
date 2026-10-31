@@ -3,6 +3,7 @@
 #' @param file data file name
 #' @param ext lower-case file extension
 #' @param header header specified in the mlxtran file
+#' @param idName the identifier column (kept as text), or NA
 #' @inheritParams utils::read.table
 #' @return data.frame with the mlxtran header, or NULL when `ext` is a
 #'   text format
@@ -12,7 +13,8 @@
   file,
   ext,
   header,
-  na.strings = c("NA", ".")
+  na.strings = c("NA", "."),
+  idName = NA_character_
 ) {
   if (length(ext) != 1L) {
     return(NULL)
@@ -59,7 +61,10 @@
     if (inherits(.data[[.i]], c("Date", "POSIXt", "difftime"))) {
       .data[[.i]] <- as.character(.data[[.i]])
     }
-    if (is.character(.data[[.i]])) {
+    # the identifier stays text; .monolixNaApply() decides its type
+    .isId <- !is.na(idName) && (identical(names(.data)[.i], idName) ||
+                                  (length(header) == length(.data) && identical(header[.i], idName)))
+    if (is.character(.data[[.i]]) && !.isId) {
       .data[[.i]] <- utils::type.convert(
         .data[[.i]],
         na.strings = na.strings,

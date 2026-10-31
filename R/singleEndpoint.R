@@ -1,20 +1,47 @@
+#' Alias error parameters shared by several endpoints
+#'
+#' rxode2 refuses one error parameter in two endpoints, so a later
+#' endpoint uses `rx_<par>_<endpoint> <- <par>` instead.
+#'
+#' @param endpoints parsed `[LONGITUDINAL] DEFINITION:` endpoints
+#' @return endpoints, with the alias lines in the "alias" attribute
+#' @noRd
+#' @author Matthew L. Fidler
+.endpointShareErr <- function(endpoints) {
+  if (length(endpoints) == 0L) return(endpoints)
+  .seen <- character(0)
+  .alias <- character(0)
+  for (.i in seq_along(endpoints)) {
+    .t <- endpoints[[.i]]$err$typical
+    if (is.null(.t)) next
+    .par <- grepl("^[A-Za-z]", .t)
+    .dup <- .par & .t %in% .seen
+    .seen <- c(.seen, .t[.par])
+    if (any(.dup)) {
+      .new <- paste0("rx_", .t[.dup], "_", endpoints[[.i]]$var)
+      .alias <- unique(c(.alias, paste0(.new, " <- ", .t[.dup])))
+      endpoints[[.i]]$err$typical[.dup] <- .new
+    }
+  }
+  attr(endpoints, "alias") <- .alias
+  endpoints
+}
+
 #' Handle a single endpoint and convert to rxode2
 #'
 #' @param endpoint The endpoint to convert to syntax
+#' @param cmt rxode2 compartment number of the endpoint (used by events)
 #' @return rxode2 syntax for the monolix endpoint
 #' @noRd
 #' @author Matthew L. Fidler
-.handleSingleEndpoint <- function(endpoint) {
+.handleSingleEndpoint <- function(endpoint, cmt=0L) {
   # $MODEL$LONGITUDINAL$DEFINITION$endpoint[[i]]
   if (endpoint$dist == "event") {
-    stop("'event' endpoint not supported in translation yet",
-         call.=FALSE)
+    return(.handleEventEndpoint(endpoint, cmt))
   } else if (endpoint$dist == "categorical") {
-    stop("'categorical' endpoint not supported in translation yet",
-         call.=FALSE)
+    return(.handleCategoricalEndpoint(endpoint))
   } else if (endpoint$dist == "count") {
-    stop("'count' endpoint not supported in translation yet",
-         call.=FALSE)
+    return(.handleCountEndpoint(endpoint))
   } else if (endpoint$dist == "lognormal") {
     .add <- "lnorm"
   } else if (endpoint$dist == "normal") {

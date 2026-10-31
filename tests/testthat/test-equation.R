@@ -1,3 +1,7 @@
+# .equation() reads the endpoints a project import sets; an earlier test
+# file's import would add their lines here
+.monolix2rx$endpointPred <- character(0)
+
 test_that("equation tests", {
 
   pk <- .pk("")
@@ -76,11 +80,11 @@ ddt_dx = -x-dx", pk)
 
   .ret <- .equation("a=amtDose", pk)
 
-  expect_equal(.ret$rx, "a <- dose")
+  expect_equal(.ret$rx, "a <- dose0()")
 
   .ret <- .equation("a=tDose", pk)
 
-  expect_equal(.ret$rx, "a <- tlast")
+  expect_equal(.ret$rx, "a <- tlast0()")
 
   .ret <- .equation("a=t+3", pk)
   expect_equal(.ret$rx, "a <- time + 3")
@@ -92,6 +96,7 @@ ddt_dx = -x-dx", pk)
 
   expect_warning(.equation("t_0=0", pk), NA)
   expect_warning(.equation("t_0=10", pk))
+  expect_warning(.equation("t_0 = 0 ; start", pk), NA)
 
   .ret <- .equation("a=invlogit(b)", pk)
   expect_equal(.ret$rx, "a <- expit(b)")
@@ -106,11 +111,26 @@ ddt_dx = -x-dx", pk)
   expect_equal(.ret$rx, "a <- lgamma(b)")
 
   .ret <- .equation("a=factln(b)", pk)
-  expect_equal(.ret$rx, "a <- lfactorial(b)")
+  expect_equal(.ret$rx, "a <- lfactorial(round(b))")
 
-  expect_error(.equation("ddt_x = ka*x-k*delay(x,tau)", pk), "delay")
+  expect_equal(.equation("ddt_x = ka*x-k*delay(x,tau)", pk)$rx,
+               "d/dt(x) <- ka * x - k * delay(x, tau)")
 
-  expect_error(.equation("ddt_x = ka*x-k*rem(tau)", pk), "rem")
+  # Monolix's rem(a, b) has the sign of a, like rxode2's %% (C fmod)
+  expect_equal(.equation("ddt_x = ka*x-k*rem(t, tau)", pk)$rx,
+               "d/dt(x) <- ka * x - k * ((time) %% (tau))")
+  expect_error(.equation("ddt_x = ka*x-k*rem(tau)", pk))
+  expect_equal(.equation("a = sinh(b)", pk)$rx, "a <- sinh(b)")
+  expect_equal(.equation("if ~(t > 5)\n a = 1\nelse\n a = 2\nend", pk)$rx,
+               c("if ((!((time > 5)))) {", "a <- 1", "} else {", "a <- 2", "}"))
+  expect_equal(.equation("a = !b & c", pk)$rx, "a <- (!(b)) && c")
+  expect_equal(.equation("a = -~b", pk)$rx, "a <-  - (!(b))")
+  expect_equal(.equation("a = b^~c", pk)$rx, "a <- b^(!(c))")
+  # the pkmodel() and PK macro argument text is not written before a following if
+  .if <- c("if (time > 1) {", "y <- 1", "} else {", "y <- 2", "}")
+  expect_equal(.equation("Cc = pkmodel(ka, V, Cl)\nif t > 1\n y = 1\nelse\n y = 2\nend", pk)$rx[4:8], .if)
+  .rx <- .equation("compartment(cmt=1, amount=Ac, volume=V)\noral(ka, cmt=1)\nperipheral(k12, k21)\nelimination(cmt=1, k)\nif t > 1\n y = 1\nelse\n y = 2\nend", pk)$rx
+  expect_equal(.rx[seq(length(.rx) - 4L, length(.rx))], .if)
 
 })
 
@@ -153,17 +173,132 @@ test_that("longitudinal PK equations keep dependency order", {
   expect_true(.wCu < .wK)
 })
 
-test_that("wsmm mixture not supported", {
-  expect_error(.equation("f = wsmm(f1, p, f2, 1-p)"),
-               "wsmm")
+test_that("bsmm and wsmm are kept for the mixture rewrite", {
+  expect_equal(.equation("M = bsmm(M1,p1,M2,1-p1)")$rx, "M <- bsmm(M1, p1, M2, 1 - p1)")
+  expect_equal(.equation("f = wsmm(f1, p, f2, 1-p)")$rx, "f <- wsmm(f1, p, f2, 1 - p)")
 })
 
-test_that("bsmm", {
-  expect_error(.equation("f = bsmm(f1, p, f2, 1-p)"),
-               "bsmm")
+test_that("EQUATION: lines before pkmodel() stay before its ODEs", {
+  .rx <- .equation("k12 = Q/V\nk21 = Q/V2\nCc = pkmodel(V, Cl, k12, k21)\nE = 2*Cc")$rx
+  expect_equal(.rx[1:2], c("k12 <- Q / V", "k21 <- Q / V2"))
+  expect_equal(.rx[length(.rx)], "E <- 2 * Cc")
+  expect_true(any(grepl("^d/dt[(]central[)]", .rx[3:5])))
 })
 
-test_that("bsmm", {
-  expect_error(.equation("M = bsmm(M1,p1,M2,1-p1)"),
-               "bsmm")
+test_that("depot(target=) into a macro compartment", {
+  .rx <- .equation("Cc = Ac/V", .pk("compartment(cmt=1, amount=Ac)\ndepot(target=Ac, ka, Tlag)\nelimination(cmt=1, k=Cl/V)"))$rx
+  expect_equal(.rx[1:3], c("d/dt(Acd) <-  - ka*Acd", "alag(Acd) <- Tlag", "d/dt(Ac) <-  - Cl/V*Ac + ka*Acd"))
+})
+
+test_that("no PK state leaks into the next equation block", {
+  .equation("Cc = Ac/V", .pk("compartment(cmt=1, amount=Ac)\ndepot(target=Ac, Tk0)\nelimination(cmt=1, k)"))
+  .rx <- .equation("ddt_Ac = -k*Ac\nCc = Ac/V", .pk("depot(target=Ac, ka)"))$rx
+  expect_false(any(grepl("dur", .rx)))
+  expect_equal(.covEq("lw = log(WT/70)")$dplyr, "lw = log(WT / 70)")
+})
+
+test_that("depot(target=) into a compartment without other flows", {
+  .rx <- .equation("Cc = Ac/V", .pk("compartment(cmt=1, amount=Ac)\ndepot(target=Ac, ka)"))$rx
+  expect_true("d/dt(Ac) <- 0 + ka*Acd" %in% .rx)
+  expect_true("d/dt(Acd) <-  - ka*Acd" %in% .rx)
+})
+
+test_that("transfer() keeps the inflow of the receiving compartment", {
+  .pk <- "compartment(cmt=1, amount=Ac)\ncompartment(cmt=2, amount=Ab)\ntransfer(from=1, to=2, kt)"
+  expect_equal(.equation("Cb = Ab/V", .pk(paste0(.pk, "\nelimination(cmt=2, k)")))$rx[2],
+               "d/dt(Ab) <-  + kt*Ac - k*Ab")
+  expect_equal(.equation("Cb = Ab/V", .pk(.pk))$rx[2], "d/dt(Ab) <-  + kt*Ac")
+})
+
+test_that("chained powers are right associative for rxode2", {
+  expect_equal(.equation("y = 2^x^2\nz = x^2 + y^3\nu = a^b^c^d\nw = 2^-x^2")$rx,
+               c("y <- 2^(x^2)", "z <- x^2 + y^3", "u <- a^(b^(c^d))", "w <- 2^( - x^2)"))
+})
+
+test_that("dose keywords in PK macro arguments are translated", {
+  expect_warning(.rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, p=2/amtDose, Tlag=0.1*tDose)")$rx,
+                 "lag time")
+  expect_true("f(Ap) <- 2/dose0()" %in% .rx)
+  expect_true("alag(Ap) <- 0.1*tlast0()" %in% .rx)
+  .rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, p=invlogit(a^b^c), Tlag=normcdf(t))")$rx
+  expect_true("f(Ap) <- expit(a^(b^c))" %in% .rx)
+  expect_true("alag(Ap) <- pnorm(time)" %in% .rx)
+  .rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, p=2^-x^2, Tlag=1e-3*t)")$rx
+  expect_true("f(Ap) <- 2^(-x^2)" %in% .rx)
+  expect_true("alag(Ap) <- 1e-3*time" %in% .rx)
+  expect_error(.equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, Tlag=inftDose)"),
+               "inftDose")
+  expect_true("f(central) <- dose0()/100" %in% .equation("", "Cc = pkmodel(V, Cl, p=amtDose/100)")$rx)
+  expect_warning(.equation("ddt_Ap = -k*Ap\nCc = Ap + tDose", "depot(adm=1, target=Ap, Tlag)"),
+                 "lag time")
+  expect_warning(.equation("Y = amtDose", "Cc = pkmodel(Tlag, ka, V, Cl)"), "lag time")
+  expect_no_warning(.equation("ddt_Ap = -k*Ap\nCc = Ap + tDose", "depot(adm=1, target=Ap)"))
+  .rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, Tlag=rem(t, 2), p=(a ~= 1))")$rx
+  expect_true("alag(Ap) <- ((time)%%(2))" %in% .rx)
+  expect_true("f(Ap) <- (a != 1)" %in% .rx)
+  expect_error(.equation("ddt_Ap = -k*Ap\nCc = Ap", "depot(adm=1, target=Ap, p=~(a > 1))"), "negation")
+})
+
+test_that("names rxode2 reserves are renamed in [LONGITUDINAL] equations", {
+  .e <- .equation("rate = max(Cl/V, 0)\nddt_ii = -rate*ii\nii_0 = 1\nCc = ii/V*t",
+                  "dur = 0.5\ndepot(target=ii, Tlag=dur)\ncompartment(cmt=1, amount=Ab)")
+  expect_equal(sort(.e$rename), c("dur", "ii", "rate"))
+  expect_equal(.e$monolix, "rate = max(Cl/V, 0)\nddt_ii = -rate*ii\nii_0 = 1\nCc = ii/V*t")
+  expect_true(all(c("mlx_dur <- 0.5", "mlx_rate <- max(Cl / V, 0)", "d/dt(mlx_ii) <-  - mlx_rate * mlx_ii",
+                    "alag(mlx_ii) <- mlx_dur", "mlx_ii(0) <- mlx_ii_0", "Cc <- mlx_ii / V * time") %in% .e$rx))
+  # a macro keyword argument keeps its name
+  expect_equal(c(.mlxRenameReserved("compartment(cmt=1, amount=cmt)")), "compartment(cmt=1, amount=mlx_cmt)")
+  # x_0 alone is a legal name; TIME is refused in any case
+  expect_equal(c(.mlxRenameReserved("y = rate_0 + ii_0")), "y = rate_0 + ii_0")
+  expect_equal(c(.mlxRenameReserved("TIME = t - 2 ; time")), "mlx_TIME = t - 2 ; time")
+  # print() keeps the Monolix names
+  expect_equal(as.character(.pk("dur = 0.5\ndepot(target=Ad, Tlag=dur)", TRUE)),
+               c("dur <- 0.5", "depot(adm = 1, target = Ad, Tlag = dur, p = 1)"))
+  # [COVARIATE] equations write data columns and keep their names
+  expect_equal(.covEq("rate = WT/70")$dplyr, "rate = WT / 70")
+})
+
+test_that("X_0 is an initial condition only for a state X", {
+  expect_equal(.equation("A_gut_0 = 10\nddt_A_gut = -A_gut\nCc = A_gut")$rx,
+               c("A_gut_0 <- 10", "A_gut(0) <- A_gut_0", "d/dt(A_gut) <-  - A_gut", "Cc <- A_gut"))
+  expect_equal(.equation("E_0 = 10\nCc = E_0")$rx, c("E_0 <- 10", "Cc <- E_0"))
+})
+
+test_that("a reserved name as a model input is an error", {
+  skip_on_cran()
+  .dir <- file.path(tempfile(), "theo")
+  dir.create(.dir, recursive = TRUE)
+  on.exit(unlink(dirname(.dir), recursive = TRUE))
+  file.copy(
+    list.files(system.file("theo", package = "monolix2rx"), full.names = TRUE),
+    .dir,
+    recursive = TRUE
+  )
+  .f <- file.path(.dir, "theophylline_project.mlxtran")
+  .l <- readLines(.f)
+  .l <- gsub("\\bCl\\b", "rate", .l, perl = TRUE)
+  .l <- gsub("oral1_1cpt_kaVCl.txt", "model.txt", .l, fixed = TRUE)
+  writeLines(.l, .f)
+  writeLines(c("[LONGITUDINAL]", "input = {ka, V, rate}", "", "PK:", "depot(target=Ac, ka)",
+               "", "EQUATION:", "ddt_Ac = -rate/V*Ac", "Cc = Ac/V", "", "OUTPUT:", "output = Cc"),
+             file.path(.dir, "model.txt"))
+  expect_error(suppressMessages(monolix2rx(.f)), "rxode2 reserves 'rate'")
+})
+
+test_that("macro argument expressions keep their own parentheses", {
+  expect_equal(.equation("Cc = pkmodel(V, Cl=a+b)")$rx[1],
+               "d/dt(central) <-  - (a+b)/V*central")
+  expect_equal(.equation("Cc = pkmodel(ka, V=V1*WT, Cl)")$rx[2:3],
+               c("d/dt(central) <-  + ka*depot - Cl/(V1*WT)*central",
+                 "Cc <- central/(V1*WT)"))
+  .p <- .pk("compartment(cmt=1, amount=Ac)\noral(cmt=1, ka=k1+k2)\nperipheral(k12=a+b, k21=c)\nelimination(cmt=1, k=c-d)")
+  expect_equal(.equation("Cc = Ac/V", .p)$rx[2],
+               "d/dt(Ac) <-  - (a+b)*Ac + c*cmt2 + (k1+k2)*Acd - (c-d)*Ac")
+})
+
+test_that("factorial() and factln() round their argument like Monolix", {
+  expect_equal(.equation("a=factorial(x) + 2*factln(1+x)")$rx,
+               "a <- factorial(round(x)) + 2 * lfactorial(round(1 + x))")
+  expect_equal(.covEq("y = factorial(WT/10) + factln(AGE)")$dplyr,
+               "y = factorial(round(WT/10)) + lfactorial(round(AGE))")
 })

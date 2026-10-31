@@ -5,7 +5,7 @@
 #' @author Matthew L. Fidler
 #' @noRd
 .mlxtranCovLin <- function(mlx) {
-  .exportPath <- mlx$MONOLIX$SETTINGS$GLOBAL$exportpath
+  .exportPath <- .mlxtranExportPath(mlx)
   .try <- try(file.exists(.exportPath), silent=TRUE)
   if (!isTRUE(.try)) return(NULL)
   .covLin <- file.path(.exportPath, "FisherInformation", "covarianceEstimatesLin.txt")
@@ -25,7 +25,7 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .mlxtranCovSA <- function(mlx) {
-  .exportPath <- mlx$MONOLIX$SETTINGS$GLOBAL$exportpath
+  .exportPath <- .mlxtranExportPath(mlx)
   .try <- try(file.exists(.exportPath), silent=TRUE)
   if (!isTRUE(.try)) return(NULL)
   .covSA <- file.path(.exportPath, "FisherInformation", "covarianceEstimatesSA.txt")
@@ -140,5 +140,6 @@
   attr(.mlx, "covSaUntransformed") <- .saUntransformed
   attr(.mlx, "covLinTransformed") <- .linTransformed
   attr(.mlx, "covLinUntransformed") <- .linUntransformed
+  attr(.mlx, "covJac") <- .jac
   .mlx
 }

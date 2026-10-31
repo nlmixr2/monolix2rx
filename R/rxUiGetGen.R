@@ -17,7 +17,16 @@ rxUiGet.etaData <- function(x, ...) {
   if (!exists("etaData", envir=x[[1]])) return(NULL)
   get("etaData", envir=x[[1]])
 }
-attr(rxUiGet.etaData, "desc") <- "NONMEM etas input from nonmem2rx"
+attr(rxUiGet.etaData, "desc") <- "Monolix random effects (conditional modes when the run has them)"
+
+rxUiGet.etaSaemData <- function(x, ...) {
+  .meta <- new.env(parent=emptyenv())
+  if (exists("meta", envir=x[[1]])) .meta <- get("meta", envir=x[[1]])
+  if (exists("etaSaemData", envir=.meta)) return(get("etaSaemData", envir=.meta))
+  if (!exists("etaSaemData", envir=x[[1]])) return(NULL)
+  get("etaSaemData", envir=x[[1]])
+}
+attr(rxUiGet.etaSaemData, "desc") <- "Monolix SAEM random effects"
 
 rxUiGet.ipredAtol <- function(x, ...) {
   .meta <- new.env(parent=emptyenv())
@@ -159,6 +168,7 @@ attr(rxUiGet.ssAtol, "rstudio") <- 1e-08
 .rxUiGetRegister <- function() {
   rxode2::.s3register("rxode2::rxUiGet", "nonmemData")
   rxode2::.s3register("rxode2::rxUiGet", "etaData")
+  rxode2::.s3register("rxode2::rxUiGet", "etaSaemData")
   rxode2::.s3register("rxode2::rxUiGet", "ipredAtol")
   rxode2::.s3register("rxode2::rxUiGet", "ipredRtol")
   rxode2::.s3register("rxode2::rxUiGet", "ipredCompare")

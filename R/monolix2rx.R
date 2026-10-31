@@ -101,6 +101,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
   }
   .admd <- NULL
   .cmt <- NULL
+  .rename <- NULL
   if (!is.null(.mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$file)) {
     withr::with_dir(.monolixGetPwd(.mlxtran), {
       if (!file.exists(.mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$file)) {
@@ -118,62 +119,109 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
     .equation <- .e$rx
     .cmt <- .e$cmtPrefix
     .admd <- .e$admd
+    .rename <- .e$rename
   } else if (!is.null(.mlxtran$MODEL$LONGITUDINAL$EQUATION)) {
     .equation <- .mlxtran$MODEL$LONGITUDINAL$EQUATION$rx # includes PK: macro
     .cmt <- .mlxtran$MODEL$LONGITUDINAL$EQUATION$cmtPrefix
     .admd <- .mlxtran$MODEL$LONGITUDINAL$EQUATION$admd
+    .rename <- .mlxtran$MODEL$LONGITUDINAL$EQUATION$rename
   } else {
+    # no doses, but the data can still be imported
+    .admd <- .equation("")$admd
     .equation <- character(0)
   }
   if (length(.cmt) == 1L && .cmt == "cmt()") .cmt <- NULL
-  .model <- c("model({",
-              .cmt,
-              mlxtranTransformGetRxCode(.mlxtran),
-              .mlxtran$MODEL$INDIVIDUAL$DEFINITION$rx,
-              .equation,
-              vapply(seq_along(.mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint),
-                     function(i) {
-                       .handleSingleEndpoint(.mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint[[i]])
-                     }, character(1), USE.NAMES = FALSE),
-              "})")
-  if (length(.model) == 2L && all(.model == c("model({", "})"))) {
-    stop("there are not equations to translate in this mlxtran file",
+  .rename <- intersect(.rename, c(.mlxtran$MODEL$LONGITUDINAL$LONGITUDINAL$input,
+                                  .mlxtran$MODEL$LONGITUDINAL$OUTPUT$output,
+                                  .getMonolixPreds(.mlxtran)))
+  if (length(.rename) > 0L) {
+    stop("rxode2 reserves ", paste0("'", .rename, "'", collapse=", "),
+         "; as a model input or output it is not translated (rename it in the Monolix model)",
          call.=FALSE)
   }
-  .model0 <- try(str2lang(paste0(.model, collapse="\n")), silent=TRUE)
-  if (inherits(.model0, "try-error")) {
-    message("Bad Model:\n")
-    message(paste(.model, collapse="\n"))
-    stop("model translation did not parse into a rxode2/nlmixr2 model", call.=FALSE)
+  .endpoints <- .endpointShareErr(.mlxtran$MODEL$LONGITUDINAL$DEFINITION$endpoint)
+  .autocor <- unlist(lapply(.endpoints, function(e) e$autocor))
+  if (length(.autocor) > 0L) {
+    warning("autocorrelated residuals (autoCorrCoef=", paste(.autocor, collapse=", "),
+            ") are not translated; the residuals are independent", call.=FALSE)
   }
-  .model <- .mlxtranChangeVal(.model0, .mlxtran)
-  .ini <- .def2ini(.mlxtran$MODEL$INDIVIDUAL$DEFINITION,
-                   .mlxtran$PARAMETER$PARAMETER,
-                   .mlxtran$MODEL$LONGITUDINAL$DEFINITION)
-  .ret <- function() {}
-  if (gsub(" +", "", deparse1(.ini)) == "ini({})") {
-    body(.ret) <- as.call(c(list(quote(`{`)), .model))
-  } else {
-    body(.ret) <- as.call(c(list(quote(`{`)), .ini, .model))
-  }
-  .ret <- eval(.ret, envir=envir)
-  ini <- rxode2::ini
-  model <- rxode2::model
-  lotri <- lotri::lotri
-  .ui <- try(.ret(), silent=TRUE)
-  if (inherits(.ui, "try-error")) {
-    print(.ret)
-    .ret()
-  }
+  .isEvent <- vapply(.endpoints, function(e) identical(e$dist, "event"), logical(1))
+  .eventCmt <- rep(0L, length(.endpoints))
+  # an event endpoint needs its own compartment number, known once parsed;
+  # the second pass repeats the first pass's warnings
+  .muffle <- function(w) if (any(.isEvent) && .pass == 1L) invokeRestart("muffleWarning")
+  for (.pass in seq_len(if (any(.isEvent)) 2L else 1L)) withCallingHandlers({
+    .latent <- .latentMix(.mlxtran)
+    .model <- c("model({",
+                .cmt,
+                .latent$model,
+                mlxtranTransformGetRxCode(.mlxtran),
+                .mlxtran$MODEL$INDIVIDUAL$DEFINITION$rx,
+                .equation,
+                attr(.endpoints, "alias"),
+                vapply(seq_along(.endpoints),
+                       function(i) .handleSingleEndpoint(.endpoints[[i]], .eventCmt[i]),
+                       character(1), USE.NAMES = FALSE),
+                "})")
+    if (length(.model) == 2L && all(.model == c("model({", "})"))) {
+      stop("there are not equations to translate in this mlxtran file",
+           call.=FALSE)
+    }
+    .model0 <- try(str2lang(paste0(.model, collapse="\n")), silent=TRUE)
+    if (inherits(.model0, "try-error")) {
+      message("Bad Model:\n")
+      message(paste(.model, collapse="\n"))
+      stop("model translation did not parse into a rxode2/nlmixr2 model", call.=FALSE)
+    }
+    .model <- .mlxtranChangeVal(.model0, .mlxtran)
+    .mix <- .mixtureRewrite(.model, .mlxtran)
+    if (!is.null(.mix$prob) && length(.latent$prob) > 0L) {
+      stop("bsmm() and a latent covariate are two mixtures; rxode2 supports one",
+           call.=FALSE)
+    }
+    .model <- .mix$model
+    .ini <- .def2ini(.mlxtran$MODEL$INDIVIDUAL$DEFINITION,
+                     .mlxtran$PARAMETER$PARAMETER,
+                     .mlxtran$MODEL$LONGITUDINAL$DEFINITION)
+    .ini <- .latentIni(.ini, .latent$prob, .mlxtran$PARAMETER$PARAMETER)
+    .ini <- .mixtureIni(.ini, .mix$prob, .mlxtran$PARAMETER$PARAMETER)
+    # MAP priors ([POPULATION] DEFINITION:) as ini() priors
+    .theta <- vapply(as.list(.ini[[2]])[-1], function(e) {
+      if (is.call(e) && identical(e[[1]], quote(`<-`)) && is.name(e[[2]])) as.character(e[[2]]) else NA_character_
+    }, character(1))
+    .prior <- .popPrior(.mlxtran$MODEL$POPULATION$DEFINITION, .mlxtran$PARAMETER$PARAMETER,
+                        .mlxtran$MODEL$INDIVIDUAL$DEFINITION, .theta[!is.na(.theta)])
+    if (length(.prior) > 0L) .ini[[2]] <- as.call(c(as.list(.ini[[2]]), .prior))
+    .ret <- function() {}
+    if (gsub(" +", "", deparse1(.ini)) == "ini({})") {
+      body(.ret) <- as.call(c(list(quote(`{`)), .model))
+    } else {
+      body(.ret) <- as.call(c(list(quote(`{`)), .ini, .model))
+    }
+    .ret <- eval(.ret, envir=envir)
+    ini <- rxode2::ini
+    model <- rxode2::model
+    lotri <- lotri::lotri
+    .ui <- try(.ret(), silent=TRUE)
+    if (inherits(.ui, "try-error")) {
+      print(.ret)
+      .ret()
+    }
+    if (.pass == 1L) {
+      .eventCmt <- as.integer(.ui$predDf$cmt[match(vapply(.endpoints, function(e) e$var, character(1)),
+                                                   .ui$predDf$var)])
+    }
+  }, warning=.muffle)
   .ui <- rxode2::rxUiDecompress(.ui)
   .dfObs <- attr(.mlxtran, "dfObs")
   if (.dfObs > 0L) assign("dfObs", as.double(.dfObs), envir=.ui$meta)
   .dfSub <- attr(.mlxtran, "dfSub")
   if (.dfSub > 0L) assign("dfSub", as.double(.dfSub), envir=.ui$meta)
+  # the transformed (log/logit/probit) scale matches the ini() estimates
   if (thetaMatType == "sa") {
-    .thetaMatType <- c("covSaUntransformed", "covLinUntransformed")
+    .thetaMatType <- c("covSaTransformed", "covLinTransformed")
   } else {
-    .thetaMatType <- c("covLinUntransformed", "covSaUntransformed")
+    .thetaMatType <- c("covLinTransformed", "covSaTransformed")
   }
   for (.tt in .thetaMatType) {
     if (inherits(attr(.mlxtran, .tt), "matrix")) {
@@ -188,6 +236,7 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
                       call.=FALSE)
       }
       .thetaMat <- .thetaMatPrune(.thetaMat, .thetaMatNames)
+      .thetaMat <- .mixtureThetaMat(.thetaMat, .mix$prob, .mlxtran)
       .thetaMatType <- .tt
       break
     }
@@ -214,19 +263,59 @@ monolix2rx <- function(mlxtran, update=TRUE, thetaMatType=c("sa", "lin"),
     .ui$monolixData <- .monolixData
     .ui$sticky <- "monolixData"
   }
-  .etaData <- try(monolixEtaImport(.ui))
+  # the etas and the predictions come from the same Monolix estimate
+  .etaData <- try(monolixEtaImport(.ui, idText=TRUE))
   if (inherits(.etaData, "try-error")) .etaData <- NULL
+  .est <- if (is.null(.etaData)) "mode" else attr(.etaData, "est")
+  .predIpredData <- try(monolixPredIpred(.ui, est=.est, idText=TRUE))
+  if (inherits(.predIpredData, "try-error")) .predIpredData <- NULL
+  if (!is.null(.predIpredData) && !identical(attr(.predIpredData, "est"), .est)) {
+    .est <- attr(.predIpredData, "est")
+    if (!is.null(.etaData)) {
+      .etaData <- try(monolixEtaImport(.ui, est=.est, idText=TRUE))
+      if (inherits(.etaData, "try-error")) .etaData <- NULL
+    }
+  }
+  # Monolix writes the ids as text; they take the data's type, so 01 stays
+  # apart from 1 when the data keeps it apart
+  .idAs <- function(d) {
+    if (is.null(d) || is.null(d$id)) return(d)
+    if (is.null(.monolixData) || is.null(.monolixData$id)) {
+      d$id <- .monolixIdType(d$id)
+    } else if (is.numeric(.monolixData$id)) {
+      d$id <- utils::type.convert(d$id, as.is=TRUE)
+    }
+    d
+  }
+  .etaData <- .idAs(.etaData)
+  .predIpredData <- .idAs(.predIpredData)
   if (!is.null(.etaData)) {
-    .minfo(paste0("imported monolix ETAS (_SAEM) imported to rxode2 compatible data (",
+    .est <- attr(.etaData, "est")
+    attr(.etaData, "est") <- NULL
+    .minfo(paste0("imported monolix ETAS (_", .est, ") imported to rxode2 compatible data (",
                   crayon::bold$blue("$etaData"), ")"))
     .ui$etaData <- .etaData
+    if (identical(.est, "mode")) {
+      .etaSaem <- try(monolixEtaImport(.ui, est="SAEM", idText=TRUE))
+      if (!inherits(.etaSaem, "try-error") && !is.null(.etaSaem)) {
+        attr(.etaSaem, "est") <- NULL
+        .etaSaem <- .idAs(.etaSaem)
+        .minfo(paste0("imported monolix ETAS (_SAEM) to ",
+                      crayon::bold$blue("$etaSaemData")))
+        .ui$etaSaemData <- .etaSaem
+      }
+    }
   }
-  .predIpredData <- try(monolixPredIpred(.ui))
-  if (inherits(.predIpredData, "try-error")) .predIpredData <- NULL
   if (!is.null(.predIpredData)) {
+    attr(.predIpredData, "est") <- NULL
     .minfo(paste0("imported monolix pred/ipred data to compare (",
                   crayon::blue$bold("$predIpredData"), ")"))
     .ui$predIpredData <- .predIpredData
+  }
+  if (is.null(.etaData) && !is.null(.predIpredData) && !is.null(.monolixData) &&
+        !any(!is.na(.ui$iniDf$neta1))) {
+    # no random effects: the validation solves each subject at the thetas
+    .ui$etaData <- data.frame(id=unique(.monolixData$id))
   }
   if (!is.null(.ui$monolixData) && (.dfObs <= 0L || .dfSub <= 0L)) {
     .trans <- rxode2::etTrans(.ui$monolixData, .ui)

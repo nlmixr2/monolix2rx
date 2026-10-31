@@ -48,7 +48,9 @@ Sex = {type=categorical, categories={M, F}}")
                ytype=character(0),
                ytypeQuote=logical(0),
                name = c("y1", "y2"),
-               type = c("continuous",  "continuous"))
+               type = c("continuous",  "continuous"),
+               ignoreLine = character(0),
+               occ = character(0))
   class(tmp2) <- "monolix2rxContent"
 
   expect_equal(tmp, tmp2)
@@ -88,7 +90,9 @@ limit = {use=limit}")
                ytype=character(0),
                ytypeQuote=logical(0),
                name = c("y1",  "y2"),
-               type = c("continuous", "continuous"))
+               type = c("continuous", "continuous"),
+               ignoreLine = character(0),
+               occ = character(0))
   class(tmp2) <- "monolix2rxContent"
 
   expect_equal(tmp, tmp2)
@@ -203,7 +207,9 @@ FLAG = {use=ignoredline}")
                  ytype = character(0),
                  ytypeQuote = logical(0),
                  name = c("y1", "y2"),
-                 type = c("continuous", "event"))
+                 type = c("continuous", "event"),
+                 ignoreLine = "FLAG",
+                 occ = character(0))
 
     class(tmp2) <- "monolix2rxContent"
 

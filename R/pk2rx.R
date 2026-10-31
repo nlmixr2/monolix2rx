@@ -59,7 +59,7 @@
   if (!is.na(concentration)) {
     .v <- ""
     if (!is.na(volume)) {
-      .v <- paste0("/", volume)
+      .v <- paste0("/", .pk2rxParen(volume, mult=FALSE))
     }
     .monolix2rx$pkLhs <- c(.monolix2rx$pkLhs, concentration)
     env$conc[[i]] <- paste0(concentration, " <- ", .pk2rxAmt(env, pk, i, amount), .v)
@@ -69,7 +69,7 @@
     concentration <- .monolix2rx$endpointPred[1]
     .v <- ""
     if (!is.na(volume)) {
-      .v <- paste0("/", volume)
+      .v <- paste0("/", .pk2rxParen(volume, mult=FALSE))
     }
     env$conc[[i]] <- paste0(concentration, " <- ", .pk2rxAmt(env, pk, i, amount), .v)
     .monolix2rx$pkLhs <- c(.monolix2rx$pkLhs, concentration)
@@ -106,14 +106,14 @@
   for (.w in .w0) {
     .perip <- pk$peripheral[.w, ]
     if (!is.na(.perip$in.eq) && .perip$in.eq != "") {
-      .k12 <- .perip$in.eq
+      .k12 <- .pk2rxParen(.perip$in.eq)
     } else if (.perip$in.i < 10 && .perip$in.j < 10) {
       .k12 <- paste0("k", .perip$in.i, .perip$in.j)
     } else {
       .k12 <- paste0("k", .perip$in.i, "_", .perip$in.j)
     }
     if (!is.na(.perip$out.eq) && .perip$out.eq != "") {
-      .k21 <- .perip$out.eq
+      .k21 <- .pk2rxParen(.perip$out.eq)
     } else if (.perip$out.i < 10 && .perip$out.j < 10) {
       .k21 <- paste0("k", .perip$out.i, .perip$out.j)
     } else {
@@ -152,6 +152,8 @@
     .c1 <- .pk2rxAmt(env, pk, .trans$from)
     .i1 <- .trans$from
     .i2 <- .trans$to
+    # name the receiving compartment now; naming it later resets its rhs
+    .pk2rxAmt(env, pk, .i2)
     .kt <- .pk2rxGetVar(.trans, "kt")
     # from
     env$rhs[[.i1]] <- paste0(env$rhs[[.i1]],
@@ -188,15 +190,25 @@
       .depot <- TRUE
     }
   }
+  # empty()/reset() administrations are not doses
+  .ev <- rbind(pk$empty[, c("adm", "admd")], pk$reset[, c("adm", "admd")])
+  if (NROW(.ev) > 0L) {
+    .admd <- .admd[!(paste(.admd$adm, .admd$admd) %in% paste(.ev$adm, .ev$admd)), ]
+  }
   if (!is.na(.cmt)) {
-    .admd <- .admd[.admd$cmt == .cmt, ]
+    .admd <- .admd[which(.admd$cmt == .cmt), ]
   } else if (!is.na(.target)) {
-    .admd <- .admd[.admd$target == .target, ]
+    .admd <- .admd[which(.admd$target == .target), ]
   } else {
     stop("target/cmt not defined, cannot figure out dose", call.=FALSE)
   }
   .cur <- .admd[.admd$depot == .depot & .admd[[type]] == TRUE , ]
-  if (length(.cur$adm) == 1L) return(value)
+  if (length(.cur$adm) == 1L) {
+    if (NROW(.ev) == 0L) return(value)
+    # rxode2 would also delay (or scale) an empty/reset event
+    if (!(df$adm %in% .ev$adm)) return(paste0("+(ADM==", df$adm, ")*(", value, ")"))
+    return(paste0("+(ADM==", df$adm, " && ADMD==", df$admd, ")*(", value, ")"))
+  }
   .cur1 <- .cur[.cur$adm == df$adm, ]
   if (length(.cur1$adm) == 1L) {
     return(paste0("+(ADM==", df$adm, ")*(", value, ")"))
@@ -224,7 +236,26 @@
   if (is.null(.inp)) return(NA_character_)
   if (is.na(.inp)) return(NA_character_)
   if (.inp == "") return(var)
+  # rates are pasted into products; f/alag/dur values are whole right sides
+  if (var %in% c("ka", "k", "Cl", "Vm", "Km", "kt", "ke0", "Mtt", "Ktr")) .inp <- .pk2rxParen(.inp)
   .inp
+}
+#' Parenthesize a macro argument expression
+#'
+#' Macro arguments are pasted into products and quotients, so an
+#' expression like `Cl=a+b` needs its own parentheses.
+#'
+#' @param x argument text
+#' @param mult `x` multiplies (a product or quotient of names is safe);
+#'   otherwise it divides, and only a name or a number is
+#' @return `x`, in parentheses unless it is safe as it is
+#' @noRd
+#' @author Matthew L. Fidler
+.pk2rxParen <- function(x, mult=TRUE) {
+  .a <- "([A-Za-z_.][A-Za-z0-9_.]*|[0-9.]+([eE][-+]?[0-9]+)?)"
+  .re <- if (mult) paste0("^\\s*", .a, "(\\s*[*/]\\s*", .a, ")*\\s*$") else paste0("^\\s*", .a, "\\s*$")
+  if (grepl(.re, x)) return(trimws(x))
+  paste0("(", x, ")")
 }
 #' Handle the administration/oral macros
 #'
@@ -397,6 +428,7 @@
     .w2 <- which(pk$compartment$cmt == i)
     if (length(.w2) == 1L) {
       .V <- pk$compartment[pk$compartment$cmt == i, "volume"]
+      if (length(.V) == 1L && !is.na(.V)) .V <- .pk2rxParen(.V, mult=FALSE)
       # Volume needs to be defined completely no need to change to "V"
     } else {
       .V <- NA_character_
@@ -531,26 +563,23 @@
   .ret$rxCmt <- vapply(seq_along(.ret$target),
                        function(i) {
                          .cur <- .ret$target[i]
-                         if (length(env$name) < i) {
-                           return(.cur)
-                         }
                          if (is.na(.cur)) {
-                           .cur <- env$name[[i]]
-                           if (.ret$depot[i]) {
-                             .cmtName <- paste0(.cur, env$depotPostfix)
-                             if (.cmtName == paste0("central", env$depotPostfix)) {
-                               .cmtName <- "depot" # align with linCmt
-                             }
-                             return(.cmtName)
+                           # env$name is indexed by the Monolix compartment
+                           .c <- .ret$cmt[i]
+                           if (is.na(.c) || length(env$name) < .c) {
+                             return(.cur)
                            }
-                         } else if (.ret$depot[i]) {
-                           if (.ret$depot[i]) {
-                             .cmtName <- paste0(.cur, env$depotPostfix)
-                             if (.cmtName == paste0("central", env$depotPostfix)) {
-                               .cmtName <- "depot" # align with linCmt
-                             }
-                             return(.cmtName)
+                           .cur <- env$name[[.c]]
+                         }
+                         if (.ret$depot[i]) {
+                           .cmtName <- paste0(.cur, env$depotPostfix)
+                           # only oral(cmt=) names its central depot `depot`;
+                           # depot(target=) keeps <target>d
+                           if (is.na(.ret$target[i]) &&
+                                 .cmtName == paste0("central", env$depotPostfix)) {
+                             .cmtName <- "depot" # align with linCmt
                            }
+                           return(.cmtName)
                          }
                          .cur
                        }, character(1), USE.NAMES=FALSE)

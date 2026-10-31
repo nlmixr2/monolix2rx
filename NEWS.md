@@ -1,5 +1,55 @@
 # monolix2rx 0.0.7
 
+* Required rxode2 >= 5.1.7, for `delay()` and `ini()` priors.
+
+* Added a Monolix stress kit (`inst/stress`, like the nonmem2rx and
+  babelmixr2 kits): it simulates each case with rxode2, writes the Monolix
+  project, runs Monolix and checks the `monolix2rx()` import; a translate
+  mode and a mock Monolix check it without Monolix.
+
+* Translated discrete observations, which stopped the import: a
+  `type=count` Poisson probability becomes `pois(lambda)` and any other
+  count probability (`log(P(Y=k))` or `P(Y=k)`, with intermediate
+  statements and `if`/`else`) `ll(Y)`; a `type=categorical` endpoint given
+  by `P(Y=c)` for all but one category, or cumulative `P(Y<=c)`, under
+  `logit()`/`probit()`/`log()` or not, becomes rxode2's ordinal
+  `c(p0=0, p1=1, 2)` (fitting it needs nlmixr2/rxode2#1450 fixed).
+  Markov dependence is still not supported.
+
+* Translated time-to-event observations (`type=event`), which stopped the
+  import: the hazard is integrated in a new state and each event record
+  gives `ll()` of an exact event, an interval censored event
+  (`eventType=intervalCensored`) or no event, from the hazard since the
+  previous record of the endpoint; the first record starts the
+  observation.  The records are found by their compartment, so the
+  imported data gives a single event endpoint's observations its `cmt`.
+
+* Imported Monolix MAP priors (`[POPULATION] DEFINITION:` with
+  `method=MAP`) on typical values and covariate coefficients as `ini()`
+  priors on the imported theta (the `iniDf` `prior` column), the inverse
+  of babelmixr2: `ka_pop = {distribution=logNormal, typical=3, sd=0.25}`
+  becomes `prior(ka_pop) ~ dnorm(log(3), 0.25)`.  Omega and residual
+  error priors, and a prior whose distribution differs from its
+  parameter's, are skipped with a warning.  The import's `rxSolve()` keeps
+  simulating uncertainty (`nStud > 1`) from Monolix's `thetaMat` with
+  `usePrior = FALSE` unless `usePrior` is given (nlmixr2/rxode2#1502).
+
+* Matched Monolix's steady state (`nbdoses=N`: the N doses before the
+  steady-state dose and that dose) in the validation and in the import's
+  `rxSolve()` on Monolix's data: a steady-state dose that starts its
+  subject (on one or more routes, `EVID=1` or `4`) is written out as those
+  doses, since rxode2's `minSS` does not give a whole number of doses
+  (nlmixr2/rxode2#1492).  A later steady-state dose still uses rxode2's
+  `ss`, exact with rxode2 newer than 5.1.8 (#1492 fixed), where the
+  import uses `minSS = maxSS = N`.  The start is written out with either rxode2: it
+  also keeps steady-state doses on several routes, a lag longer than `ii`
+  and an `nbdoses` below what the regimen needs.
+
+* Switched `$etaData` and the validation to Monolix's conditional modes
+  (`eta_*_mode`, `indivPred_mode`, `indWRes_mode`), which reproduce each
+  other where the `_SAEM` columns do not.  The SAEM random effects are
+  kept in `$etaSaemData`; a run without the modes still uses `_SAEM`.
+
 * Dropped the re-exports (`rxode2()`, `rxode()`, `RxODE()`, `ini()`,
   `model()`, `model<-`, `rxRename()`, `rxSolve()`, `rxUiGet()`, `logit()`,
   `expit()`, `lotri()`, `autoplot()` and `%>%`).  Load `nlmixr2` (or
@@ -57,6 +107,16 @@
   up to ~80x faster.  Setting `MONOLIX2RX_STRICT_AMBIGUITY` (as the tests
   do) makes any remaining grammar ambiguity an error (issue #51).
 
+* Added a warning for autocorrelated residuals (`autoCorrCoef=`), which
+  are not translated (the residuals stay independent); before, the
+  coefficient was dropped silently.
+
+* Translated the Monolix functions `rem(a, b)` (to `a %% b`, with the sign
+  of `a` like Monolix) and `sinh()`, and the negations `~a` and `!a`, which
+  were syntax errors (also after a sign or as an exponent, `-~a`, `b^~a`).
+  In a PK macro argument `rem()` is translated too and a negation is an
+  error.
+
 * Fixed implicit `ptrdiff_t` to `int` truncation in `rc_dup_str` (`src/shared.c`);
   pointer differences are now range-checked before conversion to `int`.
 
@@ -81,6 +141,271 @@
   parser state is intentionally not mutex-protected, consistent with R's
   single-threaded execution model.
 
+* Latent categorical covariates (between-subject mixtures,
+  `lcat = {type=categorical, categories={1, 2}, P(lcat=1)=plcat1}` in
+  `[COVARIATE] DEFINITION:`) are translated to rxode2's `mix()`
+  (`lcat <- mix(1, plcat1, 2)`, rxode2 >= 5.1.8) with the class
+  probabilities in `ini()`.  Monolix's class per subject is not read yet,
+  so these models are not validated.
+
+* Structural model mixtures in `EQUATION:` are translated:
+  `wsmm(f1, p1, f2, p2)` is the weighted prediction `p1*f1 + p2*f2`
+  (Monolix's definition), and `bsmm(f1, p1, f2, p2)` is
+  `mix(f1, p1_pop, f2)` (rxode2 >= 5.1.8).  A `bsmm()` probability must
+  be a number or an individual parameter without variability or
+  covariates; its typical value becomes the probability in `ini()` on its
+  natural scale, and the model needs at least one random effect.  Like
+  the latent covariates, `bsmm()` models are not validated until
+  Monolix's class per subject is read.
+
+* Fixed categorical covariate effects with numeric categories:
+  `coefficient={0, beta}` for categories `{1, 2}` was translated as
+  `beta*lcat` instead of `beta*(lcat == 2)`.  Coefficients now follow the
+  declared categories by position.
+
+* `delay(x, T)` in `EQUATION:` is translated to rxode2's `delay()` (needs
+  rxode2 >= 5.1.7); models with a delay are solved with `dop853`.
+
+* `pkmodel()` accepts the peripheral clearances and volumes `Q2`, `V2`,
+  `Q3` and `V3` (as `k12 = Q2/V`, `k21 = Q2/V2`, ...).
+
+* Fixed the order of `EQUATION:` lines written before `pkmodel()` or a PK
+  macro: they were translated after the macro's ODEs, so a rate computed
+  there (`k12 = Q/V`) was used before it was defined.  Lines between
+  macros in a `PK:` block are no longer dropped.
+
+* Fixed the inter-occasion variability level name: `varlevel={id, id*occ}`
+  gave `gamma ~ ... | occ2`, but the data's occasion column is `occ`
+  (`id*occ*occ` is now `occ2`).
+
+* Added nested occasions (several `use=occasion` columns): only the last
+  column was kept, so `gamma1 | occ` used the inner level and the inner
+  level had no data column.  The first occasion column is now `occ` and
+  the k-th `occk`, numbering each combination of the first k columns, for
+  the `id*occ*...` levels.  The parsed `[CONTENT]` gained `occ`, every
+  occasion column in order.
+
+* Fixed `amtDose`, which became a parameter `dose` instead of rxode2's
+  last dose amount `dose()`.  `PK:` macro arguments (like `depot(p=)`)
+  were copied as written; their dose keywords, `t`, `~=`, Monolix
+  function names and chained powers are now translated.
+
+* Fixed chained powers: `a^b^c` was written unchanged, which rxode2 does
+  not parse; it is now `a^(b^c)` (right associative, as in Monolix).
+
+* Fixed a project without `<MONOLIX> [SETTINGS] exportpath`, which
+  stopped the import: its results are read from the directory named like
+  the project (Monolix's default).
+
+* Fixed a categorical covariate whose categories mix numbers and strings
+  (`categories={'U', '1', '3'}`): the numbers were compared unquoted with
+  the character data column, which rxode2 matches by level order, so a
+  coefficient could silently apply to another category.
+
+* Fixed a model without `EQUATION:` or `PK:` (only `DEFINITION:`), whose
+  data set was not imported, so the import was not validated.
+
+* Fixed a project with continuous and discrete observations: the discrete
+  endpoint (no prediction) translated to `NA <- Cc`, and the continuous
+  predictions were not read, so the import was not validated.
+
+* Fixed `.getNbdoses()` and `.getStiff()`, which did not recognize the
+  parsed project and always returned 7 and `FALSE`: the validation and
+  `rxSolve()` now use the project's `nbdoses=` and `odeType=`.  The new
+  `.getSsLimits()` gives the matching `minSS`/`maxSS`: `minSS = maxSS =
+  nbdoses` with an rxode2 newer than 5.1.8, otherwise raised to rxode2's
+  floor (5 and 7) when `nbdoses` is smaller; babelmixr2, which calls
+  `.getNbdoses()` directly, needs it for `nbdoses` below 6.
+
+* Fixed the dose routing of the imported data (`$monolixData`):
+  - Without an administration column no dose was routed, because
+    `data$adm` partially matched the `admd` column added during the
+    import; doses now default to `adm=1`, as in Monolix.
+  - Doses went to the Monolix compartment number instead of the rxode2
+    compartment, so an `iv(adm=2, cmt=1)` dose next to `oral(adm=1, cmt=1)`
+    went to the depot; they are now routed by compartment name.
+  - Observation rows with an `ADM` value or `AMT=0` could become doses;
+    only dose rows (an amount, and EVID 1 or 4 when there is an EVID
+    column) are routed now.
+  - A second macro on one administration copied only a single dose, and
+    copied it after the first route had changed it; it now copies every
+    unmodified dose.
+  - `Tk0` (zero-order absorption) doses got no `rate=-2`, so `dur()` was
+    ignored; a data infusion time still takes precedence.
+  - Transit doses (`Mtt`, `Ktr`) were also added to the depot; they now
+    get `evid=7` (an `EVID=4` dose becomes a reset followed by `evid=7`).
+    The administration table (`$admd`) gained a `transit` column.
+  - With an `MDV` column and no `EVID` column, rxode2 read the `MDV=1`
+    rows as doses; they are now `evid=2`.  A missing `EVID` value on a
+    dose is now 1.
+  - A `use=ignore` data column named like an rxode2 event column (`SS`,
+    `RATE`, `EVID`, `DOSE`, ...) was still used by rxode2, which matches
+    those names ignoring case; it is now dropped.
+  - Lines flagged by a `use=ignoredline` column were kept (and an
+    `MDV`-named flag could make the import fail); the flagged lines, doses
+    included, and the flag column are now dropped.  The parsed `[CONTENT]`
+    gained `ignoreLine`, the `use=ignoredline` columns (also still listed
+    in `ignore`), and `as.character()` now writes `use=ignore` columns as
+    `use = ignore` instead of `use = ignoredline`.
+  - A data `EVID=3` line with a missing amount (`AMT = .`), which Monolix
+    2024R1 ignores, was imported as a reset; it is now `evid=2`.  An
+    `EVID=4` line without an amount, which stopped the import, is now
+    ignored the same way.
+
+* Fixed `depot(target=Ac, ka)` into a `compartment()` macro: the depot
+  ODE and its `ka` transfer were dropped (only `EQUATION:` states received
+  them), also when the compartment had no other flows.
+
+* Fixed `transfer(from=1, to=2, kt)`: the inflow into the receiving
+  compartment was dropped when that compartment was named later (for
+  example by `elimination(cmt=2, ...)`).
+
+* Fixed PK state leaking between parses: an `EQUATION:` block could pick
+  up `dur()`/`f()`/`alag()` lines of the previously parsed model, and a
+  `[COVARIATE] EQUATION:` its PK end lines.
+
+* Fixed the scale of the imported `thetaMat`: it was Monolix's
+  natural-scale covariance while the `ini()` estimates of log-, logit- and
+  probit-normal parameters are on the transformed scale, so `rxSolve()`
+  with `nStud > 1` drew their uncertainty on the wrong scale.  `thetaMat`
+  is now on the `ini()` (transformed) scale for both the older
+  natural-scale and the newer transformed Monolix outputs, converted at
+  Monolix's final estimates.
+
+* Fixed `predRtol` (and the pred line of the validation), which was
+  relative to Monolix's `ipred` instead of its `pred`; the iwres line of
+  the validation reported the pred median.
+
+* Fixed the imported random effects of a parameter whose `sd=` (or
+  `var=`) is not named `omega_<parameter>` (like `var=omega2_Cl` or a
+  fixed `sd=0.3`): Monolix's `eta_Cl` column became `omega_Cl`, which is
+  not an eta of the model, so the validation solve failed.
+
+* Accepted `errorModel=combined1(a, b, c)` and `combined2(a, b, c)`, the
+  spelling Monolix 2024R1 saves for the `combined1c`/`combined2c` error
+  models (it refuses `combined1c(a, b, c)`); the import failed on them.
+  `as.character()` (and `print()`) now write this spelling.
+
+* Fixed numeric-looking subject identifiers that are equal as numbers
+  (`1` and `01`), which Monolix keeps apart and the import merged into one
+  subject; the identifiers are read as text and become numbers only when
+  no two merge (also in Excel/SAS data sets), and Monolix's random effects
+  and predictions take the data's identifier type.  A quoted header
+  (`write.csv()`), or one with spaces after the delimiters, now matches
+  the project's header without a warning.
+
+* Fixed a `delimiter = space` data set whose columns are aligned with runs
+  of spaces, which was not read; the header and the rows are now split on
+  any run of white space.
+
+* Fixed `factorial()` and `factln()` of a non-integer, which Monolix
+  2024R1 computes for the rounded argument; rxode2 gave `gamma(x + 1)`.
+
+* Fixed PK macro and `pkmodel()` arguments given as expressions
+  (`Cl=a+b`, `V=V1*WT`, `k12=c-d`), which were pasted into the ODEs
+  without parentheses.
+
+* Fixed `depot(target=central, ka)`, whose doses went to a `depot`
+  compartment the model does not have instead of its `centrald` state.
+
+* Fixed the import of a run with occasions (an occasion column or an
+  `EVID=4` washout), whose `summary.txt` "Number of subjects-occasion"
+  line stopped the import; random effects Monolix repeats on each occasion
+  of a model without IOV are read once per subject.
+
+* Fixed the validation of a data set with a subject without observations,
+  which Monolix leaves out of its estimates.
+
+* Fixed a run without `exportpath` whose results are next to the project
+  (lixoftConnectors), which imported without the final estimates.
+
+* Fixed an infusion given by a `RATE` into a compartment with a
+  bioavailability: Monolix keeps the duration `AMT/RATE` and scales the
+  rate, while rxode2 kept the rate and shortened the infusion; such doses
+  are now imported with a `dur`.
+
+* Fixed the validation of censored data: the censored observations were
+  left out of the rxode2 solve but not of Monolix's predictions, so they
+  were reported in `$monolixNotMatched`; and a `CENS` of `.` on the dose
+  lines stopped the validation with "'id' cannot have NA values".
+
+* Fixed a parameter fixed with a lowercase `method=fixed`, which was
+  imported as estimated.
+
+* Fixed `[LONGITUDINAL]` variables and states named like rxode2 keywords
+  (`rate`, `dur`, `time`, `TIME`, `ii`, `df`, ...), which rxode2 refused; they
+  are now written as `mlx_<name>`.  Such a name as a model input or
+  output is an error.
+
+* Fixed `X_0` initial conditions: a state with an underscore (`A_gut_0`)
+  had none, and a variable like `E_0` with no state `E` became `E(0)`,
+  which rxode2 refused.
+
+* Fixed a data line with both a dose and an observation: the observation
+  was dropped.  The line is now split into an observation and a dose.
+
+* Fixed a `[COVARIATE] EQUATION:` covariate defined from an earlier one
+  (`lBMI = log(BMI/25)` after `BMI = WT/(HT/100)^2`): the model used the
+  undefined `BMI`; a covariate assigned twice used its first value.
+
+* Fixed `if`/`else` in a `[COVARIATE] EQUATION:`, which left the covariate
+  undefined; the `if`/`else` (and what uses it) now starts the `model()`
+  block, and the other covariate equations are still inlined.
+
+* Fixed the validation of a project without random effects: the imported
+  `$etaData` became a vector of ids (or was missing), so nothing was
+  validated.
+
+* Fixed an `[INDIVIDUAL] DEFINITION:` line whose `distribution=` is not
+  the first option, which was a syntax error.
+
+* Fixed the validation of a data set with character subject ids
+  (`S-001`): the individual parameters kept the character `id`, which
+  `rxSolve()` refused, so nothing was validated.  They are now also put
+  in the data's subject order, which is how `rxSolve()` assigns them.
+
+* Fixed the `PK:` macros `empty(adm, target)` and `reset(adm)`, whose
+  administrations were given as doses: an `empty()` line now empties its
+  target (rxode2 `evid=5` with amount 0) and a `reset()` line resets the
+  system (`evid=3`).  With them, a macro's `Tlag`, `p` or `Tk0` no longer
+  stopped the translation and applies to its own administration only.
+  In `EQUATION:` they are still not translated (a warning says so).
+
+* Fixed an error parameter shared by several endpoints
+  (`combined1(a, b1)` and `combined1(a, b2)`), which stopped the import
+  with a duplicated parameter; `a` is now one estimate and the later
+  endpoints use an alias (`rx_a_y2 <- a`), since rxode2 refuses one error
+  parameter in two endpoints.
+
+* Fixed the start of a model without `t_0`: Monolix starts each subject
+  at its first administration or observation, while rxode2 starts at time
+  0, so a system that changes without doses (a response with production)
+  was already moving at the first record.  The imported data now resets
+  each subject whose first administration or observation is not at 0
+  there (an `evid=2` and an `evid=3` row, with that record's covariates);
+  with `t_0 = 0` (or a time-to-event endpoint) the model starts at 0, as
+  before, and a numeric non-zero `t_0` (ignored before) starts every
+  subject there.  The validation compares
+  Monolix's predictions with rxode2's observation rows only.
+
+* Fixed `rem()` in a `[COVARIATE] EQUATION:` in `mlxtranGetMutate()`:
+  R's `%%` gave a negative covariate the sign of the divisor; it now has
+  the sign of the covariate, like Monolix and the model.
+
+* Fixed covariates missing on some of a subject's lines (a dose line):
+  the imported data now fills them with the subject's value (per
+  occasion), as Monolix does; rxode2 warned that the column was missing
+  for the subject.
+
+* Fixed `amtDose` and `tDose` before the first dose: rxode2's `dose()`
+  and `tlast` are missing there, while Monolix gives 0; they are now
+  `dose0()` and `tlast0()`, which also lets a `Tlag`, `Tk0` or `p` macro
+  argument using them solve at the first dose.  With a lag time rxode2 updates them at the
+  lagged dose, Monolix at the dose itself; the import now warns.
+
+* Fixed `pkmodel()` or a PK macro (`compartment()`, `oral()`, ...)
+  followed by an `if` in `EQUATION:`: the macro arguments' parentheses and
+  commas were written before the `if`, so the model did not parse.
 * Added `aaaCranMonolix2rxThreads()`, run first in the examples, which limits
   CRAN checks to 2 threads to cut the example time.
 

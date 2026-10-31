@@ -36,14 +36,72 @@
 #'
 #'
 #' @param text text from the individual defition
+#' @param cat named list of the categories of each categorical
+#'   covariate (from `.indCategories()`), used to map coefficients to
+#'   categories by position
 #' @return monolix2rxIndDef class
 #' @noRd
 #' @author Matthew L. Fidler
-.indDef <- function(text) {
+.indDef <- function(text, cat=NULL) {
   .indDefIni()
+  .monolix2rx$indCat <- cat
+  on.exit(.monolix2rx$indCat <- NULL)
   .Call(`_monolix2rx_trans_indDef`, text)
   .indDefFinalize()
   .monolix2rx$indDef
+}
+
+#' Categories of the categorical covariates of a parsed project
+#'
+#' @param model the parsed `<MODEL>` section
+#' @return named list of character category vectors: the `[INDIVIDUAL]`
+#'   and `[COVARIATE]` declarations and the latent covariates of
+#'   `[COVARIATE] DEFINITION:`
+#' @noRd
+#' @author Matthew L. Fidler
+.indCategories <- function(model) {
+  .ret <- list()
+  for (.d in model$COVARIATE$DEFINITION$endpoint) {
+    if (identical(.d$dist, "categorical")) {
+      .ret[[.d$var]] <- as.character(.d$err$categories)
+    }
+  }
+  for (.c in list(model$COVARIATE$COVARIATE$cat, model$INDIVIDUAL$INDIVIDUAL$cat)) {
+    for (.n in names(.c)) .ret[[.n]] <- as.character(.c[[.n]]$cat)
+  }
+  .ret
+}
+
+#' Covariate terms when the coefficients follow the declared categories
+#'
+#' @param coef coefficient names (fixed ones start with rxCov_)
+#' @param cov covariate name
+#' @return the terms, or NULL when `cov` has no matching categories
+#' @noRd
+#' @author Matthew L. Fidler
+.indDefCatTerms <- function(coef, cov) {
+  .cat <- .monolix2rx$indCat[[cov]]
+  if (is.null(.cat) || length(.cat) != length(coef) || length(coef) < 2L) return(NULL)
+  # fixed coefficients (rxCov_) of 0 are the reference: drop them from ini()
+  .zero <- grepl("^rxCov_", coef) & coef %in% names(.monolix2rx$defFixed) &
+    .monolix2rx$defFixed[coef] %in% 0
+  .monolix2rx$ignoredCoef <- c(.monolix2rx$ignoredCoef, coef[.zero])
+  # the data column is character when any category is not a number
+  paste(paste0(coef[!.zero], " * (", cov, " == ", .catLiteral(.cat, all=TRUE)[!.zero], ")"),
+        collapse=" + ")
+}
+
+#' R literal of categories: numbers as is, others single quoted
+#'
+#' @param cat character categories
+#' @param all quote every category when any is not a number
+#' @return character literals
+#' @noRd
+#' @author Matthew L. Fidler
+.catLiteral <- function(cat, all=FALSE) {
+  .num <- !is.na(suppressWarnings(as.numeric(cat)))
+  if (all && !all(.num)) .num[] <- FALSE
+  ifelse(.num, cat, vapply(cat, encodeString, character(1), quote="'", USE.NAMES=FALSE))
 }
 
 #' Finalized the mlxtran `[individual]` definition:
@@ -80,6 +138,12 @@
     if (length(.monolix2rx$varVal) == 0L) {
        stop("'", .monolix2rx$varName, "' needs a 'typical=' or 'mean=' declaration",
            call.=FALSE)
+    }
+    if (.monolix2rx$dist == "logitnormal") {
+      # logitNormal bounds default to (0, 1); min=/max= may come before
+      # distribution=
+      if (is.infinite(.monolix2rx$min)) .monolix2rx$min <- 0
+      if (is.infinite(.monolix2rx$max)) .monolix2rx$max <- 1
     }
     .ret <- list(distribution=.monolix2rx$dist)
     .rx <- paste0(.monolix2rx$varName, " <- ")
@@ -162,6 +226,8 @@
                                  function(i) {
                                    .coef <- .ret$coef[[i]]
                                    .cov <- .ret$cov[i]
+                                   .cat <- .indDefCatTerms(.coef, .cov)
+                                   if (!is.null(.cat)) return(.cat)
                                    if (length(.coef) > 1) {
                                      .ref <- vapply(strsplit(.coef, paste0(.cov,"_"), fixed = TRUE),
                                                     function(l) {
@@ -410,14 +476,6 @@ as.list.monolix2rxIndDef <- function(x, ...) {
 #' @author Matthew L. Fidler
 .setDist <- function(dist) {
   .monolix2rx$dist <- tolower(dist)
-  if (.monolix2rx$dist == "logitnormal") {
-    # Set the defaults for min/max with logitNormal
-    if (is.infinite(.monolix2rx$min) &&
-          is.infinite(.monolix2rx$max)) {
-      .monolix2rx$min <- 0
-      .monolix2rx$max <- 1
-    }
-  }
 }
 #' Set population estimation variable
 #'

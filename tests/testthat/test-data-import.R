@@ -28,3 +28,470 @@ test_that("multiple endpoint import", {
                                 plot(rx, page=TRUE))
   }
 })
+
+test_that("dose routing follows the administration table", {
+  .admd <- function(adm, admd=1L, cmt=1L, rxCmt="depot", dur=FALSE, transit=FALSE) {
+    data.frame(adm=adm, admd=admd, cmt=cmt, target=NA_character_, depot=FALSE,
+               dur=dur, f=FALSE, tlag=FALSE, transit=transit, rxCmt=rxCmt)
+  }
+  .d <- data.frame(id=1L, time=c(0, 1, 48, 49), amt=c(100, NA, 50, NA),
+                   dv=c(NA, 1, NA, 2))
+  # no adm column: every dose is adm 1 (data$adm partially matches admd)
+  .r <- .dataConvertAdm(.d, .admd(1L))
+  expect_equal(.r$cmt, c("depot", NA, "depot", NA))
+  # each adm to its own compartment, by name
+  .d$adm <- c(1L, 0L, 2L, 0L)
+  .r <- .dataConvertAdm(.d, rbind(.admd(1L), .admd(2L, cmt=1L, rxCmt="Ac")))
+  expect_equal(.r$cmt, c("depot", NA, "Ac", NA))
+  # Tk0: modeled duration
+  .r <- .dataConvertAdm(.d, rbind(.admd(1L, rxCmt="central", dur=TRUE), .admd(2L, rxCmt="central")))
+  expect_equal(.r$rate, c(-2, NA, NA, NA))
+  # transit: evid 7 so the dose only drives transit()
+  .r <- .dataConvertAdm(.d, .admd(1L, transit=TRUE))
+  expect_equal(.r$evid, c(7L, 0L, 1L, 0L))
+  # a second macro on the same adm copies the dose row
+  .r <- .dataConvertAdm(.d[1:2, ], rbind(.admd(1L), .admd(1L, admd=2L, rxCmt="central", dur=TRUE)))
+  expect_equal(.r$cmt, c("depot", NA, "central"))
+  expect_equal(.r$rate, c(NA, NA, -2))
+})
+
+test_that("depot(target=central) doses its own centrald state, oral(cmt=) the depot", {
+  .r <- function(pk) .equation("Cc = central/V", .pk(pk))$admd$rxCmt
+  expect_equal(.r("depot(target=central, ka, p)"), "centrald")
+  expect_equal(.r("depot(target=Ac, ka)"), "Acd")
+  expect_equal(.r("compartment(cmt=1, amount=central)\noral(cmt=1, ka, p)\nelimination(cmt=1, k)"), "depot")
+})
+
+test_that("a RATE dose into a compartment with a bioavailability keeps its duration", {
+  .admd <- data.frame(adm=1L, admd=1L, cmt=1L, target=NA_character_, depot=FALSE,
+                      dur=FALSE, f=FALSE, tlag=FALSE, transit=FALSE, rxCmt="central")
+  .d <- data.frame(id=1L, time=c(0, 1, 12), amt=c(100, NA, 100), rate=c(40, NA, 0),
+                   dv=c(NA, 1, NA))
+  .r <- .dataConvertAdm(.d, .admd, fCmt="central")
+  expect_equal(.r$dur, c(2.5, 0, 0))
+  expect_equal(.r$rate, c(0, NA, 0))
+  # without a bioavailability the rate is kept
+  .r <- .dataConvertAdm(.d, .admd)
+  expect_null(.r$dur)
+  expect_equal(.r$rate, c(40, NA, 0))
+  .ui <- rxode2::rxode2(function() {
+    model({
+      d/dt(central) <- -central
+      f(central) <- 0.8
+      alag(central) <- 1
+    })
+  })
+  expect_equal(.dataFCmt(.ui), "central")
+})
+
+test_that("iv() on a second route doses its own compartment", {
+  .pk <- .pk("compartment(cmt=1, amount=Ac)\noral(adm=1, cmt=1, ka)\niv(adm=2, cmt=1)\nperipheral(k12, k21)\nelimination(cmt=1, k)")
+  .admd <- .equation("Cc = Ac/V", .pk)$admd
+  expect_equal(.admd$rxCmt, c("Acd", "Ac"))
+  .t <- .equation("Cc = pkmodel(Mtt, Ktr, ka, V, Cl)")$admd
+  expect_true(.t$transit)
+})
+
+test_that("empty() and reset() administrations are not doses", {
+  .pk <- .pk("compartment(cmt=1, amount=Ac)\noral(adm=1, cmt=1, ka)\nempty(adm=2, target=Ac)\nreset(adm=3)\nelimination(cmt=1, k)")
+  .admd <- .equation("Cc = Ac/V", .pk)$admd
+  .d <- data.frame(id=1L, time=c(0, 1, 2, 3, 4), amt=c(100, NA, 1, 1, NA),
+                   adm=c(1L, 0L, 2L, 3L, 0L), dv=c(NA, 1, NA, NA, 2))
+  .r <- .dataConvertAdm(.d, .admd, .pk)
+  expect_equal(.r$evid, c(NA, NA, 5L, 3L, NA))
+  expect_equal(.r$amt, c(100, NA, 0, NA, NA))
+  expect_equal(.r$cmt, c("Acd", NA, "Ac", NA, NA))
+  # without the macros they are still routed as doses
+  expect_equal(.dataConvertAdm(.d, .admd)$amt, .d$amt)
+  # a dose and an empty on the same adm: the empty is a copy of the dose row
+  .pk2 <- .pk("compartment(cmt=1, amount=Ac)\niv(adm=1, cmt=1)\nempty(adm=1, target=Ac)\nelimination(cmt=1, k)")
+  .r <- .dataConvertAdm(.d[1:2, ], .equation("Cc = Ac/V", .pk2)$admd, .pk2)
+  expect_equal(.r$evid, c(1L, 0L, 5L))
+  expect_equal(.r$amt, c(100, NA, 0))
+  expect_equal(.r$cmt, c("Ac", NA, "Ac"))
+})
+
+test_that("a dose lag next to empty()/reset() applies to the dose's adm only", {
+  .rx <- function(txt) .equation("Cc = Ac/V", .pk(txt))$rx
+  expect_true("alag(Acd) <- +(ADM==1)*(Tlag)" %in%
+                .rx("compartment(cmt=1, amount=Ac)\noral(adm=1, cmt=1, ka, Tlag)\nreset(adm=2)\nelimination(cmt=1, k)"))
+  expect_true("alag(Ac) <- +(ADM==1)*(Tlag)" %in%
+                .rx("compartment(cmt=1, amount=Ac)\niv(adm=1, cmt=1, Tlag)\nempty(adm=2, target=Ac)\nelimination(cmt=1, k)"))
+  expect_true("alag(Acd) <- Tlag" %in%
+                .rx("compartment(cmt=1, amount=Ac)\noral(adm=1, cmt=1, ka, Tlag)\nelimination(cmt=1, k)"))
+  expect_warning(.equation("compartment(cmt=1, amount=Ac)\niv(cmt=1)\nempty(adm=2, target=Ac)\nCc = Ac"),
+                 "only translated in the PK: block")
+})
+
+test_that("a second macro on one adm copies every dose", {
+  .admd <- data.frame(adm=1L, admd=1:2, cmt=1L, target=NA_character_, depot=c(TRUE, FALSE),
+                      dur=c(FALSE, TRUE), f=FALSE, tlag=FALSE, transit=FALSE,
+                      rxCmt=c("depot", "central"))
+  .d <- data.frame(id=1L, time=c(0, 1, 12, 13), amt=c(100, NA, 100, NA), dv=c(NA, 1, NA, 2))
+  .r <- .dataConvertAdm(.d, .admd)
+  expect_equal(nrow(.r), 6L)
+  expect_equal(.r$cmt[5:6], c("central", "central"))
+  expect_equal(.r$rate, c(NA, NA, NA, NA, -2, -2))
+})
+
+test_that("routing only touches dose rows and copies unmodified doses", {
+  .admd <- function(admd=1L, rxCmt="depot", dur=FALSE, transit=FALSE) {
+    data.frame(adm=1L, admd=admd, cmt=1L, target=NA_character_, depot=FALSE,
+               dur=dur, f=FALSE, tlag=FALSE, transit=transit, rxCmt=rxCmt)
+  }
+  # transit first, Tk0 second: the Tk0 copy is a plain dose with rate -2
+  .d <- data.frame(id=1L, time=c(0, 1), amt=c(100, NA), dv=c(NA, 1))
+  .r <- .dataConvertAdm(.d, rbind(.admd(transit=TRUE), .admd(2L, "central", dur=TRUE)))
+  expect_equal(.r$evid, c(7L, 0L, 1L))
+  expect_equal(.r$rate, c(NA, NA, -2))
+  # Tk0 first, first order second: the depot copy has no rate
+  .r <- .dataConvertAdm(.d, rbind(.admd(rxCmt="central", dur=TRUE), .admd(2L, "depot")))
+  expect_equal(.r$rate, c(-2, NA, NA))
+  # AMT=0 observations without an ADM column are not doses
+  .d0 <- data.frame(id=1L, time=c(0, 1, 2), amt=c(100, 0, 0), dv=c(NA, 1, 2))
+  .r <- .dataConvertAdm(.d0, .admd(transit=TRUE))
+  expect_equal(.r$evid, c(7L, 0L, 0L))
+  expect_equal(.r$cmt, c("depot", NA, NA))
+  # ADM=1 on every row: observations get neither a rate nor a compartment
+  .d1 <- data.frame(id=1L, time=c(0, 1), amt=c(100, NA), adm=1L, dv=c(NA, 1))
+  .r <- .dataConvertAdm(.d1, .admd(rxCmt="central", dur=TRUE))
+  expect_equal(.r$rate, c(-2, NA))
+  expect_equal(.r$cmt, c("central", NA))
+  # a data infusion time wins over Tk0
+  .r <- .dataConvertAdm(transform(.d, dur=c(3, NA)), .admd(rxCmt="central", dur=TRUE))
+  expect_equal(.r$rate, c(NA_real_, NA))
+  # EVID=4 transit dose: a reset, then the evid 7 dose
+  .d4 <- data.frame(id=1L, time=c(0, 1, 6, 7), amt=c(100, NA, 100, NA),
+                    evid=c(1L, 0L, 4L, 0L), dv=c(NA, 1, NA, 2))
+  .r <- .dataConvertAdm(.d4, .admd(transit=TRUE))
+  expect_equal(.r$evid, c(7L, 0L, 3L, 7L, 0L))
+  expect_equal(.r$time, c(0, 1, 6, 6, 7))
+  expect_null(.r$rxTransitReset)
+})
+
+test_that("MDV=1 rows are not doses", {
+  .d <- data.frame(id=1L, time=c(0, 1, 2), amt=c(100, NA, NA), mdv=c(1L, 1L, 0L), dv=c(NA, 999, 1))
+  expect_equal(.dataEvid(.d)$evid, c(1L, 2L, 0L))
+})
+
+test_that("a depot named by target= keeps its depot compartment", {
+  .pk <- .pk("compartment(cmt=1, amount=Ac)\ndepot(target=Ac, ka)\nelimination(cmt=1, k)")
+  expect_equal(.equation("Cc = Ac/V", .pk)$admd$rxCmt, "Acd")
+})
+
+test_that("transit reset rows drop addl/ii/ss and NA evid doses are routed", {
+  .admd <- data.frame(adm=1L, admd=1L, cmt=1L, target=NA_character_, depot=TRUE,
+                      dur=FALSE, f=FALSE, tlag=FALSE, transit=TRUE, rxCmt="depot")
+  .d <- data.frame(id=1L, time=c(0, 1), amt=c(100, NA), evid=c(4L, 0L),
+                   ii=c(12, 0), addl=c(2L, 0L), dv=c(NA, 1))
+  .r <- .dataConvertAdm(.d, .admd)
+  expect_equal(.r$evid, c(3L, 7L, 0L))
+  expect_equal(.r$addl, c(0L, 2L, 0L))
+  expect_equal(.r$ii, c(0, 12, 0))
+  .d <- data.frame(id=1L, time=c(0, 1), amt=c(100, NA), evid=c(NA, 0L), dv=c(NA, 1))
+  .r <- .dataConvertAdm(.d, .admd)
+  expect_equal(.r$cmt, c("depot", NA))
+  expect_equal(.r$evid, c(7L, 0L))
+})
+
+test_that("an EVID column with NA on a dose is filled", {
+  .d <- data.frame(id=1L, time=c(0, 1), amt=c(100, NA), evid=c(NA, 0L), dv=c(NA, 1))
+  expect_equal(.dataEvid(.d)$evid, c(1L, 0L))
+})
+
+test_that("ignored columns named like rxode2 event columns are dropped", {
+  .c <- .content("ID = {use=identifier}\nTIME = {use=time}\nAMT = {use=amount}\nSS = {use=ignore}\nDose = {use=ignore}\nNOTE = {use=ignore}\nSEX = {use=covariate, type=categorical}\nDV = {use=observation, name=y, type=continuous}")
+  .d <- data.frame(ID=1L, TIME=0, AMT=100, SS=1L, Dose=10, NOTE="a", II=24, SEX=1L, DV=NA)
+  expect_message(.r <- .dataDropIgnoredEvent(.d, .c), "SS', 'Dose'")
+  # undeclared columns are kept: [CONTENT] does not list every declared column
+  expect_equal(names(.r), c("ID", "TIME", "AMT", "NOTE", "II", "SEX", "DV"))
+  # an ignored column in lowercased user data is also dropped
+  .d <- data.frame(id=1L, time=0, amt=100, ss=1L, dv=NA)
+  expect_message(.r <- .dataDropIgnoredEvent(.d, .c), "'ss'")
+  expect_equal(names(.r), c("id", "time", "amt", "dv"))
+  # an ignoredline flag is not an ignored column
+  .c <- .content("ID = {use=identifier}\nTIME = {use=time}\nMDV = {use=ignoredline}\nEVID = {use=ignore}\nDV = {use=observation, name=y, type=continuous}")
+  expect_equal(.c$ignore, c("MDV", "EVID"))
+  expect_equal(.c$ignoreLine, "MDV")
+  expect_equal(.content(paste(as.character(.c), collapse="\n"))$ignoreLine, "MDV")
+  # its flagged lines (doses or observations) and the flag are dropped
+  .d <- data.frame(ID=1L, TIME=c(0, 0, 1, 2), AMT=c(100, 50, NA, NA), MDV=c(0L, 1L, 1L, NA),
+                   EVID=1L, DV=c(NA, NA, 9, 1))
+  expect_message(.r <- .dataDropIgnoredLines(.d, .c), "2 line")
+  expect_equal(.r$TIME, c(0, 2))
+  expect_equal(names(.r), c("ID", "TIME", "AMT", "EVID", "DV"))
+  expect_identical(.dataDropIgnoredLines(.d[1, ], .c), .d[1, names(.r)])
+  # lowercased user data and logical flags
+  .l <- stats::setNames(.d, tolower(names(.d)))
+  .l$mdv <- c(FALSE, TRUE, TRUE, NA)
+  expect_equal(suppressMessages(.dataDropIgnoredLines(.l, .c))$time, c(0, 2))
+  # a used column is kept when an ignored one differs only by case
+  .c <- .content("ID = {use=identifier}\nTIME = {use=time}\nAMT = {use=amount}\namt = {use=ignore}\nDV = {use=observation, name=y, type=continuous}")
+  .d <- data.frame(ID=1L, TIME=0, AMT=100, amt=5, DV=NA)
+  expect_equal(names(suppressMessages(.dataDropIgnoredEvent(.d, .c))), c("ID", "TIME", "AMT", "DV"))
+  # nested occasion columns are kept
+  .c <- .content("ID = {use=identifier}\nTIME = {use=time}\nOCC = {use=occasion}\nOCC2 = {use=occasion}\nDV = {use=observation, name=y, type=continuous}")
+  .d <- data.frame(ID=1L, TIME=0, OCC=1L, OCC2=1L, DV=NA)
+  expect_identical(.dataDropIgnoredEvent(.d, .c), .d)
+})
+
+test_that("nested occasion columns become occ and a combined occ2", {
+  .c <- .content("ID = {use=identifier}\nTIME = {use=time}\nP1 = {use=occasion}\nP2 = {use=occasion}\nDV = {use=observation, name=y, type=continuous}")
+  expect_equal(.c$occ, c("P1", "P2"))
+  expect_equal(.content(paste(as.character(.c), collapse="\n"))$occ, c("P1", "P2"))
+  .d <- data.frame(ID=1L, TIME=1:6, P1=c(1, 1, 2, 2, 2, 3), P2=c(1, 2, 1, 1, 2, 1), DV=1)
+  .r <- .dataRenameOcc(.d, .c)
+  expect_equal(names(.r), c("ID", "TIME", "occ", "occ2", "DV"))
+  expect_equal(.r$occ, .d$P1)
+  # the inner level is numbered per (P1, P2) combination
+  expect_equal(.r$occ2, c(1, 2, 3, 3, 4, 5))
+  # one occasion column is left to the use=occasion rename
+  .c1 <- .content("ID = {use=identifier}\nTIME = {use=time}\nOCC = {use=occasion}")
+  expect_equal(.c1$occ, "OCC")
+  expect_identical(.dataRenameOcc(.d, .c1), .d)
+  expect_error(.dataRenameOcc(.d[, -4], .c), "P2")
+  # lowercased user data, missing occasions and clashing columns
+  .l <- stats::setNames(.d, tolower(names(.d)))
+  expect_equal(.dataRenameOcc(.l, .c)$occ2, c(1, 2, 3, 3, 4, 5))
+  .n <- .d
+  .n$P1[2] <- NA
+  .n$P2[5] <- NA
+  expect_equal(.dataRenameOcc(.n, .c)$occ2, c(1, NA, 2, 2, NA, 3))
+  # an exact match wins over another column differing only by case
+  .mx <- data.frame(ID=1L, p1=9, P1=c(1, 2), p2=c(1, 1))
+  expect_equal(.dataRenameOcc(.mx, .c)$occ, c(1, 2))
+  expect_error(.dataRenameOcc(data.frame(p1=1, p2=1), .content("P1 = {use=occasion}\np1 = {use=occasion}")),
+               "same data column")
+  # an unused column named like a translated one is dropped, a used one stops
+  .x <- .d
+  .x$OCC <- 0
+  expect_message(.r <- .dataRenameOcc(.x, .c), "dropped unused")
+  expect_equal(names(.r), c("ID", "TIME", "occ", "occ2", "DV"))
+  .cx <- .content("ID = {use=identifier}\nTIME = {use=time}\nP1 = {use=occasion}\nP2 = {use=occasion}\nOCC2 = {use=covariate, type=continuous}")
+  .x$OCC <- NULL
+  .x$OCC2 <- 0
+  expect_error(.dataRenameOcc(.x, .cx), "clash with the translated occasion")
+  .m <- list(DATAFILE=list(CONTENT=list(CONTENT=.c)),
+             MODEL=list(LONGITUDINAL=list(LONGITUDINAL=.longitudinal("input = {ka, occ2}\nocc2 = {use=regressor}"))))
+  .m$DATAFILE$CONTENT$CONTENT$reg <- "R1"
+  expect_error(.dataRenameRegressors(data.frame(ID=1, R1=2), .m), "clash with a translated data column")
+  expect_equal(.def2iniRenameOcc(c("id", "id*occ1", "id*occ1*occ2")), c("id", "occ", "occ2"))
+})
+
+test_that("a line with a dose and an observation becomes both", {
+  .d <- data.frame(id=1L, time=c(0, 12, 12, 24), amt=c(100, 100, NA, 100), dv=c(NA, 1.5, 2, NA),
+                   mdv=c(0L, 0L, 0L, 1L), ii=c(0, 12, 0, 0))
+  .d$dv[4] <- 3
+  .r <- .dataSplitDoseObs(.d)
+  expect_equal(.r$time, c(0, 12, 12, 12, 24))
+  expect_equal(.r$amt, c(100, 100, NA, NA, 100))
+  expect_equal(.r$dv, c(NA, NA, 1.5, 2, 3))
+  expect_equal(.r$ii, c(0, 12, 0, 0, 0))
+  expect_identical(.dataSplitDoseObs(.d[1, ]), .d[1, ])
+  # with an event id the observation of a dose line is ignored
+  .e <- data.frame(id=1L, time=c(0, 12, 24), amt=c(100, 100, NA), dv=c(NA, 0, 3), evid=c(1L, 4L, 0L))
+  expect_identical(.dataSplitDoseObs(.e), .e)
+  # the censoring stays with the observation
+  .c <- data.frame(id=1L, time=c(0, 1), amt=c(100, NA), dv=c(0.1, 2), cens=c(1L, 0L), limit=c(0, NA))
+  .r <- .dataSplitDoseObs(.c)
+  expect_equal(.r$cens, c(0L, 1L, 0L))
+  expect_equal(.r$limit, c(NA, 0, NA))
+  expect_equal(.r$dv, c(NA, 0.1, 2))
+})
+
+test_that("a subject's missing covariate values take its one value", {
+  .d <- data.frame(id=c(1, 1, 1, 2, 2, 3, 3), occ=c(1, 1, 2, 1, 1, 1, 1),
+                   WT=c(NA, 70, NA, NA, 80, 60, 65), SEX=c("F", NA, NA, NA, "M", NA, NA))
+  .c <- list(cont="WT", cat=list(SEX=c("F", "M")))
+  .r <- .dataFillCovariates(.d, .c)
+  # per occasion; several values are left as they are
+  expect_equal(.r$WT, c(70, 70, NA, 80, 80, 60, 65))
+  expect_equal(.r$SEX, c("F", "F", NA, "M", "M", NA, NA))
+  .d$occ <- NULL
+  expect_equal(.dataFillCovariates(.d, .c)$WT, c(70, 70, 70, 80, 80, 60, 65))
+  .d$SEX <- factor(.d$SEX, levels=c("M", "F"))
+  expect_equal(.dataFillCovariates(.d, .c)$SEX, factor(c("F", "F", "F", "M", "M", NA, NA), levels=c("M", "F")))
+})
+
+test_that("without t_0 a subject starts at its first dose or observation", {
+  .mx <- list(MODEL=list(LONGITUDINAL=list(EQUATION=list(monolix="ddt_R = 1"))))
+  .d <- data.frame(id=c(2, 2, 1, 1), time=c(0, 1, 24, 25), amt=c(100, NA, 100, NA),
+                   dv=c(NA, 1, NA, 2), cmt=c("Ad", NA, "Ad", NA), WT=c(70, 70, 60, 60))
+  .r <- .dataStartReset(.d, .mx)
+  # subject 1 gets an evid 2 row (a reset as a first record is ignored) and a reset
+  expect_equal(.r$id, c(2, 2, 1, 1, 1, 1))
+  expect_equal(.r$time, c(0, 1, 24, 24, 24, 25))
+  expect_equal(.r$evid, c(1L, 0L, 2L, 3L, 1L, 0L))
+  expect_equal(.r$WT, c(70, 70, 60, 60, 60, 60))
+  .mx$MODEL$LONGITUDINAL$EQUATION$monolix <- "t_0 = 0\nddt_R = 1"
+  expect_equal(.dataStartReset(.d, .mx), .d)
+  .mx$MODEL$LONGITUDINAL$EQUATION$monolix <- "ddt_R = X"
+  # a transit dose (evid 7) starts the subject
+  .t <- data.frame(id=1, time=c(12, 13), amt=c(100, NA), dv=c(NA, 1), evid=c(7L, 0L))
+  .r <- .dataStartReset(.t, .mx)
+  expect_equal(.r$time, c(12, 12, 12, 13))
+  expect_equal(.r$evid, c(2L, 3L, 7L, 0L))
+  # without a dv column every evid 0 row is a record
+  expect_equal(nrow(.dataStartReset(data.frame(id=1, time=c(5, 10), amt=c(100, NA)), .mx)), 4L)
+  # a numeric t_0 starts every subject there; t_0 = 0 is rxode2's start
+  .mx$MODEL$LONGITUDINAL$EQUATION$monolix <- "t_0 = 12 ; start\nddt_R = X"
+  .r <- .dataStartReset(.d, .mx)
+  expect_equal(.r$time, c(0, 1, 12, 12, 24, 25))
+  expect_equal(.r$evid, c(1L, 0L, 2L, 3L, 1L, 0L))
+  .mx$MODEL$LONGITUDINAL$EQUATION$monolix <- "ddt_R = X"
+  # an event endpoint keeps its start at time 0
+  .ev <- .mx
+  .ev$MODEL$LONGITUDINAL$DEFINITION$endpoint <- list(list(dist="event"))
+  expect_equal(.dataStartReset(.t, .ev), .t)
+  # the start rows take the regressor at the start time and are not censored
+  .r <- data.frame(id=1, time=c(0, 24, 25), amt=c(NA, 100, NA), dv=c(NA, NA, 3), X=c(1, 5, 5),
+                   evid=c(2L, 1L, 0L), cens=0, limit=NA)
+  .r <- .dataStartReset(.r, .mx)
+  expect_equal(.r$evid, c(2L, 2L, 3L, 1L, 0L))
+  expect_equal(.r$X, c(1, 5, 5, 5, 5))
+  expect_equal(.r$cens, rep(0, 5))
+})
+
+test_that("a space-delimited data set may align its columns with runs of spaces", {
+  skip_on_cran()
+  .dir <- file.path(tempfile(), "theo")
+  dir.create(.dir, recursive = TRUE)
+  on.exit(unlink(dirname(.dir), recursive = TRUE))
+  file.copy(
+    list.files(system.file("theo", package = "monolix2rx"), full.names = TRUE),
+    .dir,
+    recursive = TRUE
+  )
+  .d <- file.path(.dir, "data", "theophylline_data.txt")
+  .f <- do.call(rbind, strsplit(readLines(.d), "\t", fixed = TRUE))
+  .f <- apply(.f, 2, function(x) formatC(x, width = max(nchar(x)) + 2, flag = "-"))
+  writeLines(trimws(apply(.f, 1, paste, collapse = ""), "right"), .d)
+  .p <- file.path(.dir, "theophylline_project.mlxtran")
+  .l <- readLines(.p)
+  expect_true(any(grepl("delimiter = tab", .l, fixed = TRUE)))
+  writeLines(sub("delimiter = tab", "delimiter = space", .l, fixed = TRUE), .p)
+  .rx <- suppressMessages(monolix2rx(.p))
+  expect_equal(length(unique(.rx$monolixData$id)), 12L)
+  expect_true(.rx$ipredAtol < 1e-4)
+})
+
+test_that("identifiers become numbers only when no two merge", {
+  expect_equal(.monolixIdType(c("1", "2", "10")), c(1L, 2L, 10L))
+  expect_equal(.monolixIdType(c("001", "002")), c(1L, 2L))
+  expect_equal(.monolixIdType(c("1", "01", "2")), c("1", "01", "2"))
+  expect_equal(.monolixIdType(c("S-1", "S-2")), c("S-1", "S-2"))
+  expect_equal(.monolixIdType(c(1L, 2L)), c(1L, 2L))
+})
+
+test_that("subjects 1 and 01 stay apart in the data and in Monolix's results", {
+  skip_on_cran()
+  for (.quote in c(FALSE, TRUE)) {
+    .dir <- file.path(tempfile(), "theo")
+    dir.create(.dir, recursive = TRUE)
+    file.copy(
+      list.files(system.file("theo", package = "monolix2rx"), full.names = TRUE),
+      .dir,
+      recursive = TRUE
+    )
+    # subject 10 becomes 01, which Monolix keeps apart from 1
+    .d <- file.path(.dir, "data", "theophylline_data.txt")
+    .l <- sub("^10\t", "01\t", readLines(.d, warn = FALSE))
+    if (.quote) .l[1] <- paste0("\"", strsplit(.l[1], "\t", fixed = TRUE)[[1]], "\"", collapse = "\t")
+    writeLines(.l, .d)
+    for (.f in c(file.path(.dir, "tp", "predictions.txt"),
+                 file.path(.dir, "tp", "IndividualParameters", "estimatedRandomEffects.txt"))) {
+      writeLines(sub("^10,", "01,", readLines(.f, warn = FALSE)), .f)
+    }
+    .rx <- suppressMessages(monolix2rx(file.path(.dir, "theophylline_project.mlxtran")))
+    unlink(dirname(.dir), recursive = TRUE)
+    expect_true(is.character(.rx$monolixData$id))
+    expect_equal(length(unique(.rx$monolixData$id)), 12L)
+    expect_true(all(c("1", "01") %in% .rx$etaData$id))
+    expect_true(.rx$ipredAtol < 1e-4)
+  }
+})
+
+test_that("a header with spaces after the delimiters matches without a warning", {
+  skip_on_cran()
+  .dir <- file.path(tempfile(), "theo")
+  dir.create(.dir, recursive = TRUE)
+  on.exit(unlink(dirname(.dir), recursive = TRUE))
+  file.copy(
+    list.files(system.file("theo", package = "monolix2rx"), full.names = TRUE),
+    .dir,
+    recursive = TRUE
+  )
+  .d <- file.path(.dir, "data", "theophylline_data.txt")
+  .l <- readLines(.d, warn = FALSE)
+  .l[1] <- gsub("\t", "\t ", .l[1], fixed = TRUE)
+  writeLines(.l, .d)
+  .m <- suppressMessages(mlxtran(file.path(.dir, "theophylline_project.mlxtran")))
+  expect_warning(.d2 <- .monolixDataLoad(.m), NA)
+  expect_equal(names(.d2), c("ID", "AMT", "TIME", "CONC", "WEIGHT", "SEX"))
+})
+
+test_that("a steady-state dose that starts its subject becomes Monolix's nbdoses + 1 doses", {
+  .d <- data.frame(id = c(1, 1, 1, 1, 2, 2, 2), time = c(0, 0, 0.5, 24, 0, 5, 6),
+                   amt = c(NA, 100, NA, 200, 100, 100, NA), evid = c(3L, 1L, 0L, 1L, 1L, 1L, 0L),
+                   ss = c(0, 1, 0, 0, 0, 1, 0), ii = c(0, 12, 0, 0, 0, 12, 0),
+                   dv = c(NA, NA, 1, NA, NA, NA, 2))
+  .r <- .ssExpand(.d, 3L)
+  # subject 1: the start reset moves to the first dose, 3 doses before 0
+  expect_equal(.r$time[.r$id == 1], c(-36, -36, -24, -12, 0, 0.5, 24))
+  expect_equal(.r$evid[.r$id == 1], c(3L, 1L, 1L, 1L, 1L, 0L, 1L))
+  expect_equal(.r$ss[.r$id == 1], rep(0, 7))
+  # subject 2: a later steady-state dose keeps rxode2's ss
+  expect_equal(.r[.r$id == 2, "ss"], c(0, 1, 0))
+  expect_equal(.ssExpand(.d, NA), .d)
+})
+
+test_that("Monolix's nbdoses steady state matches its N + 1 doses, either rxode2", {
+  .m <- rxode2::rxode2({
+    d/dt(central) <- -0.01 * central
+  })
+  .d <- data.frame(id = 1, time = c(0, 0.5), amt = c(100, NA), evid = c(1L, 0L),
+                   ss = c(1, 0), ii = c(12, 0), cmt = c("central", NA))
+  # the expanded doses with an older rxode2; minSS = maxSS = N with a fixed one
+  .l <- if (.rxSsFixedCount()) c(minSS = 10L, maxSS = 10L) else c(minSS = 10L, maxSS = 11L)
+  .s <- .ssQuiet(rxode2::rxSolve(.m, .ssExpand(.d, 10L), returnType = "data.frame",
+                                 minSS = .l[["minSS"]], maxSS = .l[["maxSS"]],
+                                 ssAtol = 100, ssRtol = 100, atol = 1e-12, rtol = 1e-12))
+  .r <- exp(-0.01 * 12)
+  expect_equal(.s$central[.s$time == 0.5], 100 * (1 - .r^11) / (1 - .r) * exp(-0.01 * 0.5),
+               tolerance = 1e-6)
+})
+
+test_that("steady-state doses at the start on two routes, after a t_0 reset, and with EVID=4", {
+  # two steady-state rows at the subject's start are both written out
+  .d <- data.frame(id = 1, time = c(0, 0, 1), amt = c(100, 50, NA), evid = c(1L, 1L, 0L),
+                   ss = c(1, 1, 0), ii = c(12, 12, 0), cmt = c("depot", "central", NA))
+  .r <- .ssExpand(.d, 2L)
+  expect_equal(sum(.r$evid == 1L), 6L)
+  expect_true(all(.r$ss == 0))
+  # a start reset before the dose (an earlier t_0) keeps rxode2's ss
+  .d <- data.frame(id = 1, time = c(-5, 0, 1), amt = c(NA, 100, NA), evid = c(3L, 1L, 0L),
+                   ss = c(0, 1, 0), ii = c(0, 12, 0))
+  expect_equal(.ssExpand(.d, 2L), .d)
+  # an EVID=4 steady-state dose: the first of its doses resets
+  .d <- data.frame(id = 1, time = c(0, 1), amt = c(100, NA), evid = c(4L, 0L),
+                   ss = c(1, 0), ii = c(12, 0))
+  .r <- .ssExpand(.d, 2L)
+  expect_equal(.r$time, c(-24, -12, 0, 1))
+  expect_equal(.r$evid, c(4L, 1L, 1L, 0L))
+})
+
+test_that("steady-state doses on two routes at the start match the written-out doses", {
+  .m <- rxode2::rxode2({
+    d/dt(depot) <- -1.2 * depot
+    d/dt(central) <- 1.2 * depot - 0.1 * central
+  })
+  .d <- data.frame(id = 1, time = c(0, 0, 1, 5), amt = c(100, 50, NA, NA), evid = c(1L, 1L, 0L, 0L),
+                   ss = c(1, 1, 0, 0), ii = c(12, 12, 0, 0), cmt = c("depot", "central", NA, NA))
+  .x <- data.frame(id = 1, time = c(-36, -36, -24, -24, -12, -12, 0, 0, 1, 5),
+                   amt = c(rep(c(100, 50), 4), NA, NA), evid = c(rep(1L, 8), 0L, 0L),
+                   cmt = c(rep(c("depot", "central"), 4), NA, NA))
+  .opt <- list(returnType = "data.frame", atol = 1e-10, rtol = 1e-10)
+  .s <- .ssQuiet(do.call(rxode2::rxSolve, c(list(.m, .ssExpand(.d, 3L)), .opt)))
+  .e <- .ssQuiet(do.call(rxode2::rxSolve, c(list(.m, .x), .opt)))
+  expect_equal(.s$central, .e$central, tolerance = 1e-8)
+})

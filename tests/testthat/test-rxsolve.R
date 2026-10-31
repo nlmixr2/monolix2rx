@@ -25,7 +25,7 @@ test_that("solving makes sense", {
   expect_equal(s$env$.args$omega, f$omega)
 
   # the Monolix-style steady state limits are forwarded to the solve
-  expect_equal(s$env$.args$maxSS, .getNbdoses(f) + 1)
+  expect_equal(s$env$.args$maxSS, .getNbdoses(f) + if (.rxSsFixedCount()) 0 else 1)
   expect_equal(s$env$.args$minSS, .getNbdoses(f))
 
   # user-specified steady state limits are honored, not overwritten
@@ -72,4 +72,67 @@ test_that("rxSolve falls back to model-level dfObs/thetaMat when meta lacks them
   rm("thetaMat", envir=f)
   expect_warning(try(suppressMessages(rxSolve(f, nStud=2)), silent=TRUE),
                  "simulating without parameter uncertainty")
+})
+
+test_that(".getNbdoses() reads nbdoses from the project (also from the decompressed ui)", {
+  skip_on_cran()
+  f <- .monolix2rx(system.file("theo/theophylline_project.mlxtran", package="monolix2rx"))
+  expect_equal(.getNbdoses(f), 7L)
+  .mlx <- f$mlxtran
+  .mlx$DATAFILE$CONTENT$CONTENT$nbdoses <- 10L
+  expect_equal(.getNbdoses(.mlx), 10L)
+  .ui <- rxode2::rxUiDecompress(f)
+  assign("mlxtran", .mlx, envir=.ui)
+  expect_equal(.getNbdoses(.ui), 10L)
+  expect_equal(.getNbdoses(NULL), 7L)
+  if (.rxSsFixedCount()) {
+    # rxode2 with nlmixr2/rxode2#1492 fixed counts minSS = maxSS doses
+    expect_equal(.getSsLimits(.ui), c(minSS=10L, maxSS=10L))
+    .mlx$DATAFILE$CONTENT$CONTENT$nbdoses <- 3L
+    assign("mlxtran", .mlx, envir=.ui)
+    expect_equal(.getSsLimits(.ui), c(minSS=3L, maxSS=3L))
+    .min <- 3L
+    .max <- 3L
+  } else {
+    # an older rxode2 needs minSS >= 5 and maxSS >= 7
+    expect_equal(.getSsLimits(.ui), c(minSS=10L, maxSS=11L))
+    .mlx$DATAFILE$CONTENT$CONTENT$nbdoses <- 3L
+    assign("mlxtran", .mlx, envir=.ui)
+    expect_equal(.getSsLimits(.ui), c(minSS=5L, maxSS=7L))
+    .min <- 5L
+    .max <- 7L
+  }
+  class(.ui) <- class(f)
+  s <- .rxSolve(.ui, nStud=1)
+  expect_equal(s$env$.args$minSS, .min)
+  expect_equal(s$env$.args$maxSS, .max)
+})
+
+test_that(".getStiff() reads odeType from the project (also from the decompressed ui)", {
+  skip_on_cran()
+  f <- .monolix2rx(system.file("theo/theophylline_project.mlxtran", package="monolix2rx"))
+  expect_false(.getStiff(f))
+  .mlx <- f$mlxtran
+  .mlx$MODEL$LONGITUDINAL$EQUATION$odeType <- "stiff"
+  expect_true(.getStiff(.mlx))
+  .ui <- rxode2::rxUiDecompress(f)
+  assign("mlxtran", .mlx, envir=.ui)
+  expect_true(.getStiff(.ui))
+})
+
+test_that("predRtol is relative to the Monolix pred", {
+  skip_on_cran()
+  f <- .monolix2rx(system.file("theo/theophylline_project.mlxtran", package="monolix2rx"))
+  .p <- f$predCompare
+  expect_equal(unname(f$predRtol),
+               stats::median(abs((.p$pred - .p$monolixPred) / .p$monolixPred), na.rm=TRUE))
+})
+
+test_that("delay() models are solved with a dense method", {
+  skip_on_cran()
+  f <- .monolix2rx(system.file("theo/theophylline_project.mlxtran", package="monolix2rx"))
+  expect_false(.getDelay(f))
+  .mlx <- f$mlxtran
+  .mlx$MODEL$LONGITUDINAL$EQUATION <- .equation("ddt_x = -k*delay(x, tau)")
+  expect_true(.getDelay(.mlx))
 })

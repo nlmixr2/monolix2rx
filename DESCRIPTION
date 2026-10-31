@@ -43,8 +43,9 @@ Imports:
     stringi,
     crayon,
     lotri,
-    rxode2 (>= 3.0.4)
+    rxode2 (>= 5.1.7)
 Suggests:
+    data.table,
     devtools,
     testthat (>= 3.0.0),
     xgxr,

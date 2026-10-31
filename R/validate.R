@@ -1,34 +1,74 @@
 #' Get the number of doses for steady state for monolix2rx
 #'
-#' @param x monolix2rx object
+#' @param x monolix2rx object, its parsed project or its rxUi
 #' @return Number of doses for monolix2rx object
 #' @export
 #' @keywords internal
 #' @author Matthew L. Fidler
 .getNbdoses <- function(x) {
-  if (inherits(x, "monolix2rx")) {
+  # .validateModel() passes the decompressed rxUi (no monolix2rx class)
+  if (inherits(x, c("monolix2rx", "rxUi"))) {
     x <- x$mlxtran
   }
-  if (inherits(x, "mlxtran")) {
+  # the parsed project is a monolix2rxMlxtran
+  if (inherits(x, c("monolix2rxMlxtran", "mlxtran"))) {
     x <- x$DATAFILE$CONTENT$CONTENT
   }
-  if (inherits(x, "monolix2rxContent")) {
-    return(x$nbdoses)
+  if (inherits(x, "monolix2rxContent") &&
+        length(x$nbdoses) == 1L && !is.na(x$nbdoses)) {
+    return(as.integer(x$nbdoses))
   }
   7L
 }
+#' rxode2 steady-state limits for Monolix's number of steady-state doses
+#'
+#' An rxode2 with nlmixr2/rxode2#1492 fixed counts `minSS = maxSS = n`
+#' doses before the steady-state dose; an older one needs `minSS >= 5` and
+#' `maxSS >= 7` and stops at `minSS` with `ssAtol`/`ssRtol` of 100, which
+#' is not a whole number of doses (`.ssExpand()` writes out the start).
+#'
+#' @inheritParams .getNbdoses
+#' @return named integer vector `minSS`, `maxSS`
+#' @export
+#' @keywords internal
+#' @author Matthew L. Fidler
+.getSsLimits <- function(x) {
+  .nss <- .getNbdoses(x)
+  # an rxode2 with nlmixr2/rxode2#1492 fixed counts minSS = maxSS doses
+  if (.rxSsFixedCount()) return(c(minSS=.nss, maxSS=.nss))
+  .min <- max(.nss, 5L)
+  if (.min != .nss) {
+    .minfo(paste0("Monolix uses ", .nss, " steady-state doses; rxode2 needs at least 5, so minSS=5"))
+  }
+  c(minSS=.min, maxSS=max(.nss + 1L, 7L))
+}
+#' Does the model use delay()?
+#'
+#' @inheritParams .getNbdoses
+#' @return `TRUE` when the `EQUATION:` block uses `delay()`
+#' @noRd
+#' @author Matthew L. Fidler
+.getDelay <- function(x) {
+  if (inherits(x, c("monolix2rx", "rxUi"))) {
+    x <- x$mlxtran
+  }
+  if (inherits(x, c("monolix2rxMlxtran", "mlxtran"))) {
+    x <- x$MODEL$LONGITUDINAL$EQUATION
+  }
+  inherits(x, "monolix2rxEquation") && any(grepl("\\bdelay[(]", x$rx))
+}
 #' Get if the model object is stiff
 #'
-#' @param x monolix2rx object
+#' @param x monolix2rx object, its parsed project or its rxUi
 #' @return boolean indicating if the object is a stiff system (as indicated by monolix)
 #' @export
 #' @keywords internal
 #' @author Matthew L. Fidler
 .getStiff <- function(x) {
-  if (inherits(x, "monolix2rx")) {
+  if (inherits(x, c("monolix2rx", "rxUi"))) {
     x <- x$mlxtran
   }
-  if (inherits(x, "mlxtran")) {
+  if (inherits(x, c("monolix2rxMlxtran", "mlxtran"))) {
     x <- x$MODEL$LONGITUDINAL$EQUATION
   }
   if (inherits(x, "monolix2rxEquation")) {
@@ -57,6 +97,8 @@
 }
 
 .subsetMonolix <- function(ui, data, iwres=NULL) {
+  # Monolix predicts observations only (not the evid 2 rows rxode2 returns)
+  if (is.data.frame(data) && !is.null(data[["evid"]])) data <- data[data$evid %in% 0L, , drop=FALSE]
   if (is.null(ui$predDf)) {
 
   } else if (length(ui$predDf$cond) == 1L) {
@@ -101,16 +143,35 @@
 .validateModel <- function(ui, ci=0.95, sigdig=3) {
   # default for Monolix: nbSSDoses=7
   .ui <- rxode2::rxUiDecompress(ui)
-  .nss <- .getNbdoses(.ui)
+  .ss <- .getSsLimits(.ui)
+  # delay() needs a dense solver
+  .delayMethod <- if (.getDelay(.ui)) "dop853" else "liblsoda"
   .tol <- .getRtolAtol(.ui)
   .method <- .getMethod(.ui)
   .pop <- .parameterThetaEta(.ui, pop=TRUE)
-  .ind <- .parameterThetaEta(.ui, pop=FALSE)
   .model <- ui$monolixModelIwres
-  .data <- ui$monolixData
+  # Monolix's steady state as explicit doses (nlmixr2/rxode2#1492)
+  .data <- .ssExpand(ui$monolixData, .getNbdoses(.ui))
+  .keep <- as.character(.data$id) %in% as.character(.ui$etaData$id)
+  if (!is.null(.data) && any(.keep) && !all(.keep)) {
+    # Monolix estimates no random effects for a subject without observations
+    .minfo("leaving out subjects Monolix has no random effects for")
+    .data <- .data[.keep, , drop=FALSE]
+  }
+  .ind <- .parameterThetaEta(.ui, pop=FALSE, data=.data)
+  if (!is.null(.data) && is.null(.data[["mixest"]]) &&
+        any(grepl("\\bmix[(]", vapply(.ui$lstExpr, deparse1, character(1))))) {
+    # rxode2 would draw each subject's class at random
+    .minfo("mixture model not validated: Monolix's class per subject is not imported")
+    return(invisible())
+  }
+  .censObs <- NULL
   if (any(names(.data) == "cens")) {
     .minfo("filtering out censored observations for validation")
-    .data <- .data[.data$cens == 0, names(.data) != "cens"]
+    # CENS can be "." (NA) on dose lines
+    .isCens <- !is.na(.data$cens) & .data$cens != 0
+    .censObs <- .data[.isCens & !is.na(.data$dv), , drop=FALSE]
+    .data <- .data[!.isCens, names(.data) != "cens"]
     .minfo("done")
   }
   if (!is.null(.data) &&
@@ -119,28 +180,30 @@
       length(.ind) > 0 &&
       length(.ind[, 1]) > 0) {
     .minfo("solving ipred problem")
-    .ipredSolve <- try(rxode2::rxSolve(.model, .ind, .data, returnType = "data.frame",
+    .ipredSolve <- try(.ssQuiet(rxode2::rxSolve(.model, .ind, .data, returnType = "data.frame",
                                        covsInterpolation="locf",
                                        #addlKeepsCov=TRUE, addlDropSs=TRUE, ssAtDoseTime=TRUE,
                                        #safeZero=TRUE, ss2cancelAllPending=TRUE,
-                                       maxSS=.nss + 1,
-                                       minSS=.nss,
+                                       maxSS=.ss[["maxSS"]],
+                                       minSS=.ss[["minSS"]],
                                        atol=.tol, rtol=.tol,
                                        ssAtol=100, ssRtol=100, omega=NULL,
-                                       addDosing = FALSE))
+                                       method=.delayMethod,
+                                       addDosing = FALSE)))
 
     .ipredSolve <- .subsetMonolix(.ui, .ipredSolve, c("iwres", "ires"))
     .minfo("done")
     .minfo("solving pred problem")
-    .predSolve <- try(rxode2::rxSolve(.model, .pop, .data, returnType = "data.frame",
+    .predSolve <- try(.ssQuiet(rxode2::rxSolve(.model, .pop, .data, returnType = "data.frame",
                                       covsInterpolation="locf",
                                       #addlKeepsCov=TRUE, addlDropSs=TRUE, ssAtDoseTime=TRUE,
                                       #safeZero=TRUE, ss2cancelAllPending=TRUE,
-                                      maxSS=.nss + 1,
-                                      minSS=.nss,
+                                      maxSS=.ss[["maxSS"]],
+                                      minSS=.ss[["minSS"]],
                                       atol=.tol, rtol=.tol,
                                       ssAtol=100, ssRtol=100, omega=NULL,
-                                      addDosing = FALSE), silent=TRUE)
+                                      method=.delayMethod,
+                                      addDosing = FALSE)), silent=TRUE)
     .predSolve <- .subsetMonolix(.ui, .predSolve)
     .nPredSolve <- length(.predSolve[, 1])
     .nIpredSolve <- length(.ipredSolve[, 1])
@@ -164,6 +227,18 @@
                                 }
                                 n
                               }, character(1), USE.NAMES = FALSE)
+    if (NROW(.censObs) > 0L) {
+      # censored observations are left out on both sides; keyed by
+      # endpoint when the censored row has one
+      .cc <- if (is.null(.censObs$cmt)) rep(NA_character_, NROW(.censObs)) else as.character(.censObs$cmt)
+      .drop <- paste(.monolix$id, .monolix$time) %in%
+        paste(.censObs$id, .censObs$time)[is.na(.cc)]
+      if (!is.null(.monolix$cmt)) {
+        .drop <- .drop | paste(.monolix$id, .monolix$time, .monolix$cmt) %in%
+          paste(.censObs$id, .censObs$time, .cc)[!is.na(.cc)]
+      }
+      .monolix <- .monolix[!.drop, , drop=FALSE]
+    }
     .nMonolix <- length(.monolix[, 1])
 
     .monolix$rxMonolixRowN <- seq_along(.monolix[,1])
@@ -182,7 +257,7 @@
     .q <- c(0, .ci, 0.5, 1 - .ci, 1)
     .qi <- stats::quantile(with(.both, 100*abs((ipred-monolixIpred)/monolixIpred)), .q, na.rm=TRUE)
     .qai <- stats::quantile(with(.both, abs(ipred-monolixIpred)), .q, na.rm=TRUE)
-    .qp <- stats::quantile(with(.both, 100*abs((pred-monolixPred)/monolixIpred)), .q, na.rm=TRUE)
+    .qp <- stats::quantile(with(.both, 100*abs((pred-monolixPred)/monolixPred)), .q, na.rm=TRUE)
     .qap <- stats::quantile(with(.both, abs(pred-monolixPred)), .q, na.rm=TRUE)
 
     .qw <- stats::quantile(with(.both, 100*abs((iwres-monolixIwres)/monolixIwres)), .q, na.rm=TRUE)
@@ -216,11 +291,11 @@
                      signif(.qap[2], .sigdig), ", ",
                      signif(.qap[4], .sigdig), "); atol=",
                      signif(.qap[3], .sigdig)),
-              paste0("iwres relative difference compared to Monolix iwres: ", round(.qp[3], 2),
+              paste0("iwres relative difference compared to Monolix iwres: ", round(.qw[3], 2),
                      "%; ", .ci0 * 100,"% percentile: (",
                      round(.qw[2], 2), "%,", round(.qw[4], 2), "%); rtol=",
                      signif(.qw[3] / 100, digits=.sigdig)),
-              paste0("iwres absolute difference compared to Monolix pred: ", .ci0 * 100,
+              paste0("iwres absolute difference compared to Monolix iwres: ", .ci0 * 100,
                      "% percentile: (",
                      signif(.qaw[2], .sigdig), ", ",
                      signif(.qaw[4], .sigdig), "); atol=",
@@ -232,4 +307,117 @@
     .minfo("cannot find individual parameter estimates")
   }
   .ui
+}
+
+#' Does rxode2 give a fixed number of steady-state doses?
+#'
+#' rxode2 newer than 5.1.8 (nlmixr2/rxode2#1492 fixed) takes
+#' `minSS = maxSS = n` as the n doses before a steady-state dose (Monolix
+#' `nbdoses = n`).
+#'
+#' @return `TRUE` when it does (checked once per session)
+#' @noRd
+#' @author Matthew L. Fidler
+.rxSsFixedCount <- function() {
+  if (is.null(.monolix2rx$ssFixedCount)) {
+    .monolix2rx$ssFixedCount <- utils::packageVersion("rxode2") > "5.1.8"
+  }
+  .monolix2rx$ssFixedCount
+}
+
+#' Monolix's steady state as explicit doses
+#'
+#' Monolix's `nbdoses=N` steady state is the state after the N doses
+#' before the steady-state dose and the dose itself; rxode2's `minSS`
+#' does not give a whole number of doses (nlmixr2/rxode2#1492).  A
+#' steady-state dose that starts its subject becomes those doses, given
+#' every `ii` before it (the subject's start reset moves to the first);
+#' a later steady-state dose keeps rxode2's `ss` (exact with an rxode2
+#' that counts `minSS = maxSS` doses, `.getSsLimits()`).  The start is
+#' written out with either rxode2: it also keeps steady-state doses on
+#' several routes, a lag longer than `ii` and `nbdoses` below what the
+#' regimen needs, which rxode2's iteration does not.
+#'
+#' @param data imported data (`$monolixData`)
+#' @param nbdoses Monolix's number of steady-state doses
+#' @return data with the expanded doses
+#' @details The doses are at negative times; rxode2 then warns that the
+#'   compartments initialize at the first time, which is what is meant, so
+#'   `.ssQuiet()` muffles it.
+#' @noRd
+#' @author Matthew L. Fidler
+.ssExpand <- function(data, nbdoses) {
+  if (is.null(data) || is.null(data[["ss"]]) || is.null(data[["ii"]]) ||
+        length(nbdoses) != 1L || is.na(nbdoses) || nbdoses < 1L) {
+    return(data)
+  }
+  .evid <- if (is.null(data[["evid"]])) rep(NA_integer_, nrow(data)) else data$evid
+  .dose <- .dataIsDose(data) & (is.na(.evid) | .evid %in% c(1L, 4L))
+  .ss <- which(.dose & data$ss %in% 1L & !is.na(data$ii) & data$ii > 0)
+  if (length(.ss) == 0L) return(data)
+  .id <- as.character(data$id)
+  .reset <- .evid %in% 3L & is.na(data$amt)
+  .extra <- NULL
+  # ties sort a moved start reset first, then the new doses, then the rest
+  .key <- seq_len(nrow(data))
+  for (.w in .ss) {
+    .t <- data$time[.w]
+    # only a steady-state dose that starts its subject: no other dose or
+    # observation earlier, or at its time before it (other steady-state
+    # doses at that time, like a second route, start it too)
+    .same <- which(.id == .id[.w] & !.reset & seq_len(nrow(data)) != .w)
+    .other <- .same[data$time[.same] < .t |
+                      (data$time[.same] == .t & .same < .w & !(.same %in% .ss))]
+    .other <- .other[!(.evid[.other] %in% 2L)]
+    if (length(.other) > 0L) next
+    # a start reset before the dose (an earlier t_0) would clear the doses
+    if (any(.id == .id[.w] & .reset & data$time < .t)) next
+    .first <- .t - nbdoses * data$ii[.w]
+    .r <- which(.id == .id[.w] & .reset & data$time == .t)
+    data$time[.r] <- .first
+    .key[.r] <- -1L
+    .d <- data[rep(.w, nbdoses), , drop=FALSE]
+    .d$time <- .t - rev(seq_len(nbdoses)) * data$ii[.w]
+    .d$ss <- 0
+    if (!is.null(.d[["addl"]])) .d$addl <- 0
+    # an EVID=4 dose resets first: the first of its doses does, it does not
+    if (.evid[.w] %in% 4L) {
+      .d$evid <- 1L
+      .d$evid[1] <- 4L
+      data$evid[.w] <- 1L
+    }
+    .extra <- rbind(.extra, .d)
+    data$ss[.w] <- 0
+  }
+  if (is.null(.extra)) return(data)
+  .ret <- rbind(data, .extra)
+  .ret <- .ret[order(match(as.character(.ret$id), unique(.id)), .ret$time,
+                     c(.key, rep(0L, nrow(.extra))), method="radix"), , drop=FALSE]
+  rownames(.ret) <- NULL
+  .ret
+}
+
+#' Muffle rxode2's note on negative times from `.ssExpand()` doses
+#'
+#' @param expr expression to evaluate
+#' @return the value of `expr`
+#' @noRd
+#' @author Matthew L. Fidler
+.ssQuiet <- function(expr) {
+  withCallingHandlers(expr, warning=function(w) {
+    if (grepl("with negative times, compartments initialize", conditionMessage(w), fixed=TRUE)) {
+      invokeRestart("muffleWarning")
+    }
+  })
+}
+
+#' Is `usePrior` left to rxode2 ("auto")?
+#'
+#' @param usePrior the `rxSolve()` argument
+#' @return `TRUE` for `NA`, `NULL` or `"auto"`
+#' @noRd
+#' @author Matthew L. Fidler
+.usePriorAuto <- function(usePrior) {
+  is.null(usePrior) || (length(usePrior) == 1L &&
+                          (is.na(usePrior) || identical(tolower(as.character(usePrior)), "auto")))
 }

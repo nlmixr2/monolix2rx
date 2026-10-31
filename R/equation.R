@@ -14,6 +14,7 @@
   .monolix2rx$equationLhs <- character(0)
   .monolix2rx$equationRhs <- character(0)
   .monolix2rx$odeType <- "nonStiff"
+  .monolix2rx$pk <- NULL
   .start <- .end <- character(0)
   if (is.null(pk)) pk <- .pk("")
   if (is.character(pk)) pk <- .pk(pk)
@@ -25,9 +26,16 @@
   }
   # Apparently pk macros can also be in the EQUATION: block
   .pkIni(TRUE)
+  # lines before a pkmodel()/macro must stay before its ODEs
+  .monolix2rx$pkLong <- TRUE
+  on.exit(.monolix2rx$pkLong <- FALSE)
+  .text <- text
+  text <- .mlxRenameReserved(text)
   if (text!="") {
     .Call(`_monolix2rx_trans_equation`, text, "[LONGITUDINAL] EQUATION:")
   }
+  .monolix2rx$pkLong <- FALSE
+  .eqPre <- .monolix2rx$preEq
   .pkPushStatement()
   .validatePkModel(.monolix2rx$pkPars, .monolix2rx$pkCe)
   .pk2 <- list(Cc=.monolix2rx$pkCc,
@@ -45,6 +53,10 @@
                elimination=.monolix2rx$pkElimination,
                admd=.monolix2rx$admd)
   class(.pk2) <- "monolix2rxPk"
+  if (NROW(.pk2$empty) + NROW(.pk2$reset) > 0L) {
+    warning("empty()/reset() are only translated in the PK: block; in EQUATION: their administrations stay doses",
+            call.=FALSE)
+  }
   .lhs <- c(pk$Cc, pk$Ce, .monolix2rx$equationLhs, .pk2$Cc, .pk2$Ce)
   .rhs <- .monolix2rx$equationRhs
   .lhs <- .lhs[!is.na(.lhs)]
@@ -94,12 +106,30 @@
                                       .monolix2rx$endpointPred[.w]))
   }
   .monolix2rx$equationLine <- c(.monolix2rx$equationLine)
+  # depot(target=) into a compartment whose ODE a macro wrote
+  .tgt <- unique(unlist(lapply(list(.monolix2rx$pk$equation, .pk3$equation), function(e) {
+    lapply(e[c("lhsDepot", "dur", "f", "tlag")], names)
+  })))
+  .tgt <- setdiff(.tgt, .monolix2rx$state)
+  # a compartment with no other flows still needs an ODE to receive the depot
+  for (.s in intersect(.tgt, c(pk$compartment$amount, .pk2$compartment$amount))) {
+    if (length(.whichDdt(c(.monolix2rx$pk$pk, .pk3$pk), .s)) == 0L) {
+      .monolix2rx$pk$pk <- c(.monolix2rx$pk$pk, paste0("d/dt(", .s, ") <- 0"))
+    }
+  }
+  for (.p in list(.monolix2rx$pk, .pk3)) {
+    .monolix2rx$pk$pk <- .updateDdtEq(.tgt, .monolix2rx$pk$pk, .p)
+    .pk3$pk <- .updateDdtEq(.tgt, .pk3$pk, .p)
+  }
   .monolix2rx$equationLine <- .updateDdtEq(.monolix2rx$state, .monolix2rx$equationLine, .monolix2rx$pk)
   .monolix2rx$equationLine <- .updateDdtEq(.monolix2rx$state, .monolix2rx$equationLine, .pk3)
   .w <- which(grepl("^ *[<][-] *$", .monolix2rx$equationLine))
   if (length(.w) > 0L) {
     .monolix2rx$equationLine <- .monolix2rx$equationLine[-.w]
   }
+  .eqPre <- .updateDdtEq(.monolix2rx$state, .eqPre, .monolix2rx$pk)
+  .eqPre <- .updateDdtEq(.monolix2rx$state, .eqPre, .pk3)
+  .eqPre <- .eqPre[!grepl("^ *[<][-] *$", .eqPre)]
   .cmtOther <- vapply(c(.monolix2rx$stateExtra, .monolix2rx$state),
                       function(x) {
                         if (x %in% .cmtNum) return(NA_character_)
@@ -112,21 +142,134 @@
                     }, character(1), USE.NAMES = FALSE)
   .cmtNum <- c(.cmtPre, .cmtNum, .cmtOther)
   .cmtNum <- .cmtNum[!is.na(.cmtNum)]
-  .ret <- list(monolix=text,
-               rx=c(
-                 .start,
-                 .monolix2rx$pk$pk,
-                 .pk3$pk,
-                 .end,
-                 .monolix2rx$equationLine,
-                 .monolix2rx$extraPred,
-                 .monolix2rx$pk$equation$endLines),
+  .rx <- .pkMacroRx(c(.start,
+                      .monolix2rx$pk$pk,
+                      .end,
+                      .eqPre,
+                      .pk3$pk,
+                      .monolix2rx$equationLine,
+                      .monolix2rx$extraPred,
+                      .monolix2rx$pk$equation$endLines))
+  .rx <- .equationInitial(.rx)
+  if (any(grepl("\\b(tlast0|dose0)[(]", .rx, perl=TRUE)) &&
+        any(grepl("^\\s*alag[(]", .rx, perl=TRUE))) {
+    warning("tDose/amtDose with a lag time: rxode2 updates them at the lagged dose time, Monolix at the dose time",
+            call.=FALSE)
+  }
+  .ret <- list(monolix=.text,
+               rx=.rx,
                lhs=.monolix2rx$equationLhs,
                odeType=.monolix2rx$odeType,
                admd=.admd,
-               cmtPrefix=paste0("cmt(", .cmtNum, ")"))
+               cmtPrefix=paste0("cmt(", .cmtNum, ")"),
+               rename=unique(c(pk$rename, attr(text, "rename"))))
   class(.ret) <- "monolix2rxEquation"
   .ret
+}
+
+#' Translate the Monolix expressions in PK macro lines
+#'
+#' PK macro arguments (like `depot(p=)`) are copied as written; lines
+#' with Monolix-only syntax are translated and the others kept as is.
+#'
+#' @param lines rxode2 lines from the PK macros
+#' @return translated lines
+#' @noRd
+#' @author Matthew L. Fidler
+.pkMacroRx <- function(lines) {
+  if (length(lines) == 0L) return(lines)
+  if (any(grepl("\\binftDose\\b", lines, perl=TRUE))) {
+    stop("'inftDose' Monolix declaration not supported in translation", call.=FALSE)
+  }
+  # a macro argument's ~a or !a is copied as written (the walker writes
+  # (!(a))), and R parses ~a + b as ~(a + b), unlike Monolix's (~a) + b
+  if (any(grepl("~(?!=)|(?<![(])!(?!=)", lines, perl=TRUE))) {
+    stop("a negation (~a or !a) in a PK macro argument is not supported in translation", call.=FALSE)
+  }
+  .fun <- c(invlogit="expit", norminv="qnorm", normcdf="pnorm", gammaln="lgamma",
+            factln="lfactorial")
+  .re <- paste0("~=|\\bt\\b|\\bamtDose\\b|\\btDose\\b|\\b(",
+                paste(names(.fun), collapse="|"), ")[(]")
+  vapply(lines, function(l) {
+    .i <- regexpr(" <- ", l, fixed=TRUE)
+    if (.i < 0) return(l)
+    .rhs <- substring(l, .i + 4)
+    if (grepl(.re, .rhs, perl=TRUE)) {
+      .rhs <- gsub("~=", "!=", .rhs, fixed=TRUE)
+      .rhs <- gsub("\\bt\\b", "time", .rhs, perl=TRUE)
+      .rhs <- gsub("\\bamtDose\\b", "dose0()", .rhs, perl=TRUE)
+      .rhs <- gsub("\\btDose\\b", "tlast0()", .rhs, perl=TRUE)
+      for (.n in names(.fun)) {
+        .rhs <- gsub(paste0("\\b", .n, "[(]"), paste0(.fun[[.n]], "("), .rhs, perl=TRUE)
+      }
+    }
+    # a chained power, rem() or factorial() the walker did not write;
+    # otherwise keep the text
+    if (grepl("\\^.*\\^|\\b(rem|l?factorial)[(]", .rhs, perl=TRUE)) {
+      .e <- try(str2lang(.rhs), silent=TRUE)
+      if (!inherits(.e, "try-error")) {
+        .p <- .rxPowParen(.rxFactorial(.rxRem(.e)))
+        if (!identical(.p, .e)) .rhs <- deparse1(.p)
+      }
+    }
+    paste0(substr(l, 1, .i - 1), " <- ", .rhs)
+  }, character(1), USE.NAMES=FALSE)
+}
+
+#' Monolix factorial()/factln() of a rounded argument
+#'
+#' Monolix 2024R1 rounds the argument; rxode2's factorial(x) is gamma(x + 1).
+#'
+#' @param e expression
+#' @return expression with `factorial(round(a))` and `lfactorial(round(a))`
+#' @noRd
+#' @author Matthew L. Fidler
+.rxFactorial <- function(e) {
+  if (!is.call(e)) return(e)
+  e <- as.call(lapply(as.list(e), .rxFactorial))
+  if ((identical(e[[1]], quote(factorial)) || identical(e[[1]], quote(lfactorial))) &&
+        length(e) == 2L &&
+        !(is.call(e[[2]]) && identical(e[[2]][[1]], quote(round)))) {
+    e[[2]] <- call("round", e[[2]])
+  }
+  e
+}
+
+#' Translate Monolix rem(a, b) in an expression
+#'
+#' @param e expression
+#' @return expression with `rem(a, b)` as `((a) %% (b))`
+#' @noRd
+#' @author Matthew L. Fidler
+.rxRem <- function(e) {
+  if (!is.call(e)) return(e)
+  e <- as.call(lapply(as.list(e), .rxRem))
+  if (identical(e[[1]], quote(rem)) && length(e) == 3L) {
+    # rxode2's %% is C fmod (the sign of a), like Monolix's rem()
+    return(call("(", call("%%", call("(", e[[2]]), call("(", e[[3]]))))
+  }
+  e
+}
+
+#' Parenthesize chained powers, which rxode2 does not parse
+#'
+#' @param e expression
+#' @return expression with `a^b^c` as `a^(b^c)`
+#' @noRd
+#' @author Matthew L. Fidler
+.rxPowParen <- function(e) {
+  if (!is.call(e)) return(e)
+  e <- as.call(lapply(as.list(e), .rxPowParen))
+  if (identical(e[[1]], quote(`^`)) && is.call(e[[3]])) {
+    .x <- e[[3]]
+    # a^b^c and a^-b^c (a signed power)
+    if (identical(.x[[1]], quote(`^`)) ||
+          (length(.x) == 2L && (identical(.x[[1]], quote(`-`)) || identical(.x[[1]], quote(`+`))) &&
+             is.call(.x[[2]]) && identical(.x[[2]][[1]], quote(`^`)))) {
+      e[[3]] <- call("(", .x)
+    }
+  }
+  e
 }
 
 #' Add an equation line
@@ -137,37 +280,8 @@
 #' @noRd
 #' @author Matthew L. Fidler
 .equationLine <- function(line, ddt) {
-  if (ddt != "") {
-    if (!is.null(.monolix2rx$pk$equation$lhsDepot[[ddt]])) {
-      .monolix2rx$equationLine <- c(.monolix2rx$equationLine,
-                                    paste0(.monolix2rx$pk$rhsDepot[[ddt]], " <- ", .monolix2rx$pk$lhsDepot[[ddt]]),
-                                    paste0(line, .monolix2rx$pk$rhsExtra[[ddt]]))
-      if (!is.null(.monolix2rx$pk$equation$fDepot[[ddt]])) {
-        .monolix2rx$equationLine <- c(.monolix2rx$equationLine,
-                                      .monolix2rx$pk$equation$fDepot[[ddt]])
-      }
-      if (!is.null(.monolix2rx$pk$equation$tlagDepot[[ddt]])) {
-        .monolix2rx$equationLine <- c(.monolix2rx$equationLine,
-                                      .monolix2rx$pk$equation$tlagDepot[[ddt]])
-      }
-    } else {
-      .monolix2rx$equationLine <- c(.monolix2rx$equationLine, line)
-    }
-    if (!is.null(.monolix2rx$pk$equation$dur[[ddt]])) {
-      .monolix2rx$equationLine <- c(.monolix2rx$equationLine,
-                                    .monolix2rx$pk$equation$dur[[ddt]])
-    }
-    if (!is.null(.monolix2rx$pk$equation$f[[ddt]])) {
-      .monolix2rx$equationLine <- c(.monolix2rx$equationLine,
-                                    .monolix2rx$pk$equation$f[[ddt]])
-    }
-    if (!is.null(.monolix2rx$pk$equation$tlag[[ddt]])) {
-      .monolix2rx$equationLine <- c(.monolix2rx$equationLine,
-                                    .monolix2rx$pk$equation$tlag[[ddt]])
-    }
-  } else {
-    .monolix2rx$equationLine <- c(.monolix2rx$equationLine, line)
-  }
+  # depot/dur/f/tlag lines are added afterwards by .updateDdtEq()
+  .monolix2rx$equationLine <- c(.monolix2rx$equationLine, line)
 }
 #' Add to the lhs variables of the equation object
 #'
@@ -178,6 +292,52 @@
 .equationLhs <- function(v) {
   .monolix2rx$equationLhs <- c(.monolix2rx$equationLhs, v)
 }
+#' Add the initial condition X(0) <- X_0 for each state X
+#'
+#' Monolix `X_0` is the initial condition only when `X` is a state.
+#'
+#' @param lines rxode2 lines
+#' @return lines with `X(0) <- X_0` after each `X_0` assignment
+#' @noRd
+#' @author Matthew L. Fidler
+.equationInitial <- function(lines) {
+  .ddt <- grep("^ *d/dt[(][^)]+[)] *<-", lines, value=TRUE)
+  .st <- unique(sub("^ *d/dt[(]([^)]+)[)].*$", "\\1", .ddt))
+  if (length(.st) == 0L) return(lines)
+  .re <- paste0("^( *)(", paste(.st, collapse="|"), ")_0 <- ")
+  unlist(lapply(lines, function(l) {
+    if (!grepl(.re, l)) return(l)
+    c(l, sub(paste0(.re, ".*$"), "\\1\\2(0) <- \\2_0", l))
+  }), use.names=FALSE)
+}
+#' Rename Monolix names that rxode2 reserves
+#'
+#' They become `mlx_<name>` in the Monolix text, before any parsing, so
+#' the equations, PK macros and compartments agree.  A macro keyword
+#' argument (`cmt=`) keeps its name.
+#'
+#' @param text Monolix [LONGITUDINAL] text
+#' @return text with the names renamed; the renamed names are in the
+#'   `"rename"` attribute
+#' @noRd
+#' @author Matthew L. Fidler
+.mlxRenameReserved <- function(text) {
+  .n <- .rxReservedNames
+  # comments and macro keyword arguments are skipped
+  .skip <- paste0(";[^\n]*(*SKIP)(*FAIL)|[(,]\\s*(?:", .n, ")\\s*=(?!=)(*SKIP)(*FAIL)|")
+  # a bare name or ddt_x renames x, and then also x_0
+  .m <- regmatches(text, gregexpr(paste0(.skip, "\\b(ddt_)?(", .n, ")\\b"), text, perl=TRUE))[[1]]
+  .m <- unique(sub("^ddt_", "", .m))
+  if (length(.m) == 0L) return(text)
+  .re <- paste0(.skip, "\\b(ddt_)?(", paste(.m, collapse="|"), ")(_0)?\\b")
+  .ret <- gsub(.re, "\\1mlx_\\2\\3", text, perl=TRUE)
+  attr(.ret, "rename") <- .m
+  .ret
+}
+# names rxode2 does not allow as model variables (a regex)
+.rxReservedNames <- paste0("(?i:id|evid|ii|time|amt)|rate|dur|cmt|ss|addl|tlast|newind|mtime|",
+                           "printf|print|Rprintf|dvid|df|ifelse|rxFlag|M_[A-Z0-9_]+")
+
 #' Add state information to the equation object
 #'
 #' @param v state to add

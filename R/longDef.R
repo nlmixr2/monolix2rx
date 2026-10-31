@@ -396,7 +396,11 @@ as.character.monolix2rxLongDef <- function(x, ...) {
                                                   .asCharacterSingleOrList("max", .lst$max)),
                                            ""),
                                     ", errorModel=",
-                                    .err$errName, "(", paste(.v, collapse=", "), ")",
+                                    # Monolix 2024R1 writes (and only reads) combined1c
+                                    # as combined1(a, b, c)
+                                    switch(.err$errName, combined1c="combined1", combined2c="combined2",
+                                           .err$errName),
+                                    "(", paste(.v, collapse=", "), ")",
                                     .asCharacterSingleOrList("autoCorrCoef", .lst$autocor),
                                     "}")
                    }
@@ -462,10 +466,14 @@ as.list.monolix2rxLongDef <- function(x, ...) {
   }
   if (!inherits(x, "monolix2rxLongDef")) return(character(0))
   x <- as.list(x)
-  vapply(seq_along(x$endpoint),
-         function(i) {
-           .ret <- x$endpoint[[i]]
-           if (!checkmate::testCharacter(.ret$pred, len=1)) return(NA_character_)
-           .ret$pred
-         }, character(1), USE.NAMES = TRUE)
+  .ret <- vapply(seq_along(x$endpoint),
+                 function(i) {
+                   .ret <- x$endpoint[[i]]
+                   # an event's pred is its hazard
+                   if (identical(.ret$dist, "event") ||
+                         !checkmate::testCharacter(.ret$pred, len=1)) return(NA_character_)
+                   .ret$pred
+                 }, character(1), USE.NAMES = TRUE)
+  # discrete and event endpoints have no prediction
+  .ret[!is.na(.ret)]
 }

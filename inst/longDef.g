@@ -12,8 +12,12 @@ errPar: number | identifier;
 combined1: 'combined1' '(' errPar ',' errPar ')';
 combined2: 'combined2' '(' errPar ',' errPar ')';
 
-combined1c: 'combined1c' '(' errPar ',' errPar ',' errPar ')';
-combined2c: 'combined2c' '(' errPar ',' errPar ',' errPar ')';
+// Monolix 2024R1 saves the exponent models as combined1(a, b, c) and
+// combined2(a, b, c); the combined1c/combined2c spellings are kept
+combined1c: 'combined1c' '(' errPar ',' errPar ',' errPar ')'
+          | 'combined1' '(' errPar ',' errPar ',' errPar ')';
+combined2c: 'combined2c' '(' errPar ',' errPar ',' errPar ')'
+          | 'combined2' '(' errPar ',' errPar ',' errPar ')';
 
 constantErr: 'constant' '(' errPar ')';
 proportional: 'proportional' '(' errPar ')';
