@@ -2,6 +2,8 @@
 
 ## monolix2rx 0.0.7
 
+CRAN release: 2026-11-06
+
 - Required rxode2 \>= 5.1.7, for
   [`delay()`](https://nlmixr2.github.io/rxode2/reference/delay.html) and
   [`ini()`](https://nlmixr2.github.io/rxode2/reference/ini.html) priors.

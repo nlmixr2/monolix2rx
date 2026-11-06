@@ -42,11 +42,11 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/nlmixr2/monolix2rx/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/nlmixr2/monolix2rx/blob/v0.0.7/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.0.7" id="monolix2rx-007">monolix2rx 0.0.7<a class="anchor" aria-label="anchor" href="#monolix2rx-007"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.0.7" id="monolix2rx-007">monolix2rx 0.0.7<a class="anchor" aria-label="anchor" href="#monolix2rx-007"></a></h2><p class="text-muted">CRAN release: 2026-11-06</p>
 <ul><li><p>Required rxode2 &gt;= 5.1.7, for <code><a href="https://nlmixr2.github.io/rxode2/reference/delay.html" class="external-link">delay()</a></code> and <code><a href="https://nlmixr2.github.io/rxode2/reference/ini.html" class="external-link">ini()</a></code> priors.</p></li>
 <li><p>Added a Monolix stress kit (<code>inst/stress</code>, like the nonmem2rx and babelmixr2 kits): it simulates each case with rxode2, writes the Monolix project, runs Monolix and checks the <code><a href="../reference/monolix2rx.html">monolix2rx()</a></code> import; a translate mode and a mock Monolix check it without Monolix.</p></li>
 <li><p>Translated discrete observations, which stopped the import: a <code>type=count</code> Poisson probability becomes <code>pois(lambda)</code> and any other count probability (<code>log(P(Y=k))</code> or <code>P(Y=k)</code>, with intermediate statements and <code>if</code>/<code>else</code>) <code>ll(Y)</code>; a <code>type=categorical</code> endpoint given by <code>P(Y=c)</code> for all but one category, or cumulative <code>P(Y&lt;=c)</code>, under <code><a href="https://nlmixr2.github.io/rxode2/reference/logit.html" class="external-link">logit()</a></code>/<code><a href="https://nlmixr2.github.io/rxode2/reference/probit.html" class="external-link">probit()</a></code>/<code><a href="https://rdrr.io/r/base/Log.html" class="external-link">log()</a></code> or not, becomes rxode2’s ordinal <code>c(p0=0, p1=1, 2)</code> (fitting it needs nlmixr2/rxode2#1450 fixed). Markov dependence is still not supported.</p></li>

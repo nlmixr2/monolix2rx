@@ -11,7 +11,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/nlmixr2/monolix2rx/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/nlmixr2/monolix2rx/blob/v0.0.7/DESCRIPTION)
 
 Fidler M (2026). *monolix2rx: Converts 'Monolix' Models to 'rxode2'*. R
 package version 0.0.7, <https://nlmixr2.github.io/monolix2rx/>.
