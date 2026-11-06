@@ -359,6 +359,12 @@
   runs of spaces, which was not read; the header and the rows are now
   split on any run of white space.
 
+- Fixed a `use=limit` column filled on every row (as in
+  `theo/parent_metabolite_data.csv`): Monolix reads the limit only on
+  censored rows, but the imported data kept it on uncensored ones, where
+  nlmixr2 reads it as a truncation; it is now missing there
+  ([\#62](https://github.com/nlmixr2/monolix2rx/issues/62)).
+
 - Fixed [`factorial()`](https://rdrr.io/r/base/Special.html) and
   `factln()` of a non-integer, which Monolix 2024R1 computes for the
   rounded argument; rxode2 gave `gamma(x + 1)`.
