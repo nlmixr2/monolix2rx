@@ -495,3 +495,31 @@ test_that("steady-state doses on two routes at the start match the written-out d
   .e <- .ssQuiet(do.call(rxode2::rxSolve, c(list(.m, .x), .opt)))
   expect_equal(.s$central, .e$central, tolerance = 1e-8)
 })
+
+test_that("a censoring limit is kept only on the censored rows (#62)", {
+  .d <- data.frame(
+    id = 1L,
+    time = 0:4,
+    dv = c(1, 2, 0.1, 3, 4),
+    cens = c(0L, NA, 1L, -1L, 0L),
+    limit = c(0, 0, 0, 10, 5)
+  )
+  .r <- .dataLimitCensOnly(.d)
+  expect_equal(.r$limit, c(NA, NA, 0, 10, NA))
+  expect_equal(
+    .r[, c("id", "time", "dv", "cens")],
+    .d[, c("id", "time", "dv", "cens")]
+  )
+  # without a censoring column Monolix does not use the limit
+  expect_true(all(is.na(.dataLimitCensOnly(.d[, -4])$limit)))
+  expect_identical(.dataLimitCensOnly(.d[, -5]), .d[, -5])
+  # the shipped parent-metabolite data fills LIMIT = 0 on every row
+  .m <- suppressMessages(monolix2rx(system.file(
+    "theo/parent_metabolite_project.mlxtran",
+    package = "monolix2rx"
+  )))
+  .i <- suppressMessages(monolixDataImport(.m))
+  expect_true(any(.i$cens %in% 1L))
+  expect_true(all(is.na(.i$limit[!(.i$cens %in% c(1L, -1L))])))
+  expect_true(all(!is.na(.i$limit[.i$cens %in% c(1L, -1L)])))
+})

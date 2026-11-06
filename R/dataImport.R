@@ -439,6 +439,7 @@
     }
   }
   data <- .dataFillCovariates(data, .content)
+  data <- .dataLimitCensOnly(data)
   # Make sure the dvid matches what monolix specified
   if (
     any(names(data) == "rxMDvid") &&
@@ -450,6 +451,32 @@
     }
   }
   return(data)
+}
+
+#' Keep a censoring limit only on the censored rows
+#'
+#' Monolix reads `use=limit` only where the observation is censored;
+#' nlmixr2 reads a finite limit on an uncensored row as a truncation
+#' (issue #62).
+#'
+#' @param data dataset with the translated `cens`/`limit` columns
+#' @return data with `limit` missing where `cens` is 0 or missing
+#' @noRd
+#' @author Matthew L. Fidler
+.dataLimitCensOnly <- function(data) {
+  if (is.null(data[["limit"]])) {
+    return(data)
+  }
+  .cens <- data[["cens"]]
+  .unc <- if (is.null(.cens)) {
+    rep(TRUE, nrow(data))
+  } else {
+    is.na(.cens) | .cens %in% 0
+  }
+  if (any(.unc)) {
+    data$limit[.unc] <- NA
+  }
+  data
 }
 
 #' Fill a subject's missing covariate values with its one value
