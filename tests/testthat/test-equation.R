@@ -302,3 +302,44 @@ test_that("factorial() and factln() round their argument like Monolix", {
   expect_equal(.covEq("y = factorial(WT/10) + factln(AGE)")$dplyr,
                "y = factorial(round(WT/10)) + lfactorial(round(AGE))")
 })
+
+test_that("tDose with a lag time is the dose record time (#64)", {
+  expect_warning(.rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap + tDose", "depot(adm=1, target=Ap, Tlag)")$rx,
+                 "rxode2#1678")
+  expect_true("Cc <- Ap + (tlast0(Ap) - (Tlag))*(tlast0(Ap) > 0)" %in% .rx)
+  expect_true("alag(Ap) <- Tlag" %in% .rx)
+  # an unlagged administration counts with its own tlast0()
+  expect_warning(.rx <- .equation("ddt_Ap = -k*Ap\nddt_Ac = -k*Ac\nCc = Ap + tDose",
+                                  "depot(adm=1, target=Ap, Tlag)\ndepot(adm=2, target=Ac)")$rx,
+                 "rxode2#1678")
+  expect_true("Cc <- Ap + max((tlast0(Ap) - (Tlag))*(tlast0(Ap) > 0), tlast0(Ac))" %in% .rx)
+  expect_warning(.rx <- .equation("MTIME = thetaMTIME + tDose\nif t <= MTIME\n ka = ka1\nelse\n ka = ka2\nend\nCc = pkmodel(Tlag, ka, V, Cl, k12, k21)")$rx,
+                 "rxode2#1678")
+  expect_true("MTIME <- thetaMTIME + (tlast0(depot) - (Tlag))*(tlast0(depot) > 0)" %in% .rx)
+  expect_true("alag(depot) <- Tlag" %in% .rx)
+  # amtDose alone is not changed
+  expect_warning(.rx <- .equation("Y = amtDose", "Cc = pkmodel(Tlag, ka, V, Cl)")$rx, "rxode2#1678")
+  expect_true("Y <- dose0()" %in% .rx)
+  # a lag that reads the dose history keeps tlast0()
+  expect_warning(.rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap + tDose", "depot(adm=1, target=Ap, Tlag=0.1*tDose)")$rx,
+                 "Monolix at the dose time")
+  expect_true("Cc <- Ap + tlast0()" %in% .rx)
+  expect_true("alag(Ap) <- 0.1*tlast0()" %in% .rx)
+  # no lag: no change
+  expect_no_warning(.rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap + tDose", "depot(adm=1, target=Ap)")$rx)
+  expect_true("Cc <- Ap + tlast0()" %in% .rx)
+})
+
+test_that("a lagged tDose solves to the dose record time (#64)", {
+  skip_on_cran()
+  suppressWarnings(.rx <- .equation("ddt_Ap = -k*Ap\nddt_Ac = -k*Ac\nCc = Ap + Ac\nY = tDose",
+                                    "depot(adm=1, target=Ap, Tlag)\ndepot(adm=2, target=Ac)")$rx)
+  .m <- rxode2::rxode2(paste(c("Tlag <- 1.5", "k <- 1", .rx), collapse="\n"))
+  .e <- rxode2::et(amt=100, time=0, cmt="Ap") |>
+    rxode2::et(amt=50, time=10, cmt="Ap") |>
+    rxode2::et(amt=10, time=20, cmt="Ac") |>
+    rxode2::et(c(0.5, 1.6, 10.5, 11.6, 20.5, 21.6))
+  .s <- rxode2::rxSolve(.m, .e, returnType="data.frame")
+  # Monolix: 0, 0, 10, 10, 20, 20; inside a lag window rxode2#1678 is pending
+  expect_equal(.s$Y, c(0, 0, 0, 10, 20, 20))
+})
