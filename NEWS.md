@@ -412,8 +412,8 @@
   Monolix, instead of the time rxode2 gives the lagged dose, so a
   time-since-dose switch no longer moves by the lag after each dose.
   Between a dose and its lagged arrival rxode2 still has the previous
-  dose's `tDose` and `amtDose` (nlmixr2/rxode2#1678); the import warns
-  (#64).
+  dose's `tDose` and `amtDose` (nlmixr2/rxode2#1678), and a lag that uses
+  `t` or `tDose` keeps rxode2's time; the import warns (#64).
 
 * Fixed `pkmodel()` or a PK macro (`compartment()`, `oral()`, ...)
   followed by an `if` in `EQUATION:`: the macro arguments' parentheses and

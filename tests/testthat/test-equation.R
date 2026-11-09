@@ -306,16 +306,16 @@ test_that("factorial() and factln() round their argument like Monolix", {
 test_that("tDose with a lag time is the dose record time (#64)", {
   expect_warning(.rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap + tDose", "depot(adm=1, target=Ap, Tlag)")$rx,
                  "rxode2#1678")
-  expect_true("Cc <- Ap + (tlast0(Ap) - (Tlag))*(tlast0(Ap) > 0)" %in% .rx)
+  expect_true("Cc <- Ap + ((tlast0(Ap) - (Tlag))*(tlast0(Ap) != 0))" %in% .rx)
   expect_true("alag(Ap) <- Tlag" %in% .rx)
   # an unlagged administration counts with its own tlast0()
   expect_warning(.rx <- .equation("ddt_Ap = -k*Ap\nddt_Ac = -k*Ac\nCc = Ap + tDose",
                                   "depot(adm=1, target=Ap, Tlag)\ndepot(adm=2, target=Ac)")$rx,
                  "rxode2#1678")
-  expect_true("Cc <- Ap + max((tlast0(Ap) - (Tlag))*(tlast0(Ap) > 0), tlast0(Ac))" %in% .rx)
+  expect_true("Cc <- Ap + max((tlast0(Ap) - (Tlag))*(tlast0(Ap) != 0), tlast0(Ac))" %in% .rx)
   expect_warning(.rx <- .equation("MTIME = thetaMTIME + tDose\nif t <= MTIME\n ka = ka1\nelse\n ka = ka2\nend\nCc = pkmodel(Tlag, ka, V, Cl, k12, k21)")$rx,
                  "rxode2#1678")
-  expect_true("MTIME <- thetaMTIME + (tlast0(depot) - (Tlag))*(tlast0(depot) > 0)" %in% .rx)
+  expect_true("MTIME <- thetaMTIME + ((tlast0(depot) - (Tlag))*(tlast0(depot) != 0))" %in% .rx)
   expect_true("alag(depot) <- Tlag" %in% .rx)
   # amtDose alone is not changed
   expect_warning(.rx <- .equation("Y = amtDose", "Cc = pkmodel(Tlag, ka, V, Cl)")$rx, "rxode2#1678")
@@ -325,6 +325,14 @@ test_that("tDose with a lag time is the dose record time (#64)", {
                  "Monolix at the dose time")
   expect_true("Cc <- Ap + tlast0()" %in% .rx)
   expect_true("alag(Ap) <- 0.1*tlast0()" %in% .rx)
+  # nor does a lag that moves with time
+  expect_warning(.rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap + tDose", "depot(adm=1, target=Ap, Tlag=0.1*t)")$rx,
+                 "Monolix at the dose time")
+  expect_true("Cc <- Ap + tlast0()" %in% .rx)
+  # the replacement keeps its precedence
+  expect_warning(.rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap/tDose^2", "depot(adm=1, target=Ap, Tlag)")$rx,
+                 "rxode2#1678")
+  expect_true("Cc <- Ap / ((tlast0(Ap) - (Tlag))*(tlast0(Ap) != 0))^2" %in% .rx)
   # no lag: no change
   expect_no_warning(.rx <- .equation("ddt_Ap = -k*Ap\nCc = Ap + tDose", "depot(adm=1, target=Ap)")$rx)
   expect_true("Cc <- Ap + tlast0()" %in% .rx)

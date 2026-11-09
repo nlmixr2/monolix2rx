@@ -186,8 +186,9 @@
   .prop <- grepl("^\\s*(alag|lag|f|F|dur|rate)[(][^)]*[)]\\s*(<-|=)", rx, perl=TRUE)
   .wT <- which(!.prop & grepl("\\btlast0[(][)]", rx, perl=TRUE))
   .useD <- any(grepl("\\bdose0[(]", rx[!.prop], perl=TRUE))
+  # a lag read now is the dose's lag only if it does not move with time
   if (length(.wT) == 0L && !.useD ||
-        any(grepl(.reDose, .lag, perl=TRUE))) {
+        any(grepl("\\b(tlast0|dose0|time)\\b", .lag, perl=TRUE))) {
     warning("tDose/amtDose with a lag time: rxode2 updates them at the lagged dose time, Monolix at the dose time",
             call.=FALSE)
     return(rx)
@@ -198,9 +199,9 @@
     .t <- vapply(.cmt, function(c) {
       if (!(c %in% names(.lag))) return(paste0("tlast0(", c, ")"))
       # tlast0() is 0 until the first lagged dose is given
-      paste0("(tlast0(", c, ") - (", .lag[[c]], "))*(tlast0(", c, ") > 0)")
+      paste0("(tlast0(", c, ") - (", .lag[[c]], "))*(tlast0(", c, ") != 0)")
     }, character(1), USE.NAMES=FALSE)
-    .t <- if (length(.t) == 1L) .t else paste0("max(", paste(.t, collapse=", "), ")")
+    .t <- if (length(.t) == 1L) paste0("(", .t, ")") else paste0("max(", paste(.t, collapse=", "), ")")
     rx[.wT] <- gsub("tlast0()", .t, rx[.wT], fixed=TRUE)
   }
   warning("tDose/amtDose with a lag time: until a lagged dose is given rxode2 still has the previous dose (rxode2#1678)",
