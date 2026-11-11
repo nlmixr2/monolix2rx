@@ -151,11 +151,7 @@
                       .monolix2rx$extraPred,
                       .monolix2rx$pk$equation$endLines))
   .rx <- .equationInitial(.rx)
-  if (any(grepl("\\b(tlast0|dose0)[(]", .rx, perl=TRUE)) &&
-        any(grepl("^\\s*alag[(]", .rx, perl=TRUE))) {
-    warning("tDose/amtDose with a lag time: rxode2 updates them at the lagged dose time, Monolix at the dose time",
-            call.=FALSE)
-  }
+  .rx <- .equationTDoseLag(.rx, .admd)
   .ret <- list(monolix=.text,
                rx=.rx,
                lhs=.monolix2rx$equationLhs,
@@ -165,6 +161,52 @@
                rename=unique(c(pk$rename, attr(text, "rename"))))
   class(.ret) <- "monolix2rxEquation"
   .ret
+}
+
+#' Move `tDose` back to the dose time of a lagged dose
+#'
+#' rxode2's `tlast0()` is the time a lagged dose is given (its record
+#' time plus `alag()`); Monolix's `tDose` is the record time.  Outside the
+#' dose-property lines, `tlast0()` becomes the latest dosed compartment's
+#' `tlast0(cmt)` less its lag (#64).
+#'
+#' @param rx translated rxode2 lines
+#' @param admd administration table, with the dosed compartment in `rxCmt`
+#' @return `rx` with `tlast0()` replaced when there is a lag time
+#' @noRd
+#' @author Matthew L. Fidler
+.equationTDoseLag <- function(rx, admd=NULL) {
+  .reLag <- "^\\s*alag[(]\\s*([^)]+?)\\s*[)]\\s*(?:<-|=)\\s*(.*?)\\s*$"
+  .wLag <- grepl(.reLag, rx, perl=TRUE)
+  .reDose <- "\\b(tlast0|dose0)[(]"
+  if (!any(.wLag) || !any(grepl(.reDose, rx, perl=TRUE))) return(rx)
+  .lag <- sub(.reLag, "\\2", rx[.wLag], perl=TRUE)
+  names(.lag) <- sub(.reLag, "\\1", rx[.wLag], perl=TRUE)
+  # dose properties are evaluated with the dose, not at the dose time
+  .prop <- grepl("^\\s*(alag|lag|f|F|dur|rate)[(][^)]*[)]\\s*(<-|=)", rx, perl=TRUE)
+  .wT <- which(!.prop & grepl("\\btlast0[(][)]", rx, perl=TRUE))
+  .useD <- any(grepl("\\bdose0[(]", rx[!.prop], perl=TRUE))
+  # a lag read now is the dose's lag only if it does not move with time
+  if (length(.wT) == 0L && !.useD ||
+        any(grepl("\\b(tlast0|dose0|time)\\b", .lag, perl=TRUE))) {
+    warning("tDose/amtDose with a lag time: rxode2 updates them at the lagged dose time, Monolix at the dose time",
+            call.=FALSE)
+    return(rx)
+  }
+  if (length(.wT) > 0L) {
+    .cmt <- unique(c(admd$rxCmt, names(.lag)))
+    .cmt <- .cmt[!is.na(.cmt)]
+    .t <- vapply(.cmt, function(c) {
+      if (!(c %in% names(.lag))) return(paste0("tlast0(", c, ")"))
+      # tlast0() is 0 until the first lagged dose is given
+      paste0("(tlast0(", c, ") - (", .lag[[c]], "))*(tlast0(", c, ") != 0)")
+    }, character(1), USE.NAMES=FALSE)
+    .t <- if (length(.t) == 1L) paste0("(", .t, ")") else paste0("max(", paste(.t, collapse=", "), ")")
+    rx[.wT] <- gsub("tlast0()", .t, rx[.wT], fixed=TRUE)
+  }
+  warning("tDose/amtDose with a lag time: until a lagged dose is given rxode2 still has the previous dose (rxode2#1678)",
+          call.=FALSE)
+  rx
 }
 
 #' Translate the Monolix expressions in PK macro lines
