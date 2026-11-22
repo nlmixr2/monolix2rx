@@ -70,12 +70,12 @@ print(mod)
 #>         b ~ c(omega_ka = -1.3886e-05, omega_V = -3.1105e-05, 
 #>             omega_Cl = 5.2805e-05, a = -0.0026458, b = 0.00056232)
 #>     })
-#>     validation <- c("ipred relative difference compared to Monolix ipred: 0%; 95% percentile: (0%,0%); rtol=6.68e-07", 
-#>         "ipred absolute difference compared to Monolix ipred: 95% percentile: (1.8e-07, 1.38e-05); atol=3.41e-06", 
+#>     validation <- c("ipred relative difference compared to Monolix ipred: 0%; 95% percentile: (0%,0%); rtol=6.84e-07", 
+#>         "ipred absolute difference compared to Monolix ipred: 95% percentile: (2.42e-07, 1.38e-05); atol=3.41e-06", 
 #>         "pred relative difference compared to Monolix pred: 0%; 95% percentile: (0%,0%); rtol=6.78e-07", 
 #>         "pred absolute difference compared to Monolix pred: 95% percentile: (1.6e-07, 1.27e-05); atol=3.66e-06", 
 #>         "iwres relative difference compared to Monolix iwres: 0%; 95% percentile: (0%,0.03%); rtol=6.93e-06", 
-#>         "iwres absolute difference compared to Monolix iwres: 95% percentile: (7.96e-08, 1.85e-05); atol=2.71e-06")
+#>         "iwres absolute difference compared to Monolix iwres: 95% percentile: (7.96e-08, 1.85e-05); atol=2.62e-06")
 #>     ini({
 #>         ka_pop <- 0.426994483535611
 #>         V_pop <- -0.786351566327091
@@ -139,16 +139,16 @@ modified returned `ui` object. For the rtol, atol as follows you have:
 
 mod$iwresAtol
 #>          50% 
-#> 2.712703e-06
+#> 2.621182e-06
 mod$iwresRtol
-#>          50% 
-#> 6.932171e-06
+#>         50% 
+#> 6.92722e-06
 mod$ipredAtol
 #>          50% 
-#> 3.410731e-06
+#> 3.408998e-06
 mod$ipredRtol
 #>          50% 
-#> 6.679512e-07
+#> 6.837266e-07
 mod$predAtol
 #>          50% 
 #> 3.657152e-06
@@ -170,7 +170,7 @@ head(mod$iwresCompare)
 #> 3  1  1.12     1.949460  1.94947593 CONC
 #> 4  1 12.12     0.491487  0.49148044 CONC
 #> 5  1  2.02     0.183648  0.18365325 CONC
-#> 6  1 24.37     0.807985  0.80797726 CONC
+#> 6  1 24.37     0.807985  0.80797718 CONC
 
 head(mod$ipredCompare)
 #>   id  time monolixIpred    ipred  cmt

@@ -81,12 +81,12 @@ print(mod)
 #>         b ~ c(omega_ka = -1.3886e-05, omega_V = -3.1105e-05, 
 #>             omega_Cl = 5.2805e-05, a = -0.0026458, b = 0.00056232)
 #>     })
-#>     validation <- c("ipred relative difference compared to Monolix ipred: 0%; 95% percentile: (0%,0%); rtol=6.68e-07", 
-#>         "ipred absolute difference compared to Monolix ipred: 95% percentile: (1.8e-07, 1.38e-05); atol=3.41e-06", 
+#>     validation <- c("ipred relative difference compared to Monolix ipred: 0%; 95% percentile: (0%,0%); rtol=6.84e-07", 
+#>         "ipred absolute difference compared to Monolix ipred: 95% percentile: (2.42e-07, 1.38e-05); atol=3.41e-06", 
 #>         "pred relative difference compared to Monolix pred: 0%; 95% percentile: (0%,0%); rtol=6.78e-07", 
 #>         "pred absolute difference compared to Monolix pred: 95% percentile: (1.6e-07, 1.27e-05); atol=3.66e-06", 
 #>         "iwres relative difference compared to Monolix iwres: 0%; 95% percentile: (0%,0.03%); rtol=6.93e-06", 
-#>         "iwres absolute difference compared to Monolix iwres: 95% percentile: (7.96e-08, 1.85e-05); atol=2.71e-06")
+#>         "iwres absolute difference compared to Monolix iwres: 95% percentile: (7.96e-08, 1.85e-05); atol=2.62e-06")
 #>     ini({
 #>         ka_pop <- 0.426994483535611
 #>         V_pop <- -0.786351566327091
@@ -143,6 +143,7 @@ fit <- as.nlmixr2(mod)
 
 # If you want you can use nlmixr2, to add cwres to this fit:
 fit <- addCwres(fit)
+#> → Calculating residuals/tables
 #> → loading into symengine environment...
 #> → pruning branches (`if`/`else`) of full model...
 #> ✔ done
@@ -162,7 +163,25 @@ fit <- addCwres(fit)
 #> ✔ done
 #> → compiling events FD model...
 #> ✔ done
-#> → Calculating residuals/tables
+#> ✔ done
+#> → loading into symengine environment...
+#> → pruning branches (`if`/`else`) of full model...
+#> ✔ done
+#> [====|====|====|====|====|====|====|====|====|====] 0:00:00
+#> → calculate sensitivities
+#> [====|====|====|====|====|====|====|====|====|====] 0:00:00
+#> → calculate ∂(f)/∂(η)
+#> [====|====|====|====|====|====|====|====|====|====] 0:00:00
+#> → calculate ∂(R²)/∂(η)
+#> [====|====|====|====|====|====|====|====|====|====] 0:00:00
+#> → finding duplicate expressions in inner model...
+#> → finding duplicate expressions in EBE model...
+#> → compiling inner model...
+#> ✔ done
+#> → finding duplicate expressions in FD model...
+#> → compiling EBE model...
+#> ✔ done
+#> → compiling events FD model...
 #> ✔ done
 
 library(ggplot2)
